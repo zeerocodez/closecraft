@@ -1,0 +1,168 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// -----------------------------------------------------------------------------
+// IDENTITY & MULTI-TENANCY
+// -----------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  memberships   OrganizationMember[]
+}
+
+model Organization {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  plan          String    @default("STARTER") // e.g. STARTER, GROWTH, SCALE
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  members       OrganizationMember[]
+  leads         Lead[]
+  conversations Conversation[]
+  appointments  Appointment[]
+  aiActions     AiAction[]
+  deals         Deal[]
+}
+
+model OrganizationMember {
+  id             String       @id @default(cuid())
+  role           String       @default("MEMBER") // ADMIN, CLOSER, MEMBER
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Foreign Keys
+  userId         String
+  organizationId String
+
+  // Relations
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+}
+
+// -----------------------------------------------------------------------------
+// CORE SAAS & CRM (TENANT ISOLATED)
+// -----------------------------------------------------------------------------
+
+model Lead {
+  id             String       @id @default(cuid())
+  type           String       @default("MARKETING_LEAD") // MARKETING_LEAD, SALES_LEAD
+  name           String
+  email          String
+  phone          String?
+  message        String?
+  status         String       @default("NEW") // NEW, QUALIFIED, CONTACTED, SCHEDULED, CLOSED
+  source         String?      // e.g., Website Widget, Manual Import
+  buyingIntent   Int?         // 1-100 AI score
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Foreign Keys
+  organizationId String?      // Optional for platform-owned marketing leads, required for SaaS leads
+
+  // Relations
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  conversations  Conversation[]
+  appointments   Appointment[]
+  aiActions      AiAction[]
+  deals          Deal[]
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+model Conversation {
+  id             String       @id @default(cuid())
+  content        String
+  channel        String       @default("WEB") // WEB, EMAIL, WHATSAPP
+  createdAt      DateTime     @default(now())
+
+  // Foreign Keys
+  leadId         String
+  organizationId String
+
+  // Relations
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([leadId])
+}
+
+model Appointment {
+  id             String       @id @default(cuid())
+  scheduledAt    DateTime
+  status         String       @default("SCHEDULED") // SCHEDULED, COMPLETED, NO_SHOW, CANCELLED
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Foreign Keys
+  leadId         String
+  organizationId String
+
+  // Relations
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model AiAction {
+  id             String       @id @default(cuid())
+  actionType     String       // e.g. QUALIFY, DRAFT_EMAIL, RECOMMEND_NEXT_STEP
+  confidence     Float        // e.g. 0.95
+  result         String
+  status         String       @default("PENDING_APPROVAL") // PENDING_APPROVAL, APPROVED, REJECTED, EXECUTED
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Foreign Keys
+  leadId         String
+  organizationId String
+
+  // Relations
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
+
+model Deal {
+  id             String       @id @default(cuid())
+  amount         Float
+  currency       String       @default("USD")
+  stage          String       @default("OPPORTUNITY") // OPPORTUNITY, PROPOSAL, WON, LOST
+  closedAt       DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  // Foreign Keys
+  leadId         String
+  organizationId String
+
+  // Relations
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+}
