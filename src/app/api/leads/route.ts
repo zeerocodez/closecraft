@@ -5,21 +5,16 @@ import { sendTransactionalEmail } from '@/lib/email';
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, experience } = body;
+    const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck } = body;
 
     // Strict input validation
-    if (!firstName || typeof firstName !== 'string' || 
-        !lastName || typeof lastName !== 'string' || 
+    if (!name || typeof name !== 'string' || 
         !email || typeof email !== 'string' || !email.includes('@') ||
-        !experience || typeof experience !== 'string') {
+        !business || typeof business !== 'string') {
       return NextResponse.json({ error: 'Missing or invalid required fields' }, { status: 400 });
     }
 
-    const name = `${firstName.trim()} ${lastName.trim()}`;
-    const message = `Sales Experience: ${experience.trim()}`;
-
     // A Lead must belong to an organization. 
-    // Since this is the public marketing site form, it belongs to the primary CloseCraft tenant.
     let org = await db.organization.findFirst({
       where: { slug: 'acme-corp' } // fallback to demo org
     });
@@ -33,31 +28,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'System configuration error' }, { status: 500 });
     }
 
+    // Store custom data
+    const customData = JSON.stringify({
+      business,
+      website,
+      monthlyLeadVolume,
+      biggestSalesBottleneck
+    });
+
     const lead = await db.lead.create({
       data: {
         organizationId: org.id,
         type: 'MARKETING_LEAD',
-        name,
+        name: name.trim(),
         email: email.toLowerCase().trim(),
-        message,
-        source: 'Marketing Website Application',
+        phone: phone || null,
+        message: `Revenue Audit Request from ${business}. Volume: ${monthlyLeadVolume}. Bottleneck: ${biggestSalesBottleneck}`,
+        source: 'Website Revenue Audit Form',
         status: 'NEW',
-        buyingIntent: 50,
+        buyingIntent: 85, // High intent if they request an audit
+        qualificationData: {
+          create: {
+            customData
+          }
+        }
       },
     });
 
     // Send a transactional email welcoming the new applicant
     await sendTransactionalEmail({
       to: email.toLowerCase().trim(),
-      subject: 'Application Received - CloseCraft Network',
+      subject: 'Revenue Audit Request Received - Zeerocodes',
       html: `
         <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #333;">
-          <h2 style="color: #0055FF;">Application Received</h2>
-          <p>Hi ${firstName.trim()},</p>
-          <p>We've received your application to join the CloseCraft network as a Closer.</p>
-          <p>Our AI qualification engine is currently reviewing your profile based on your stated experience level: <strong>${experience.trim()}</strong>.</p>
-          <p>You will hear from us shortly with your next steps, including your first assessment in the AI Simulator.</p>
-          <p>Best,<br>The CloseCraft Team</p>
+          <h2 style="color: #789d2e;">Audit Request Received</h2>
+          <p>Hi ${name.trim().split(' ')[0]},</p>
+          <p>We've received your request for a Revenue Audit for <strong>${business.trim()}</strong>.</p>
+          <p>Our team is reviewing your details regarding your current lead volume (${monthlyLeadVolume}) and the bottleneck you're experiencing (${biggestSalesBottleneck}).</p>
+          <p>You will hear from us shortly to schedule your audit call.</p>
+          <p>Best,<br>Zeerocodes Revenue Engine</p>
         </div>
       `
     });

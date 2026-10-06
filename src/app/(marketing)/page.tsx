@@ -29,12 +29,27 @@ export default function MarketingPage() {
     setAuditSuccess(null);
     setAuditError(null);
     
-    // Simulating API call for audit
-    setTimeout(() => {
+    const formData = new FormData(event.target as HTMLFormElement);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to submit audit request.');
+      }
+
       setAuditSuccess('Audit request received! We will examine your lead-to-sale process and show you where opportunities are being lost.');
-      setAuditBusy(false);
       (event.target as HTMLFormElement).reset();
-    }, 1000);
+    } catch (error) {
+      setAuditError(error instanceof Error ? error.message : 'An error occurred.');
+    } finally {
+      setAuditBusy(false);
+    }
   }
 
   const openAudit = () => {
