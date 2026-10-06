@@ -1,18 +1,32 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sendTransactionalEmail } from '@/lib/email';
+import { z } from 'zod';
+
+const auditFormSchema = z.object({
+  name: z.string().min(2, "Name is too short").max(100),
+  business: z.string().min(2, "Business name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().optional(),
+  website: z.string().optional(),
+  monthlyLeadVolume: z.string().min(1, "Lead volume is required"),
+  biggestSalesBottleneck: z.string().min(1, "Bottleneck is required")
+});
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck } = body;
-
-    // Strict input validation
-    if (!name || typeof name !== 'string' || 
-        !email || typeof email !== 'string' || !email.includes('@') ||
-        !business || typeof business !== 'string') {
-      return NextResponse.json({ error: 'Missing or invalid required fields' }, { status: 400 });
+    
+    // Validate with Zod
+    const result = auditFormSchema.safeParse(body);
+    if (!result.success) {
+      return NextResponse.json({ 
+        error: 'Validation failed', 
+        details: result.error.errors 
+      }, { status: 400 });
     }
+
+    const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck } = result.data;
 
     // A Lead must belong to an organization. 
     let org = await db.organization.findFirst({
