@@ -356,3 +356,83 @@ A feature that merely renders is not complete.
 ## Final Rule
 
 Never sacrifice security, tenant isolation or data integrity for speed of implementation.
+
+---
+
+# REVENUE ENGINE & UNIFIED PLATFORM RULES (MASTER PROMPT)
+
+**1. ONE PRODUCT, ONE ARCHITECTURE**
+Do not duplicate Auth, Leads, Dashboards, AI, or Databases. Use a single source of truth. A lead captured on the website immediately enters the Revenue Engine. Maintain a unified data model enforcing strict tenant isolation (Organization/Workspace).
+
+**2. LEAD LIFECYCLE & EVENTS**
+Use a coherent lifecycle (e.g., NEW → ENGAGED → QUALIFYING → OPPORTUNITY → WON). Use domain events (`LeadCreated`, `MessageReceived`) separated from commands (`AssignHuman`).
+
+**3. REVENUE SIGNAL & PRIORITY ENGINE**
+Derive standardized signals (intent, fit, urgency, value). Prioritize leads explainably—do not use an opaque AI score without interpretable factors.
+
+**4. NEXT BEST ACTION & ACTOR MODEL**
+Every viable lead must have a Next Best Action (RESPOND, ESCALATE, WAIT) assigned to the correct actor: AI (reasoning), AUTOMATION (predictable), HUMAN (negotiation/closing), or SYSTEM (permissions/security). AI must never override deterministic business rules.
+
+**5. UNIFIED WORKSPACES (INBOX, LEADS, PIPELINE)**
+The Inbox, Leads list, and Pipeline must expose Revenue Engine intelligence natively. Do not force users to jump between applications. The Sales Command Centre must answer: **"What needs attention right now?"** (Hot Leads, Revenue at Risk, Overdue Follow-ups).
+
+**6. FOLLOW-UP & HUMAN HANDOFF**
+Follow-up must stop automatically upon terminal events. When AI detects high intent or complex objections, escalate deterministically: Assign human → Pause automation → Generate summary → Start SLA.
+
+**7. APPOINTMENTS, LEAKAGE & ANALYTICS**
+Appointments must operate directly inside the system. Build Revenue Leakage detection (stalled deals, SLA breaches) into the main workflow. Analytics and Attribution must span the entire journey (Source → Revenue). Do not fabricate metrics.
+
+**8. REAL-TIME AI & AUTOMATION**
+AI must use strict structured outputs and never invent pricing/commitments. Automations must be idempotent and native. Reflect updates in the UI in real-time where appropriate.
+
+**9. SECURITY & RELIABILITY**
+Enforce RBAC and tenant isolation server-side. Implement idempotency, retries, and duplicate-send prevention. A technical retry must never contact a prospect twice.
+
+**10. AUDITABILITY & UX PRINCIPLES**
+Trace every consequential action. The UI must communicate: **Priority → Reason → Action → Outcome**. Use simple, premium, modern design tokens shared between the marketing site and SaaS app.
+
+**11. IMPLEMENTATION APPROACH**
+Consolidate domain logic first, then data access, then application surfaces. Prioritize an operational vertical slice: 
+*Real lead enters → stored → Revenue Engine processes → appears in App → Next Best Action generated → action executed → result reflected everywhere.* 
+Every feature requires Database, Logic, Backend, UI, Permissions, Auditability, and Tests. Do not build disconnected mock dashboards.
+
+**FINAL OPERATING PRINCIPLE**
+One platform. One domain model. One source of truth. One revenue loop. Every viable lead must have a clear state, a measurable opportunity, and the right next action assigned to the right actor at the right time.
+
+
+
+
+---
+
+# DIGITAL SALES SCHOOL (DSS) & LMS RULES (MASTER PROMPT)
+
+**1. BUILD DIRECTIVE**
+Build an original, premium Digital Sales School (DSS) website plus AI-powered LMS for Zeerocodes Automation Limited. Primary business objective: convert qualified visitors into active paid students, then help those students produce measurable evidence of digital-sales competence.
+
+**2. BRAND + DESIGN SYSTEM**
+- Premium Nigerian technology education brand. Deep ink foundation, restrained electric accent, optional cyan highlight.
+- Large editorial headlines, generous whitespace, strong alignment, and high-contrast CTAs.
+- Use purposeful reveal, hover, and progress animations.
+
+**3. AI LMS**
+- Every module is locked by default. Module N+1 remains locked until the server confirms that Module N's required completion criteria have passed.
+- AI layer includes: AI Tutor, AI Buyer Role-play, AI Assessor, AI Practice Coach, AI Study Planner.
+- Human review remains authoritative for configured high-stakes certification.
+
+**4. TECHNICAL DIRECTIVE**
+- TypeScript architecture with clear domain/application boundaries.
+- Server-authoritative authentication, payments, and entitlements.
+- Persist all progress and assessment state server-side. Protect premium media.
+- Build loading, empty, locked, error, and success states for all critical flows.
+
+**5. CORE DATA MODEL**
+Include: StudentProfile, Application, Payment, Enrollment, Cohort, Part, Module, ModulePrerequisite, Lesson, LessonProgress, ModuleProgress, Quiz, Question, QuizAttempt, Assignment, Submission, Assessment, AssessmentScore, RoleplayScenario, RoleplaySession, AIGrade, CompetencyScore, PortfolioArtifact, CertificationAttempt, InternshipOpportunity.
+
+## Build and Validation
+
+- Install the locked dependencies with `npm ci`.
+- Run `npm run build` for the production build; the prebuild script generates Prisma Client.
+- Run `npm run lint` and `npm test` before delivering changes.
+- Google Fonts must be reachable during the build.
+- Never run `prisma/seed.ts` against an existing database: it deletes data and creates demo accounts.
+- A successful build does not verify deployment configuration or complete the planned product integrations.

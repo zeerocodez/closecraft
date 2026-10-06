@@ -45,3 +45,20 @@ Conversion tracking is prepared for key actions (hero clicks, form submissions, 
 - Compressed media and lazy-loaded assets.
 - Responsive mobile variants for videos.
 - Proper SEO metadata, Open Graph images, and semantic HTML structure.
+
+
+## Build and validation
+
+Install dependencies with `npm ci`, then run:
+
+```sh
+npm run build
+npm run lint
+npm test
+```
+
+The production build generates Prisma Client before compiling Next.js. Prisma CLI and Client use matching version 6 releases to support the existing SQLite schema and client initialization. Internet access to Google Fonts is required for the current fonts. See [Prisma's upgrade guide](https://www.prisma.io/docs/guides/upgrade-prisma-orm/v7) before upgrading the database packages to version 7 or later.
+
+The tenant-page tests verify login redirects, reject missing organisation IDs before database access, and check that page queries use the session organisation. They use mocked sessions and database calls; they do not establish complete authentication or database isolation coverage.
+
+The login and marketing form currently simulate submission, and several views contain demo content. A successful build verifies compilation, not production readiness. Do not run `prisma/seed.ts` against existing data: the seed deletes all records before creating demo accounts.

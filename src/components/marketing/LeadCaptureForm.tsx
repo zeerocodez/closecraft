@@ -6,14 +6,32 @@ export default function LeadCaptureForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
-    // Simulate API call for lead creation
-    setTimeout(() => {
-      setIsSubmitting(false);
+    
+    try {
+      const formData = new FormData(e.currentTarget);
+      const data = {
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        experience: formData.get('experience'),
+      };
+
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      if (!res.ok) throw new Error('Failed to submit application');
       setIsSuccess(true);
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isSuccess) {
@@ -45,6 +63,7 @@ export default function LeadCaptureForm() {
               <input 
                 className="w-full h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all" 
                 id="firstName" 
+                name="firstName"
                 placeholder="Sarah" 
                 required 
                 type="text"
@@ -55,6 +74,7 @@ export default function LeadCaptureForm() {
               <input 
                 className="w-full h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all" 
                 id="lastName" 
+                name="lastName"
                 placeholder="Jenkins" 
                 required 
                 type="text"
@@ -67,6 +87,7 @@ export default function LeadCaptureForm() {
             <input 
               className="w-full h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all" 
               id="email" 
+              name="email"
               placeholder="sarah@example.com" 
               required 
               type="email"
@@ -78,9 +99,11 @@ export default function LeadCaptureForm() {
             <select 
               className="w-full h-11 px-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all cursor-pointer" 
               id="experience"
+              name="experience"
               required
+              defaultValue=""
             >
-              <option value="" disabled selected>Select experience level</option>
+              <option value="" disabled>Select experience level</option>
               <option value="none">No prior experience (Willing to learn)</option>
               <option value="beginner">1-2 years (SDR / BDR)</option>
               <option value="intermediate">3-5 years (Account Executive)</option>

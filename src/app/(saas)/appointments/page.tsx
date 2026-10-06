@@ -9,8 +9,10 @@ export default async function AppointmentsPage() {
     redirect('/login');
   }
 
-  const organizationId = (session as any).organizationId;
-  const user = session.user;
+  const organizationId = session.organizationId;
+  if (!organizationId) {
+    redirect("/login");
+  }
 
   // Fetch upcoming appointments
   const appointments = await db.appointment.findMany({
@@ -37,69 +39,8 @@ export default async function AppointmentsPage() {
   const firstApt = appointments.length > 0 ? appointments[0] : null;
   const firstAptDeal = firstApt?.lead.deals[0];
   const formattedFirstAptDeal = firstAptDeal ? `₦${(firstAptDeal.amount / 1000000).toFixed(1)}M ACV` : 'No Deal';
-    <div className="flex h-screen bg-surface font-body-md text-on-surface antialiased overflow-hidden">
-      {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-full w-64 bg-inverse-surface z-50 flex flex-col justify-between select-none shadow-[0_1px_8px_rgba(0,0,0,0.12)]">
-        <div className="flex flex-col flex-1 overflow-y-auto">
-          <div className="h-16 px-4 flex items-center justify-between bg-inverse-surface">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                <span className="material-symbols-outlined text-on-primary text-[18px]">rocket_launch</span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1">
-                  <span className="font-headline-sm text-headline-sm font-bold text-inverse-on-surface tracking-tight">Closecraft</span>
-                </div>
-                <span className="font-label-caps text-label-caps uppercase text-primary-fixed tracking-wider font-semibold">Revenue OS</span>
-              </div>
-            </div>
-            <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-          </div>
-          <div className="px-4 py-1">
-            <div className="bg-on-surface/20 rounded-lg p-1.5 flex items-center justify-between text-inverse-on-surface cursor-pointer">
-              <div className="flex items-center gap-1 overflow-hidden">
-                <span className="material-symbols-outlined text-primary-fixed text-[16px]">corporate_fare</span>
-                <span className="font-label-md text-label-md truncate font-medium text-inverse-on-surface">Acme Enterprise Ops</span>
-              </div>
-              <span className="material-symbols-outlined text-outline-variant text-[16px]">unfold_more</span>
-            </div>
-          </div>
-          
-          <nav className="flex-1 px-3 py-2 space-y-3 mt-4">
-            <div className="space-y-1">
-              <div className="px-1 py-1 font-label-caps text-label-caps uppercase text-outline-variant tracking-wider font-bold">Revenue</div>
-              <div className="space-y-0.5">
-                <a className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" href="/dashboard">
-                  <span className="material-symbols-outlined text-[18px]">dashboard</span>
-                  <span>Dashboard</span>
-                </a>
-                <a className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" href="/leads">
-                  <span className="material-symbols-outlined text-[18px]">group</span>
-                  <span>Leads</span>
-                </a>
-                <a className="flex items-center justify-between px-3 py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" href="/inbox">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px]">inbox</span>
-                    <span>Inbox</span>
-                  </div>
-                  <span className="px-1.5 py-0.5 rounded-full font-label-caps text-label-caps bg-primary-container text-on-primary font-bold">5</span>
-                </a>
-                <a className="flex items-center gap-2 px-3 py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" href="/pipeline">
-                  <span className="material-symbols-outlined text-[18px]">view_kanban</span>
-                  <span>Pipeline</span>
-                </a>
-                <a className="flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors bg-primary text-on-primary font-semibold shadow-[0_1px_4px_rgba(0,0,0,0.2)]" href="/appointments">
-                  <span className="material-symbols-outlined text-[18px]">calendar_today</span>
-                  <span>Appointments</span>
-                </a>
-              </div>
-            </div>
-          </nav>
-        </div>
-      </aside>
-
-      {/* Main Content Area */}
-      <div className="pl-64 flex-1 flex flex-col relative w-full bg-surface">
+  return (
+    <>
         <header className="fixed top-0 left-64 right-0 h-16 bg-surface/90 backdrop-blur-xl z-40 flex items-center justify-between px-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-1 text-on-surface-variant font-body-sm text-body-sm">
@@ -120,7 +61,7 @@ export default async function AppointmentsPage() {
         </header>
 
         <main className="relative pt-16 min-h-screen w-full overflow-y-auto">
-          <div className="flex flex-col w-full p-6 gap-6">
+          <div className="flex flex-col w-full px-gutter-desktop py-space-xl gap-space-lg">
             {/* Operational Sub-Header & Controls Bar */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="flex flex-col">
@@ -430,7 +371,6 @@ export default async function AppointmentsPage() {
             </div>
           </div>
         </main>
-      </div>
-    </div>
+    </>
   );
 }

@@ -47,14 +47,14 @@ export const {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.organizationId = (user as any).organizationId;
+        token.organizationId = user.organizationId ?? null;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        (session as any).organizationId = token.organizationId as string | null;
+        session.organizationId = typeof token.organizationId === "string" ? token.organizationId : null;
       }
       return session;
     }

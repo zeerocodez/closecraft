@@ -23,6 +23,7 @@ model User {
 
   // Relations
   memberships   OrganizationMember[]
+  studentProfile StudentProfile?
 }
 
 model Organization {
@@ -40,6 +41,14 @@ model Organization {
   appointments  Appointment[]
   aiActions     AiAction[]
   deals         Deal[]
+  auditLogs     AuditLog[]
+  followUpTasks FollowUpTask[]
+  
+  // LMS Relations
+  studentProfiles StudentProfile[]
+  cohorts         Cohort[]
+  modules         Module[]
+  roleplayScenarios RoleplayScenario[]
 }
 
 model OrganizationMember {
@@ -86,6 +95,9 @@ model Lead {
   appointments   Appointment[]
   aiActions      AiAction[]
   deals          Deal[]
+  auditLogs      AuditLog[]
+  followUpTasks  FollowUpTask[]
+  qualificationData QualificationData?
 
   @@index([organizationId])
   @@index([email])
@@ -93,9 +105,10 @@ model Lead {
 
 model Conversation {
   id             String       @id @default(cuid())
-  content        String
-  channel        String       @default("WEB") // WEB, EMAIL, WHATSAPP
+  channel        String       @default("WHATSAPP") // WEB, EMAIL, WHATSAPP
+  status         String       @default("ACTIVE") // ACTIVE, CLOSED, PAUSED
   createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 
   // Foreign Keys
   leadId         String
@@ -104,6 +117,7 @@ model Conversation {
   // Relations
   lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  messages       Message[]
 
   @@index([organizationId])
   @@index([leadId])
@@ -166,3 +180,204 @@ model Deal {
 
   @@index([organizationId])
 }
+
+model Message {
+  id             String       @id @default(cuid())
+  content        String
+  senderType     String       // AI, HUMAN, PROSPECT
+  createdAt      DateTime     @default(now())
+
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+}
+
+model AuditLog {
+  id             String       @id @default(cuid())
+  actorId        String?
+  actorType      String       // USER, AI, SYSTEM, INTEGRATION
+  action         String
+  resourceType   String
+  resourceId     String
+  oldState       String?
+  newState       String?
+  createdAt      DateTime     @default(now())
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId         String?
+  lead           Lead?        @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([leadId])
+}
+
+model FollowUpTask {
+  id             String       @id @default(cuid())
+  actionType     String       // e.g. SEND_WHATSAPP, NOTIFY_SALES
+  scheduledFor   DateTime
+  status         String       @default("PENDING") // PENDING, EXECUTED, CANCELLED
+  reason         String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leadId         String
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([leadId])
+  @@index([status, scheduledFor])
+}
+
+model QualificationData {
+  id             String       @id @default(cuid())
+  budget         String?
+  authority      String?
+  need           String?
+  timeline       String?
+  customData     String?      // JSON string for extra fields
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  leadId         String       @unique
+  lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
+}
+
+
+// -----------------------------------------------------------------------------
+// DSS LEARNING MANAGEMENT SYSTEM (LMS)
+// -----------------------------------------------------------------------------
+
+model StudentProfile {
+  id             String       @id @default(cuid())
+  bio            String?
+  track          String?      // SETTER, CLOSER
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  userId         String       @unique
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  enrollments    Enrollment[]
+  roleplaySessions RoleplaySession[]
+  
+  @@index([organizationId])
+}
+
+model Cohort {
+  id             String       @id @default(cuid())
+  name           String
+  startDate      DateTime
+  endDate        DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  enrollments    Enrollment[]
+
+  @@index([organizationId])
+}
+
+model Enrollment {
+  id             String       @id @default(cuid())
+  status         String       @default("ACTIVE") // ACTIVE, COMPLETED, DROPPED
+  enrolledAt     DateTime     @default(now())
+
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  cohortId       String
+  cohort         Cohort       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, cohortId])
+  @@index([cohortId])
+}
+
+model Module {
+  id             String       @id @default(cuid())
+  title          String
+  orderIndex     Int
+  description    String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  lessons        Lesson[]
+
+  @@index([organizationId])
+}
+
+model Lesson {
+  id             String       @id @default(cuid())
+  title          String
+  orderIndex     Int
+  contentUrl     String?      // Video or PDF link
+  transcript     String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  moduleId       String
+  module         Module       @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@index([moduleId])
+}
+
+model RoleplayScenario {
+  id             String       @id @default(cuid())
+  title          String
+  buyerPersona   String       // e.g., CEO, CTO, CFO
+  context        String       // Scenario instructions for the AI
+  rubric         String       // JSON defining what to score (e.g. discovery, objection handling)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  sessions       RoleplaySession[]
+
+  @@index([organizationId])
+}
+
+model RoleplaySession {
+  id             String       @id @default(cuid())
+  status         String       @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, FAILED
+  finalScore     Int?
+  feedback       String?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  studentId      String
+  student        StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  scenarioId     String
+  scenario       RoleplayScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+
+  turns          RoleplayTurn[]
+
+  @@index([studentId])
+  @@index([scenarioId])
+}
+
+model RoleplayTurn {
+  id             String       @id @default(cuid())
+  content        String
+  senderType     String       // STUDENT, AI_BUYER
+  createdAt      DateTime     @default(now())
+
+  sessionId      String
+  session        RoleplaySession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+}
+

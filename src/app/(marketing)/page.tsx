@@ -1,211 +1,972 @@
-import LeadCaptureForm from '@/components/marketing/LeadCaptureForm';
+"use client";
+
+import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
+import {
+  ArrowRight,
+  Check,
+  Clock,
+  Menu,
+  Phone,
+  Send,
+  ShieldCheck,
+  TrendingUp,
+  X,
+  Zap,
+} from 'lucide-react';
+import './landing.css';
 
 export default function MarketingPage() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [showAuditModal, setShowAuditModal] = useState(false);
+  const [auditBusy, setAuditBusy] = useState(false);
+  const [auditSuccess, setAuditSuccess] = useState<string | null>(null);
+  const [auditError, setAuditError] = useState<string | null>(null);
+
+  async function handleAuditSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAuditBusy(true);
+    setAuditSuccess(null);
+    setAuditError(null);
+    
+    // Simulating API call for audit
+    setTimeout(() => {
+      setAuditSuccess('Audit request received! We will examine your lead-to-sale process and show you where opportunities are being lost.');
+      setAuditBusy(false);
+      (event.target as HTMLFormElement).reset();
+    }, 1000);
+  }
+
+  const openAudit = () => {
+    setMobileMenuOpen(false);
+    setShowAuditModal(true);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-surface font-body-md text-on-surface">
-      {/* Navigation Bar */}
-      <header className="fixed top-0 left-0 right-0 h-20 bg-inverse-surface/95 backdrop-blur-md z-50 flex items-center justify-between px-6 lg:px-12 shadow-sm border-b border-surface-container-high/20">
-        <div className="flex items-center gap-2">
-          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
-            <span className="material-symbols-outlined text-on-primary text-[24px]">rocket_launch</span>
+    <div className="landing-shell">
+      {/* 1. Navigation */}
+      <header className="site-nav">
+        <Link href="#hero" className="brand-lockup">
+          <div className="brand-mark">Z</div>
+          <div>
+            <strong>ZEEROCODES</strong>
+            <small>REVENUE ENGINE</small>
           </div>
-          <span className="font-headline-sm text-headline-sm font-bold text-inverse-on-surface tracking-tight ml-1">CLOSECRAFT</span>
-        </div>
-        
-        <nav className="hidden md:flex items-center gap-8">
-          <Link href="#platform" className="font-label-md text-label-md text-inverse-on-surface/80 hover:text-inverse-on-surface transition-colors">Platform</Link>
-          <Link href="#training" className="font-label-md text-label-md text-inverse-on-surface/80 hover:text-inverse-on-surface transition-colors">Training</Link>
-          <Link href="#business" className="font-label-md text-label-md text-inverse-on-surface/80 hover:text-inverse-on-surface transition-colors">For Businesses</Link>
+        </Link>
+
+        <nav className={`nav-links ${mobileMenuOpen ? 'nav-links-open' : ''}`}>
+          <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How It Works</Link>
+          <Link href="#revenue-leakage" onClick={() => setMobileMenuOpen(false)}>Revenue Leakage</Link>
+          <Link href="#who-its-for" onClick={() => setMobileMenuOpen(false)}>Who It's For</Link>
+          <Link href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</Link>
         </nav>
 
-        <div className="flex items-center gap-4">
-          <Link href="/login" className="font-label-md text-label-md text-inverse-on-surface hover:text-primary-fixed transition-colors font-medium hidden sm:block">
-            Login
-          </Link>
-          <Link href="#apply" className="h-10 px-5 bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-2 shadow-lg shadow-primary/25 transition-all hover:scale-[1.02] active:scale-[0.98]">
-            <span>Start Free</span>
-            <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-          </Link>
+        <div className="nav-actions">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Link
+              href="/dashboard"
+              className="text-link"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
+            >
+              Dashboard
+            </Link>
+            <Link
+              href="/login"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                background: 'rgba(255,255,255,0.06)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: '#fff',
+                borderRadius: '6px',
+                padding: '6px 12px',
+                fontSize: '12.5px',
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              <Zap size={12} color="var(--accent)" /> Client Sign In
+            </Link>
+            <button
+              type="button"
+              onClick={openAudit}
+              className="button button-small"
+            >
+              BOOK REVENUE AUDIT <ArrowRight size={13} />
+            </button>
+          </div>
+          <button
+            type="button"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="mobile-menu"
+            aria-label="Toggle Navigation"
+          >
+            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
         </div>
       </header>
 
-      <main className="flex-1 pt-20">
-        {/* Hero Section */}
-        <section className="relative overflow-hidden bg-inverse-surface text-inverse-on-surface pt-24 pb-32 px-6 lg:px-12">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary/20 via-inverse-surface to-inverse-surface opacity-60"></div>
-          
-          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 relative z-10">
-            <div className="flex-1 flex flex-col gap-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-highest/10 self-center lg:self-start border border-primary/20">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                <span className="font-label-caps text-label-caps uppercase text-primary-fixed tracking-wider font-bold">The Revenue Operating System</span>
-              </div>
-              
-              <h1 className="font-display-lg text-4xl lg:text-6xl font-bold tracking-tight leading-tight text-inverse-on-surface">
-                Learn to Close. <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-fixed to-primary">Get Paid to Close.</span>
-              </h1>
-              
-              <p className="font-body-lg text-body-lg text-inverse-on-surface/80 max-w-xl mx-auto lg:mx-0 leading-relaxed text-lg">
-                The unified platform connecting elite, AI-augmented sales talent with high-growth businesses. Stop hunting for leads. Start closing deals.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row items-center gap-4 mt-4 justify-center lg:justify-start">
-                <Link href="#apply" className="h-14 px-8 bg-primary hover:bg-primary-container text-on-primary font-headline-sm text-headline-sm font-semibold rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-primary/30 transition-all hover:scale-[1.02] active:scale-[0.98] w-full sm:w-auto">
-                  <span>Join as a Closer</span>
-                  <span className="material-symbols-outlined">how_to_reg</span>
-                </Link>
-                <Link href="/business-demo" className="h-14 px-8 bg-surface-container-highest/10 hover:bg-surface-container-highest/20 text-inverse-on-surface font-headline-sm text-headline-sm font-semibold rounded-lg flex items-center justify-center gap-2 border border-surface-container-high/30 transition-all w-full sm:w-auto">
-                  <span>Hire Closers</span>
-                  <span className="material-symbols-outlined">domain</span>
-                </Link>
-              </div>
-              
-              <div className="flex items-center gap-6 mt-8 justify-center lg:justify-start opacity-70">
-                <div className="flex flex-col">
-                  <span className="font-metric-numeral-lg text-2xl font-bold text-inverse-on-surface">₦4B+</span>
-                  <span className="font-label-caps text-label-caps tracking-wider uppercase text-inverse-on-surface/60">Revenue Closed</span>
-                </div>
-                <div className="w-px h-10 bg-surface-container-high/20"></div>
-                <div className="flex flex-col">
-                  <span className="font-metric-numeral-lg text-2xl font-bold text-inverse-on-surface">1,200+</span>
-                  <span className="font-label-caps text-label-caps tracking-wider uppercase text-inverse-on-surface/60">Certified Closers</span>
-                </div>
-              </div>
+      {/* 2. Hero Section */}
+      <section id="hero" className="section-wrap">
+        <div className="hero">
+          <div>
+            <div className="eyebrow">
+              <span className="eyebrow-dot" /> ZEEROCODES REVENUE ENGINE
             </div>
-            
-            <div className="flex-1 w-full max-w-lg lg:max-w-none relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary to-tertiary rounded-2xl blur-lg opacity-30"></div>
-              <div className="relative rounded-2xl bg-surface p-2 shadow-2xl border border-surface-container">
-                <div className="rounded-xl overflow-hidden bg-surface-container-lowest">
-                  {/* Mock Dashboard Preview */}
-                  <div className="h-10 bg-inverse-surface flex items-center px-4 gap-2">
-                    <div className="w-3 h-3 rounded-full bg-error/80"></div>
-                    <div className="w-3 h-3 rounded-full bg-primary/80"></div>
-                    <div className="w-3 h-3 rounded-full bg-tertiary/80"></div>
-                  </div>
-                  <div className="p-6">
-                    <div className="w-1/3 h-4 rounded bg-surface-container mb-6"></div>
-                    <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="h-24 rounded bg-surface-container-low border border-surface-container"></div>
-                      <div className="h-24 rounded bg-surface-container-low border border-surface-container"></div>
-                    </div>
-                    <div className="h-8 rounded bg-primary/10 w-1/4 mb-4"></div>
-                    <div className="space-y-3">
-                      <div className="h-12 rounded bg-surface-container-low w-full"></div>
-                      <div className="h-12 rounded bg-surface-container-low w-full"></div>
-                      <div className="h-12 rounded bg-surface-container-low w-full"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <h1>
+              Turn More of the Leads You Already Have Into <em>Sales.</em>
+            </h1>
+            <p className="hero-lede">
+              You've already spent money, time and effort getting people to enquire. Zeerocodes helps you respond faster, follow up consistently, qualify serious prospects and get the right opportunities to your sales team.
+            </p>
+            <div className="hero-actions">
+              <button
+                type="button"
+                onClick={openAudit}
+                className="button"
+              >
+                BOOK A REVENUE AUDIT <ArrowRight size={15} />
+              </button>
+              <Link href="#how-it-works" className="button button-ghost">
+                See How It Works
+              </Link>
             </div>
-          </div>
-        </section>
-
-        {/* The Pipeline Section */}
-        <section className="py-24 px-6 lg:px-12 bg-surface">
-          <div className="max-w-7xl mx-auto text-center mb-16">
-            <h2 className="font-headline-xl text-3xl md:text-4xl font-bold text-on-surface mb-4">The Complete Revenue Pipeline</h2>
-            <p className="font-body-md text-on-surface-variant max-w-2xl mx-auto text-lg">
-              We don't just teach theory. We provide the platform, the leads, the AI, and the environment required to close deals at scale.
+            <p className="hero-subtext" style={{ marginTop: '16px' }}>
+              See where your leads are being lost. No obligation.
             </p>
           </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Value Prop 1 */}
-            <div className="bg-surface-container-lowest p-8 rounded-2xl border border-surface-container shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-primary/10 text-primary flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-[28px]">school</span>
+
+          {/* Hero Visual: Lead Pipeline & Stalled Opportunity */}
+          <div className="hero-visual-card">
+            <div className="visual-header">
+              <span>LEAD-TO-SALE FLOW</span>
+              <div className="live-badge">
+                <span className="live-dot" /> ENGINE ACTIVE
               </div>
-              <h3 className="font-headline-sm text-xl font-bold text-on-surface mb-3">Skill & Practice</h3>
-              <p className="font-body-md text-on-surface-variant leading-relaxed">
-                Master enterprise sales mechanics. Roleplay against our AI prospect simulator until your objection handling is flawless.
-              </p>
             </div>
-            
-            {/* Value Prop 2 */}
-            <div className="bg-surface-container-lowest p-8 rounded-2xl border border-surface-container shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-tertiary/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
-              <div className="w-14 h-14 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center mb-6 relative z-10">
-                <span className="material-symbols-outlined text-[28px]">verified</span>
+
+            {/* Pipeline Steps */}
+            <div className="pipeline-track">
+              <div className="pipeline-step">
+                <span>LEADS</span>
+                <strong>100</strong>
               </div>
-              <h3 className="font-headline-sm text-xl font-bold text-on-surface mb-3 relative z-10">Proof & Certification</h3>
-              <p className="font-body-md text-on-surface-variant leading-relaxed relative z-10">
-                Earn your CloseCraft Certification. Your conversion metrics become your immutable resume to the world's best companies.
-              </p>
+              <span className="pipeline-arrow">&rarr;</span>
+              <div className="pipeline-step">
+                <span>CONTACTED</span>
+                <strong>72</strong>
+              </div>
+              <span className="pipeline-arrow">&rarr;</span>
+              <div className="pipeline-step">
+                <span>QUALIFIED</span>
+                <strong>20</strong>
+              </div>
+              <span className="pipeline-arrow">&rarr;</span>
+              <div className="pipeline-step">
+                <span>BOOKED</span>
+                <strong>8</strong>
+              </div>
+              <span className="pipeline-arrow">&rarr;</span>
+              <div className="pipeline-step">
+                <span style={{ color: 'var(--accent)' }}>SOLD</span>
+                <strong style={{ color: 'var(--accent)' }}>3</strong>
+              </div>
             </div>
-            
-            {/* Value Prop 3 */}
-            <div className="bg-surface-container-lowest p-8 rounded-2xl border border-surface-container shadow-sm hover:shadow-md transition-shadow">
-              <div className="w-14 h-14 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center mb-6">
-                <span className="material-symbols-outlined text-[28px]">work</span>
+
+            {/* Opportunity At Risk Card */}
+            <div className="opportunity-box">
+              <div className="opp-badge">
+                <div className="opp-badge-label">
+                  <Zap size={13} /> REVENUE AT RISK
+                </div>
+                <span className="opp-badge-tag">NO FOLLOW-UP</span>
               </div>
-              <h3 className="font-headline-sm text-xl font-bold text-on-surface mb-3">Opportunity & Revenue</h3>
-              <p className="font-body-md text-on-surface-variant leading-relaxed">
-                Access a live queue of high-intent leads from our partner businesses. Qualify, pitch, close, and get paid your commission.
-              </p>
+              <div className="opp-name">David — ABC Consulting</div>
+              <div className="opp-grid">
+                <div>
+                  <small>ESTIMATED VALUE</small>
+                  <strong>₦2,000,000 NGN</strong>
+                </div>
+                <div>
+                  <small>CURRENT STATE</small>
+                  <strong style={{ color: 'var(--warning)' }}>Qualified (Idle 32m)</strong>
+                </div>
+              </div>
+              <div className="opp-action-block">
+                <div className="opp-action-text">
+                  <small>NEXT BEST ACTION</small>
+                  <strong>High-value lead with no appointment</strong>
+                </div>
+                <div className="opp-action-btn">
+                  CALL NOW &rarr;
+                </div>
+              </div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Application / CTA Section */}
-        <section id="apply" className="py-24 px-6 lg:px-12 bg-surface-container-low border-t border-surface-container">
-          <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16">
-            <div className="flex-1 text-center lg:text-left">
-              <h2 className="font-headline-xl text-3xl md:text-5xl font-bold text-on-surface mb-6 leading-tight">
-                Ready to accelerate your earning potential?
-              </h2>
-              <p className="font-body-lg text-on-surface-variant text-lg mb-8 max-w-xl mx-auto lg:mx-0">
-                Submit your application to join the CloseCraft network. Our platform is selective, but we welcome hungry beginners willing to learn the craft.
+      {/* 3. Linear Mechanism Flow Strip */}
+      <div className="flow-banner">
+        <div className="flow-banner-title">
+          <span>THE CONVERSION MECHANISM:</span>
+        </div>
+        <div className="flow-banner-steps">
+          <span>LEAD</span> <i>&rarr;</i>
+          <span>FAST RESPONSE</span> <i>&rarr;</i>
+          <span>FOLLOW-UP</span> <i>&rarr;</i>
+          <span>QUALIFICATION</span> <i>&rarr;</i>
+          <span>APPOINTMENT</span> <i>&rarr;</i>
+          <span style={{ color: 'var(--ink)' }}>SALE</span>
+        </div>
+      </div>
+
+      {/* 4. Problem Section */}
+      <section className="section-wrap problem-section">
+        <div className="section-intro">
+          <div className="eyebrow">THE REALITY</div>
+          <h2>Your leads are not the problem.</h2>
+          <p>
+            The money is often lost after the lead comes in. When enquiry handling relies on ad-hoc memory, opportunities slip through the cracks every single day.
+          </p>
+        </div>
+
+        <div className="problem-grid">
+          <div className="problem-card">
+            <span className="problem-card-num">GAP 01</span>
+            <h3>SLOW RESPONSE</h3>
+            <p>
+              A new enquiry arrives. Nobody follows up quickly enough while the buyer's intent is highest.
+            </p>
+          </div>
+
+          <div className="problem-card">
+            <span className="problem-card-num">GAP 02</span>
+            <h3>LOST FOLLOW-UP</h3>
+            <p>
+              The prospect showed genuine interest, but after one or two messages, the conversation goes cold.
+            </p>
+          </div>
+
+          <div className="problem-card">
+            <span className="problem-card-num">GAP 03</span>
+            <h3>MISSED OPPORTUNITY</h3>
+            <p>
+              A qualified prospect is sitting in the pipeline, but nobody on the sales team knows what to do next.
+            </p>
+          </div>
+        </div>
+
+        <div className="problem-closer">
+          <Check size={18} /> Zeerocodes is built to close those gaps.
+        </div>
+      </section>
+
+      {/* 5. The Offer: One System. One Job. */}
+      <section className="offer-section">
+        <div className="section-wrap">
+          <div className="eyebrow">THE OPERATING SYSTEM</div>
+          <h2>One system. One job.</h2>
+          <div className="offer-lead">Turn more of your existing leads into revenue.</div>
+
+          <div className="offer-steps-grid">
+            <div className="offer-step-card">
+              <span>01. RESPOND</span>
+              <h3>Fast Intake</h3>
+              <p>New leads are engaged quickly across your channels before intent decays.</p>
+            </div>
+
+            <div className="offer-step-card">
+              <span>02. QUALIFY</span>
+              <h3>Filter Serious Fit</h3>
+              <p>Identify who is actually worth your sales team's time and budget requirements.</p>
+            </div>
+
+            <div className="offer-step-card">
+              <span>03. FOLLOW UP</span>
+              <h3>Consistent Cadence</h3>
+              <p>Keep opportunities moving instead of letting them disappear into silence.</p>
+            </div>
+
+            <div className="offer-step-card">
+              <span>04. PRIORITISE</span>
+              <h3>Clear Direction</h3>
+              <p>Tell your team which opportunity needs immediate attention right now.</p>
+            </div>
+
+            <div className="offer-step-card">
+              <span>05. CONVERT</span>
+              <h3>Closed Deals</h3>
+              <p>Move qualified opportunities toward booked appointments and verified sales.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. "How It Works" */}
+      <section id="how-it-works" className="section-wrap how-it-works-section">
+        <div className="section-intro" style={{ textAlign: 'center' }}>
+          <div className="eyebrow" style={{ justifyContent: 'center' }}>STEP-BY-STEP PROCESS</div>
+          <h2>From lead to sale.</h2>
+          <p style={{ margin: '0 auto' }}>
+            A disciplined progression from the moment an enquiry lands to the completed deal.
+          </p>
+        </div>
+
+        <div className="process-chain">
+          <div className="process-node">
+            <div className="process-node-num">1</div>
+            <strong>LEAD</strong>
+          </div>
+          <span className="process-divider">&rarr;</span>
+
+          <div className="process-node">
+            <div className="process-node-num">2</div>
+            <strong>RESPOND</strong>
+          </div>
+          <span className="process-divider">&rarr;</span>
+
+          <div className="process-node">
+            <div className="process-node-num">3</div>
+            <strong>QUALIFY</strong>
+          </div>
+          <span className="process-divider">&rarr;</span>
+
+          <div className="process-node">
+            <div className="process-node-num">4</div>
+            <strong>BOOK</strong>
+          </div>
+          <span className="process-divider">&rarr;</span>
+
+          <div className="process-node">
+            <div className="process-node-num">5</div>
+            <strong>CLOSE</strong>
+          </div>
+          <span className="process-divider">&rarr;</span>
+
+          <div className="process-node">
+            <div className="process-node-num" style={{ background: 'var(--ink)', color: 'var(--accent)' }}>6</div>
+            <strong style={{ color: 'var(--accent-deep)' }}>REVENUE</strong>
+          </div>
+        </div>
+
+        <p className="process-caption">
+          Zeerocodes sits in the middle of this process and helps your team keep opportunities moving.
+        </p>
+      </section>
+
+      {/* 7. Revenue Leakage Funnel */}
+      <section id="revenue-leakage" className="leakage-section">
+        <div className="section-wrap">
+          <div className="section-intro">
+            <div className="eyebrow">REVENUE LEAKAGE AUDIT</div>
+            <h2>Find the sales you're already losing.</h2>
+            <p>
+              Instead of immediately asking you to generate more leads, we first look at what is happening to the leads you already have.
+            </p>
+          </div>
+
+          <div className="funnel-breakdown-card">
+            <div className="funnel-table">
+              <div className="funnel-row-item">
+                <div className="funnel-row-stat">
+                  <strong>100 Leads</strong>
+                  <span>TOTAL ENQUIRIES</span>
+                </div>
+                <div className="funnel-progress-bar">
+                  <i style={{ width: '100%' }} />
+                </div>
+                <div className="funnel-row-gap" style={{ color: 'var(--muted)' }}>Initial Baseline</div>
+              </div>
+
+              <div className="funnel-row-item">
+                <div className="funnel-row-stat">
+                  <strong>72 Contacted</strong>
+                  <span>REACHED IN TIME</span>
+                </div>
+                <div className="funnel-progress-bar">
+                  <i style={{ width: '72%' }} />
+                </div>
+                <div className="funnel-row-gap">28 lost to slow response</div>
+              </div>
+
+              <div className="funnel-row-item">
+                <div className="funnel-row-stat">
+                  <strong>45 Engaged</strong>
+                  <span>ACTIVE DIALOGUE</span>
+                </div>
+                <div className="funnel-progress-bar">
+                  <i style={{ width: '45%' }} />
+                </div>
+                <div className="funnel-row-gap">27 ghosted / stalled</div>
+              </div>
+
+              <div className="funnel-row-item">
+                <div className="funnel-row-stat">
+                  <strong>20 Qualified</strong>
+                  <span>FIT CONFIRMED</span>
+                </div>
+                <div className="funnel-progress-bar">
+                  <i style={{ width: '20%' }} />
+                </div>
+                <div className="funnel-row-gap">25 lost in qualification</div>
+              </div>
+
+              <div className="funnel-row-item">
+                <div className="funnel-row-stat">
+                  <strong>8 Booked</strong>
+                  <span>MEETINGS ON CALENDAR</span>
+                </div>
+                <div className="funnel-progress-bar">
+                  <i style={{ width: '8%' }} />
+                </div>
+                <div className="funnel-row-gap">12 qualified but unbooked</div>
+              </div>
+
+              <div className="funnel-row-item" style={{ background: 'var(--accent-bg)', borderColor: '#cfe0cb' }}>
+                <div className="funnel-row-stat">
+                  <strong style={{ color: 'var(--accent-deep)' }}>3 Won</strong>
+                  <span>CLOSED SALES</span>
+                </div>
+                <div className="funnel-progress-bar">
+                  <i style={{ width: '3%' }} />
+                </div>
+                <div className="funnel-row-gap" style={{ color: 'var(--accent-deep)' }}>5 lost post-meeting</div>
+              </div>
+            </div>
+
+            <div className="funnel-footer-note">
+              <span>* Illustrative example. Every gap is an opportunity to investigate.</span>
+              <button
+                type="button"
+                onClick={openAudit}
+                className="button button-small"
+              >
+                FIND MY REVENUE LEAKS <ArrowRight size={13} />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. What Zeerocodes Does (4 Cards Only) */}
+      <section className="section-wrap pillars-section">
+        <div className="section-intro">
+          <div className="eyebrow">CORE CAPABILITIES</div>
+          <h2>What Zeerocodes does.</h2>
+          <p>Four disciplined operational capabilities to prevent pipeline decay.</p>
+        </div>
+
+        <div className="pillars-grid">
+          <div className="pillar-card">
+            <div className="pillar-card-icon"><Clock size={20} /></div>
+            <h3>FAST FOLLOW-UP</h3>
+            <p>Respond to new opportunities before they go cold and establish immediate commercial dialogue.</p>
+          </div>
+
+          <div className="pillar-card">
+            <div className="pillar-card-icon"><ShieldCheck size={20} /></div>
+            <h3>SMART QUALIFICATION</h3>
+            <p>Identify prospects that fit your offer, budget, and timeline so reps don't waste hours.</p>
+          </div>
+
+          <div className="pillar-card">
+            <div className="pillar-card-icon"><TrendingUp size={20} /></div>
+            <h3>SALES PRIORITY</h3>
+            <p>Give your sales reps a clear, real-time answer to "who should I contact next?"</p>
+          </div>
+
+          <div className="pillar-card">
+            <div className="pillar-card-icon"><Zap size={20} /></div>
+            <h3>REVENUE RECOVERY</h3>
+            <p>Find stalled opportunities in your pipeline that deserve another action before being lost.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. AI (One Short Block) */}
+      <section className="section-wrap ai-block-section">
+        <div className="ai-block-card">
+          <div>
+            <div className="eyebrow">HUMAN + MACHINE BALANCE</div>
+            <h2>Let AI handle the repetition. Let your team handle the sale.</h2>
+            <p>
+              AI can respond, follow up and qualify. Your people handle conversations that require judgment, negotiation and closing.
+            </p>
+          </div>
+
+          <div className="ai-division-box">
+            <div className="ai-div-item">
+              <strong>AI JOBS</strong>
+              <span>Sub-minute greeting, qualification questionnaires, scheduled follow-up triggers.</span>
+            </div>
+            <div className="ai-div-item">
+              <strong>REP JOBS</strong>
+              <span>Discovery meetings, custom proposals, objection handling, final contract signing.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 10. Product Screen: Realistic Opportunity Card */}
+      <section className="section-wrap product-preview-section">
+        <div className="product-preview-layout">
+          <div>
+            <div className="eyebrow">PRODUCT PREVIEW</div>
+            <h2>What it actually looks like.</h2>
+            <p style={{ color: 'var(--muted)', fontSize: '16px', lineHeight: 1.6 }}>
+              Every lead in your pipeline has a clear status, estimated deal value, SLA timer, and a deterministic <strong>Next Best Action</strong>.
+            </p>
+            <p style={{ color: 'var(--muted)', fontSize: '14px', marginTop: '12px' }}>
+              Your sales reps never have to guess who needs attention. The engine tells them exactly who to call, message, or escalate.
+            </p>
+          </div>
+
+          <div className="opportunity-card-full">
+            <div className="opp-full-header">
+              <span>QUALIFIED OPPORTUNITY</span>
+              <small>DEMO DATA</small>
+            </div>
+
+            <div className="opp-full-body">
+              <h3>David — ABC Consulting</h3>
+              <div className="opp-detail-table">
+                <div>
+                  <small>ESTIMATED VALUE</small>
+                  <strong>₦2,000,000 NGN</strong>
+                </div>
+                <div>
+                  <small>BUYER INTENT</small>
+                  <strong>Ready to book</strong>
+                </div>
+                <div>
+                  <small>CURRENT STATE</small>
+                  <strong style={{ color: 'var(--accent)' }}>Qualified</strong>
+                </div>
+                <div>
+                  <small>SLA STATUS</small>
+                  <strong style={{ color: 'var(--warning)' }}>At risk (32m idle)</strong>
+                </div>
+              </div>
+            </div>
+
+            <div className="opp-nba-block">
+              <small>NEXT BEST ACTION</small>
+              <div className="opp-nba-callout">
+                <div>
+                  <strong>CALL NOW</strong>
+                  <p>Why: High-value qualified lead with no appointment.</p>
+                </div>
+                <Link
+                  href="/dashboard"
+                  className="button button-small"
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <Phone size={13} /> View SDR Queue
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 11. Who It Is For & Not For */}
+      <section id="who-its-for" className="section-wrap audience-section">
+        <div className="section-intro">
+          <div className="eyebrow">TARGET FIT</div>
+          <h2>Built for businesses that already have leads.</h2>
+          <p>
+            Zeerocodes is designed specifically for organizations that generate enquiries but lose deals due to operational follow-up friction.
+          </p>
+        </div>
+
+        <div className="audience-grid">
+          <div className="audience-card">
+            <h3>SERVICE BUSINESSES</h3>
+            <p>"Enquiries come in, but follow-up is inconsistent across busy weeks."</p>
+          </div>
+
+          <div className="audience-card">
+            <h3>PROFESSIONAL SERVICES</h3>
+            <p>"High-value prospects need disciplined qualification and structured follow-through."</p>
+          </div>
+
+          <div className="audience-card">
+            <h3>SALES TEAMS</h3>
+            <p>"Your reps need to know which opportunities deserve attention first."</p>
+          </div>
+        </div>
+
+        {/* Who It Is Not For */}
+        <div className="not-for-box">
+          <div>
+            <div className="eyebrow" style={{ color: '#88988a' }}>HONEST CRITERIA</div>
+            <h3>This works best when you already have leads.</h3>
+          </div>
+          <div>
+            <p style={{ margin: '0 0 8px', fontWeight: 650, fontSize: '13px', color: 'var(--ink)' }}>Not ideal if:</p>
+            <ul>
+              <li>You have no active lead flow</li>
+              <li>You have no defined offer or pricing structure</li>
+              <li>You expect software alone to magically close deals without sales execution</li>
+            </ul>
+            <p style={{ margin: '12px 0 0', fontWeight: 600, fontSize: '13px', color: 'var(--accent-deep)' }}>
+              ✓ Ideal if: You already have enquiries and want to convert more of them.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 12. The Offer / Revenue Audit Form Section */}
+      <section id="audit" className="audit-cta-section">
+        <div className="section-wrap">
+          <div className="audit-layout">
+            <div className="audit-copy">
+              <div className="eyebrow">START HERE</div>
+              <h2>Start with a Revenue Audit.</h2>
+              <p>
+                We'll look at your current lead-to-sale process and identify where opportunities are being lost.
               </p>
-              
-              <ul className="space-y-4 font-body-md text-on-surface text-left max-w-md mx-auto lg:mx-0">
-                <li className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                    <span className="material-symbols-outlined text-[14px]">check</span>
-                  </div>
-                  <span>Access to AI objection handling simulators</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                    <span className="material-symbols-outlined text-[14px]">check</span>
-                  </div>
-                  <span>Direct pipeline to real business opportunities</span>
-                </li>
-                <li className="flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-primary shrink-0">
-                    <span className="material-symbols-outlined text-[14px]">check</span>
-                  </div>
-                  <span>Zero upfront fees; we win when you close</span>
-                </li>
+
+              <ul className="audit-checklist">
+                <li><Check size={18} /> Where leads are going cold</li>
+                <li><Check size={18} /> Where follow-up is breaking down</li>
+                <li><Check size={18} /> Where your sales team should focus first</li>
               </ul>
-            </div>
-            
-            <div className="flex-1 w-full max-w-md lg:max-w-none flex justify-center lg:justify-end">
-              <LeadCaptureForm />
-            </div>
-          </div>
-        </section>
-      </main>
 
-      {/* Footer */}
-      <footer className="bg-inverse-surface text-inverse-on-surface py-12 px-6 lg:px-12 border-t border-surface-container-high/20">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2 opacity-80">
-            <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
-            <span className="font-headline-sm text-sm font-bold tracking-widest uppercase">Closecraft</span>
+              <div className="pilot-tag">
+                Followed by a structured 30-Day Revenue Pilot for qualified businesses.
+              </div>
+
+              <p style={{ fontSize: '13px', color: 'var(--dark-muted)', marginTop: '18px' }}>
+                No obligation. We'll identify the gaps before recommending anything.
+              </p>
+            </div>
+
+            {/* Inline Audit Form */}
+            <div className="audit-form-card">
+              <h3>Find Your Revenue Leaks</h3>
+              <p>Submit your details to request a comprehensive revenue leak audit.</p>
+
+              {auditSuccess ? (
+                <div className="success-state">
+                  <div className="success-icon">
+                    <Check size={26} />
+                  </div>
+                  <h2>Audit Request Received</h2>
+                  <p>{auditSuccess}</p>
+                  <button
+                    type="button"
+                    onClick={() => setAuditSuccess(null)}
+                    className="button button-small"
+                  >
+                    Submit Another Request
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleAuditSubmit}>
+                  {auditError && <p className="form-error">{auditError}</p>}
+
+                  <div className="form-row">
+                    <label>
+                      Name *
+                      <input name="name" required placeholder="Alex Rivera" />
+                    </label>
+                    <label>
+                      Business Name *
+                      <input name="business" required placeholder="Apex Consulting Ltd" />
+                    </label>
+                  </div>
+
+                  <div className="form-row">
+                    <label>
+                      Email *
+                      <input name="email" type="email" required placeholder="alex@apex.com" />
+                    </label>
+                    <label>
+                      Phone / WhatsApp *
+                      <input name="phone" required placeholder="+234 800 000 0000" />
+                    </label>
+                  </div>
+
+                  <label>
+                    Website (optional)
+                    <input name="website" placeholder="https://apex.com" />
+                  </label>
+
+                  <label>
+                    Approximate Monthly Lead Volume *
+                    <select name="monthlyLeadVolume" defaultValue="50–200 leads/mo">
+                      <option value="Under 50 leads/mo">Under 50 leads/mo</option>
+                      <option value="50–200 leads/mo">50–200 leads/mo</option>
+                      <option value="200–1,000 leads/mo">200–1,000 leads/mo</option>
+                      <option value="1,000+ leads/mo">1,000+ leads/mo</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Biggest Sales Problem *
+                    <select name="biggestSalesBottleneck" defaultValue="Slow response to inbound inquiries">
+                      <option value="Slow response to inbound inquiries">Slow response to inbound inquiries</option>
+                      <option value="Leads fall through cracks / unworked">Leads fall through cracks / inconsistent follow-up</option>
+                      <option value="Unqualified bookings wasting closer time">Unqualified bookings wasting closer time</option>
+                      <option value="Stalled deals with no follow-up triggers">Stalled deals with no follow-up triggers</option>
+                      <option value="No attribution from marketing spend to cash">No attribution from marketing spend to cash</option>
+                    </select>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={auditBusy}
+                    className="button button-full"
+                    style={{ marginTop: '8px' }}
+                  >
+                    {auditBusy ? 'Submitting Request…' : 'FIND MY REVENUE LEAKS'} <Send size={14} />
+                  </button>
+                </form>
+              )}
+            </div>
           </div>
-          <div className="font-body-sm text-inverse-on-surface/50 text-sm">
-            © {new Date().getFullYear()} Closecraft Revenue Systems. All rights reserved.
+        </div>
+      </section>
+
+      {/* 13. FAQ (5 Questions Only) */}
+      <section id="faq" className="section-wrap faq-section">
+        <div>
+          <div className="eyebrow">COMMON QUESTIONS</div>
+          <h2>Frequently Asked Questions</h2>
+          <p style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '12px' }}>
+            Everything you need to know about how the Revenue Engine works.
+          </p>
+        </div>
+
+        <div className="faq-list">
+          <details open>
+            <summary>Do I need more leads?</summary>
+            <p>
+              Not necessarily. Zeerocodes starts by helping you convert more of the leads you're already generating.
+            </p>
+          </details>
+
+          <details>
+            <summary>Does it replace my CRM?</summary>
+            <p>
+              No. Zeerocodes works around your existing lead and sales process.
+            </p>
+          </details>
+
+          <details>
+            <summary>Does it replace my sales team?</summary>
+            <p>
+              No. It helps your team know which opportunities need attention and what should happen next.
+            </p>
+          </details>
+
+          <details>
+            <summary>What does the system actually do?</summary>
+            <p>
+              It helps respond, follow up, qualify, prioritise and recover sales opportunities.
+            </p>
+          </details>
+
+          <details>
+            <summary>Can you guarantee more sales?</summary>
+            <p>
+              No. Results depend on lead quality, your offer, sales execution and market conditions. The system is designed to improve the process between lead and revenue.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      {/* 14. Final CTA */}
+      <section className="final-cta">
+        <div className="section-wrap">
+          <h2>How many sales are sitting inside your existing leads?</h2>
+          <p>
+            Let's find out where your lead-to-sale process is leaking opportunities.
+          </p>
+          <div className="final-cta-actions">
+            <button
+              type="button"
+              onClick={openAudit}
+              className="button"
+            >
+              BOOK A REVENUE AUDIT <ArrowRight size={15} />
+            </button>
+            <Link
+              href="/dashboard"
+              className="button button-ghost"
+            >
+              Launch Operational Dashboard
+            </Link>
           </div>
-          <div className="flex items-center gap-4 font-body-sm text-inverse-on-surface/70 text-sm">
-            <Link href="/privacy" className="hover:text-inverse-on-surface transition-colors">Privacy</Link>
-            <Link href="/terms" className="hover:text-inverse-on-surface transition-colors">Terms</Link>
+        </div>
+      </section>
+
+      {/* 15. Footer */}
+      <footer className="site-footer">
+        <div className="section-wrap">
+          <div className="footer-grid">
+            <div>
+              <Link href="#hero" className="brand-lockup">
+                <div className="brand-mark">Z</div>
+                <div>
+                  <strong style={{ color: '#fff' }}>ZEEROCODES</strong>
+                  <small>REVENUE GROWTH ENGINE</small>
+                </div>
+              </Link>
+              <p style={{ color: 'var(--dark-muted)', fontSize: '13px', marginTop: '14px', maxWidth: '320px' }}>
+                "Turn more of the leads you already have into sales."
+              </p>
+            </div>
+
+            <div>
+              <small>WORKSPACES</small>
+              <Link href="/dashboard" className="footer-button">Overview Control Plane</Link>
+              <Link href="/dashboard" className="footer-button">Lead Inbox</Link>
+              <Link href="/dashboard" className="footer-button">Lead Sources & CSV</Link>
+              <Link href="/dashboard" className="footer-button">SDR Work Queue</Link>
+              <Link href="/dashboard" className="footer-button">Revenue Attribution</Link>
+              <Link href="/dashboard" className="footer-button">Tenant Policy Settings</Link>
+            </div>
+
+            <div>
+              <small>NAVIGATION</small>
+              <Link href="#how-it-works">How It Works</Link>
+              <Link href="#revenue-leakage">Revenue Leakage</Link>
+              <Link href="#who-its-for">Who It's For</Link>
+              <Link href="#faq">FAQ</Link>
+              <button onClick={openAudit} className="footer-button" style={{ display: 'inline-block', marginTop: '10px' }}>Book Revenue Audit</button>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <span>© {new Date().getFullYear()} Zeerocodes Revenue Growth Engine. All rights reserved.</span>
+            <span>Turn more of the leads you already have into sales.</span>
           </div>
         </div>
       </footer>
+
+      {/* Mobile Sticky Bottom CTA */}
+      <div className="mobile-sticky-cta">
+        <button
+          type="button"
+          onClick={openAudit}
+          className="button button-full"
+        >
+          BOOK REVENUE AUDIT <ArrowRight size={14} />
+        </button>
+      </div>
+
+      {/* 16. Revenue Leak Audit Modal */}
+      {showAuditModal && (
+        <div className="modal-backdrop">
+          <div className="audit-modal">
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => {
+                setShowAuditModal(false);
+                setAuditSuccess(null);
+                setAuditError(null);
+              }}
+              aria-label="Close modal"
+            >
+              <X size={20} />
+            </button>
+
+            {auditSuccess ? (
+              <div className="success-state">
+                <div className="success-icon">
+                  <Check size={26} />
+                </div>
+                <h2>Audit Request Received</h2>
+                <p>{auditSuccess}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAuditModal(false);
+                    setAuditSuccess(null);
+                  }}
+                  className="button button-small"
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="eyebrow">ZEEROCODES REVENUE AUDIT</div>
+                <h2>Find Your Revenue Leaks</h2>
+                <p className="modal-copy">
+                  Tell us about your current sales process and lead flow. We'll identify where opportunities are slipping through the cracks.
+                </p>
+
+                {auditError && <p className="form-error">{auditError}</p>}
+
+                <form onSubmit={handleAuditSubmit}>
+                  <div className="form-row">
+                    <label>
+                      Name *
+                      <input name="name" required placeholder="Alex Rivera" />
+                    </label>
+                    <label>
+                      Business Name *
+                      <input name="business" required placeholder="Apex Consulting Ltd" />
+                    </label>
+                  </div>
+
+                  <div className="form-row">
+                    <label>
+                      Email *
+                      <input name="email" type="email" required placeholder="alex@apex.com" />
+                    </label>
+                    <label>
+                      Phone / WhatsApp *
+                      <input name="phone" required placeholder="+234 800 000 0000" />
+                    </label>
+                  </div>
+
+                  <label>
+                    Website (optional)
+                    <input name="website" placeholder="https://apex.com" />
+                  </label>
+
+                  <label>
+                    Approximate Monthly Lead Volume *
+                    <select name="monthlyLeadVolume" defaultValue="50–200 leads/mo">
+                      <option value="Under 50 leads/mo">Under 50 leads/mo</option>
+                      <option value="50–200 leads/mo">50–200 leads/mo</option>
+                      <option value="200–1,000 leads/mo">200–1,000 leads/mo</option>
+                      <option value="1,000+ leads/mo">1,000+ leads/mo</option>
+                    </select>
+                  </label>
+
+                  <label>
+                    Biggest Sales Problem *
+                    <select name="biggestSalesBottleneck" defaultValue="Slow response to inbound inquiries">
+                      <option value="Slow response to inbound inquiries">Slow response to inbound inquiries</option>
+                      <option value="Leads fall through cracks / unworked">Leads fall through cracks / inconsistent follow-up</option>
+                      <option value="Unqualified bookings wasting closer time">Unqualified bookings wasting closer time</option>
+                      <option value="Stalled deals with no follow-up triggers">Stalled deals with no follow-up triggers</option>
+                      <option value="No attribution from marketing spend to cash">No attribution from marketing spend to cash</option>
+                    </select>
+                  </label>
+
+                  <button
+                    type="submit"
+                    disabled={auditBusy}
+                    className="button button-full"
+                    style={{ marginTop: '8px' }}
+                  >
+                    {auditBusy ? 'Submitting Request…' : 'FIND MY REVENUE LEAKS'} <Send size={14} />
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
