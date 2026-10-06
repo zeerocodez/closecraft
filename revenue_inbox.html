@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={"darkMode":"class","theme":{"extend":{"colors":{"surface-container-low":"#f2f3ff","surface-container-high":"#e2e7ff","on-primary-container":"#fffbff","primary-fixed-dim":"#b5c4ff","on-background":"#131b2e","inverse-surface":"#283044","surface-container-lowest":"#ffffff","on-tertiary":"#ffffff","on-secondary-fixed-variant":"#3f4759","tertiary":"#4648d4","outline":"#737686","on-secondary-container":"#5b6276","secondary":"#575e71","surface-tint":"#1a53d6","surface-container":"#eaedff","on-error-container":"#93000a","secondary-fixed":"#dbe2f9","on-surface-variant":"#434654","inverse-primary":"#b5c4ff","surface-container-highest":"#dae2fd","on-primary-fixed":"#00164d","error":"#ba1a1a","background":"#faf8ff","surface-dim":"#d2d9f4","primary":"#1550d3","inverse-on-surface":"#eef0ff","on-secondary-fixed":"#141b2c","surface-bright":"#faf8ff","on-tertiary-container":"#fffbff","on-tertiary-fixed-variant":"#2f2ebe","on-error":"#ffffff","surface":"#faf8ff","primary-container":"#3c6bed","on-tertiary-fixed":"#07006c","surface-variant":"#dae2fd","on-primary":"#ffffff","tertiary-container":"#6063ee","on-surface":"#131b2e","secondary-fixed-dim":"#bfc6dc","error-container":"#ffdad6","tertiary-fixed-dim":"#c0c1ff","tertiary-fixed":"#e1e0ff","primary-fixed":"#dce1ff","secondary-container":"#d8dff6","on-primary-fixed-variant":"#003cad","on-secondary":"#ffffff","outline-variant":"#c3c5d7"},"borderRadius":{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},"spacing":{"margin-tablet":"1.5rem","margin-desktop":"2rem","space-md":"0.75rem","gutter-tablet":"1.25rem","gutter-desktop":"1.5rem","space-sm":"0.5rem","space-lg":"1.25rem","margin":"1rem","space-xl":"1.75rem","space-xs":"0.25rem","gutter":"1rem"},"fontFamily":{"headline-xl":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"label-md":["Inter"],"headline-lg":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"],"metric-numeral-lg":["Inter"],"metric-numeral-md":["Inter"],"body-md":["Inter"],"label-caps":["Inter"],"headline-sm":["Plus Jakarta Sans"],"body-lg":["Inter"],"body-sm":["Inter"]},"fontSize":{"headline-xl":["28px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"600"}],"display-lg":["36px",{"lineHeight":"44px","letterSpacing":"-0.025em","fontWeight":"700"}],"label-md":["13px",{"lineHeight":"16px","letterSpacing":"0.01em","fontWeight":"600"}],"headline-lg":["22px",{"lineHeight":"28px","letterSpacing":"-0.015em","fontWeight":"600"}],"display-lg-mobile":["28px",{"lineHeight":"34px","letterSpacing":"-0.02em","fontWeight":"700"}],"metric-numeral-lg":["32px",{"lineHeight":"36px","letterSpacing":"-0.02em","fontWeight":"700"}],"metric-numeral-md":["20px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"20px","letterSpacing":"0em","fontWeight":"400"}],"label-caps":["11px",{"lineHeight":"14px","letterSpacing":"0.06em","fontWeight":"700"}],"headline-sm":["18px",{"lineHeight":"24px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"24px","letterSpacing":"-0.005em","fontWeight":"400"}],"body-sm":["12px",{"lineHeight":"16px","letterSpacing":"0.005em","fontWeight":"400"}]}}}}</script></head><body class="bg-background font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-64 bg-inverse-surface text-inverse-on-surface z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.08)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="p-space-lg flex items-center gap-space-md"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">bolt</span></div><div class="flex flex-col"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-inverse-on-surface">Closecraft</span><span class="font-label-caps text-label-caps uppercase tracking-wider text-outline-variant">RevOps Engine</span></div></div><div class="px-space-md mb-space-md"><div class="flex items-center justify-between px-space-md py-space-sm rounded-lg bg-surface-container-highest/10 hover:bg-surface-container-highest/20 cursor-pointer transition-colors"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-inverse-primary text-[18px]">domain</span><div class="flex flex-col"><span class="font-body-sm text-body-sm font-semibold text-inverse-on-surface leading-none">Acme Enterprise</span><span class="font-label-caps text-label-caps text-outline-variant">Main Production</span></div></div><span class="material-symbols-outlined text-outline-variant text-[16px]">unfold_more</span></div></div><nav class="flex-1 px-space-md space-y-space-md" data-active-classes="bg-primary text-on-primary font-semibold rounded-lg"><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-caps text-label-caps uppercase tracking-wider text-outline-variant">Revenue</div><div class="space-y-0.5"><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[18px]">monitoring</span><span class="font-body-md text-body-md">Dashboard</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="leads" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[18px]">contact_page</span><span class="font-body-md text-body-md">Leads</span></div><span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-surface-container-highest/20 text-inverse-primary">24</span></a><a aria-current="page" class="flex items-center gap-space-md px-space-sm py-space-xs transition-colors bg-primary text-on-primary font-semibold rounded-lg" data-path="inbox" href="#"><span class="material-symbols-outlined text-[18px]">inbox</span><span class="font-body-md text-body-md">Inbox</span></a><a class="flex items-center justify-between px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="ai-actions" href="#"><div class="flex items-center gap-space-md"><span class="material-symbols-outlined text-[18px] text-inverse-primary">smart_toy</span><span class="font-body-md text-body-md">AI Actions</span></div><span class="w-2 h-2 rounded-full bg-primary-fixed"></span></a><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="pipeline" href="#"><span class="material-symbols-outlined text-[18px]">view_kanban</span><span class="font-body-md text-body-md">Pipeline</span></a><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="appointments" href="#"><span class="material-symbols-outlined text-[18px]">calendar_today</span><span class="font-body-md text-body-md">Appointments</span></a></div></div><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-caps text-label-caps uppercase tracking-wider text-outline-variant">Operations</div><div class="space-y-0.5"><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="automations" href="#"><span class="material-symbols-outlined text-[18px]">alt_route</span><span class="font-body-md text-body-md">Automations</span></a><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="knowledge" href="#"><span class="material-symbols-outlined text-[18px]">menu_book</span><span class="font-body-md text-body-md">Knowledge</span></a><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="revenue-intelligence" href="#"><span class="material-symbols-outlined text-[18px]">query_stats</span><span class="font-body-md text-body-md">Revenue Intelligence</span></a><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="ai-performance" href="#"><span class="material-symbols-outlined text-[18px]">speed</span><span class="font-body-md text-body-md">AI Performance</span></a></div></div><div class="space-y-space-xs"><div class="px-space-sm py-space-xs font-label-caps text-label-caps uppercase tracking-wider text-outline-variant">Workspace</div><div class="space-y-0.5"><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="team-and-capacity" href="#"><span class="material-symbols-outlined text-[18px]">group</span><span class="font-body-md text-body-md">Team &amp; Capacity</span></a><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="integrations" href="#"><span class="material-symbols-outlined text-[18px]">hub</span><span class="font-body-md text-body-md">Integrations</span></a><a class="flex items-center gap-space-md px-space-sm py-space-xs rounded-lg text-inverse-on-surface/80 hover:bg-surface-container-highest/10 hover:text-inverse-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">settings</span><span class="font-body-md text-body-md">Settings</span></a></div></div></nav></div><div class="p-space-md bg-surface-container-highest/5 space-y-space-sm"><div class="flex items-center justify-between px-space-sm py-1.5 rounded-lg bg-surface-container-highest/10"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-primary-fixed"></span><span class="font-body-sm text-body-sm text-inverse-on-surface font-medium">AI Engine Active</span></div><span class="font-label-caps text-label-caps px-1 py-0.5 rounded bg-surface-container-highest/20 text-inverse-primary">v3.4</span></div><div class="flex items-center gap-space-sm px-space-sm py-space-xs rounded-lg hover:bg-surface-container-highest/10 cursor-pointer transition-colors"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center shrink-0"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col min-w-0"><span class="font-body-sm text-body-sm font-semibold text-inverse-on-surface truncate">Sarah Jenkins</span><span class="font-label-caps text-label-caps text-outline-variant truncate">Sales Mgr &amp; Closer</span></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-space-lg flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md min-w-0"><div class="flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">Closecraft</span><span class="material-symbols-outlined text-[14px]">chevron_right</span><span class="text-on-surface font-semibold">Revenue Ops</span></div></div><div class="flex-1 max-w-lg mx-space-lg"><div class="relative flex items-center w-full"><span class="material-symbols-outlined absolute left-space-md text-on-surface-variant text-[18px]">search</span><input class="w-full pl-9 pr-14 py-space-xs rounded-lg bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md shadow-[0_1px_4px_rgba(12,20,36,0.05)] focus:outline-none" placeholder="Search leads, companies, deals..." type="text"/><div class="absolute right-space-md flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface-container-high text-on-secondary-container font-label-caps text-label-caps">⌘K</div></div></div><div class="flex items-center gap-space-md shrink-0"><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-low text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-body-sm text-body-sm">Telemetry: 340ms • 99.98% Integrity</span></div><button class="relative p-space-xs rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span></button><button class="flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-on-primary rounded-lg font-label-md text-label-md hover:bg-primary-container transition-colors shadow-[0_1px_2px_rgba(12,20,36,0.1)]"><span class="material-symbols-outlined text-[18px]">add</span><span>Add Lead</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="w-full pt-16 bg-surface"><div class="flex flex-col w-full">
+<div class="flex flex-col w-full px-space-md py-space-sm bg-surface">
+<!-- Operational Triage Sub-Bar -->
+<div class="flex items-center justify-between gap-space-md mb-space-sm px-space-sm py-space-xs bg-surface-container-low rounded-xl">
+<div class="flex items-center gap-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Revenue Inbox</span>
+</div>
+<div class="h-4 w-[1px] bg-outline-variant"></div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span>Active Ingestion:</span>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-surface-container-highest text-primary font-semibold">WhatsApp Gateway v2.4</span>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface font-semibold">Resend SMTP Live</span>
+</div>
+</div>
+<div class="flex items-center gap-space-sm">
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[14px] text-tertiary">bolt</span>
+<span>SLA Target: &lt; 3 mins</span>
+</div>
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+<span>Auto-Triage Active (89% hands-free)</span>
+</div>
+</div>
+</div>
+<!-- 3-Pane Desktop Grid Layout (28% - 44% - 28%) -->
+<div class="grid grid-cols-12 gap-space-md h-[calc(100vh-148px)] overflow-hidden">
+<!-- PANE 1: Conversation List & Triage (28% ~ col-span-3 or col-span-12 xl:col-span-3) -->
+<section class="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<!-- Filter Tabs / Operational Pills -->
+<div class="p-space-sm bg-surface-container-lowest">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Live Routing Triage</span>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">18 Live Queued</span>
+</div>
+<div class="flex items-center gap-1 overflow-x-auto pb-1.5 scrollbar-none text-nowrap">
+<button class="px-2.5 py-1 rounded-lg bg-primary text-on-primary font-label-caps text-label-caps font-bold transition-all shadow-sm">All (18)</button>
+<button class="px-2 py-1 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps transition-colors">Unread (5)</button>
+<button class="px-2 py-1 rounded-lg bg-error-container text-on-error-container font-label-caps text-label-caps font-bold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>Hot (4)
+            </button>
+<button class="px-2 py-1 rounded-lg bg-surface-container text-on-surface-variant hover:text-on-surface font-label-caps text-label-caps transition-colors">AI Han (9)</button>
+<button class="px-2 py-1 rounded-lg bg-secondary-container text-on-secondary-container font-label-caps text-label-caps transition-colors">Review (3)</button>
+</div>
+<!-- Quick Search & Sorting -->
+<div class="relative mt-space-xs">
+<span class="material-symbols-outlined absolute left-2.5 top-2 text-[16px] text-outline">search</span>
+<input class="w-full bg-surface-container-low text-on-surface placeholder:text-outline-variant font-body-sm text-body-sm pl-8 pr-7 py-1.5 rounded-lg focus:outline-none focus:bg-surface-container" placeholder="Search conversations, rep, ACV..." type="text"/>
+<span class="material-symbols-outlined absolute right-2.5 top-2 text-[16px] text-outline cursor-pointer hover:text-on-surface">tune</span>
+</div>
+</div>
+<!-- Conversation Item Feed -->
+<div class="flex-1 overflow-y-auto divide-y-0 space-y-1 p-space-xs bg-surface-container-low">
+<!-- SELECTED ITEM: Tunde Balogun -->
+<article class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm cursor-pointer transition-all hover:shadow-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="w-2 h-2 rounded-full bg-error shrink-0" title="Hot Surge Signal"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold truncate">Tunde Balogun</span>
+<span class="font-label-caps text-label-caps px-1 py-0.2 rounded bg-tertiary-fixed text-on-tertiary-fixed font-bold shrink-0">96</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline shrink-0">11m left</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm mt-0.5">
+<span class="truncate font-semibold text-on-surface">Sterling &amp; Sterling Ltd</span>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-surface-container text-primary font-bold">₦4.2M ACV</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">
+              "We have greenlit the security addendum. Can you guarantee data residency within Lagos DC before signature tonight?"
+            </p>
+<div class="flex items-center justify-between mt-2 pt-1.5">
+<div class="flex items-center gap-1.5">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-high text-on-primary-fixed-variant font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[13px] text-primary">chat</span>
+<span>WhatsApp</span>
+</span>
+<span class="px-1.5 py-0.5 rounded bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps">
+                  AI Drafted (94%)
+                </span>
+</div>
+<div class="flex items-center gap-1">
+<div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] text-on-primary font-bold">SJ</div>
+<span class="font-label-caps text-label-caps text-outline-variant">Sarah</span>
+</div>
+</div>
+</article>
+<!-- CONVERSATION ITEM 2: Chioma Adeleke -->
+<article class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm cursor-pointer transition-all hover:bg-surface-container-lowest/80">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Chioma Adeleke</span>
+<span class="font-label-caps text-label-caps px-1 py-0.2 rounded bg-surface-container-high text-on-surface font-bold shrink-0">88</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline shrink-0">18m ago</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm mt-0.5">
+<span class="truncate">Zenith Edge Tech</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">₦12.8M ACV</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">
+              "Thanks Sarah, scheduling demo with our CTO for Thursday 2 PM."
+            </p>
+<div class="flex items-center justify-between mt-2 pt-1">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[13px]">mail</span>
+<span>Email</span>
+</span>
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">smart_toy</span>
+<span class="font-label-caps text-label-caps text-primary">Autonomous Flow</span>
+</div>
+</div>
+</article>
+<!-- CONVERSATION ITEM 3: Emeka Nnamdi -->
+<article class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm cursor-pointer transition-all hover:bg-surface-container-lowest/80">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="w-2 h-2 rounded-full bg-error shrink-0"></span>
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Emeka Nnamdi</span>
+<span class="font-label-caps text-label-caps px-1 py-0.2 rounded bg-tertiary-fixed text-on-tertiary-fixed font-bold shrink-0">91</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline shrink-0">32m ago</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm mt-0.5">
+<span class="truncate">Apex Logistics Logistics</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">₦6.1M ACV</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">
+              "We have pricing queries regarding the enterprise tier API rate limits."
+            </p>
+<div class="flex items-center justify-between mt-2 pt-1">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[13px]">sms</span>
+<span>SMS</span>
+</span>
+<span class="px-1.5 py-0.5 rounded bg-secondary-container text-on-secondary-container font-label-caps text-label-caps">
+                Needs Review
+              </span>
+</div>
+</article>
+<!-- CONVERSATION ITEM 4: Fatima Yusuf -->
+<article class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm cursor-pointer transition-all hover:bg-surface-container-lowest/80">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">Fatima Yusuf</span>
+<span class="font-label-caps text-label-caps px-1 py-0.2 rounded bg-surface-container-high text-on-surface font-bold shrink-0">74</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline shrink-0">1h ago</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm mt-0.5">
+<span class="truncate">Kuda Capital Partners</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">₦3.5M ACV</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">
+              "NDPR terms reviewed by legal team, looks good."
+            </p>
+<div class="flex items-center justify-between mt-2 pt-1">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container-high text-primary font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[13px]">chat</span>
+<span>WhatsApp</span>
+</span>
+<span class="font-label-caps text-label-caps text-outline">Resolved</span>
+</div>
+</article>
+<!-- CONVERSATION ITEM 5: David Alabi -->
+<article class="p-space-sm rounded-lg bg-surface-container-lowest shadow-sm cursor-pointer transition-all hover:bg-surface-container-lowest/80">
+<div class="flex items-start justify-between gap-space-xs">
+<div class="flex items-center gap-space-xs min-w-0">
+<span class="font-headline-sm text-headline-sm text-on-surface truncate">David Alabi</span>
+<span class="font-label-caps text-label-caps px-1 py-0.2 rounded bg-surface-container-high text-on-surface font-bold shrink-0">82</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline shrink-0">2h ago</span>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm mt-0.5">
+<span class="truncate">Horizon Energy Hub</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">₦8.0M ACV</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-1">
+              "AI auto-responder shared SOC2 compliance binder."
+            </p>
+<div class="flex items-center justify-between mt-2 pt-1">
+<span class="flex items-center gap-1 px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[13px]">mail</span>
+<span>Email</span>
+</span>
+<span class="font-label-caps text-label-caps text-tertiary">Copilot Handled</span>
+</div>
+</article>
+</div>
+</section>
+<!-- PANE 2: Center Pane (44%) - Active Multichannel Conversation & Composer -->
+<section class="col-span-12 lg:col-span-8 xl:col-span-6 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+<!-- Active Thread Header -->
+<header class="p-space-md bg-surface-container-low flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="relative">
+<div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-headline-sm text-headline-sm text-on-primary font-bold">
+                  TB
+                </div>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-primary-fixed ring-2 ring-surface-container-low"></span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Tunde Balogun</h2>
+<span class="material-symbols-outlined text-[16px] text-primary" title="Verified Business Contact">verified</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-semibold">Sterling &amp; Sterling Ltd</span>
+</div>
+<div class="flex items-center gap-space-md text-on-surface-variant font-body-sm text-body-sm">
+<span>VP Digital Operations</span>
+<span>•</span>
+<span>+234 803 912 4490</span>
+<span>•</span>
+<span>tunde@sterlingsolutions.ng</span>
+</div>
+</div>
+</div>
+<!-- Urgent SLA Badge -->
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-1.5 px-space-sm py-1 rounded bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">
+<span class="material-symbols-outlined text-[16px] animate-spin">timelapse</span>
+<span>Window Closes: 11m 48s</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline mt-0.5">WhatsApp 24h Policy Bound</span>
+</div>
+</div>
+<!-- Channel switcher & verification indicator -->
+<div class="flex items-center justify-between pt-1">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Active Stream:</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-primary font-label-caps text-label-caps font-bold">
+<span class="material-symbols-outlined text-[14px]">chat</span>
+                WhatsApp Business (Direct API)
+              </span>
+<span class="font-label-caps text-label-caps text-outline">Latency: 112ms</span>
+</div>
+<div class="flex items-center gap-space-sm">
+<button class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="Call Contact">
+<span class="material-symbols-outlined text-[18px]">call</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="Assign Rep">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-container text-on-surface-variant hover:text-on-surface" title="Conversation Details">
+<span class="material-symbols-outlined text-[18px]">more_vert</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Message History Log -->
+<div class="flex-1 overflow-y-auto p-space-md space-y-space-md bg-surface">
+<!-- System Stamp -->
+<div class="flex items-center justify-center my-space-xs">
+<div class="px-space-md py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps uppercase tracking-wider">
+              Today • 14:15 WAT • Ingestion via WhatsApp Gateway
+            </div>
+</div>
+<!-- 1. Prospect Message -->
+<div class="flex flex-col items-start max-w-[85%]">
+<div class="flex items-center gap-space-xs mb-1">
+<span class="font-label-caps text-label-caps text-on-surface font-bold">Tunde Balogun</span>
+<span class="font-label-caps text-label-caps text-outline">14:16 WAT</span>
+<span class="material-symbols-outlined text-[14px] text-outline">done_all</span>
+</div>
+<div class="p-space-md rounded-2xl rounded-tl-sm bg-surface-container-lowest text-on-surface shadow-sm">
+<p class="font-body-md text-body-md">
+                Good afternoon Sarah. We have greenlit the security addendum in principle during our leadership scrum. However, our board auditor requires absolute written confirmation: Can Closecraft guarantee local data residency within a Lagos tier-3 DC before we issue the signed ₦4.2M SOW tonight?
+              </p>
+</div>
+<span class="font-label-caps text-label-caps text-outline-variant mt-1">Direct via WhatsApp Business API</span>
+</div>
+<!-- 2. System Audit / Telemetry Event -->
+<div class="p-space-sm rounded-lg bg-surface-container-high/60 flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm shadow-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-tertiary">query_stats</span>
+<span class="font-semibold text-on-surface">Buying Signal Surge:</span>
+<span>Pricing Matrix &amp; SLA Schedules re-opened 4 minutes ago.</span>
+</div>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-bold">NDPR Compliant</span>
+</div>
+<!-- 3. AI Copilot Qualification Analysis & Auto-Action Draft -->
+<div class="flex flex-col items-stretch bg-surface-container-low rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-xs mb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[18px] text-primary">auto_awesome</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">AI Commercial Copilot</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed font-bold">94% Confidence</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline">Autonomous Model v3.4</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-space-sm">
+              Identified Decision Driver: <strong class="text-on-surface">Local Data Sovereignty (Lagos DC)</strong>. Verified via Knowledge Base: Closecraft hosts on MainOne MDXi Lekki DC with full NDPR ISO/IEC 27001 certification. High urgency closure window (&lt;12h).
+            </p>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest text-on-surface font-body-md text-body-md shadow-xs">
+<p class="italic text-on-surface-variant font-body-sm text-body-sm mb-1">Pre-Generated Suggested WhatsApp Message:</p>
+<p class="text-on-surface">
+                "Hello Tunde, absolutely. All Sterling &amp; Sterling telemetry, metadata, and transaction archives are hosted natively at the MainOne MDXi Lekki DC, fully compliant with NDPR guidelines. I am attaching our signed Data Sovereignty Certificate directly for your board's auditor."
+              </p>
+</div>
+<div class="flex items-center justify-end gap-space-xs mt-space-sm">
+<button class="px-space-sm py-1 rounded-lg bg-surface-container text-on-surface font-label-caps text-label-caps hover:bg-surface-container-high transition-colors">Discard</button>
+<button class="px-space-sm py-1 rounded-lg bg-primary text-on-primary font-label-caps text-label-caps font-bold hover:bg-primary-container transition-colors shadow-sm" onclick="populateDraft()">Insert Draft into Composer</button>
+</div>
+</div>
+<!-- 4. Internal Rep Note (Audit Trail) -->
+<div class="flex flex-col items-end max-w-[85%] ml-auto">
+<div class="flex items-center gap-space-xs mb-1">
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-bold">Internal Note</span>
+<span class="font-label-caps text-label-caps text-on-surface font-semibold">Sarah Jenkins (Sales Mgr)</span>
+<span class="font-label-caps text-label-caps text-outline">14:18 WAT</span>
+</div>
+<div class="p-space-sm rounded-xl rounded-tr-sm bg-secondary-container text-on-secondary-container font-body-sm text-body-sm">
+              Tunde is ready to sign once DC certificate is attached. I verified our legal repository has the 2024 MDXi certificate renewed last month.
+            </div>
+</div>
+</div>
+<!-- Message Composer Dock -->
+<div class="p-space-md bg-surface-container-lowest shadow-md">
+<!-- Mode Tabs -->
+<div class="flex items-center justify-between pb-space-xs mb-space-xs">
+<div class="flex items-center gap-1">
+<button class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg bg-surface-container-high text-primary font-label-caps text-label-caps font-bold">
+<span class="material-symbols-outlined text-[14px]">chat</span>
+<span>WhatsApp Reply</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-caps text-label-caps font-medium">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>Internal Team Note</span>
+</button>
+<button class="flex items-center gap-1.5 px-space-sm py-1 rounded-lg text-on-surface-variant hover:bg-surface-container font-label-caps text-label-caps font-medium">
+<span class="material-symbols-outlined text-[14px]">auto_awesome</span>
+<span>AI Draft (94% Fit)</span>
+</button>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] cursor-pointer hover:text-on-surface" title="Bold">format_bold</span>
+<span class="material-symbols-outlined text-[16px] cursor-pointer hover:text-on-surface" title="Italic">format_italic</span>
+<span class="material-symbols-outlined text-[16px] cursor-pointer hover:text-on-surface" title="Quick Template Snippet">quickreply</span>
+<span class="material-symbols-outlined text-[16px] cursor-pointer hover:text-on-surface" title="Attach Certificate / PDF">attach_file</span>
+</div>
+</div>
+<!-- Composer Textarea Area -->
+<div class="relative">
+<textarea class="w-full bg-surface-container-low text-on-surface placeholder:text-outline-variant font-body-md text-body-md p-space-sm rounded-lg focus:outline-none focus:bg-surface-container resize-none" id="composer-input" placeholder="Type WhatsApp response or hit Tab to insert AI copilot play..." rows="3"></textarea>
+<!-- Quick Attached Artifact Pill -->
+<div class="flex items-center gap-2 mt-1.5">
+<div class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[14px] text-primary">description</span>
+<span>Lekki_MDXi_Sovereignty_NDPR_2024.pdf</span>
+<span class="material-symbols-outlined text-[14px] text-outline cursor-pointer hover:text-error">close</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline-variant">Auto-staged by AI Copilot</span>
+</div>
+</div>
+<!-- Bottom Control Bar -->
+<div class="flex items-center justify-between mt-space-sm pt-space-xs">
+<div class="flex items-center gap-space-sm font-label-caps text-label-caps text-on-surface-variant">
+<span class="inline-flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>WhatsApp Template: <strong>Closing Security Confirm</strong></span>
+</span>
+<span>•</span>
+<span class="text-outline">Characters: 182 / 1024</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md hover:bg-surface-container-high transition-colors">
+                Save Draft
+              </button>
+<button class="flex items-center gap-space-xs px-space-lg py-1.5 rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px]">send</span>
+<span>Send via WhatsApp</span>
+<span class="ml-1 px-1.5 py-0.2 rounded bg-on-primary/20 font-label-caps text-label-caps">⌘+Enter</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- PANE 3: Right Pane (28%) - Live Commercial Context & AI Prescribed Play -->
+<section class="col-span-12 lg:col-span-12 xl:col-span-3 flex flex-col gap-space-sm overflow-y-auto">
+<!-- Section A: Commercial Snapshot -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Commercial Snapshot</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-bold">Stage 4: Legal &amp; Audit</span>
+</div>
+<div class="grid grid-cols-2 gap-space-sm mt-1">
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-outline block">Potential ACV</span>
+<span class="font-metric-numeral-md text-metric-numeral-md text-on-surface font-bold">₦4.2M</span>
+<span class="font-label-caps text-label-caps text-primary block mt-0.5">Annual Recurring</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-outline block">Propensity Score</span>
+<div class="flex items-baseline gap-1">
+<span class="font-metric-numeral-md text-metric-numeral-md text-primary font-bold">96</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">/ 100</span>
+</div>
+<span class="font-label-caps text-label-caps text-tertiary block mt-0.5">Top 2% Velocity</span>
+</div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm pt-1">
+<span>Target Close Quarter:</span>
+<strong class="text-on-surface font-semibold">Q3 2024 (In 48 Hours)</strong>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-body-sm text-body-sm">
+<span>Assigned AE / Closer:</span>
+<div class="flex items-center gap-1 font-semibold text-on-surface">
+<span class="w-4 h-4 rounded-full bg-primary text-on-primary text-[9px] flex items-center justify-center">SJ</span>
+<span>Sarah Jenkins</span>
+</div>
+</div>
+</div>
+<!-- Section B: Prescribed Revenue Action (One-Click Execution Card) -->
+<div class="p-space-md rounded-xl bg-surface-container-high shadow-sm flex flex-col gap-space-xs relative overflow-hidden">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]">psychology</span>
+<span class="font-headline-sm text-headline-sm font-bold">Prescribed Play</span>
+</div>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-primary text-on-primary font-bold">High Intent</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface font-medium mt-1">
+            "Address residency certification within 15 mins to lock signature before 18:00 WAT cutoff."
+          </p>
+<!-- 1-Click Operations Trigger Buttons -->
+<div class="flex flex-col gap-1.5 mt-space-xs">
+<button class="w-full flex items-center justify-center gap-space-xs py-2 rounded-lg bg-on-background text-on-primary font-label-md text-label-md hover:bg-on-background/90 transition-all shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-tertiary-fixed">call</span>
+<span>Claim &amp; Instant Dial (+234)</span>
+</button>
+<div class="grid grid-cols-2 gap-1.5">
+<button class="py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-caps text-label-caps font-bold hover:bg-surface-container transition-colors shadow-xs">
+                Edit Response
+              </button>
+<button class="py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-label-caps text-label-caps font-bold hover:bg-surface-container transition-colors shadow-xs">
+                Regen Draft
+              </button>
+</div>
+</div>
+</div>
+<!-- Section C: MEDDPICC Progress Summary -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-space-xs">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">MEDDPICC Rigor</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-surface-container text-on-surface font-bold">6 of 7 Verified</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-container h-2 rounded-full overflow-hidden mb-1">
+<div class="bg-primary h-full rounded-full w-[85%] transition-all duration-500"></div>
+</div>
+<!-- Criteria Checklist -->
+<div class="space-y-1.5 text-body-sm text-body-sm mt-1">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-primary">check_circle</span>
+<span class="text-on-surface font-medium">Metrics</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline">₦4.2M SOW / 32% efficiency</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-primary">check_circle</span>
+<span class="text-on-surface font-medium">Economic Buyer</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline">Confirmed (MD &amp; VP Ops)</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-primary">check_circle</span>
+<span class="text-on-surface font-medium">Decision Criteria</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline">NDPR &amp; ISO 27001</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-error">pending</span>
+<span class="text-on-surface font-medium">Paper Process</span>
+</div>
+<span class="font-label-caps text-label-caps text-error font-bold">Awaiting Board Audit</span>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[15px] text-primary">check_circle</span>
+<span class="text-on-surface font-medium">Champion</span>
+</div>
+<span class="font-label-caps text-label-caps text-outline">Tunde Balogun</span>
+</div>
+</div>
+</div>
+<!-- Section D: Real-Time Buying Telemetry Feed -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest shadow-sm flex flex-col gap-space-xs flex-1">
+<div class="flex items-center justify-between mb-1">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Live Prospect Telemetry</span>
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+</div>
+<div class="space-y-space-xs font-body-sm text-body-sm">
+<div class="p-space-xs rounded bg-surface-container-low flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary shrink-0 mt-0.5">download</span>
+<div class="min-w-0">
+<span class="font-semibold text-on-surface block truncate">NDPR Security Addendum</span>
+<span class="text-outline text-body-sm">Downloaded by VP Digital Ops • 4m ago</span>
+</div>
+</div>
+<div class="p-space-xs rounded bg-surface-container-low flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary shrink-0 mt-0.5">visibility</span>
+<div class="min-w-0">
+<span class="font-semibold text-on-surface block truncate">Pricing Matrix v3.2</span>
+<span class="text-outline text-body-sm">Viewed 3 mins (IP: 102.89.44.12, Lagos)</span>
+</div>
+</div>
+<div class="p-space-xs rounded bg-surface-container-low flex items-start gap-2">
+<span class="material-symbols-outlined text-[16px] text-outline shrink-0 mt-0.5">history_toggle_off</span>
+<div class="min-w-0">
+<span class="font-semibold text-on-surface block truncate">Contract Redline Sync</span>
+<span class="text-outline text-body-sm">DocuSign pending recipient sign-off</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+</div>
+</div>
+<script>
+  function populateDraft() {
+    const input = document.getElementById('composer-input');
+    if (input) {
+      input.value = "Hello Tunde, absolutely. All Sterling & Sterling telemetry, metadata, and transaction archives are hosted natively at the MainOne MDXi Lekki DC, fully compliant with NDPR guidelines. I am attaching our signed Data Sovereignty Certificate directly for your board's auditor.";
+      input.focus();
+    }
+  }
+</script></main></div></body></html>

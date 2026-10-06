@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "error": "#ba1a1a", "on-tertiary-fixed-variant": "#2f2ebe", "on-primary": "#ffffff", "outline-variant": "#c3c5d7", "primary": "#1550d3", "on-background": "#131b2e", "on-secondary-container": "#5b6276", "inverse-surface": "#283044", "error-container": "#ffdad6", "on-surface-variant": "#434654", "secondary-fixed": "#dbe2f9", "on-error-container": "#93000a", "secondary": "#575e71", "secondary-fixed-dim": "#bfc6dc", "secondary-container": "#d8dff6", "primary-fixed-dim": "#b5c4ff", "on-tertiary-container": "#fffbff", "on-tertiary": "#ffffff", "outline": "#737686", "primary-fixed": "#dce1ff", "surface-variant": "#dae2fd", "inverse-primary": "#b5c4ff", "primary-container": "#3c6bed", "on-error": "#ffffff", "tertiary-fixed": "#e1e0ff", "surface-container-highest": "#dae2fd", "on-secondary": "#ffffff", "surface": "#faf8ff", "tertiary": "#4648d4", "surface-container-high": "#e2e7ff", "surface-container-lowest": "#ffffff", "surface-container": "#eaedff", "tertiary-fixed-dim": "#c0c1ff", "surface-container-low": "#f2f3ff", "tertiary-container": "#6063ee", "on-primary-fixed": "#00164d", "inverse-on-surface": "#eef0ff", "on-primary-container": "#fffbff", "on-primary-fixed-variant": "#003cad", "surface-tint": "#1a53d6", "on-tertiary-fixed": "#07006c", "surface-dim": "#d2d9f4", "background": "#faf8ff", "on-secondary-fixed-variant": "#3f4759", "surface-bright": "#faf8ff", "on-surface": "#131b2e", "on-secondary-fixed": "#141b2c" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "gutter": "1rem", "space-sm": "0.5rem", "gutter-tablet": "1.25rem", "space-xl": "1.75rem", "space-md": "0.75rem", "margin-tablet": "1.5rem", "margin-desktop": "2rem", "margin": "1rem", "space-xs": "0.25rem", "space-lg": "1.25rem", "gutter-desktop": "1.5rem" }, "fontFamily": { "headline-lg": ["Plus Jakarta Sans"], "body-lg": ["Inter"], "display-lg-mobile": ["Plus Jakarta Sans"], "headline-xl": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "label-md": ["Inter"], "body-sm": ["Inter"], "label-caps": ["Inter"], "body-md": ["Inter"], "metric-numeral-md": ["Inter"], "metric-numeral-lg": ["Inter"], "headline-sm": ["Plus Jakarta Sans"] }, "fontSize": { "headline-lg": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}], "body-lg": ["16px", {"lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400"}], "display-lg-mobile": ["28px", {"lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "headline-xl": ["28px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600"}], "display-lg": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700"}], "label-md": ["13px", {"lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600"}], "body-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400"}], "label-caps": ["11px", {"lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "700"}], "body-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400"}], "metric-numeral-md": ["20px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}], "metric-numeral-lg": ["32px", {"lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700"}], "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}] } } } };</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface text-on-surface antialiased flex flex-col min-h-screen selection:bg-primary selection:text-on-primary"><header class="fixed top-0 w-full z-50 pt-safe bg-inverse-surface text-inverse-on-surface shadow-[0_1px_8px_rgba(0,0,0,0.12)]"><div class="h-20 px-gutter flex flex-col justify-between py-space-xs"><div class="flex items-center justify-between w-full h-10"><div class="flex items-center gap-space-sm"><button aria-label="Open Operations Menu" class="w-11 h-11 -ml-space-xs flex items-center justify-center text-inverse-on-surface hover:text-on-primary rounded active:bg-surface-variant/20 transition-colors" onclick="document.getElementById('nav-drawer').classList.remove('-translate-x-full');document.getElementById('drawer-backdrop').classList.remove('hidden')" type="button"><span class="material-symbols-outlined text-[24px]">menu</span></button><div class="flex items-center gap-space-xs"><img alt="Closecraft Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Uexc5IxdLQQm91i5nkhcLef_SDj5rOkMZcirGtvoLTguznGlzZiz9INxBDnnd6dwbhJ51Nx2Al3l0SEVcLuIcBhe6H9So1jq9FowL2CW2c9sCPeMCyc_IoqxHvP9DqQYaUNnV2xw5R2OTxYIJ4KS9-IGj9iQBw7Aux81abgQNHAV6K-4-ndnEcb6ujYyvNF0sdyhAg6XoeX90Ngc2YON7umUNK5spVOJrraj5cBrZfOHA15nWivqQf3bc"/><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm font-bold tracking-tight text-on-primary leading-none">CLOSECRAFT</span><span class="px-1 py-0.5 rounded bg-primary text-on-primary font-label-caps text-label-caps uppercase tracking-wider text-[9px] leading-none">REVENUE OS</span></div><div class="flex items-center gap-0.5 text-secondary-fixed cursor-pointer"><span class="font-body-sm text-body-sm text-secondary-fixed leading-none">Acme Enterprise Ops</span><span class="material-symbols-outlined text-[14px] leading-none">arrow_drop_down</span></div></div></div></div><div class="flex items-center gap-space-xs"><button aria-label="Search Deals" class="w-11 h-11 flex items-center justify-center text-secondary-fixed hover:text-on-primary rounded transition-colors active:bg-surface-variant/20" type="button"><span class="material-symbols-outlined text-[20px]">search</span></button><button aria-label="Notifications" class="w-11 h-11 relative flex items-center justify-center text-secondary-fixed hover:text-on-primary rounded transition-colors active:bg-surface-variant/20" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 flex h-4 w-4 items-center justify-center rounded-full bg-error text-on-error font-label-caps text-[10px] font-bold">3</span></button><img alt="Profile" class="w-8 h-8 rounded-full object-cover shadow-[0_1px_8px_rgba(0,0,0,0.2)] ml-space-xs" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBQDc1ktI2H29uVXzBGk-gt0nQzjUPZCRcLISARNjFnnNrN3VJBBSvZQ-oJZOmeVAk7dj3xHVOlJPSTOBwMyE9pDleY1dlXHF0o-beDzfFnZKp5ZeQCqOdZV86uLDrYecHy0BbCuXNVr87VcczkVMo4W4jyiXCtnnimjkWeLQd8_wSrSNqI10Ipjwv0APl_uZ3B5WzySoPk4SbUzEVjfMm4-GscjTdsklBY6IIn7JD-9TBQ-y5Oyph"/></div></div><div class="flex items-center justify-between w-full h-7 px-space-xs"><div class="flex items-center gap-space-xs"><span class="font-label-caps text-label-caps text-secondary-fixed-dim uppercase">Active Space</span><span class="font-headline-sm text-headline-sm text-on-primary">Revenue Command Centre</span></div><div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-surface-container-lowest/10"><span class="w-2 h-2 rounded-full bg-[#10b981] animate-pulse"></span><span class="font-label-caps text-label-caps text-inverse-on-surface">AI Engine Active</span></div></div></div></header><div class="hidden fixed inset-0 z-50 bg-on-surface/50 backdrop-blur-sm transition-opacity" id="drawer-backdrop" onclick="document.getElementById('nav-drawer').classList.add('-translate-x-full');this.classList.add('hidden')"></div><aside class="fixed top-0 bottom-0 left-0 z-50 w-80 max-w-[85vw] bg-inverse-surface text-inverse-on-surface transform -translate-x-full transition-transform duration-200 ease-in-out flex flex-col pt-safe pb-safe shadow-[0_16px_32px_-4px_rgba(12,20,36,0.36)]" id="nav-drawer"><div class="flex items-center justify-between px-gutter h-16 border-b border-surface-variant/10"><div class="flex items-center gap-space-xs"><img alt="Closecraft Logo" class="h-7 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1Uexc5IxdLQQm91i5nkhcLef_SDj5rOkMZcirGtvoLTguznGlzZiz9INxBDnnd6dwbhJ51Nx2Al3l0SEVcLuIcBhe6H9So1jq9FowL2CW2c9sCPeMCyc_IoqxHvP9DqQYaUNnV2xw5R2OTxYIJ4KS9-IGj9iQBw7Aux81abgQNHAV6K-4-ndnEcb6ujYyvNF0sdyhAg6XoeX90Ngc2YON7umUNK5spVOJrraj5cBrZfOHA15nWivqQf3bc"/><span class="font-headline-sm text-headline-sm font-bold text-on-primary">CLOSECRAFT</span></div><button class="w-11 h-11 flex items-center justify-center text-secondary-fixed hover:text-on-primary" onclick="document.getElementById('nav-drawer').classList.add('-translate-x-full');document.getElementById('drawer-backdrop').classList.add('hidden')"><span class="material-symbols-outlined">close</span></button></div><div class="flex-1 overflow-y-auto px-gutter py-space-md space-y-space-lg"><div class="space-y-space-xs"><div class="font-label-caps text-label-caps text-secondary-fixed-dim uppercase tracking-wider px-space-xs">Primary Navigation</div><nav class="space-y-0.5"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="revenue-command-centre" href="#"><span class="material-symbols-outlined text-[20px] text-primary-fixed">dashboard</span><span>Dashboard</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="qualification-and-enrichment" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">group</span><span>Leads</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="unified-conversations" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">forum</span><span>Inbox</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="autopilot-queue" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">smart_toy</span><span>AI Actions</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="deal-progression" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">view_kanban</span><span>Pipeline</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="calendar-bookings" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">event</span><span>Appointments</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="playbooks-workflows" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">account_tree</span><span>Automations</span></a></nav></div><div class="space-y-space-xs"><div class="font-label-caps text-label-caps text-secondary-fixed-dim uppercase tracking-wider px-space-xs">Operations</div><nav class="space-y-0.5"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="playbooks-objection-library" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">menu_book</span><span>Knowledge</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="revenue-performance" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">monitoring</span><span>Analytics</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="reps-routing" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">badge</span><span>Team</span></a></nav></div><div class="space-y-space-xs"><div class="font-label-caps text-label-caps text-secondary-fixed-dim uppercase tracking-wider px-space-xs">Admin &amp; Config</div><nav class="space-y-0.5"><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="crm-integrations" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">hub</span><span>Integrations</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="billing" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">credit_card</span><span>Billing</span></a><a class="flex items-center gap-space-md px-space-md py-space-sm rounded font-body-md text-body-md text-inverse-on-surface hover:bg-surface-variant/10 transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[20px] text-secondary-fixed">settings</span><span>Settings</span></a></nav></div></div></aside><main class="flex-1 flex flex-col relative w-full pt-20 pb-20 bg-surface min-h-screen"><div class="flex flex-col w-full px-margin pb-space-xl">
+<div class="w-full max-w-md mx-auto flex flex-col pt-space-md">
+<div class="flex items-center justify-between px-space-md py-space-sm rounded-lg bg-surface-container mb-space-lg shadow-sm">
+<div class="flex items-center gap-space-xs">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Enterprise Gateway</span>
+</div>
+<div class="flex items-center gap-1 text-primary">
+<span class="material-symbols-outlined text-[16px]">verified_user</span>
+<span class="font-label-caps text-label-caps">v4.18 Secure</span>
+</div>
+</div>
+<div class="flex flex-col items-center text-center mb-space-lg">
+<div class="relative w-16 h-16 rounded-xl bg-inverse-surface shadow-md flex items-center justify-center mb-space-md overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent"></div>
+<img alt="Closecraft Symbol" class="w-10 h-10 object-contain relative z-10" data-alt="Closecraft minimalist deep tech enterprise vector logomark on crisp dark indigo backdrop with electric blue core geometry representing autonomous sales acceleration." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmu3323Q1T4DYLIlI9r_DxaiTdT6hhXatIXulQl26295o1-a91LXCFtu_WdjM-WMRxumWTVXxBMAh_FfQN7l8JDO5JNDfKrkOrTB2GcRDZDvFcEk1VeUka2p_U0-vIs-a_U67IL1E5iHnsg6AnW_-tqTHOJ_-9ekUCsCPaXvKMNpFXlaQOeFUBmuoqcum85DX-Dbta3usOtWIB_6OCWxjK18R2T8tlDbf2sKkef_j7mXfy3D2wUgj1"/>
+</div>
+<div class="flex items-center gap-space-xs mb-space-xs">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight">CLOSECRAFT</span>
+<span class="px-1.5 py-0.5 rounded bg-primary text-on-primary font-label-caps text-label-caps tracking-widest text-[10px]">REVENUE OS</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight mb-space-xs">
+        Turn More Leads Into Sales.
+      </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xs leading-relaxed">
+        AI qualifies, follows up and routes opportunities. Your sales team closes.
+      </p>
+</div>
+<div class="relative w-full rounded-xl bg-surface-container-lowest shadow-xl p-space-lg mb-space-lg overflow-hidden">
+<div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-container to-tertiary"></div>
+<div class="flex items-center justify-between mb-space-md">
+<span class="font-label-caps text-label-caps uppercase text-secondary tracking-wider">Operator Authentication</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-md text-label-md flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-primary">lock</span> Encrypted
+        </span>
+</div>
+<form class="space-y-space-md" id="auth-form" onsubmit="event.preventDefault(); window.triggerAuthSuccess();">
+<div class="space-y-1">
+<label class="block font-label-md text-label-md text-on-surface" for="work-email">Work Email</label>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">mail</span>
+<input class="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" id="work-email" placeholder="sarah.jenkins@acmeops.com" required="" type="email"/>
+</div>
+</div>
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<label class="block font-label-md text-label-md text-on-surface" for="password-input">Master Password</label>
+<span class="font-label-caps text-[10px] text-secondary tracking-normal">AES-256</span>
+</div>
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">key</span>
+<input class="w-full h-11 pl-10 pr-11 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" id="password-input" placeholder="••••••••••••" required="" type="password"/>
+<button aria-label="Toggle password visibility" class="absolute right-1 w-9 h-9 flex items-center justify-center text-secondary hover:text-on-surface transition-colors" id="toggle-password-btn" type="button">
+<span class="material-symbols-outlined text-[20px]" id="password-toggle-icon">visibility</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between pt-1">
+<label class="flex items-center gap-space-xs cursor-pointer select-none">
+<input class="w-4 h-4 rounded bg-surface-container-high text-primary focus:ring-0 focus:outline-none cursor-pointer" id="remember-device" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Remember this device</span>
+</label>
+<a class="font-label-md text-label-md text-primary hover:text-on-primary-fixed-variant transition-colors" href="#">
+            Forgot password?
+          </a>
+</div>
+<button class="w-full h-12 rounded bg-primary hover:bg-primary-container active:scale-[0.99] text-on-primary font-headline-sm text-headline-sm font-semibold flex items-center justify-center gap-space-xs shadow-md transition-all mt-space-sm" id="login-btn" type="submit">
+<span>Log In</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</form>
+<div class="relative flex items-center justify-center my-space-lg">
+<div class="w-full h-px bg-surface-container-high"></div>
+<span class="absolute px-3 bg-surface-container-lowest text-on-surface-variant font-label-caps text-label-caps tracking-wider uppercase">
+          or continue with enterprise SSO
+        </span>
+</div>
+<div class="grid grid-cols-1 gap-space-sm">
+<button class="w-full h-11 px-space-md rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-space-sm transition-colors text-on-surface font-label-md text-label-md shadow-sm" type="button">
+<svg class="w-5 h-5 shrink-0" viewbox="0 0 24 24">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"></path>
+</svg>
+<span>Google Workspace</span>
+</button>
+<button class="w-full h-11 px-space-md rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-space-sm transition-colors text-on-surface font-label-md text-label-md shadow-sm" type="button">
+<svg class="w-5 h-5 shrink-0" viewbox="0 0 23 23">
+<path d="M1 1h10v10H1z" fill="#f35325"></path>
+<path d="M12 1h10v10H12z" fill="#81bc06"></path>
+<path d="M1 12h10v10H1z" fill="#05a6f0"></path>
+<path d="M12 12h10v10H12z" fill="#ffba08"></path>
+</svg>
+<span>Microsoft Azure AD / Entra ID</span>
+</button>
+</div>
+</div>
+<div class="rounded-xl bg-surface-container-high p-space-md flex items-center justify-between mb-space-lg shadow-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<div class="w-9 h-9 rounded-lg bg-inverse-surface flex items-center justify-center text-primary-fixed shrink-0">
+<span class="material-symbols-outlined text-[20px]">rocket_launch</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-headline-sm text-headline-sm font-semibold text-on-surface truncate">New to Closecraft?</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">14-day trial with full AI Autopilot</span>
+</div>
+</div>
+<a class="shrink-0 px-space-md py-2 rounded bg-inverse-surface text-inverse-on-surface hover:bg-on-surface transition-colors font-label-md text-label-md font-semibold ml-space-xs" href="#">
+        Start Free
+      </a>
+</div>
+<div class="flex flex-col items-center justify-center gap-space-xs text-center px-space-sm">
+<div class="flex items-center gap-1.5 text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px] text-primary">security</span>
+<span class="font-label-caps text-label-caps uppercase tracking-wider">Enterprise Security Protocol</span>
+</div>
+<p class="font-body-sm text-body-sm text-secondary">
+        SOC2 Type II Certified • 256-Bit NDPR &amp; GDPR Compliant Security
+      </p>
+</div>
+</div>
+</div>
+<script>
+  (function() {
+    const passwordInput = document.getElementById('password-input');
+    const toggleBtn = document.getElementById('toggle-password-btn');
+    const toggleIcon = document.getElementById('password-toggle-icon');
+    const loginBtn = document.getElementById('login-btn');
+
+    if (toggleBtn && passwordInput && toggleIcon) {
+      toggleBtn.addEventListener('click', function() {
+        const isPassword = passwordInput.getAttribute('type') === 'password';
+        passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
+        toggleIcon.textContent = isPassword ? 'visibility_off' : 'visibility';
+      });
+    }
+
+    window.triggerAuthSuccess = function() {
+      if (loginBtn) {
+        const originalHtml = loginBtn.innerHTML;
+        loginBtn.innerHTML = '<span class="material-symbols-outlined text-[20px] animate-spin">sync</span><span>Authenticating Session...</span>';
+        loginBtn.classList.add('opacity-80', 'pointer-events-none');
+        setTimeout(() => {
+          loginBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">check_circle</span><span>Authenticated</span>';
+          loginBtn.classList.remove('bg-primary');
+          loginBtn.classList.add('bg-primary-container');
+        }, 1200);
+      }
+    };
+  })();
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-inverse-surface/95 backdrop-blur-xl shadow-[0_-1px_12px_rgba(0,0,0,0.18)]" data-active-classes="text-primary-fixed bg-surface-variant/15 font-bold"><div class="flex justify-around items-center h-16 px-space-xs"><a aria-current="page" class="flex flex-col items-center justify-center gap-1 min-w-[60px] h-12 rounded transition-all text-primary-fixed bg-surface-variant/15 font-bold" data-path="revenue-command-centre" href="#"><span class="material-symbols-outlined text-[20px]">dashboard</span><span class="font-label-caps text-[10px]">Dashboard</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[60px] h-12 text-secondary-fixed hover:text-on-primary rounded transition-all" data-path="qualification-and-enrichment" href="#"><span class="material-symbols-outlined text-[20px]">group</span><span class="font-label-caps text-[10px]">Leads</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[60px] h-12 text-secondary-fixed hover:text-on-primary rounded transition-all" data-path="autopilot-queue" href="#"><span class="material-symbols-outlined text-[20px]">smart_toy</span><span class="font-label-caps text-[10px]">AI Actions</span></a><a class="flex flex-col items-center justify-center gap-1 min-w-[60px] h-12 text-secondary-fixed hover:text-on-primary rounded transition-all" data-path="deal-progression" href="#"><span class="material-symbols-outlined text-[20px]">view_kanban</span><span class="font-label-caps text-[10px]">Pipeline</span></a><button class="flex flex-col items-center justify-center gap-1 min-w-[60px] h-12 text-secondary-fixed hover:text-on-primary rounded transition-all" onclick="document.getElementById('nav-drawer').classList.remove('-translate-x-full');document.getElementById('drawer-backdrop').classList.remove('hidden')" type="button"><span class="material-symbols-outlined text-[20px]">menu_open</span><span class="font-label-caps text-[10px]">More</span></button></div></nav></body></html>
