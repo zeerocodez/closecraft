@@ -13,6 +13,7 @@ datasource db {
 
 model User {
   id            String    @id @default(cuid())
+  platformRole  String    @default("USER")
   email         String    @unique
   name          String?
   passwordHash  String?
@@ -20,6 +21,9 @@ model User {
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+
+  whatsappPhoneNumberId String? @unique
+  payments PaymentTransaction[]
 
   // Relations
   memberships   OrganizationMember[]
@@ -264,6 +268,7 @@ model StudentProfile {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
+  moduleProgress ModuleProgress[]
   enrollments    Enrollment[]
   roleplaySessions RoleplaySession[]
   
@@ -312,6 +317,7 @@ model Module {
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   
+  progress       ModuleProgress[]
   lessons        Lesson[]
 
   @@index([organizationId])
@@ -381,3 +387,32 @@ model RoleplayTurn {
   @@index([sessionId])
 }
 
+
+// Created only by trusted server billing code, before redirecting to Paystack.
+model PaymentTransaction {
+  reference String @id
+  organizationId String
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  amount Int
+  currency String
+  plan String
+  processedAt DateTime?
+  createdAt DateTime @default(now())
+}
+
+// Completion is recorded by trusted assessment code, never by the browser.
+model ModuleProgress {
+  studentId String
+  moduleId String
+  completedAt DateTime?
+  student StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  @@id([studentId, moduleId])
+}
+
+model PublicFormRateLimit {
+  key String @id
+  count Int @default(1)
+  expiresAt DateTime
+  @@index([expiresAt])
+}

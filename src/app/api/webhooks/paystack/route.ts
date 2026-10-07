@@ -1,70 +1,46 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import crypto from 'crypto';
+import { validSignature } from '@/lib/security';
+import { z } from 'zod';
+
+const chargeSchema = z.object({
+  reference: z.string().min(1).max(200),
+  status: z.literal('success'),
+  amount: z.number().int().positive(),
+  currency: z.string().length(3),
+});
 
 export async function POST(request: Request) {
+  const secret = process.env.PAYSTACK_SECRET_KEY;
+  if (!secret?.trim()) return NextResponse.json({ error: 'Billing unavailable' }, { status: 503 });
+  const raw = await request.text();
+  if (!validSignature(raw, request.headers.get('x-paystack-signature'), secret, 'sha512')) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+  }
+  let event;
+  try { event = JSON.parse(raw); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+  if (event.event !== 'charge.success') return NextResponse.json({ received: true });
+  const result = chargeSchema.safeParse(event.data);
+  if (!result.success) return NextResponse.json({ error: 'Invalid charge' }, { status: 400 });
+  const charge = result.data;
   try {
-    const rawBody = await request.text();
-    const signature = request.headers.get('x-paystack-signature');
-
-    // Verify Paystack signature
-    const secret = process.env.PAYSTACK_SECRET_KEY || 'sk_test_mock';
-    const expectedSignature = crypto
-      .createHmac('sha512', secret)
-      .update(rawBody)
-      .digest('hex');
-
-    if (signature !== expectedSignature) {
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-      }
-      // In dev, we can let it slide or just mock it, but good practice is to warn
-      console.warn('Invalid Paystack signature in dev environment');
-    }
-
-    const event = JSON.parse(rawBody);
-
-    // Handle Paystack Events
-    if (event.event === 'charge.success') {
-      const email = event.data.customer.email;
-      const amount = event.data.amount / 100; // Paystack amounts are in kobo
-
-      console.log(`[Paystack Webhook] Successful charge of ₦${amount} for ${email}`);
-
-      // Example: find organization by email and update plan
-      // You would typically store a customer_code or reference on the organization
-      const org = await db.organization.findFirst({
-        where: {
-          members: {
-            some: {
-              user: { email }
-            }
-          }
-        }
+    const accepted = await db.$transaction(async tx => {
+      const payment = await tx.paymentTransaction.findUnique({ where: { reference: charge.reference } });
+      if (!payment || payment.amount !== charge.amount || payment.currency !== charge.currency || !['GROWTH', 'SCALE', 'PRO'].includes(payment.plan)) return false;
+      // Atomic claim and all side effects commit together, including concurrent retries.
+      const claimed = await tx.paymentTransaction.updateMany({
+        where: { reference: payment.reference, processedAt: null }, data: { processedAt: new Date() },
       });
-
-      if (org) {
-        await db.organization.update({
-          where: { id: org.id },
-          data: { plan: 'PRO' }
-        });
-        
-        await db.auditLog.create({
-          data: {
-            organizationId: org.id,
-            actorType: 'SYSTEM',
-            action: 'SUBSCRIPTION_UPGRADED',
-            resourceType: 'BILLING',
-            resourceId: event.data.reference,
-            newState: 'PRO'
-          }
-        });
-      }
-    }
-
-    return NextResponse.json({ received: true });
-  } catch (error) {
-    console.error('Paystack webhook error:', error);
+      if (claimed.count === 0) return true;
+      await tx.organization.update({ where: { id: payment.organizationId }, data: { plan: payment.plan } });
+      await tx.auditLog.create({ data: {
+        organizationId: payment.organizationId, actorType: 'SYSTEM', action: 'SUBSCRIPTION_UPGRADED',
+        resourceType: 'BILLING', resourceId: payment.reference, newState: payment.plan,
+      } });
+      return true;
+    });
+    return accepted ? NextResponse.json({ received: true }) : NextResponse.json({ error: 'Unrecognized payment' }, { status: 400 });
+  } catch {
     return NextResponse.json({ error: 'Webhook handler failed' }, { status: 500 });
   }
 }

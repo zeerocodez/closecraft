@@ -1,21 +1,22 @@
 import { PrismaClient } from '@prisma/client';
+import { requireDemoDatabase } from '../src/lib/demoSeed';
+
+requireDemoDatabase();
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('Seeding SaaS data...');
 
-  const org = await prisma.organization.findFirst();
+  const org = await prisma.organization.findUnique({ where: { slug: 'demo-workspace' } });
   if (!org) {
     console.log('No organization found.');
     return;
   }
 
-  // Clear existing
-  await prisma.deal.deleteMany();
-  await prisma.message.deleteMany();
-  await prisma.conversation.deleteMany();
-  await prisma.lead.deleteMany();
+  if (await prisma.lead.count() || await prisma.conversation.count() || await prisma.deal.count()) {
+    throw new Error('Demo SaaS seed refuses existing CRM data');
+  }
 
   // 1. Hot Lead - Opportunity Stage
   const lead1 = await prisma.lead.create({

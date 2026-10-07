@@ -1,4 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import { requireDemoDatabase } from '../src/lib/demoSeed';
+
+requireDemoDatabase();
 
 const prisma = new PrismaClient();
 
@@ -6,7 +9,7 @@ async function main() {
   console.log('Seeding LMS curriculum...');
 
   // Get the primary organization
-  const org = await prisma.organization.findFirst();
+  const org = await prisma.organization.findUnique({ where: { slug: 'demo-workspace' } });
   if (!org) {
     console.log('No organization found. Cannot seed LMS.');
     return;

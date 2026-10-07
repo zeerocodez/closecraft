@@ -1,18 +1,15 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { secretMatches } from '@/lib/security';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const isTest = url.searchParams.get('test') === 'true';
+  const isTest = process.env.NODE_ENV !== 'production' && url.searchParams.get('test') === 'true';
 
-  // Secure this endpoint by verifying the Vercel cron secret
-  // Bypass only if running locally in test mode
-  if (!isTest || process.env.NODE_ENV === 'production') {
-    const authHeader = request.headers.get('Authorization');
-    if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-      console.warn('[Follow-Up Engine] Unauthorized cron execution attempt');
-      return new NextResponse('Unauthorized', { status: 401 });
-    }
+  const secret = process.env.CRON_SECRET;
+  if (!secret?.trim()) return new NextResponse('Service unavailable', { status: 503 });
+  if (!secretMatches(request.headers.get('Authorization'), `Bearer ${secret}`)) {
+    return new NextResponse('Unauthorized', { status: 401 });
   }
 
   try {

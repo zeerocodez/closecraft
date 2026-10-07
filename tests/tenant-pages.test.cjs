@@ -32,6 +32,7 @@ function loadPage(page, session) {
       if (name === "@/lib/auth") return { auth: async () => session };
       if (name === "@/lib/db") return { db };
       if (name === "next/navigation") return { redirect: url => { throw new Error("redirect:" + url); } };
+      if (name === './InboxClient') return { __esModule: true, default: () => null };
       return require(name);
     },
   }, { filename: file });

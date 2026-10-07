@@ -61,4 +61,8 @@ The production build generates Prisma Client before compiling Next.js. Prisma CL
 
 The tenant-page tests verify login redirects, reject missing organisation IDs before database access, and check that page queries use the session organisation. They use mocked sessions and database calls; they do not establish complete authentication or database isolation coverage.
 
-The login and marketing form currently simulate submission, and several views contain demo content. A successful build verifies compilation, not production readiness. Do not run `prisma/seed.ts` against existing data: the seed deletes all records before creating demo accounts.
+The login and marketing form currently simulate submission, and several views contain demo content. A successful build verifies compilation, not production readiness. The demo seed requires explicit development opt-in and an empty local demo database; see [security remediation](SECURITY_REMEDIATION.md) for setup and deployment requirements.
+
+## Security configuration
+
+See [SECURITY_REMEDIATION.md](SECURITY_REMEDIATION.md) for the security fixes, additive database migration, platform admin provisioning, trusted payment references, WhatsApp number mapping, enrollment requirements, and verification limits.

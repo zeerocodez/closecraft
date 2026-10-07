@@ -2,45 +2,43 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sendTransactionalEmail } from '@/lib/email';
 import { z } from 'zod';
+import { escapeHtml } from '@/lib/security';
 
 const auditFormSchema = z.object({
-  name: z.string().min(2, "Name is too short").max(100),
-  business: z.string().min(2, "Business name is required"),
-  email: z.string().email("Invalid email address"),
-  phone: z.string().optional(),
-  website: z.string().optional(),
-  monthlyLeadVolume: z.string().min(1, "Lead volume is required"),
-  biggestSalesBottleneck: z.string().min(1, "Bottleneck is required")
+  name: z.string().trim().min(2, "Name is too short").max(100),
+  business: z.string().trim().min(2, "Business name is required").max(200),
+  email: z.string().trim().max(254).email("Invalid email address"),
+  phone: z.string().max(40).optional(),
+  website: z.string().max(500).optional(),
+  monthlyLeadVolume: z.string().trim().min(1, "Lead volume is required").max(100),
+  biggestSalesBottleneck: z.string().trim().min(1, "Bottleneck is required").max(2000)
 });
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    
+    // Shared database budget cannot be evaded by spoofing proxy/IP headers.
+    const bucket = Math.floor(Date.now() / 60000);
+    const budget = await db.publicFormRateLimit.upsert({
+      where: { key: `marketing:${bucket}` },
+      create: { key: `marketing:${bucket}`, expiresAt: new Date((bucket + 1) * 60000) },
+      update: { count: { increment: 1 } },
+    });
+    if (budget.count > 20) return NextResponse.json({ error: 'Too many requests' }, { status: 429, headers: { 'Retry-After': '60' } });
+    const raw = await request.text();
+    if (Buffer.byteLength(raw) > 16000) return NextResponse.json({ error: 'Payload too large' }, { status: 413 });
+    let body;
+    try { body = JSON.parse(raw); } catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+
     // Validate with Zod
     const result = auditFormSchema.safeParse(body);
     if (!result.success) {
-      return NextResponse.json({ 
-        error: 'Validation failed', 
-        details: result.error.errors 
+      return NextResponse.json({
+        error: 'Validation failed',
+        details: result.error.issues
       }, { status: 400 });
     }
 
     const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck } = result.data;
-
-    // A Lead must belong to an organization. 
-    let org = await db.organization.findFirst({
-      where: { slug: 'acme-corp' } // fallback to demo org
-    });
-    
-    if (!org) {
-      org = await db.organization.findFirst();
-    }
-    
-    if (!org) {
-      console.error('[Leads API] Cannot create lead: No organization exists in the system to own this lead.');
-      return NextResponse.json({ error: 'System configuration error' }, { status: 500 });
-    }
 
     // Store custom data
     const customData = JSON.stringify({
@@ -50,9 +48,9 @@ export async function POST(request: Request) {
       biggestSalesBottleneck
     });
 
-    const lead = await db.lead.create({
+    await db.lead.create({
       data: {
-        organizationId: org.id,
+        organizationId: null,
         type: 'MARKETING_LEAD',
         name: name.trim(),
         email: email.toLowerCase().trim(),
@@ -76,16 +74,16 @@ export async function POST(request: Request) {
       html: `
         <div style="font-family: sans-serif; max-w: 600px; margin: 0 auto; color: #333;">
           <h2 style="color: #789d2e;">Audit Request Received</h2>
-          <p>Hi ${name.trim().split(' ')[0]},</p>
-          <p>We've received your request for a Revenue Audit for <strong>${business.trim()}</strong>.</p>
-          <p>Our team is reviewing your details regarding your current lead volume (${monthlyLeadVolume}) and the bottleneck you're experiencing (${biggestSalesBottleneck}).</p>
+          <p>Hi ${escapeHtml(name.trim().split(' ')[0])},</p>
+          <p>We've received your request for a Revenue Audit for <strong>${escapeHtml(business.trim())}</strong>.</p>
+          <p>Our team is reviewing your details regarding your current lead volume (${escapeHtml(monthlyLeadVolume)}) and the bottleneck you're experiencing (${escapeHtml(biggestSalesBottleneck)}).</p>
           <p>You will hear from us shortly to schedule your audit call.</p>
           <p>Best,<br>Zeerocodes Revenue Engine</p>
         </div>
       `
     });
 
-    return NextResponse.json({ success: true, lead }, { status: 201 });
+    return NextResponse.json({ success: true }, { status: 201 });
   } catch (error) {
     console.error('Failed to create lead:', error);
     return NextResponse.json({ error: 'Failed to create lead' }, { status: 500 });

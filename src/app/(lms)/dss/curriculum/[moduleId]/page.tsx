@@ -1,23 +1,22 @@
 import { db } from '@/lib/db';
-import { auth } from '@/lib/auth';
+import { requireStudent, curriculumAccess } from '@/lib/access';
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
 
-export default async function ModulePlayerPage({ params }: { params: { moduleId: string } }) {
-  const session = await auth();
-  if (!session?.user) redirect('/login');
-
-  // Fetch the module, lessons, and check completion gates
-  const module = await db.module.findUnique({ 
-    where: { id: params.moduleId }, 
-    include: { lessons: { orderBy: { orderIndex: 'asc' } } } 
+export default async function ModulePlayerPage({ params }: { params: Promise<{ moduleId: string }> }) {
+  const student = await requireStudent();
+  const { moduleId } = await params;
+  const modules = await curriculumAccess(student);
+  const allowed = modules.find(item => item.id === moduleId);
+  if (!allowed || allowed.status === 'LOCKED') notFound();
+  const curriculumModule = await db.module.findFirst({
+    where: { id: moduleId, organizationId: student.organizationId },
+    include: { lessons: { orderBy: { orderIndex: 'asc' } } },
   });
-
-  if (!module) notFound();
+  if (!curriculumModule) notFound();
 
   // For MVP demo, pick the first lesson as active
-  const activeLesson = module.lessons[0] || null;
+  const activeLesson = curriculumModule.lessons[0] || null;
 
   return (
     <div className="flex h-full flex-col lg:flex-row">
@@ -30,7 +29,7 @@ export default async function ModulePlayerPage({ params }: { params: { moduleId:
             <span className="font-label-md font-bold">Back to Curriculum</span>
           </Link>
           <div className="flex items-center gap-4">
-            <span className="font-label-sm uppercase tracking-wider opacity-60">Module {module.orderIndex} of 28</span>
+            <span className="font-label-sm uppercase tracking-wider opacity-60">Module {curriculumModule.orderIndex} of 28</span>
             <div className="w-px h-4 bg-surface-container-high/30"></div>
             <button className="text-inverse-on-surface/70 hover:text-inverse-on-surface">
               <span className="material-symbols-outlined text-[20px]">help</span>
@@ -60,10 +59,10 @@ export default async function ModulePlayerPage({ params }: { params: { moduleId:
         {/* Lesson Info */}
         <div className="p-6 md:p-8 bg-inverse-surface border-t border-surface-container-high/20">
           <h1 className="font-headline-md text-2xl font-bold mb-2">
-            {activeLesson ? `Lesson ${activeLesson.orderIndex}: ${activeLesson.title}` : module.title}
+            {activeLesson ? `Lesson ${activeLesson.orderIndex}: ${activeLesson.title}` : curriculumModule.title}
           </h1>
           <p className="font-body-md text-inverse-on-surface/70 max-w-3xl leading-relaxed">
-            {module.description || 'No description available for this module.'}
+            {curriculumModule.description || 'No description available for this curriculumModule.'}
           </p>
         </div>
       </div>
@@ -71,7 +70,7 @@ export default async function ModulePlayerPage({ params }: { params: { moduleId:
       {/* Sidebar: Lessons & Tasks */}
       <div className="w-full lg:w-80 bg-surface-container-lowest border-l border-surface-container flex flex-col h-full overflow-hidden">
         <div className="p-5 border-b border-surface-container bg-surface-container-low">
-          <h2 className="font-headline-sm font-bold text-on-surface">Module {module.orderIndex} Tasks</h2>
+          <h2 className="font-headline-sm font-bold text-on-surface">Module {curriculumModule.orderIndex} Tasks</h2>
           <div className="flex items-center gap-2 mt-2">
             <div className="flex-1 h-2 bg-surface-container rounded-full overflow-hidden">
               <div className="w-1/2 h-full bg-primary"></div>
@@ -83,7 +82,7 @@ export default async function ModulePlayerPage({ params }: { params: { moduleId:
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           <h3 className="font-label-sm uppercase tracking-wider text-on-surface-variant font-bold mb-3 mt-2 px-2">Video Lessons</h3>
           
-          {module.lessons.map((lesson) => (
+          {curriculumModule.lessons.map((lesson) => (
             <div key={lesson.id} className={`flex items-start gap-3 p-3 rounded-lg ${lesson.id === activeLesson?.id ? 'bg-primary/10 border border-primary/20' : 'bg-surface-container-low border border-surface-container'}`}>
               <span className={`material-symbols-outlined text-[20px] shrink-0 mt-0.5 ${lesson.id === activeLesson?.id ? 'text-primary' : 'text-on-surface-variant'}`}>
                 {lesson.id === activeLesson?.id ? 'play_circle' : 'ondemand_video'}

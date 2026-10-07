@@ -1,5 +1,18 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { validSignature, secretMatches } from '@/lib/security';
+import { z } from 'zod';
+
+const payloadSchema = z.object({
+  object: z.literal('whatsapp_business_account'),
+  entry: z.array(z.object({ changes: z.array(z.object({ value: z.object({
+    metadata: z.object({ phone_number_id: z.string().min(1) }),
+    messages: z.array(z.object({ from: z.string().regex(/^\d{5,20}$/), text: z.object({ body: z.string().max(10000) }).optional() })).optional(),
+    contacts: z.array(z.object({ wa_id: z.string(), profile: z.object({ name: z.string().max(200) }).optional() })).optional(),
+  }) })) })),
+});
+type IncomingMessage = z.infer<typeof payloadSchema>['entry'][number]['changes'][number]['value']['messages'];
+
 import { processLeadWithAI } from '@/lib/ai/qualificationEngine';
 
 export async function GET(request: Request) {
@@ -9,7 +22,7 @@ export async function GET(request: Request) {
   const challenge = url.searchParams.get('hub.challenge');
 
   // Verify the webhook with Meta
-  if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
+  if (mode === 'subscribe' && challenge && secretMatches(token, process.env.WHATSAPP_VERIFY_TOKEN)) {
     console.log('WhatsApp Webhook verified!');
     return new NextResponse(challenge, { status: 200 });
   }
@@ -19,7 +32,27 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const secret = process.env.WHATSAPP_APP_SECRET;
+    if (!secret?.trim()) return new NextResponse('Service unavailable', { status: 503 });
+    const raw = await request.text();
+    const signature = request.headers.get('x-hub-signature-256');
+    if (!signature?.startsWith('sha256=') || !validSignature(raw, signature.slice(7), secret, 'sha256')) {
+      return new NextResponse('Unauthorized', { status: 401 });
+    }
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch { return new NextResponse('Invalid JSON', { status: 400 }); }
+    const result = payloadSchema.safeParse(parsed);
+    if (!result.success) return new NextResponse('Invalid payload', { status: 400 });
+    const body = result.data;
+    // Resolve every number before any writes to prevent partial cross-tenant processing.
+    const organizations = new Map<string, string>();
+    for (const entry of body.entry) for (const change of entry.changes) {
+      if (!change.value.messages?.length) continue;
+      const phoneId = change.value.metadata.phone_number_id;
+      const org = await db.organization.findUnique({ where: { whatsappPhoneNumberId: phoneId }, select: { id: true } });
+      if (!org) return new NextResponse('Unknown phone number', { status: 403 });
+      organizations.set(phoneId, org.id);
+    }
 
     if (body.object !== 'whatsapp_business_account') {
       return new NextResponse('Not Found', { status: 404 });
@@ -35,13 +68,12 @@ export async function POST(request: Request) {
           const messages = change.value.messages;
           const contacts = change.value.contacts || [];
           const metadata = change.value.metadata || {};
-          const phoneNumberId = metadata.phone_number_id || 'UNKNOWN';
-          
+          const phoneNumberId = metadata.phone_number_id;
+
           for (const message of messages) {
-            console.log('Received WhatsApp message:', message);
-            const contactName = contacts.find((c: any) => c.wa_id === message.from)?.profile?.name || message.from;
+            const contactName = contacts.find((c) => c.wa_id === message.from)?.profile?.name || message.from;
             // Process message (create Lead if new, append to Conversation)
-            await processWhatsAppMessage(message, contactName, phoneNumberId);
+            await processWhatsAppMessage(message, contactName, organizations.get(phoneNumberId)!);
           }
         }
       }
@@ -54,41 +86,25 @@ export async function POST(request: Request) {
   }
 }
 
-async function processWhatsAppMessage(message: any, contactName: string, phoneNumberId: string) {
+async function processWhatsAppMessage(message: NonNullable<IncomingMessage>[number], contactName: string, organizationId: string) {
   // Extract details
   const fromPhone = message.from;
   const content = message.text?.body || '';
-  
+
   if (!content) return; // Only processing text for now
-
-  // In a production multi-tenant system, we must resolve the Organization
-  // based on the phone_number_id (which tenant owns this WhatsApp number).
-  // For the MVP, we fallback to the primary tenant if none specified.
-  let org = await db.organization.findFirst({
-    where: { slug: 'acme-corp' } // Try to find a specific demo org
-  });
-  
-  if (!org) {
-    org = await db.organization.findFirst();
-  }
-
-  if (!org) {
-    console.error(`[Webhook Error] No organization found to attach lead for WhatsApp number: ${phoneNumberId}`);
-    return;
-  }
 
   // Find or create lead
   let lead = await db.lead.findFirst({
-    where: { 
+    where: {
       phone: fromPhone,
-      organizationId: org.id 
+      organizationId: organizationId
     }
   });
 
   if (!lead) {
     lead = await db.lead.create({
       data: {
-        organizationId: org.id,
+        organizationId: organizationId,
         type: 'SALES_LEAD',
         name: contactName,
         email: `${fromPhone}@whatsapp.local`, // Dummy email since it's required in schema
@@ -104,7 +120,8 @@ async function processWhatsAppMessage(message: any, contactName: string, phoneNu
   let conversation = await db.conversation.findFirst({
     where: {
       leadId: lead.id,
-      channel: 'WHATSAPP'
+      channel: 'WHATSAPP',
+      organizationId,
     }
   });
 
@@ -112,7 +129,7 @@ async function processWhatsAppMessage(message: any, contactName: string, phoneNu
     conversation = await db.conversation.create({
       data: {
         leadId: lead.id,
-        organizationId: org.id,
+        organizationId: organizationId,
         channel: 'WHATSAPP',
         status: 'ACTIVE'
       }
@@ -132,7 +149,7 @@ async function processWhatsAppMessage(message: any, contactName: string, phoneNu
 
   // Trigger AI Qualification / Response
   const aiResult = await processLeadWithAI(lead.id, content);
-  
+
   if (aiResult.shouldReply && aiResult.draftReply) {
     // Save AI response
     await db.message.create({

@@ -1,16 +1,10 @@
 import { db } from '@/lib/db';
-import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { requirePlatformAdmin } from '@/lib/access';
 import { Building2, Users, Activity, BarChart3, Database, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function SuperAdminDashboard() {
-  const session = await auth();
-
-  // Basic authorization: Ensure user exists. In production, check for a SUPER_ADMIN role.
-  if (!session?.user) {
-    redirect('/login');
-  }
+  await requirePlatformAdmin();
 
   const [
     totalOrgs,

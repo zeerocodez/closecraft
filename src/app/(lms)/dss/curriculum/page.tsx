@@ -1,17 +1,9 @@
-import { db } from '@/lib/db';
-import { auth } from '@/lib/auth';
+import { requireStudent, curriculumAccess } from '@/lib/access';
 import Link from 'next/link';
 
 export default async function CurriculumPage() {
-  const session = await auth();
-  
-  // Fetch real modules from database, ordered by index
-  const dbModules = await db.module.findMany({
-    orderBy: { orderIndex: 'asc' },
-    include: {
-      lessons: true
-    }
-  });
+  const student = await requireStudent();
+  const dbModules = await curriculumAccess(student);
 
   // Group modules into a single "Part 1" for MVP demonstration
   // In a complete implementation, 'Part' would be its own database model.
@@ -23,10 +15,10 @@ export default async function CurriculumPage() {
       modules: dbModules.length > 0 ? dbModules.map(m => ({
         id: m.id,
         title: m.title,
-        status: m.orderIndex === 1 ? 'COMPLETED' : m.orderIndex === 2 ? 'ACTIVE' : 'LOCKED', // Mocking progress logic for demo
-        lessonsCount: m.lessons.length,
+        status: m.status,
+        lessonsCount: m._count.lessons,
       })) : [
-        { id: 'm1', title: 'Module 1: No Modules Found (Run Seed)', status: 'LOCKED', lessonsCount: 0 },
+        { id: 'm1', title: 'Module 1: No modules available', status: 'LOCKED', lessonsCount: 0 },
       ]
     }
   ];
