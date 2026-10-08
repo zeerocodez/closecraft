@@ -2,6 +2,7 @@ import React from 'react';
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
+import { SettingsForm } from './SettingsForm';
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -40,7 +41,7 @@ export default async function SettingsPage() {
           </div>
         </header>
 
-        <main className="relative pt-24 min-h-screen w-full px-gutter-desktop pb-space-xl overflow-y-auto">
+        <main className="relative pt-24 min-h-screen w-full px-8 pb-space-xl overflow-y-auto">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex flex-col gap-2">
               <h1 className="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight">Organization Settings</h1>
@@ -79,6 +80,16 @@ export default async function SettingsPage() {
                     Save Changes
                   </button>
                 </div>
+              </div>
+            </section>
+
+            {/* AI Engine Configuration */}
+            <section className="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container overflow-hidden">
+              <div className="p-6 border-b border-surface-container bg-surface-container-low/30">
+                <h2 className="font-headline-sm text-lg font-bold text-on-surface">AI Engine Configuration</h2>
+              </div>
+              <div className="p-6">
+                <SettingsForm initialPolicy={org.qualificationPolicy || ""} />
               </div>
             </section>
 

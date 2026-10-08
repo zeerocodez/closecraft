@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import OpenAI from 'openai';
-import { db } from '@/lib/db';
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || 'mock-key-for-local',
-});
+import { generateObject } from 'ai';
+import { openai } from '@ai-sdk/openai';
+import { z } from 'zod';
 
 export async function POST(request: Request) {
   try {
@@ -20,45 +17,52 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // In a real system, you would look up the specific scenario the student is playing
-    const systemPrompt = `You are a B2B SaaS prospect (CTO) roleplaying with a junior sales rep. 
+    const systemPrompt = `You are David Chen, CTO of PayPulse Africa, roleplaying with a junior sales rep. 
 Your goal is to be realistic, slightly skeptical, and resistant to pitching too early. 
 Do not make it too easy for the rep. If they pitch features before understanding your problems, push back.
 Your main problem: Data silos causing you to lose enterprise deals to competitors who move faster.
 Your budget: Tight this quarter, requiring board approval for new tools, but you are the technical decision maker.
-Keep responses concise, conversational, and under 3 sentences.`;
+The current objection is pricing (₦35,000/month is too high).
+Evaluate the rep's response and provide your reply. Also provide an assessment of their performance.`;
 
-    // Format history for OpenAI
     const messages = [
       { role: 'system', content: systemPrompt },
       ...(history || []).map((h: any) => ({
-        role: h.role === 'student' ? 'user' : 'assistant',
+        role: h.role === 'user' ? 'assistant' : 'user',
         content: h.content
       })),
       { role: 'user', content: message }
     ] as any[];
 
-    let reply = "";
-
     try {
-      if (process.env.OPENAI_API_KEY) {
-        const response = await openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages,
-          temperature: 0.7,
-        });
-        reply = response.choices[0].message.content || "I see. Go on.";
-      } else {
-        // Fallback mock if no API key is set
-        reply = "[Mock Mode - No API Key] That sounds interesting, but we don't have the budget for it right now unless you can show clear ROI.";
-        await new Promise(r => setTimeout(r, 1000));
-      }
+      const result = await generateObject({
+        model: openai('gpt-4o-mini'),
+        schema: z.object({
+          buyerResponse: z.string().describe("Your conversational reply as David Chen. Keep it concise, under 3 sentences."),
+          assessment: z.object({
+            scores: z.object({
+              "Objection Handling": z.number().min(0).max(100),
+              "Active Listening": z.number().min(0).max(100),
+              "Closing Attempt": z.number().min(0).max(100)
+            }),
+            coachNote: z.string().describe("Constructive feedback for the sales rep based on their last message.")
+          })
+        }),
+        messages
+      });
+
+      return NextResponse.json(result.object);
+      
     } catch (e) {
       console.error('OpenAI Error:', e);
-      reply = "[Error] The AI prospect is currently unavailable.";
+      return NextResponse.json({ 
+        buyerResponse: "[Error] The AI prospect is currently unavailable.",
+        assessment: {
+          scores: { "Objection Handling": 0, "Active Listening": 0, "Closing Attempt": 0 },
+          coachNote: "Connection error with AI. Try again."
+        }
+      });
     }
-
-    return NextResponse.json({ reply });
     
   } catch (error) {
     console.error('Roleplay API Error:', error);

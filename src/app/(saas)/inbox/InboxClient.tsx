@@ -36,6 +36,8 @@ export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
   // For the MVP, we just render the first conversation of the active lead
   const activeConversation = activeLead?.conversations?.[0];
   const messages = activeConversation?.messages || [];
+  
+  const activeNextAction = activeLead?.revenueActions?.[0];
 
   return (
     <div className="grid grid-cols-12 gap-3 flex-1 overflow-hidden pb-4 h-[calc(100vh-140px)]">
@@ -240,6 +242,27 @@ export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
                 </div>
               </div>
             </div>
+
+            {activeNextAction && (
+              <div className="p-3 rounded-xl bg-primary-container text-on-primary-container shadow-sm border border-primary/20 flex flex-col gap-2 mt-2">
+                <div className="flex items-center gap-1.5 font-label-caps text-label-caps uppercase font-bold tracking-wider">
+                  <span className="material-symbols-outlined text-[16px]">priority</span>
+                  <span>Next Best Action</span>
+                </div>
+                <div className="flex flex-col mt-1">
+                  <span className="font-headline-sm text-sm font-bold">{activeNextAction.type.replace(/_/g, ' ')}</span>
+                  <p className="font-body-sm text-[11px] opacity-90 mt-1 leading-tight">{activeNextAction.reason}</p>
+                </div>
+                <div className="flex items-center justify-between mt-2 pt-2 border-t border-primary/20">
+                  <span className="font-label-caps text-[10px] uppercase font-bold tracking-widest opacity-80">Actor: {activeNextAction.recommendedActor}</span>
+                  {activeNextAction.recommendedActor === 'HUMAN' && (
+                    <button className="h-6 px-2 bg-primary text-on-primary rounded text-[10px] font-bold uppercase hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">
+                      Execute Now
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
           </>
         )}
       </section>

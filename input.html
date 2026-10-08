@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_standard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "secondary-fixed": "#dbe2f9", "primary-container": "#3c6bed", "surface-bright": "#faf8ff", "on-primary-container": "#fffbff", "on-secondary": "#ffffff", "error-container": "#ffdad6", "on-surface": "#131b2e", "tertiary-container": "#6063ee", "on-tertiary-fixed-variant": "#2f2ebe", "secondary-container": "#d8dff6", "outline": "#737686", "surface-container-high": "#e2e7ff", "on-error-container": "#93000a", "on-secondary-fixed-variant": "#3f4759", "on-secondary-fixed": "#141b2c", "on-secondary-container": "#5b6276", "on-tertiary": "#ffffff", "surface-container-low": "#f2f3ff", "surface-container": "#eaedff", "primary-fixed-dim": "#b5c4ff", "surface-variant": "#dae2fd", "tertiary": "#4648d4", "surface-tint": "#1a53d6", "primary-fixed": "#dce1ff", "on-surface-variant": "#434654", "surface": "#faf8ff", "surface-dim": "#d2d9f4", "on-tertiary-fixed": "#07006c", "background": "#faf8ff", "on-primary": "#ffffff", "primary": "#1550d3", "tertiary-fixed-dim": "#c0c1ff", "inverse-on-surface": "#eef0ff", "on-primary-fixed": "#00164d", "surface-container-highest": "#dae2fd", "on-primary-fixed-variant": "#003cad", "error": "#ba1a1a", "outline-variant": "#c3c5d7", "inverse-surface": "#283044", "tertiary-fixed": "#e1e0ff", "on-background": "#131b2e", "on-tertiary-container": "#fffbff", "inverse-primary": "#b5c4ff", "secondary": "#575e71", "on-error": "#ffffff", "surface-container-lowest": "#ffffff", "secondary-fixed-dim": "#bfc6dc" }, "borderRadius": { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" }, "spacing": { "margin": "1rem", "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter": "1rem", "space-md": "0.75rem", "margin-desktop": "2rem", "space-xl": "1.75rem", "gutter-tablet": "1.25rem", "gutter-desktop": "1.5rem", "margin-tablet": "1.5rem", "space-lg": "1.25rem" }, "fontFamily": { "display-lg-mobile": [ "Plus Jakarta Sans" ], "display-lg": [ "Plus Jakarta Sans" ], "metric-numeral-lg": [ "Inter" ], "label-caps": [ "Inter" ], "metric-numeral-md": [ "Inter" ], "headline-sm": [ "Plus Jakarta Sans" ], "headline-lg": [ "Plus Jakarta Sans" ], "body-sm": [ "Inter" ], "label-md": [ "Inter" ], "body-md": [ "Inter" ], "headline-xl": [ "Plus Jakarta Sans" ], "body-lg": [ "Inter" ] }, "fontSize": { "display-lg-mobile": [ "28px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "display-lg": [ "36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" } ], "metric-numeral-lg": [ "32px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-caps": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.06em", "fontWeight": "700" } ], "metric-numeral-md": [ "20px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "headline-sm": [ "18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "headline-lg": [ "22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" } ], "body-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.005em", "fontWeight": "400" } ], "label-md": [ "13px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" } ], "headline-xl": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.02em", "fontWeight": "600" } ], "body-lg": [ "16px", { "lineHeight": "24px", "letterSpacing": "-0.005em", "fontWeight": "400" } ] } } } };</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full px-gutter-desktop max-w-[1440px] mx-auto flex items-center justify-between"><div class="flex items-center gap-space-xl"><a class="flex items-center gap-space-sm group" data-path="home" href="#"><div class="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-on-primary font-headline-lg text-headline-lg shadow-sm"><span class="material-symbols-outlined text-[20px] text-primary-fixed">bolt</span></div><span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Closecraft</span></a><nav class="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-primary font-headline-sm rounded-lg"><a class="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="platform" href="#">Platform</a><a class="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="solutions" href="#">Solutions</a><a class="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="revenue-engine" href="#">Revenue Engine</a><a class="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="integrations" href="#">Integrations</a><a class="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="pricing" href="#">Pricing</a><a class="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="case-studies" href="#">Case Studies</a><Link class="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/dss/apply">DSS Academy</Link></nav></div><div class="flex items-center gap-space-md"><a class="hidden sm:inline-flex items-center px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" data-path="sign-in" href="/login">Client Sign In</a><a class="inline-flex items-center justify-center px-space-lg py-space-sm bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container font-label-md text-label-md rounded-lg shadow-sm transition-all" data-path="book-executive-demo" href="#">Book Executive Demo</a><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-space-xs"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-20 bg-surface min-h-[calc(100vh-80px)]"><div class="flex flex-col w-full">
+<!-- Top Command Telemetry Ticker -->
+<section class="w-full bg-surface-container-low px-gutter-desktop py-space-xs">
+<div class="max-w-[1440px] mx-auto flex flex-wrap items-center justify-between gap-space-sm text-on-surface-variant font-label-caps text-label-caps tracking-wider uppercase">
+<div class="flex items-center gap-space-md">
+<span class="inline-flex items-center gap-space-xs text-primary font-bold">
+<span class="w-2 h-2 rounded-full bg-primary animate-ping"></span>
+          LIVE TELEMETRY
+        </span>
+<span class="hidden sm:inline opacity-60">•</span>
+<span class="hidden sm:inline">Engine Latency: <strong class="text-on-surface">318ms</strong></span>
+<span class="hidden md:inline opacity-60">•</span>
+<span class="hidden md:inline">Qualification Precision: <strong class="text-on-surface">94.8%</strong></span>
+<span class="hidden lg:inline opacity-60">•</span>
+<span class="hidden lg:inline">Active Commercial Channels: <strong class="text-on-surface">WhatsApp • Webhook • Email • Voice</strong></span>
+</div>
+<div class="flex items-center gap-space-md ml-auto">
+<span class="text-on-surface font-semibold">₦482,450,000 Pipeline Routed This Week</span>
+<span class="px-space-xs py-0.5 rounded bg-surface-container font-semibold text-primary">SLA: 99.99%</span>
+</div>
+</div>
+</section>
+<!-- Hero Section -->
+<section class="relative w-full px-gutter-desktop pt-space-xl pb-space-xl overflow-hidden">
+<div class="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-center relative">
+<!-- Left Column: High-Impact Typography & Actionable Value -->
+<div class="lg:col-span-7 flex flex-col gap-space-md">
+<!-- Eyebrow Badge -->
+<div class="inline-flex items-center gap-space-xs self-start px-space-md py-space-xs rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase shadow-sm">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">verified</span>
+          THE REVENUE OPERATING SYSTEM • STOP LEAVING PIPELINE ON THE TABLE
+        </div>
+<!-- H1 Heading -->
+<h1 class="font-display-lg text-display-lg lg:text-[56px] lg:leading-[64px] text-on-surface tracking-tight font-extrabold">
+          Turn More Leads <br/>
+<span class="text-primary underline decoration-primary-container decoration-4 underline-offset-8">Into Closed Sales.</span>
+</h1>
+<!-- Subtitle & Brand Philosophy -->
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
+          AI qualifies, follows up, and routes high-value inbound opportunities across <strong class="text-on-surface font-semibold">WhatsApp, Email &amp; Webhooks</strong> in under 45 seconds. Your sales team steps in with full context to close the highest ACV deals.
+        </p>
+<!-- Brand Doctrine Sub-pill -->
+<div class="p-space-md rounded-xl bg-surface-container-low max-w-xl shadow-sm">
+<div class="flex items-start gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px] mt-0.5">psychology</span>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-primary uppercase">The Closecraft Principle</span>
+<p class="font-body-sm text-body-sm text-on-surface font-medium leading-snug">
+                AI handles speed, continuous triage, and scale. Humans handle commercial judgment, relationship context, and executive closing decisions.
+              </p>
+</div>
+</div>
+</div>
+<!-- Dual CTA Row -->
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<a class="inline-flex items-center justify-center gap-space-sm px-space-xl py-space-md bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md rounded-lg shadow-md hover:shadow-lg transition-all" data-path="book-executive-demo" href="#">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+            Book Executive Demo
+          </a>
+<button class="inline-flex items-center justify-center gap-space-sm px-space-lg py-space-md bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md rounded-lg transition-all" id="trigger-tour">
+<span class="material-symbols-outlined text-[18px] text-primary">play_circle</span>
+            Watch 2-Min Live Walkthrough
+          </button>
+</div>
+<!-- Social Proof Stats Mini Strip -->
+<div class="pt-space-md flex flex-wrap items-center gap-space-lg text-on-surface-variant">
+<div class="flex flex-col">
+<span class="font-metric-numeral-md text-metric-numeral-md text-on-surface">₦420M+</span>
+<span class="font-label-caps text-label-caps uppercase opacity-80">Pipeline Routed Q1</span>
+</div>
+<div class="w-px h-8 bg-surface-container-highest"></div>
+<div class="flex flex-col">
+<span class="font-metric-numeral-md text-metric-numeral-md text-on-surface">94.2%</span>
+<span class="font-label-caps text-label-caps uppercase opacity-80">MEDDPICC Accuracy</span>
+</div>
+<div class="w-px h-8 bg-surface-container-highest"></div>
+<div class="flex flex-col">
+<span class="font-metric-numeral-md text-metric-numeral-md text-on-surface">&lt;45s</span>
+<span class="font-label-caps text-label-caps uppercase opacity-80">Median First Touch</span>
+</div>
+</div>
+</div>
+<!-- Right Column: Live Ingestion & Routing Simulation Console -->
+<div class="lg:col-span-5 relative">
+<div class="w-full bg-surface-container-lowest rounded-2xl shadow-xl p-space-md overflow-hidden relative">
+<!-- Glass Top Bar -->
+<div class="flex items-center justify-between pb-space-sm bg-surface-container-lowest">
+<div class="flex items-center gap-space-xs">
+<span class="w-3 h-3 rounded-full bg-error"></span>
+<span class="w-3 h-3 rounded-full bg-surface-container-highest"></span>
+<span class="w-3 h-3 rounded-full bg-primary-fixed"></span>
+<span class="ml-space-xs font-label-caps text-label-caps text-on-surface-variant uppercase font-semibold">ORCHESTRATION ENGINE v4.2</span>
+</div>
+<span class="inline-flex items-center gap-1 font-label-caps text-label-caps px-space-xs py-0.5 rounded bg-primary-fixed text-on-primary-fixed font-bold">
+<span class="material-symbols-outlined text-[12px]">bolt</span> 340ms RESPONSE
+            </span>
+</div>
+<!-- Live Deal Ingestion Stream Block -->
+<div class="space-y-space-sm pt-space-xs">
+<!-- Alert Badge -->
+<div class="p-space-sm rounded-lg bg-surface-container-high flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[18px]">chat</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold">Incoming WhatsApp Lead</span>
+</div>
+<span class="font-label-caps text-label-caps text-primary uppercase font-bold">PRIORITY HIGH • ₦14.2M ACV</span>
+</div>
+<!-- Inbound Raw Message -->
+<div class="p-space-sm rounded-lg bg-surface-container-low text-on-surface font-body-sm text-body-sm leading-relaxed">
+<span class="text-on-surface-variant font-label-caps text-label-caps block mb-1">PROSPECT: Babatunde Adeleke (VP Ops, Interswitch Corp)</span>
+              “We need automated routing across 38 regional distribution desks by next month. Currently leaking ~25% of inbound partner deals due to CRM delay.”
+            </div>
+<!-- AI Real-Time MEDDPICC Assessment -->
+<div class="p-space-sm rounded-lg bg-secondary-container text-on-secondary-fixed">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-caps text-label-caps uppercase font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px] text-tertiary">neurology</span>
+                  AI Qualification Analysis (410ms)
+                </span>
+<span class="font-label-caps text-label-caps font-semibold px-space-xs py-0.5 rounded bg-surface-container-lowest text-primary">96% Fit Confidence</span>
+</div>
+<ul class="space-y-1 font-body-sm text-body-sm">
+<li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> <strong>Metrics:</strong> Defends 25% leaked partner pipeline</li>
+<li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> <strong>Economic Buyer:</strong> VP Ops (Tier-1 Enterprise Approval)</li>
+<li class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">check_circle</span> <strong>Timeline:</strong> Target rollout within 30 days</li>
+</ul>
+</div>
+<!-- Human-in-the-Loop Gateway Decision Block -->
+<div class="p-space-md rounded-xl bg-inverse-surface text-inverse-on-surface shadow-md">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-caps text-label-caps uppercase text-primary-fixed font-bold tracking-wider">Human Executive Gateway Required</span>
+<span class="font-label-caps text-label-caps text-error-container bg-error/20 px-space-xs py-0.5 rounded">SLA: 04:12 Remaining</span>
+</div>
+<p class="font-body-sm text-body-sm text-inverse-on-surface/90 mb-space-sm">
+                ACV surpasses ₦5,000,000 threshold. Autonomous reply drafted. Requiring Senior Closer authorization.
+              </p>
+<div class="grid grid-cols-2 gap-space-xs">
+<button class="flex items-center justify-center gap-1 py-space-sm px-space-sm bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md rounded text-center font-semibold">
+<span class="material-symbols-outlined text-[16px]">check</span>
+                  Approve &amp; Route (⌘+Enter)
+                </button>
+<button class="flex items-center justify-center gap-1 py-space-sm px-space-sm bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md rounded text-center font-semibold">
+<span class="material-symbols-outlined text-[16px]">mic</span>
+                  Direct Voice Claim
+                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Client Logo & Ecosystem Trust Strip -->
+<div class="max-w-[1440px] mx-auto mt-space-xl pt-space-lg">
+<p class="text-center font-label-caps text-label-caps uppercase text-on-surface-variant font-semibold mb-space-md">
+        Powering High-Velocity Inbound Pipeline For Market Leaders Across Africa &amp; Global Emerging Markets
+      </p>
+<div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-space-md items-center justify-items-center opacity-75">
+<div class="flex items-center gap-2 font-headline-sm text-headline-sm font-bold text-on-surface"><span class="material-symbols-outlined text-primary">account_balance</span> KUDABANK</div>
+<div class="flex items-center gap-2 font-headline-sm text-headline-sm font-bold text-on-surface"><span class="material-symbols-outlined text-primary">local_shipping</span> KOBOLABS</div>
+<div class="flex items-center gap-2 font-headline-sm text-headline-sm font-bold text-on-surface"><span class="material-symbols-outlined text-primary">hub</span> MONIEPOINT</div>
+<div class="flex items-center gap-2 font-headline-sm text-headline-sm font-bold text-on-surface"><span class="material-symbols-outlined text-primary">payments</span> FLUTTERWAVE</div>
+<div class="flex items-center gap-2 font-headline-sm text-headline-sm font-bold text-on-surface"><span class="material-symbols-outlined text-primary">cloud</span> MTN CLOUD</div>
+<div class="flex items-center gap-2 font-headline-sm text-headline-sm font-bold text-on-surface"><span class="material-symbols-outlined text-primary">shield</span> HELIUM HEALTH</div>
+</div>
+</div>
+</section>
+<!-- The Core Loop Visual Progression: Architectural Pipeline -->
+<section class="w-full bg-surface-container-low px-gutter-desktop py-space-xl">
+<div class="max-w-[1440px] mx-auto flex flex-col gap-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div>
+<span class="font-label-caps text-label-caps uppercase text-primary font-bold tracking-widest">ARCHITECTURAL OPERATING BLUEPRINT</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface font-extrabold mt-1">
+            The 7-Phase Revenue Closed Loop
+          </h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+          How Closecraft eliminates lead leakage, ensures auditable triage, and empowers executive closers within seconds.
+        </p>
+</div>
+<!-- Core Loop Steps Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-space-sm pt-space-sm">
+<!-- Step 1 -->
+<div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps text-primary font-bold">01</span>
+<span class="material-symbols-outlined text-[20px] text-primary">rss_feed</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold mb-1">Lead Signal</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">WhatsApp, Webhook, Typeform, or Email ping received immediately.</p>
+</div>
+<span class="mt-space-sm font-label-caps text-label-caps text-on-surface-variant opacity-60">TIME: &lt;50ms</span>
+</div>
+<!-- Step 2 -->
+<div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps text-primary font-bold">02</span>
+<span class="material-symbols-outlined text-[20px] text-tertiary">neurology</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold mb-1">AI Intelligence</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Extracts ACV, authority, procurement cycle, and MEDDPICC criteria.</p>
+</div>
+<span class="mt-space-sm font-label-caps text-label-caps text-on-surface-variant opacity-60">TIME: +280ms</span>
+</div>
+<!-- Step 3 -->
+<div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps text-primary font-bold">03</span>
+<span class="material-symbols-outlined text-[20px] text-primary">tune</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold mb-1">Revenue Priority</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ranks lead queue by commercial urgency and deal velocity score.</p>
+</div>
+<span class="mt-space-sm font-label-caps text-label-caps text-on-surface-variant opacity-60">TIME: +40ms</span>
+</div>
+<!-- Step 4 -->
+<div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps text-primary font-bold">04</span>
+<span class="material-symbols-outlined text-[20px] text-primary">recommend</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold mb-1">Action Plan</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Drafts tailored WhatsApp brief, assigns rep by territory alignment.</p>
+</div>
+<span class="mt-space-sm font-label-caps text-label-caps text-on-surface-variant opacity-60">TIME: +80ms</span>
+</div>
+<!-- Step 5 (Human Gateway) -->
+<div class="p-space-md bg-primary-fixed text-on-primary-fixed rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps text-on-primary-fixed font-bold">05</span>
+<span class="material-symbols-outlined text-[20px] text-primary">person_check</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-primary-fixed font-bold mb-1">Human Decision</h3>
+<p class="font-body-sm text-body-sm text-on-primary-fixed font-medium">Closer approves or amends high-value response with 1 click.</p>
+</div>
+<span class="mt-space-sm font-label-caps text-label-caps text-on-primary-fixed opacity-75 font-semibold">GATEWAY ACTIVE</span>
+</div>
+<!-- Step 6 -->
+<div class="p-space-md bg-surface-container-lowest rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps text-primary font-bold">06</span>
+<span class="material-symbols-outlined text-[20px] text-primary">send</span>
+</div>
+<h3 class="font-label-md text-label-md text-on-surface font-bold mb-1">Execution</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Instant WhatsApp dispatch, calendar invite, and CRM ledger sync.</p>
+</div>
+<span class="mt-space-sm font-label-caps text-label-caps text-on-surface-variant opacity-60">TIME: Instant</span>
+</div>
+<!-- Step 7 -->
+<div class="p-space-md bg-inverse-surface text-inverse-on-surface rounded-xl shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-space-sm">
+<span class="font-label-caps text-label-caps text-primary-fixed font-bold">07</span>
+<span class="material-symbols-outlined text-[20px] text-primary-fixed">trophy</span>
+</div>
+<h3 class="font-label-md text-label-md text-inverse-on-surface font-bold mb-1">Closed Outcome</h3>
+<p class="font-body-sm text-body-sm text-inverse-on-surface/80">Closed-won revenue logged with verified attribution ledger.</p>
+</div>
+<span class="mt-space-sm font-label-caps text-label-caps text-primary-fixed font-semibold">REVENUE SECURED</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Deep Workspace Showcase: Interactive Operations Console -->
+<section class="w-full px-gutter-desktop py-space-xl">
+<div class="max-w-[1440px] mx-auto flex flex-col gap-space-lg">
+<div class="max-w-2xl">
+<span class="font-label-caps text-label-caps uppercase text-primary font-bold tracking-widest">MISSION CONTROL INTERFACE</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface font-extrabold mt-1">
+          Designed For The High-Velocity Deal Desk
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+          No generic chat windows. A precision-engineered operational cockpit where pipeline velocity is measured in seconds, not business days.
+        </p>
+</div>
+<!-- Main Desktop Mockup Frame -->
+<div class="w-full bg-inverse-surface text-inverse-on-surface rounded-2xl shadow-2xl p-space-sm md:p-space-md">
+<!-- Mockup Shell Header -->
+<div class="flex items-center justify-between pb-space-sm mb-space-md bg-inverse-surface">
+<div class="flex items-center gap-space-md">
+<span class="font-headline-sm text-headline-sm font-bold text-on-primary">Closecraft Command</span>
+<span class="hidden sm:inline-flex items-center gap-1 font-label-caps text-label-caps px-space-xs py-0.5 rounded bg-surface-container text-primary">
+<span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span> SYSTEM HEALTH: NOMINAL (99.98%)
+            </span>
+</div>
+<div class="flex items-center gap-space-xs font-label-md text-label-md">
+<span class="px-space-sm py-1 rounded bg-surface-container text-on-surface">Queue: 14 Active Inbounds</span>
+<span class="px-space-sm py-1 rounded bg-primary text-on-primary font-semibold">Active Rep: Sarah K. (CRO)</span>
+</div>
+</div>
+<!-- Split Workspace Mockup: Left 40% Inbound Queue, Right 60% Execution Canvas -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
+<!-- Left Column: Deal Inbound Queue -->
+<div class="lg:col-span-5 flex flex-col gap-space-xs">
+<div class="p-space-sm rounded-lg bg-surface-container-lowest text-on-surface shadow-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-primary font-bold">NEEDS HUMAN DECISION</span>
+<span class="font-label-caps text-label-caps px-1.5 py-0.5 rounded bg-error-container text-on-error-container font-semibold">SLA: 03m 40s</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<h4 class="font-label-md text-label-md font-bold">OmniFreight Logistics</h4>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">₦28,000,000</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 line-clamp-2">
+                “Evaluating switching 120 dispatch agents from Salesforce to Closecraft WhatsApp flow.”
+              </p>
+<div class="mt-space-xs flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-primary-fixed text-on-primary-fixed">WhatsApp Verified</span>
+<span class="font-label-caps text-label-caps px-2 py-0.5 rounded bg-secondary-container text-on-secondary-fixed">Fit Score: 98%</span>
+</div>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container text-on-surface">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant font-bold">AUTONOMOUSLY ROUTED</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">12m ago</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<h4 class="font-label-md text-label-md font-bold">Apex Financial Ltd</h4>
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold">₦8,500,000</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                Assigned to Michael O. • Demo confirmed for Thursday 14:00 WAT.
+              </p>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container text-on-surface">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant font-bold">AI NURTURE SEQUENCE</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">34m ago</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<h4 class="font-label-md text-label-md font-bold">Zenith Health Cloud</h4>
+<span class="font-label-md text-label-md text-on-surface-variant font-semibold">₦4,200,000</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+                Gathering budget cycle confirmation via autonomous WhatsApp follow-up.
+              </p>
+</div>
+</div>
+<!-- Right Column: Deal Execution and Human-in-the-Loop Orchestrator -->
+<div class="lg:col-span-7 bg-surface-container-lowest text-on-surface rounded-xl p-space-md shadow-lg flex flex-col justify-between">
+<div class="space-y-space-md">
+<!-- Opportunity Header -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm pb-space-xs">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="px-space-xs py-0.5 rounded bg-primary text-on-primary font-label-caps text-label-caps uppercase font-bold">Deal Desk Active</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Lead ID: #CC-9021-AFRICA</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg font-extrabold text-on-surface mt-1">OmniFreight Logistics (HQ: Lagos / Nairobi)</h3>
+</div>
+<div class="text-right">
+<span class="font-metric-numeral-lg text-metric-numeral-lg text-primary font-bold">₦28.0M</span>
+<span class="block font-label-caps text-label-caps text-on-surface-variant uppercase">Estimated ARR</span>
+</div>
+</div>
+<!-- Explainable AI Diagnostic Card -->
+<div class="p-space-md rounded-xl bg-surface-container-low">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-caps text-label-caps uppercase text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">visibility</span>
+                    EXPLAINABLE AI RECOMMENDATION LEDGER
+                  </span>
+<span class="font-label-caps text-label-caps font-semibold px-space-xs py-0.5 rounded bg-surface-container text-primary">AUDIT STATUS: FULLY COMPLIANT</span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm pt-space-xs font-body-sm text-body-sm">
+<div class="p-space-xs rounded bg-surface-container-lowest">
+<span class="font-label-caps text-label-caps text-on-surface-variant block">DETECTED INTENT</span>
+<span class="font-semibold text-on-surface">Urgent Replacement of Legacy CRM</span>
+</div>
+<div class="p-space-xs rounded bg-surface-container-lowest">
+<span class="font-label-caps text-label-caps text-on-surface-variant block">DECISION AUTHORITY</span>
+<span class="font-semibold text-on-surface">Verified Group CTO &amp; COO</span>
+</div>
+<div class="p-space-xs rounded bg-surface-container-lowest">
+<span class="font-label-caps text-label-caps text-on-surface-variant block">RECOMMENDED ACTION</span>
+<span class="font-semibold text-primary">Instant Director Demo Dispatch</span>
+</div>
+</div>
+</div>
+<!-- Proposed Action Preview -->
+<div class="p-space-md rounded-xl bg-surface-container-lowest">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase font-bold block mb-1">Pre-Generated Multi-Channel Dispatch</span>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                  “Hello David, Sarah here from Closecraft. Given your goal to eliminate the 25% deal leakage across your 120 dispatch desks before next quarter, I have reserved a 30-minute tailored architectural review for your operations leadership this Thursday at 11:00 AM WAT.”
+                </p>
+</div>
+</div>
+<!-- Execution Action Bar -->
+<div class="mt-space-md pt-space-md flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-caps text-label-caps">
+<span class="material-symbols-outlined text-[16px] text-primary">security</span>
+                Human Authorization Protocol Active (Threshold &gt; ₦5.0M)
+              </div>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-md py-space-sm rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors">
+                  Edit Brief
+                </button>
+<button class="px-space-lg py-space-sm rounded-lg bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-semibold shadow-md transition-all flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                  Authorize &amp; Dispatch Lead
+                </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Signature Features Bento Grid -->
+<section class="w-full bg-surface-container-low px-gutter-desktop py-space-xl">
+<div class="max-w-[1440px] mx-auto flex flex-col gap-space-xl">
+<div class="text-center max-w-3xl mx-auto">
+<span class="font-label-caps text-label-caps uppercase text-primary font-bold tracking-widest">BUILT FOR ENTERPRISE REVENUE DOMINANCE</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface font-extrabold mt-1">
+          Why Traditional CRMs Leak Deals — And How Closecraft Wins
+        </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
+          Leads go cold within 15 minutes. Manual triage creates operational friction. Closecraft replaces pipeline latency with structured speed.
+        </p>
+</div>
+<!-- Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-space-md">
+<!-- Feature 1: Multi-Channel WhatsApp Native -->
+<div class="md:col-span-8 p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm max-w-xl">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px] text-primary">quickreply</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg font-bold text-on-surface">
+              Zero-Latency WhatsApp &amp; Omnichannel Ingestion
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              In emerging markets and enterprise deal cycles, critical sales dialogues happen on WhatsApp. Closecraft hooks natively into Meta Cloud and Twilio APIs to parse, qualify, and triage buyer messages in real time — while your competitors take 2 business days to send a standard webform email.
+            </p>
+</div>
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-3 gap-space-sm pt-space-md">
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-metric-numeral-md text-metric-numeral-md text-primary block font-bold">14 Sec</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Average WhatsApp Triage</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-metric-numeral-md text-metric-numeral-md text-primary block font-bold">100%</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Official Meta Partner API</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-metric-numeral-md text-metric-numeral-md text-primary block font-bold">Zero Bot Feel</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Context-Rich Briefings</span>
+</div>
+</div>
+</div>
+<!-- Feature 2: Team Collaboration & Closer Dispatch -->
+<div class="md:col-span-4 p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-surface-container text-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">groups</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg font-bold text-on-surface">
+              Executive Closer Dispatch
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              High-value deals require senior human empathy. The moment a Tier-1 enterprise lead is qualified, Closecraft delivers a 3-bullet executive briefing directly to your top closer.
+            </p>
+</div>
+<div class="mt-space-md p-space-sm rounded-xl bg-surface-container-low">
+<div class="flex items-center gap-space-xs font-label-caps text-label-caps text-primary font-bold">
+<span class="material-symbols-outlined text-[16px]">notifications_active</span>
+              REAL-TIME DISPATCH ROUTE
+            </div>
+<p class="font-body-sm text-body-sm text-on-surface mt-1">
+              VP Sales receives calendar invite + CRM draft within 42 seconds of customer submit.
+            </p>
+</div>
+</div>
+<!-- Feature 3: Explainable AI, Never Black Box -->
+<div class="md:col-span-4 p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm">
+<div class="w-12 h-12 rounded-xl bg-surface-container text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">psychology_alt</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg font-bold text-on-surface">
+              Explainable AI Intelligence
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Every single qualification recommendation displays explicit source citations: What AI detected → Why it scored the lead high → Exact numerical confidence score. No mysterious hallucinations.
+            </p>
+</div>
+<div class="mt-space-md p-space-sm rounded-lg bg-surface-container-low">
+<span class="font-label-caps text-label-caps text-tertiary font-bold block mb-1">AUDITABLE CONFIDENCE</span>
+<span class="font-metric-numeral-md text-metric-numeral-md text-on-surface font-bold">96.4% Score</span>
+</div>
+</div>
+<!-- Feature 4: Enterprise Guardrails & Sovereign Compliance -->
+<div class="md:col-span-8 p-space-lg rounded-2xl bg-inverse-surface text-inverse-on-surface shadow-md flex flex-col justify-between">
+<div class="flex flex-col gap-space-sm max-w-xl">
+<div class="w-12 h-12 rounded-xl bg-surface-container text-primary-fixed flex items-center justify-center">
+<span class="material-symbols-outlined text-[28px] text-primary">policy</span>
+</div>
+<h3 class="font-headline-lg text-headline-lg font-bold text-inverse-on-surface">
+              Custom Commercial Ceilings &amp; Autonomous Guardrails
+            </h3>
+<p class="font-body-md text-body-md text-inverse-on-surface/80 leading-relaxed">
+              Maintain uncompromising governance. Closecraft allows CROs to set precise threshold triggers: leads below ₦2M are booked autonomously; leads above ₦5M mandate senior closer authorization. Full compliance with NDPR, GDPR, and ISO/IEC 27001 data residency standards.
+            </p>
+</div>
+<div class="mt-space-md grid grid-cols-1 sm:grid-cols-3 gap-space-sm pt-space-md">
+<div class="p-space-sm rounded-lg bg-surface-container-lowest/10">
+<span class="font-label-caps text-label-caps text-primary-fixed block">COMMERCIAL THRESHOLD</span>
+<span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface">Configurable ACV</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest/10">
+<span class="font-label-caps text-label-caps text-primary-fixed block">AUDIT TRAIL</span>
+<span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface">Immutable Logs</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-lowest/10">
+<span class="font-label-caps text-label-caps text-primary-fixed block">SECURITY STANDARD</span>
+<span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface">SOC2 Type II</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Quantified Commercial Impact & ROI Ledger -->
+<section class="w-full px-gutter-desktop py-space-xl">
+<div class="max-w-[1440px] mx-auto flex flex-col gap-space-lg">
+<div class="max-w-2xl">
+<span class="font-label-caps text-label-caps uppercase text-primary font-bold tracking-widest">QUANTIFIABLE BUSINESS ACCELERATION</span>
+<h2 class="font-headline-xl text-headline-xl text-on-surface font-extrabold mt-1">
+          The Math Behind 4.2x Revenue Yield
+        </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2">
+          Real telemetry reported across enterprise sales teams running Closecraft over 180 continuous operating days.
+        </p>
+</div>
+<!-- 4 Stat Counters Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md">
+<!-- Stat 1 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div>
+<span class="font-metric-numeral-lg text-metric-numeral-lg lg:text-[44px] text-primary font-extrabold block">4.2x</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">Inbound Win Rate</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+              High-intent inbound leads are engaged during their active browsing window instead of hours later.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs font-label-caps text-label-caps text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> MEASURED VS LEGACY SDR FLOW
+          </div>
+</div>
+<!-- Stat 2 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div>
+<span class="font-metric-numeral-lg text-metric-numeral-lg lg:text-[44px] text-primary font-extrabold block">42s</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">Median First-Touch</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+              Collapsed down from an industry average of 4.8 business hours across multi-regional channels.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs font-label-caps text-label-caps text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">bolt</span> 98% FASTER ENGAGEMENT
+          </div>
+</div>
+<!-- Stat 3 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div>
+<span class="font-metric-numeral-lg text-metric-numeral-lg lg:text-[44px] text-primary font-extrabold block">84.1%</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">Autonomous Triage</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+              Routine inquiries and low ACV leads are scheduled, disqualified, or enriched without human overhead.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs font-label-caps text-label-caps text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">verified</span> 0 COMPLIANCE BREACHES
+          </div>
+</div>
+<!-- Stat 4 -->
+<div class="p-space-lg rounded-2xl bg-surface-container-lowest shadow-sm flex flex-col justify-between">
+<div>
+<span class="font-metric-numeral-lg text-metric-numeral-lg lg:text-[44px] text-primary font-extrabold block">1.8%</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-bold mt-2">Meeting No-Show Rate</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1 leading-relaxed">
+              Multi-channel calendar reminders, customized agenda briefs, and instant WhatsApp confirmations protect executive time.
+            </p>
+</div>
+<div class="mt-space-md pt-space-xs font-label-caps text-label-caps text-primary font-semibold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">calendar_month</span> CALENDAR INTEGRITY DEFENDED
+          </div>
+</div>
+</div>
+</div>
+</section>
+<!-- Enterprise Trust, Security & Compliance Strip -->
+<section class="w-full bg-surface-container-low px-gutter-desktop py-space-xl">
+<div class="max-w-[1440px] mx-auto">
+<div class="bg-surface-container-lowest rounded-2xl p-space-lg md:p-space-xl shadow-sm flex flex-col lg:flex-row items-center justify-between gap-space-lg">
+<div class="max-w-2xl">
+<div class="inline-flex items-center gap-space-xs px-space-sm py-0.5 rounded bg-surface-container font-label-caps text-label-caps text-primary uppercase font-bold mb-space-xs">
+<span class="material-symbols-outlined text-[16px]">shield_lock</span> SOVEREIGN ENTERPRISE GOVERNANCE
+          </div>
+<h3 class="font-headline-xl text-headline-xl text-on-surface font-extrabold">
+            Engineered For Tier-1 Financial &amp; Telecom Standards
+          </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 leading-relaxed">
+            Your commercial pipeline and client dialogues never train public AI models. Closecraft operates under strict role-based isolation, local data protection protocols (NDPR, GDPR), and 256-bit cryptographic payload verification.
+          </p>
+</div>
+<div class="grid grid-cols-2 gap-space-sm w-full lg:w-auto">
+<div class="p-space-md rounded-xl bg-surface-container-low flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">verified_user</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface block">SOC2 Type II</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Annual Continuous Audit</span>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">lock</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface block">ISO/IEC 27001</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Certified Security Ops</span>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">database</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface block">NDPR On-Soil</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Tier-3 Sovereign Vaults</span>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[28px]">vpn_key</span>
+<div>
+<span class="font-label-md text-label-md font-bold text-on-surface block">256-Bit TLS</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Zero-Trust Payload Ingress</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- High-Conversion Final CTA Banner -->
+<section class="w-full px-gutter-desktop py-space-xl">
+<div class="max-w-[1440px] mx-auto">
+<div class="w-full rounded-3xl bg-inverse-surface text-inverse-on-surface p-space-lg md:p-space-xl relative overflow-hidden shadow-2xl">
+<div class="relative z-10 max-w-3xl flex flex-col gap-space-md">
+<div class="inline-flex items-center gap-space-xs self-start px-space-sm py-1 rounded bg-surface-container font-label-caps text-label-caps text-primary-fixed uppercase font-bold">
+<span class="w-2 h-2 rounded-full bg-primary-fixed animate-ping"></span>
+            DEPLOY IN UNDER 15 MINUTES
+          </div>
+<h2 class="font-display-lg text-display-lg lg:text-[44px] lg:leading-[52px] font-extrabold text-inverse-on-surface">
+            Ready to Stop Losing High-Value Inbound Leads?
+          </h2>
+<p class="font-body-lg text-body-lg text-inverse-on-surface/80 leading-relaxed">
+            Connect Closecraft to your WhatsApp Business API, CRM (HubSpot, Salesforce, Zoho), and team calendars today. Experience sub-45-second deal qualification with ironclad human guardrails.
+          </p>
+<div class="flex flex-wrap items-center gap-space-md pt-space-xs">
+<a class="inline-flex items-center justify-center gap-space-sm px-space-xl py-space-md bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-bold rounded-lg shadow-lg hover:shadow-xl transition-all" data-path="book-executive-demo" href="#">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+              Request Custom Enterprise Demo
+            </a>
+<a class="inline-flex items-center justify-center gap-space-sm px-space-lg py-space-md bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md font-semibold rounded-lg transition-all" data-path="solutions" href="#">
+<span class="material-symbols-outlined text-[18px] text-primary">engineering</span>
+              Talk to Solutions Architect
+            </a>
+</div>
+<div class="flex flex-wrap items-center gap-space-lg pt-space-sm text-inverse-on-surface/60 font-body-sm text-body-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-primary-fixed">check</span> No CRM Migration Required</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-primary-fixed">check</span> 14-Day Pilot Available</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px] text-primary-fixed">check</span> Dedicated Enterprise Success Lead</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Interactive Modal / Walkthrough Simulation Trigger Script -->
+</div></main><footer class="w-full bg-surface-container-low shadow-[0_-1px_8px_rgba(0,0,0,0.02)]"><div class="w-full px-gutter-desktop max-w-[1440px] mx-auto pt-space-xl pb-space-lg"><div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-space-lg pb-space-xl"><div class="col-span-2 md:col-span-3 lg:col-span-2 flex flex-col gap-space-md pr-space-lg"><div class="flex items-center gap-space-sm"><div class="w-7 h-7 rounded-lg bg-inverse-surface flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-[18px] text-primary-fixed">bolt</span></div><span class="font-headline-lg text-headline-lg text-on-surface tracking-tight">Closecraft</span></div><p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">The Revenue Operating System engineered for enterprise go-to-market teams, CROs, and deal executives requiring analytical precision and machine velocity.</p><div class="flex items-center gap-space-sm pt-space-xs"><div class="inline-flex items-center gap-space-xs px-space-sm py-space-xs rounded bg-surface-container font-label-caps text-label-caps text-on-surface"><span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>All Systems Operational — 99.98% SLA</div></div></div><div class="flex flex-col gap-space-sm"><span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Product</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="platform" href="#">Platform Overview</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="revenue-engine" href="#">Pipeline Execution</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="integrations" href="#">Ecosystem &amp; Connectors</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="pricing" href="#">Edition Pricing</a></div><div class="flex flex-col gap-space-sm"><span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Engine</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="platform" href="#">Signal Intelligence</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="solutions" href="#">Deal Routing Logic</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="case-studies" href="#">Ledger Automation</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="case-studies" href="#">CRO Scorecards</a></div><div class="flex flex-col gap-space-sm"><span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Governance</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="security-and-trust" href="#">Security Architecture</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="compliance" href="#">Compliance Standards</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="security-and-trust" href="#">Audit &amp; Transparency</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="security-and-trust" href="#">Role-based Access</a></div><div class="flex flex-col gap-space-sm"><span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Company</span><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="home" href="#">About Closecraft</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="case-studies" href="#">Customer Stories</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="book-executive-demo" href="#">Executive Briefings</a><a class="font-body-sm text-body-sm text-on-surface-variant hover:text-on-surface transition-colors" data-path="legal" href="#">Legal &amp; Privacy</a></div></div><div class="pt-space-lg bg-surface-container-lowest/60 rounded-xl p-space-lg flex flex-col md:flex-row items-center justify-between gap-space-md shadow-[0_1px_8px_rgba(0,0,0,0.02)]"><div class="flex flex-wrap items-center gap-space-md"><span class="inline-flex items-center gap-space-xs font-label-caps text-label-caps text-on-surface px-space-sm py-space-xs rounded bg-surface-container"><span class="material-symbols-outlined text-[14px] text-primary">verified_user</span>ISO/IEC 27001</span><span class="inline-flex items-center gap-space-xs font-label-caps text-label-caps text-on-surface px-space-sm py-space-xs rounded bg-surface-container"><span class="material-symbols-outlined text-[14px] text-primary">verified_user</span>SOC2 Type II</span><span class="inline-flex items-center gap-space-xs font-label-caps text-label-caps text-on-surface px-space-sm py-space-xs rounded bg-surface-container"><span class="material-symbols-outlined text-[14px] text-primary">shield</span>NDPR Compliant</span></div><div class="flex items-center gap-space-lg text-on-surface-variant font-body-sm text-body-sm"><span>© 2025 Closecraft Systems Inc. All rights reserved.</span></div></div></div></footer></body></html>

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sendTransactionalEmail } from '@/lib/email';
 import { z } from 'zod';
+import { inngest } from '@/lib/inngest/client';
 
 const auditFormSchema = z.object({
   name: z.string().min(2, "Name is too short").max(100),
@@ -22,7 +23,7 @@ export async function POST(request: Request) {
     if (!result.success) {
       return NextResponse.json({ 
         error: 'Validation failed', 
-        details: result.error.errors 
+        details: result.error.issues 
       }, { status: 400 });
     }
 
@@ -50,23 +51,18 @@ export async function POST(request: Request) {
       biggestSalesBottleneck
     });
 
-    const lead = await db.lead.create({
+    // Fire event to Inngest background bus. 
+    // The background job will create the lead via the DAL and trigger AI qualification.
+    await inngest.send({
+      name: 'revenue/lead.created',
       data: {
         organizationId: org.id,
-        type: 'MARKETING_LEAD',
         name: name.trim(),
         email: email.toLowerCase().trim(),
-        phone: phone || null,
-        message: `Revenue Audit Request from ${business}. Volume: ${monthlyLeadVolume}. Bottleneck: ${biggestSalesBottleneck}`,
         source: 'Website Revenue Audit Form',
-        status: 'NEW',
-        buyingIntent: 85, // High intent if they request an audit
-        qualificationData: {
-          create: {
-            customData
-          }
-        }
-      },
+        message: `Revenue Audit Request from ${business}. Volume: ${monthlyLeadVolume}. Bottleneck: ${biggestSalesBottleneck}`,
+        customData
+      }
     });
 
     // Send a transactional email welcoming the new applicant
@@ -85,7 +81,7 @@ export async function POST(request: Request) {
       `
     });
 
-    return NextResponse.json({ success: true, lead }, { status: 201 });
+    return NextResponse.json({ success: true, lead: { name: name.trim() } }, { status: 201 });
   } catch (error) {
     console.error('Failed to create lead:', error);
     return NextResponse.json({ error: 'Failed to create lead' }, { status: 500 });

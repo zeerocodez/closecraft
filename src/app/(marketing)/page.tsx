@@ -58,69 +58,9 @@ export default function MarketingPage() {
   };
 
   return (
-    <div className="landing-shell">
+    <div className="landing-shell" style={{ paddingTop: '80px' }}>
       {/* 1. Navigation */}
-      <header className="site-nav">
-        <Link href="#hero" className="brand-lockup">
-          <div className="brand-mark">Z</div>
-          <div>
-            <strong>ZEEROCODES</strong>
-            <small>REVENUE ENGINE</small>
-          </div>
-        </Link>
-
-        <nav className={`nav-links ${mobileMenuOpen ? 'nav-links-open' : ''}`}>
-          <Link href="#how-it-works" onClick={() => setMobileMenuOpen(false)}>How It Works</Link>
-          <Link href="#revenue-leakage" onClick={() => setMobileMenuOpen(false)}>Revenue Leakage</Link>
-          <Link href="#who-its-for" onClick={() => setMobileMenuOpen(false)}>Who It's For</Link>
-          <Link href="#faq" onClick={() => setMobileMenuOpen(false)}>FAQ</Link>
-        </nav>
-
-        <div className="nav-actions">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Link
-              href="/dashboard"
-              className="text-link"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/login"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '5px',
-                background: 'rgba(255,255,255,0.06)',
-                border: '1px solid rgba(255,255,255,0.15)',
-                color: '#fff',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                fontSize: '12.5px',
-                fontWeight: 700,
-                cursor: 'pointer',
-              }}
-            >
-              <Zap size={12} color="var(--accent)" /> Client Sign In
-            </Link>
-            <button
-              type="button"
-              onClick={openAudit}
-              className="button button-small"
-            >
-              BOOK REVENUE AUDIT <ArrowRight size={13} />
-            </button>
-          </div>
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="mobile-menu"
-            aria-label="Toggle Navigation"
-          >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
-        </div>
-      </header>
+      <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div className="h-20 w-full px-gutter-desktop max-w-[1440px] mx-auto flex items-center justify-between"><div className="flex items-center gap-space-xl"><Link className="flex items-center gap-space-sm group" href="#hero"><div className="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-on-primary font-headline-lg text-headline-lg shadow-sm"><span className="material-symbols-outlined text-[20px] text-primary-fixed">bolt</span></div><span className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Closecraft</span></Link><nav className="hidden xl:flex items-center gap-space-xs" data-active-classes="bg-surface-container text-primary font-headline-sm rounded-lg"><Link className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/platform">Platform</Link><Link className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/solutions">Solutions</Link><Link className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/integrations">Integrations</Link><Link className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/pricing">Pricing</Link><Link className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/#faq">FAQ</Link><Link className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/dss/courses">DSS Academy</Link></nav></div><div className="flex items-center gap-space-md"><Link className="hidden sm:inline-flex items-center px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md transition-colors" href="/login">Client Sign In</Link><button onClick={openAudit} className="inline-flex items-center justify-center px-space-lg py-space-sm bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container font-label-md text-label-md rounded-lg shadow-sm transition-all">Book Executive Demo</button><Link href="/dashboard" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-space-xs"><span className="material-symbols-outlined text-on-primary text-[18px]">person</span></Link></div></div></header>
 
       {/* 2. Hero Section */}
       <section id="hero" className="section-wrap">
@@ -133,7 +73,7 @@ export default function MarketingPage() {
               Turn More of the Leads You Already Have Into <em>Sales.</em>
             </h1>
             <p className="hero-lede">
-              You've already spent money, time and effort getting people to enquire. Zeerocodes helps you respond faster, follow up consistently, qualify serious prospects and get the right opportunities to your sales team.
+              Whether your leads come from Facebook Ads, website forms, or CSV uploads, pull them in instantly. Work them in real-time and hand verified prospects off to your closers or appointment setters before they go cold.
             </p>
             <div className="hero-actions">
               <button
@@ -143,7 +83,7 @@ export default function MarketingPage() {
               >
                 BOOK A REVENUE AUDIT <ArrowRight size={15} />
               </button>
-              <Link href="#how-it-works" className="button button-ghost">
+              <Link href="/solutions" className="button button-ghost">
                 See How It Works
               </Link>
             </div>
@@ -222,6 +162,14 @@ export default function MarketingPage() {
         </div>
       </section>
 
+
+
+
+
+
+
+
+
       {/* 3. Linear Mechanism Flow Strip */}
       <div className="flow-banner">
         <div className="flow-banner-title">
@@ -250,9 +198,9 @@ export default function MarketingPage() {
         <div className="problem-grid">
           <div className="problem-card">
             <span className="problem-card-num">GAP 01</span>
-            <h3>SLOW RESPONSE</h3>
+            <h3>LEADS GOING COLD</h3>
             <p>
-              A new enquiry arrives. Nobody follows up quickly enough while the buyer's intent is highest.
+              New leads sit in Facebook Ads or spreadsheets for hours. Nobody responds quickly enough while their buying intent is at its absolute highest.
             </p>
           </div>
 
@@ -288,8 +236,8 @@ export default function MarketingPage() {
           <div className="offer-steps-grid">
             <div className="offer-step-card">
               <span>01. RESPOND</span>
-              <h3>Fast Intake</h3>
-              <p>New leads are engaged quickly across your channels before intent decays.</p>
+              <h3>Real-Time Ingestion</h3>
+              <p>Pull leads instantly from Facebook Ads or CSV and trigger automated, real-time responses before they go cold.</p>
             </div>
 
             <div className="offer-step-card">
@@ -312,8 +260,8 @@ export default function MarketingPage() {
 
             <div className="offer-step-card">
               <span>05. CONVERT</span>
-              <h3>Closed Deals</h3>
-              <p>Move qualified opportunities toward booked appointments and verified sales.</p>
+              <h3>Send to Closers</h3>
+              <p>Seamlessly pass verified, warm leads directly to your appointment setters and closers so they can do what they do best.</p>
             </div>
           </div>
         </div>
@@ -746,6 +694,104 @@ export default function MarketingPage() {
         </div>
       </section>
 
+      {/* 11. Integrations */}
+      <section id="integrations" className="section-wrap" style={{ marginTop: '60px', padding: '60px 0', borderTop: '1px solid var(--line)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div className="eyebrow">SEAMLESS INTEGRATIONS</div>
+          <h2>Bring Your Leads From Anywhere</h2>
+          <p style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '12px', maxWidth: '600px', margin: '12px auto' }}>
+            The Revenue Engine doesn't force you to change how you acquire leads. Plug it directly into your existing acquisition channels in minutes.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container shadow-sm">
+            <h3 className="font-headline-sm font-bold text-lg mb-2 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">facebook</span> Facebook Lead Ads
+            </h3>
+            <p className="text-on-surface-variant text-sm mb-4">
+              Stop downloading CSVs manually from Facebook Business Manager while leads go cold. 
+              Our native webhook integration pulls new leads instantly into the Revenue Engine.
+            </p>
+            <ol className="text-sm text-on-surface-variant list-decimal pl-4 space-y-2">
+              <li>Navigate to your Facebook Page Settings &gt; Lead Access.</li>
+              <li>Add the Closecraft Webhook URL (found in your tenant settings).</li>
+              <li>Every time a user submits your Facebook form, the Engine immediately qualifies them.</li>
+            </ol>
+          </div>
+          <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container shadow-sm">
+            <h3 className="font-headline-sm font-bold text-lg mb-2 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">upload_file</span> Bulk CSV Upload
+            </h3>
+            <p className="text-on-surface-variant text-sm mb-4">
+              Have an existing list of cold leads or a recent event roster? Upload them directly 
+              into your workspace to initiate automated follow-up sequences.
+            </p>
+            <ol className="text-sm text-on-surface-variant list-decimal pl-4 space-y-2">
+              <li>Prepare your CSV with headers: <code>Name</code>, <code>Email</code>, <code>Phone</code>.</li>
+              <li>Go to your <strong>Leads</strong> workspace in the application.</li>
+              <li>Click <strong>Add Lead &gt; Bulk Import</strong>, map your columns, and let the Engine process the batch.</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      {/* 12. Pricing Section */}
+      <section id="pricing" className="section-wrap" style={{ padding: '60px 0', borderTop: '1px solid var(--line)' }}>
+        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+          <div className="eyebrow">FLEXIBLE DEPLOYMENT</div>
+          <h2>Affordable Revenue Scaling</h2>
+          <p style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '12px', maxWidth: '600px', margin: '12px auto' }}>
+            Illustrative pricing models based on tenant usage. Choose the tier that matches your current sales volume. All plans include the core AI-triage engine.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col">
+            <h3 className="font-headline-sm font-bold text-lg text-on-surface">Starter Engine</h3>
+            <div className="mt-4 mb-6">
+              <span className="text-3xl font-bold">₦15,000</span>
+              <span className="text-on-surface-variant text-sm"> / month</span>
+            </div>
+            <ul className="space-y-3 mb-8 flex-1 text-sm text-on-surface-variant">
+              <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Up to 500 leads/month</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Automated Email Nurture</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Basic Command Centre</li>
+            </ul>
+            <button onClick={openAudit} className="w-full py-2 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary-container transition-colors">Request Proposal</button>
+          </div>
+          
+          <div className="bg-primary p-6 rounded-xl border border-primary text-on-primary shadow-md relative transform md:-translate-y-2 flex flex-col">
+            <div className="absolute top-0 right-0 bg-accent text-ink text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">MOST POPULAR</div>
+            <h3 className="font-headline-sm font-bold text-lg text-on-primary">Growth Engine</h3>
+            <div className="mt-4 mb-6">
+              <span className="text-3xl font-bold">₦35,000</span>
+              <span className="text-primary-container text-sm"> / month</span>
+            </div>
+            <ul className="space-y-3 mb-8 flex-1 text-sm text-on-primary/90">
+              <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Up to 2,500 leads/month</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Advanced AI Triage</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> WhatsApp Gateway Integration</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Deal Pipeline Tracking</li>
+            </ul>
+            <button onClick={openAudit} className="w-full py-2 rounded-lg bg-accent text-ink font-bold hover:bg-[#b5f03d] transition-colors border border-transparent">Request Proposal</button>
+          </div>
+
+          <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col">
+            <h3 className="font-headline-sm font-bold text-lg text-on-surface">Enterprise Fleet</h3>
+            <div className="mt-4 mb-6">
+              <span className="text-3xl font-bold">₦75,000</span>
+              <span className="text-on-surface-variant text-sm"> / month</span>
+            </div>
+            <ul className="space-y-3 mb-8 flex-1 text-sm text-on-surface-variant">
+              <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Unlimited leads</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Custom AI Models & Scoring</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Dedicated SLA & Support</li>
+              <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Multiple Workspaces</li>
+            </ul>
+            <button onClick={openAudit} className="w-full py-2 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary-container transition-colors">Request Proposal</button>
+          </div>
+        </div>
+      </section>
+
       {/* 13. FAQ (5 Questions Only) */}
       <section id="faq" className="section-wrap faq-section">
         <div>
@@ -839,19 +885,19 @@ export default function MarketingPage() {
             <div>
               <small>WORKSPACES</small>
               <Link href="/dashboard" className="footer-button">Overview Control Plane</Link>
-              <Link href="/dashboard" className="footer-button">Lead Inbox</Link>
-              <Link href="/dashboard" className="footer-button">Lead Sources & CSV</Link>
-              <Link href="/dashboard" className="footer-button">SDR Work Queue</Link>
+              <Link href="/inbox" className="footer-button">Lead Inbox</Link>
+              <Link href="/leads" className="footer-button">Lead Sources & CSV</Link>
+              <Link href="/pipeline" className="footer-button">SDR Work Queue</Link>
               <Link href="/dashboard" className="footer-button">Revenue Attribution</Link>
-              <Link href="/dashboard" className="footer-button">Tenant Policy Settings</Link>
+              <Link href="/settings" className="footer-button">Tenant Policy Settings</Link>
             </div>
 
             <div>
               <small>NAVIGATION</small>
-              <Link href="#how-it-works">How It Works</Link>
-              <Link href="#revenue-leakage">Revenue Leakage</Link>
-              <Link href="#who-its-for">Who It's For</Link>
-              <Link href="#faq">FAQ</Link>
+              <Link href="/solutions">How It Works</Link>
+              <Link href="/revenue-engine">Revenue Leakage</Link>
+              <Link href="/platform">Who It's For</Link>
+              <Link href="/#faq">FAQ</Link>
               <button onClick={openAudit} className="footer-button" style={{ display: 'inline-block', marginTop: '10px' }}>Book Revenue Audit</button>
             </div>
           </div>

@@ -13,6 +13,7 @@ export default function Sidebar({ user }: { user: any }) {
     { href: '/inbox', icon: 'inbox', label: 'Inbox', badge: '5' },
     { href: '/pipeline', icon: 'view_kanban', label: 'Pipeline' },
     { href: '/appointments', icon: 'calendar_today', label: 'Appointments' },
+    { href: '/automations', icon: 'smart_toy', label: 'Automations' },
     { href: '/settings', icon: 'settings', label: 'Settings' }
   ];
 

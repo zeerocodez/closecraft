@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"inverse-on-surface":"#eef0ff","surface":"#faf8ff","on-tertiary-fixed":"#07006c","on-surface":"#131b2e","on-secondary":"#ffffff","on-primary-fixed-variant":"#003cad","tertiary":"#4648d4","on-background":"#131b2e","surface-tint":"#1a53d6","primary-fixed":"#dce1ff","on-surface-variant":"#434654","on-primary-container":"#fffbff","on-secondary-container":"#5b6276","on-secondary-fixed":"#141b2c","primary":"#1550d3","on-secondary-fixed-variant":"#3f4759","secondary":"#575e71","primary-container":"#3c6bed","on-primary":"#ffffff","surface-container-high":"#e2e7ff","on-tertiary":"#ffffff","tertiary-fixed":"#e1e0ff","surface-dim":"#d2d9f4","secondary-fixed-dim":"#bfc6dc","surface-bright":"#faf8ff","on-error":"#ffffff","outline":"#737686","primary-fixed-dim":"#b5c4ff","on-tertiary-container":"#fffbff","surface-container-low":"#f2f3ff","outline-variant":"#c3c5d7","on-tertiary-fixed-variant":"#2f2ebe","inverse-primary":"#b5c4ff","secondary-container":"#d8dff6","on-primary-fixed":"#00164d","surface-container":"#eaedff","tertiary-fixed-dim":"#c0c1ff","error-container":"#ffdad6","secondary-fixed":"#dbe2f9","error":"#ba1a1a","surface-container-lowest":"#ffffff","inverse-surface":"#283044","surface-variant":"#dae2fd","on-error-container":"#93000a","tertiary-container":"#6063ee","surface-container-highest":"#dae2fd","background":"#faf8ff"},borderRadius:{DEFAULT:"0.125rem",lg:"0.25rem",xl:"0.5rem",full:"0.75rem"},spacing:{"margin-desktop":"2rem","margin-tablet":"1.5rem",gutter:"1rem","gutter-tablet":"1.25rem","space-sm":"0.5rem","space-lg":"1.25rem","space-md":"0.75rem","space-xl":"1.75rem",margin:"1rem","gutter-desktop":"1.5rem","space-xs":"0.25rem"},fontFamily:{"display-lg-mobile":["Plus Jakarta Sans"],"headline-xl":["Plus Jakarta Sans"],"body-lg":["Inter"],"label-caps":["Inter"],"headline-lg":["Plus Jakarta Sans"],"body-md":["Inter"],"headline-sm":["Plus Jakarta Sans"],"metric-numeral-lg":["Inter"],"display-lg":["Plus Jakarta Sans"],"body-sm":["Inter"],"metric-numeral-md":["Inter"],"label-md":["Inter"]},fontSize:{"display-lg-mobile":["28px",{lineHeight:"34px",letterSpacing:"-0.02em",fontWeight:"700"}],"headline-xl":["28px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"24px",letterSpacing:"-0.005em",fontWeight:"400"}],"label-caps":["11px",{lineHeight:"14px",letterSpacing:"0.06em",fontWeight:"700"}],"headline-lg":["22px",{lineHeight:"28px",letterSpacing:"-0.015em",fontWeight:"600"}],"body-md":["14px",{lineHeight:"20px",letterSpacing:"0em",fontWeight:"400"}],"headline-sm":["18px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],"metric-numeral-lg":["32px",{lineHeight:"36px",letterSpacing:"-0.02em",fontWeight:"700"}],"display-lg":["36px",{lineHeight:"44px",letterSpacing:"-0.025em",fontWeight:"700"}],"body-sm":["12px",{lineHeight:"16px",letterSpacing:"0.005em",fontWeight:"400"}],"metric-numeral-md":["20px",{lineHeight:"24px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-md":["13px",{lineHeight:"16px",letterSpacing:"0.01em",fontWeight:"600"}]}}}}</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-64 bg-inverse-surface z-50 flex flex-col justify-between select-none shadow-[0_1px_8px_rgba(0,0,0,0.12)]"><div class="flex flex-col flex-1 overflow-y-auto"><div class="h-16 px-space-md flex items-center justify-between bg-inverse-surface"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">rocket_launch</span></div><div class="flex flex-col"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm font-bold text-inverse-on-surface tracking-tight">Closecraft</span></div><span class="font-label-caps text-label-caps uppercase text-primary-fixed tracking-wider font-semibold">Revenue OS</span></div></div><div class="w-2 h-2 rounded-full bg-primary animate-pulse"></div></div><div class="px-space-md py-space-xs"><div class="bg-on-surface/20 rounded-lg p-space-xs flex items-center justify-between text-inverse-on-surface"><div class="flex items-center gap-space-xs overflow-hidden"><span class="material-symbols-outlined text-primary-fixed text-[16px]">corporate_fare</span><span class="font-label-md text-label-md truncate font-medium text-inverse-on-surface">Acme Enterprise Ops</span></div><span class="material-symbols-outlined text-outline-variant text-[16px]">unfold_more</span></div></div><nav class="flex-1 px-space-sm py-space-xs space-y-space-md" data-active-classes="bg-primary text-on-primary font-semibold shadow-[0_1px_4px_rgba(0,0,0,0.2)]"><div class="space-y-space-xs"><div class="px-space-xs py-1 font-label-caps text-label-caps uppercase text-outline-variant tracking-wider font-bold">Revenue</div><div class="space-y-0.5"><a aria-current="page" class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg transition-colors bg-primary text-on-primary font-semibold shadow-[0_1px_4px_rgba(0,0,0,0.2)]" data-path="revenue-command-centre" href="#"><span class="material-symbols-outlined text-[18px]">dashboard</span><span>Dashboard</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="leads" href="#"><span class="material-symbols-outlined text-[18px]">group</span><span>Leads</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="inbox" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px]">inbox</span><span>Inbox</span></div><span class="px-1.5 py-0.5 rounded-full font-label-caps text-label-caps bg-primary text-on-primary font-bold">5</span></a><a class="flex items-center justify-between px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="ai-actions" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[18px] text-tertiary-fixed">smart_toy</span><span>AI Actions</span></div><span class="px-1.5 py-0.5 rounded-full font-label-caps text-label-caps bg-tertiary text-on-tertiary font-bold">Live</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="pipeline" href="#"><span class="material-symbols-outlined text-[18px]">view_kanban</span><span>Pipeline</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="appointments" href="#"><span class="material-symbols-outlined text-[18px]">calendar_today</span><span>Appointments</span></a></div></div><div class="space-y-space-xs"><div class="px-space-xs py-1 font-label-caps text-label-caps uppercase text-outline-variant tracking-wider font-bold">Operations</div><div class="space-y-0.5"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="automations" href="#"><span class="material-symbols-outlined text-[18px]">alt_route</span><span>Automations</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="knowledge" href="#"><span class="material-symbols-outlined text-[18px]">menu_book</span><span>Knowledge</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="revenue-intelligence" href="#"><span class="material-symbols-outlined text-[18px]">insights</span><span>Revenue Intelligence</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="ai-performance" href="#"><span class="material-symbols-outlined text-[18px]">query_stats</span><span>AI Performance</span></a></div></div><div class="space-y-space-xs"><div class="px-space-xs py-1 font-label-caps text-label-caps uppercase text-outline-variant tracking-wider font-bold">Workspace</div><div class="space-y-0.5"><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="team-capacity" href="#"><span class="material-symbols-outlined text-[18px]">groups</span><span>Team &amp; Capacity</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="integrations" href="#"><span class="material-symbols-outlined text-[18px]">hub</span><span>Integrations</span></a><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg font-body-md text-body-md text-inverse-on-surface/80 hover:bg-surface-container-highest/20 hover:text-inverse-on-surface transition-colors" data-path="settings" href="#"><span class="material-symbols-outlined text-[18px]">settings</span><span>Settings</span></a></div></div></nav></div><div class="p-space-md space-y-space-sm bg-inverse-surface"><div class="flex items-center justify-between px-space-sm py-1.5 rounded-full bg-surface-container-highest/10"><div class="flex items-center gap-space-xs"><span class="w-2 h-2 rounded-full bg-primary"></span><span class="font-label-caps text-label-caps uppercase text-inverse-on-surface tracking-wider font-semibold">AI Engine Active</span></div><span class="font-label-caps text-label-caps text-primary-fixed font-bold">v3.4</span></div><div class="flex items-center justify-between p-space-xs rounded-lg bg-surface-container-highest/10"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-inverse-on-surface font-semibold truncate leading-tight">Sarah Jenkins</span><span class="font-body-sm text-body-sm text-outline-variant truncate leading-tight">Sales Mgr &amp; Closer</span></div></div><span class="material-symbols-outlined text-outline-variant text-[18px]">tune</span></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface/90 backdrop-blur-xl z-40 flex items-center justify-between px-gutter-desktop shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm"><span class="font-label-md text-label-md text-secondary font-medium">Revenue Workspace</span><span class="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span><span class="font-label-md text-label-md text-on-surface font-bold">Production Fleet</span></div><div class="relative flex items-center"><span class="material-symbols-outlined absolute left-space-sm text-on-surface-variant text-[18px]">search</span><input class="w-80 h-9 pl-9 pr-14 bg-surface-container-lowest text-on-surface font-body-sm text-body-sm rounded-lg focus:outline-none focus:ring-1 focus:ring-primary shadow-[0_1px_2px_rgba(0,0,0,0.03)]" placeholder="Search leads, companies, deals..." type="text"/><div class="absolute right-space-xs flex items-center px-1.5 py-0.5 bg-surface-container text-on-surface-variant font-label-caps text-label-caps rounded font-medium">⌘K</div></div></div><div class="flex items-center gap-space-md"><div class="hidden xl:flex items-center gap-space-xs px-space-sm py-1 bg-surface-container-low rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span><span class="font-label-caps text-label-caps font-semibold text-on-surface-variant tracking-wide">Telemetry: 340ms • 99.98% Integrity</span></div><button class="relative w-9 h-9 flex items-center justify-center rounded-lg bg-surface-container-lowest text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.03)]"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-error ring-2 ring-surface"></span></button><button class="h-9 px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-space-xs shadow-[0_1px_3px_rgba(21,80,211,0.25)] transition-colors"><span class="material-symbols-outlined text-[18px]">add</span><span>Add Lead</span></button><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main class="relative pt-16 min-h-screen w-full px-gutter-desktop pb-space-xl bg-surface"><div class="flex flex-col w-full">
+<!-- Operational Sub-Header & Live Status Pill -->
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-lg">
+<div class="flex flex-col">
+<div class="flex items-center gap-space-sm mb-1">
+<span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps uppercase tracking-wider font-bold">
+<span class="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
+          Live Ingest Fleet
+        </span>
+<span class="font-body-sm text-body-sm text-secondary">• Engine v3.4 Active</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface tracking-tight font-bold">Good morning, Sarah.</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Here's what needs your revenue attention today across <span class="font-semibold text-on-surface">Acme Enterprise Ops</span>.</p>
+</div>
+<!-- Quick Date Filter & Primary Actions -->
+<div class="flex items-center gap-space-sm self-start lg:self-center">
+<div class="inline-flex items-center bg-surface-container-lowest shadow-sm rounded-lg px-space-sm py-1.5">
+<span class="material-symbols-outlined text-[18px] text-secondary mr-1.5">calendar_month</span>
+<select class="bg-transparent font-label-md text-label-md font-semibold text-on-surface focus:outline-none cursor-pointer">
+<option>Q3 2024 / MTD (Current)</option>
+<option>Q2 2024 (Historical)</option>
+<option>Trailing 30 Days</option>
+</select>
+</div>
+<button class="h-9 px-space-md bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded-lg flex items-center gap-space-xs transition-colors shadow-sm" id="btn-autopilot-stream">
+<span class="material-symbols-outlined text-[18px] text-tertiary">stream</span>
+<span>Autopilot Stream</span>
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+</button>
+<button class="h-9 px-space-md bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold rounded-lg flex items-center gap-space-xs shadow-sm transition-all hover:shadow">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>Add Lead</span>
+</button>
+</div>
+</div>
+<!-- Compact Executive KPI Bar (5 Metrics, Tabular Numerals) -->
+<div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-space-sm mb-space-lg">
+<!-- Metric 1: Inbound Leads -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-semibold">Inbound Leads</span>
+<span class="material-symbols-outlined text-[16px] text-primary">hub</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<span class="font-metric-numeral-lg text-metric-numeral-lg font-bold text-on-surface">1,428</span>
+<span class="font-label-caps text-label-caps text-primary bg-primary-fixed/40 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">trending_up</span>+18% MoM
+        </span>
+</div>
+<div class="mt-2 w-full bg-surface-container-high h-1 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[78%]"></div>
+</div>
+</div>
+<!-- Metric 2: AI Qualified -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-semibold">AI Qualified</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary">neurology</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<span class="font-metric-numeral-lg text-metric-numeral-lg font-bold text-on-surface">524</span>
+<span class="font-label-caps text-label-caps text-secondary font-semibold">36.7% rate</span>
+</div>
+<div class="mt-2 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span>Pass-through peak</span>
+<span class="font-medium text-tertiary">94.2% fidelity</span>
+</div>
+</div>
+<!-- Metric 3: Active Pipeline -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-semibold">Active Pipeline</span>
+<span class="material-symbols-outlined text-[16px] text-primary">view_kanban</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<span class="font-metric-numeral-lg text-metric-numeral-lg font-bold text-on-surface">₦142.8M</span>
+<span class="font-label-caps text-label-caps text-primary bg-primary-fixed/40 px-1.5 py-0.5 rounded font-bold flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[12px]">arrow_upward</span>+14% vs Q2
+        </span>
+</div>
+<div class="mt-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="font-semibold text-on-surface">38</span> live enterprise deals
+      </div>
+</div>
+<!-- Metric 4: Appointments -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-semibold">Appointments</span>
+<span class="material-symbols-outlined text-[16px] text-secondary">calendar_today</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<span class="font-metric-numeral-lg text-metric-numeral-lg font-bold text-on-surface">92</span>
+<span class="font-label-caps text-label-caps text-on-surface font-semibold bg-surface-container px-1.5 py-0.5 rounded">49.5% demo rate</span>
+</div>
+<div class="mt-2 flex items-center gap-1.5 font-body-sm text-body-sm text-secondary">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>14 slated today</span>
+</div>
+</div>
+<!-- Metric 5: Closed Won MTD -->
+<div class="bg-surface-container-lowest p-space-md rounded-lg shadow-sm flex flex-col justify-between col-span-2 md:col-span-1">
+<div class="flex items-center justify-between text-secondary mb-1">
+<span class="font-label-caps text-label-caps uppercase tracking-wider font-semibold">Closed Won MTD</span>
+<span class="material-symbols-outlined text-[16px] text-primary">verified</span>
+</div>
+<div class="flex items-baseline justify-between mt-1">
+<span class="font-metric-numeral-lg text-metric-numeral-lg font-bold text-primary">₦38.2M</span>
+<span class="font-label-caps text-label-caps text-primary bg-primary-fixed/40 px-1.5 py-0.5 rounded font-bold">41.3% win rate</span>
+</div>
+<div class="mt-2 flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
+<span>Target: ₦45M</span>
+<span class="font-semibold text-on-surface">84.8% of goal</span>
+</div>
+</div>
+</div>
+<!-- Signature Section: "Needs Your Attention" (High-Priority Operational Revenue Ledger) -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm p-space-md mb-space-lg flex flex-col gap-space-sm">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-xs gap-space-xs">
+<div class="flex items-center gap-space-sm">
+<div class="w-2.5 h-2.5 rounded-full bg-error animate-pulse"></div>
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Needs Your Attention</h2>
+<span class="px-2 py-0.5 rounded-full bg-error-container text-on-error-container font-label-caps text-label-caps font-bold">4 Critical Actions</span>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px]">timer</span>
+<span>SLA Threshold: 15m max human escalation</span>
+</div>
+</div>
+<!-- Operational Alert Cards Grid / Row Ledger -->
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-space-sm">
+<!-- Item 1: Apex Logistics -->
+<div class="bg-surface-container-low/70 hover:bg-surface-container-low transition-colors p-space-md rounded-lg flex flex-col justify-between gap-space-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-error-container text-on-error-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">pause_circle</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Apex Logistics</span>
+<span class="font-label-caps text-label-caps uppercase bg-error/10 text-error px-1.5 py-0.2 rounded font-bold">URGENT</span>
+<span class="font-body-sm text-body-sm text-secondary">DL-9182</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                AI Engine Paused: NDPR / ERP Webhook gateway timeout encountered during contract generation.
+              </p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<div class="font-metric-numeral-md text-metric-numeral-md font-bold text-on-surface">₦12.5M</div>
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">ARR Estimate</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-label-caps text-label-caps text-secondary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 6 mins overdue
+          </span>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-sm rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1" onclick="handleAction('apex-retry', 'AI Retry Initiated on DL-9182')">
+<span class="material-symbols-outlined text-[16px]">refresh</span>
+<span>Retry AI</span>
+</button>
+<button class="h-8 px-space-sm rounded bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 shadow-sm" onclick="handleAction('apex-manual', 'Apex Logistics marked for Manual Closer Takeover')">
+<span class="material-symbols-outlined text-[16px]">person_check</span>
+<span>Qualify Manually</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item 2: PayPulse Africa (David Chen) -->
+<div class="bg-surface-container-low/70 hover:bg-surface-container-low transition-colors p-space-md rounded-lg flex flex-col justify-between gap-space-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high text-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">David Chen</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium">@ PayPulse Africa</span>
+<span class="font-label-caps text-label-caps bg-primary-fixed text-on-primary-fixed px-1.5 py-0.2 rounded font-bold">SCORE 79</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Sensitive compliance inquiry regarding Central Bank of Nigeria (CBN) on-soil data residency &amp; auditing.
+              </p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<div class="font-metric-numeral-md text-metric-numeral-md font-bold text-on-surface">₦8.5M</div>
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Tier-1 Fintech</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-label-caps text-label-caps text-secondary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">mark_chat_unread</span> Live conversation queued
+          </span>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-sm rounded bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1" onclick="handleAction('paypulse-ndpr', 'NDPR Compliance Pack dispatched to dchen@paypulse.africa')">
+<span class="material-symbols-outlined text-[16px]">description</span>
+<span>Review NDPR Addendum</span>
+</button>
+<button class="h-8 px-space-sm rounded bg-inverse-surface hover:bg-on-surface text-inverse-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 shadow-sm" onclick="handleAction('paypulse-chat', 'Joined live communication thread with David Chen')">
+<span class="material-symbols-outlined text-[16px]">forum</span>
+<span>Take Over Chat</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item 3: Sterling & Sterling Ltd (Tunde Balogun) -->
+<div class="bg-surface-container-low/70 hover:bg-surface-container-low transition-colors p-space-md rounded-lg flex flex-col justify-between gap-space-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">bolt</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Tunde Balogun</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium">@ Sterling &amp; Sterling Ltd</span>
+<span class="font-label-caps text-label-caps bg-tertiary text-on-tertiary px-1.5 py-0.2 rounded font-bold">SCORE 96</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Surging high-intent buying signals: Pricing &amp; Enterprise API tier visited 4x within the past 22 minutes.
+              </p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<div class="font-metric-numeral-md text-metric-numeral-md font-bold text-on-surface">₦4.2M</div>
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Immediate ARR</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-label-caps text-label-caps text-primary font-bold flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">visibility</span> Active on site now
+          </span>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-md rounded bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold transition-colors flex items-center gap-1.5 shadow-sm" onclick="handleAction('tunde-dial', 'Direct bridge dialing initiated for Tunde Balogun (+234 803 ***)')">
+<span class="material-symbols-outlined text-[16px]">call</span>
+<span>Claim &amp; Instant Dial</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Item 4: KwikLogistics (Amaka Okafor) -->
+<div class="bg-surface-container-low/70 hover:bg-surface-container-low transition-colors p-space-md rounded-lg flex flex-col justify-between gap-space-sm">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-start gap-space-sm">
+<div class="w-9 h-9 rounded-lg bg-surface-container-high text-secondary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[20px]">contract_edit</span>
+</div>
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="font-headline-sm text-headline-sm font-bold text-on-surface">Amaka Okafor</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium">@ KwikLogistics</span>
+<span class="font-label-caps text-label-caps bg-surface-container text-on-surface-variant px-1.5 py-0.2 rounded font-bold">SLIPPING</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Contract viewed 3x over 48 hours without redline or signature submission. Approaching cycle velocity drop.
+              </p>
+</div>
+</div>
+<div class="text-right shrink-0">
+<div class="font-metric-numeral-md text-metric-numeral-md font-bold text-on-surface">₦2.8M</div>
+<span class="font-label-caps text-label-caps text-secondary uppercase font-semibold">Annual Tier</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<span class="font-label-caps text-label-caps text-secondary font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">timelapse</span> Last interaction: 41 hrs ago
+          </span>
+<div class="flex items-center gap-space-xs">
+<button class="h-8 px-space-md rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-label-md text-label-md font-semibold transition-colors flex items-center gap-1 shadow-sm" onclick="handleAction('amaka-bump', 'Executive touch email dispatched via Sarah Jenkins persona')">
+<span class="material-symbols-outlined text-[16px]">forward_to_inbox</span>
+<span>Send Exec Bump</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Operational Two-Column Revenue Engine Workspace -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md">
+<!-- Left Column (Wider, 8 cols): Hot & High-Value Inbound Opportunities -->
+<div class="lg:col-span-8 flex flex-col gap-space-sm bg-surface-container-lowest rounded-lg shadow-sm p-space-md">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-xs pb-space-xs">
+<div>
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface">Hot &amp; High-Value Inbound Opportunities</h2>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps font-bold">Real-time Stream</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ranked by revenue upside and multi-vector AI qualification match.</p>
+</div>
+<div class="flex items-center gap-space-xs">
+<div class="flex items-center bg-surface-container-low rounded px-2 py-1">
+<span class="material-symbols-outlined text-[16px] text-secondary mr-1">tune</span>
+<span class="font-label-md text-label-md text-secondary font-medium">Filter:</span>
+<span class="font-label-md text-label-md text-on-surface font-semibold ml-1">Score &gt; 80</span>
+</div>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">download</span>
+</button>
+</div>
+</div>
+<!-- Opportunities Ledger Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-secondary font-label-caps text-label-caps uppercase tracking-wider">
+<th class="py-2.5 px-3 rounded-l">Lead &amp; Entity</th>
+<th class="py-2.5 px-3">Est. ACV</th>
+<th class="py-2.5 px-3">Score &amp; Vectors (F / I / B / A)</th>
+<th class="py-2.5 px-3">Owner</th>
+<th class="py-2.5 px-3 rounded-r text-right">Recommended Action</th>
+</tr>
+</thead>
+<tbody class="divide-y-0 text-on-surface font-body-sm text-body-sm">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center font-bold text-on-primary-fixed text-[12px]">
+                    FO
+                  </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-on-surface">Femi Otedola Jr.</span>
+<span class="font-body-sm text-body-sm text-secondary">Zenith Maritime Infra</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-label-md text-label-md font-bold text-on-surface">₦24.0M</div>
+<span class="font-label-caps text-label-caps text-secondary">Annual Master</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<div class="px-2 py-0.5 rounded bg-primary text-on-primary font-label-caps text-label-caps font-bold">98</div>
+<div class="flex items-center gap-1 font-label-caps text-label-caps text-secondary font-mono">
+<span class="text-primary font-bold" title="Fit">99</span>/
+                    <span class="text-primary font-bold" title="Intent">98</span>/
+                    <span class="text-primary font-bold" title="Budget">100</span>/
+                    <span class="text-primary font-bold" title="Authority">95</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-body-sm text-body-sm font-medium">S. Jenkins</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="h-7 px-space-sm bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md font-semibold rounded transition-colors inline-flex items-center gap-1" onclick="handleAction('opp-route-1', 'Routing direct invite: Femi Otedola Jr.')">
+<span>Send Exec Calendly</span>
+<span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-secondary text-[12px]">
+                    EA
+                  </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-on-surface">Emeka Anyaoku</span>
+<span class="font-body-sm text-body-sm text-secondary">FirstDirect Switching</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-label-md text-label-md font-bold text-on-surface">₦18.4M</div>
+<span class="font-label-caps text-label-caps text-secondary">Switch Routing</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<div class="px-2 py-0.5 rounded bg-primary text-on-primary font-label-caps text-label-caps font-bold">92</div>
+<div class="flex items-center gap-1 font-label-caps text-label-caps text-secondary font-mono">
+<span class="text-primary font-bold">94</span>/
+                    <span class="text-primary font-bold">90</span>/
+                    <span class="text-primary font-bold">95</span>/
+                    <span class="text-primary font-bold">89</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-body-sm text-body-sm font-medium">AI Autopilot</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="h-7 px-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded transition-colors inline-flex items-center gap-1" onclick="handleAction('opp-route-2', 'Approved AI SLA automated dispatch for FirstDirect')">
+<span>Approve Route</span>
+<span class="material-symbols-outlined text-[14px]">check</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-tertiary-fixed flex items-center justify-center font-bold text-on-tertiary-fixed text-[12px]">
+                    KI
+                  </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-on-surface">Khadija Ibrahim</span>
+<span class="font-body-sm text-body-sm text-secondary">NorthBridge Energy</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-label-md text-label-md font-bold text-on-surface">₦11.2M</div>
+<span class="font-label-caps text-label-caps text-secondary">ERP Extension</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<div class="px-2 py-0.5 rounded bg-tertiary text-on-tertiary font-label-caps text-label-caps font-bold">88</div>
+<div class="flex items-center gap-1 font-label-caps text-label-caps text-secondary font-mono">
+<span class="font-bold">90</span>/
+                    <span class="font-bold">86</span>/
+                    <span class="font-bold">88</span>/
+                    <span class="font-bold">88</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+<span class="font-body-sm text-body-sm font-medium">B. Adebayo</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="h-7 px-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded transition-colors inline-flex items-center gap-1" onclick="handleAction('opp-route-3', 'Re-qualification triggers pushed to Khadija Ibrahim')">
+<span>Re-qualify</span>
+<span class="material-symbols-outlined text-[14px]">tune</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/50 transition-colors">
+<td class="py-3 px-3">
+<div class="flex items-center gap-space-sm">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center font-bold text-on-secondary-container text-[12px]">
+                    TA
+                  </div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-on-surface">Tolani Adeleke</span>
+<span class="font-body-sm text-body-sm text-secondary">OctaCore Telecoms</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="font-label-md text-label-md font-bold text-on-surface">₦9.6M</div>
+<span class="font-label-caps text-label-caps text-secondary">Unified Billing</span>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-2">
+<div class="px-2 py-0.5 rounded bg-tertiary text-on-tertiary font-label-caps text-label-caps font-bold">84</div>
+<div class="flex items-center gap-1 font-label-caps text-label-caps text-secondary font-mono">
+<span class="font-bold">88</span>/
+                    <span class="font-bold">80</span>/
+                    <span class="font-bold">82</span>/
+                    <span class="font-bold">86</span>
+</div>
+</div>
+</td>
+<td class="py-3 px-3">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-body-sm text-body-sm font-medium">AI Autopilot</span>
+</div>
+</td>
+<td class="py-3 px-3 text-right">
+<button class="h-7 px-space-sm bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded transition-colors inline-flex items-center gap-1" onclick="handleAction('opp-route-4', 'Assigned Rep: S. Jenkins assigned to Tolani Adeleke')">
+<span>Assign Rep</span>
+<span class="material-symbols-outlined text-[14px]">person_add</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Quick Bottom Visual Insight: Velocity Sparkline / Lead Cadence -->
+<div class="mt-space-sm p-space-sm bg-surface-container-low rounded-lg flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-[20px] text-primary">insights</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Real-Time Inbound Velocity</span>
+<span class="font-body-sm text-body-sm text-secondary">Hourly deal arrival velocity is trending +24% higher than weekly median</span>
+</div>
+</div>
+<!-- Inline Micro SVG Visual -->
+<svg class="w-36 h-7 text-primary" fill="none" viewbox="0 0 144 28" xmlns="http://www.w3.org/2000/svg">
+<path d="M2 24L24 18L44 22L66 12L88 15L110 6L142 2" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+<circle cx="142" cy="2" fill="currentColor" r="2.5"></circle>
+</svg>
+</div>
+</div>
+<!-- Right Column (4 cols): Autonomous Revenue Engine Telemetry -->
+<div class="lg:col-span-4 flex flex-col gap-space-sm">
+<!-- Telemetry Health Box -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm p-space-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-[20px] text-tertiary">query_stats</span>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Revenue Telemetry Mesh</h3>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed text-on-primary-fixed font-label-caps text-label-caps font-bold">Live Stream</span>
+</div>
+<!-- Telemetry Key Metrics -->
+<div class="grid grid-cols-2 gap-space-sm pt-space-xs">
+<div class="p-space-sm bg-surface-container-low rounded">
+<span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Mesh Latency</span>
+<div class="font-metric-numeral-md text-metric-numeral-md font-bold text-on-surface mt-0.5">340ms</div>
+<span class="font-body-sm text-body-sm text-primary font-medium">99.98% integrity</span>
+</div>
+<div class="p-space-sm bg-surface-container-low rounded">
+<span class="font-label-caps text-label-caps uppercase text-secondary font-semibold">Pass-Through</span>
+<div class="font-metric-numeral-md text-metric-numeral-md font-bold text-on-surface mt-0.5">94.2%</div>
+<span class="font-body-sm text-body-sm text-secondary font-medium">Auto-qualify rate</span>
+</div>
+</div>
+<!-- Confidence Distribution Spectrum -->
+<div class="flex flex-col gap-1.5 pt-space-xs">
+<div class="flex items-center justify-between font-label-caps text-label-caps text-secondary font-semibold">
+<span>Confidence Distribution</span>
+<span>Avg Match: 88.4%</span>
+</div>
+<div class="h-2 w-full flex rounded-full overflow-hidden bg-surface-container">
+<div class="bg-primary h-full w-[64%]" title="High Confidence (&gt;85%)"></div>
+<div class="bg-tertiary h-full w-[26%]" title="Moderate Confidence (70-85%)"></div>
+<div class="bg-error h-full w-[10%]" title="Low / Escalated (&lt;70%)"></div>
+</div>
+<div class="flex items-center justify-between font-body-sm text-body-sm text-secondary pt-0.5">
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span>High (64%)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span>Review (26%)</span>
+</div>
+<div class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+<span>Human Esc. (10%)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recent Autonomous Actions Log -->
+<div class="bg-surface-container-lowest rounded-lg shadow-sm p-space-md flex flex-col gap-space-sm flex-1">
+<div class="flex items-center justify-between">
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface">Recent AI Actions Log</h3>
+<span class="font-body-sm text-body-sm text-secondary">Auto-sync active</span>
+</div>
+<!-- Timeline Log Entries -->
+<div class="flex flex-col gap-space-sm pt-space-xs">
+<!-- Entry 1 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-7 h-7 rounded bg-primary-fixed flex items-center justify-center text-on-primary-fixed shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">draw</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">DocuSign Envelope Executed</span>
+<span class="font-label-caps text-label-caps text-secondary shrink-0">1m ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Safeway Freight &amp; Logistics (₦16.2M)</p>
+</div>
+</div>
+<!-- Entry 2 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-7 h-7 rounded bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">event_available</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Calendly Demo Synced</span>
+<span class="font-label-caps text-label-caps text-secondary shrink-0">4m ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">CTO @ Omniverse Pay with Sarah Jenkins</p>
+</div>
+</div>
+<!-- Entry 3 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-7 h-7 rounded bg-surface-container flex items-center justify-center text-secondary shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">outgoing_mail</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Smart Re-engagement Sent</span>
+<span class="font-label-caps text-label-caps text-secondary shrink-0">9m ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Follow-up series to 12 cold inbound leads</p>
+</div>
+</div>
+<!-- Entry 4 -->
+<div class="flex items-start gap-space-sm">
+<div class="w-7 h-7 rounded bg-primary-fixed flex items-center justify-center text-on-primary-fixed shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[16px]">sync_alt</span>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">HubSpot Stage Auto-Shift</span>
+<span class="font-label-caps text-label-caps text-secondary shrink-0">14m ago</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant truncate">Deal #7721 moved to "Technical Evaluation"</p>
+</div>
+</div>
+</div>
+<!-- Log Action Strip -->
+<div class="mt-auto pt-space-sm">
+<button class="w-full h-8 bg-surface-container hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded flex items-center justify-center gap-1.5 transition-colors" onclick="handleAction('telemetry-full-audit', 'Generating Full Autopilot Security and Routing Audit...')">
+<span class="material-symbols-outlined text-[16px]">history</span>
+<span>View Full Audit Ledger</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Toast Notification / Operational Notification Drawer Container -->
+<div class="fixed bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none" id="revenue-toast">
+<div class="bg-inverse-surface text-inverse-on-surface px-space-md py-3 rounded-lg shadow-xl flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary-fixed text-[20px]">task_alt</span>
+<span class="font-body-sm text-body-sm font-medium" id="toast-message">Operation executed successfully.</span>
+</div>
+</div>
+</div>
+<script>
+  function handleAction(actionId, message) {
+    const toast = document.getElementById('revenue-toast');
+    const toastMessage = document.getElementById('toast-message');
+    if (toast && toastMessage) {
+      toastMessage.textContent = message;
+      toast.classList.remove('translate-y-24', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+      
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-24', 'opacity-0', 'pointer-events-none');
+      }, 3400);
+    }
+  }
+
+  // Quick Autopilot Stream Toggle micro-interaction
+  document.getElementById('btn-autopilot-stream')?.addEventListener('click', function() {
+    handleAction('autopilot-stream-toggle', 'Autopilot Live Stream Inspector enabled (Sampling rate: 100ms)');
+  });
+</script></main></div></body></html>
