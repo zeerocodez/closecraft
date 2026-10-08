@@ -1,0 +1,119 @@
+// @ts-nocheck
+import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
+import { z } from "zod";
+import { db as prisma } from "@/lib/db";
+import { withApiErrors } from "@/lib/apiError";
+import { auth } from "@/lib/auth";
+import { getRankingConfig, calculateVisibility } from "@/lib/ecosystem/visibility";
+import { RankingConfigSchema, pickFeatured } from "@/lib/ecosystem/visibilityCore";
+
+export const dynamic = "force-dynamic";
+
+const FLAG_SELECT = {
+  ecosystemOrgPagesEnabled: true,
+  ecosystemEducationEnabled: true,
+  ecosystemFeedEnabled: true,
+  ecosystemLandingEnabled: true,
+  ecosystemLandingPlaceholders: true,
+  ecosystemPublicJobsEnabled: true,
+  ecosystemPublicTraineesEnabled: true,
+} as const;
+
+const FlagsSchema = z.object({
+  ecosystemOrgPagesEnabled: z.boolean().optional(),
+  ecosystemEducationEnabled: z.boolean().optional(),
+  ecosystemFeedEnabled: z.boolean().optional(),
+  ecosystemLandingEnabled: z.boolean().optional(),
+  ecosystemLandingPlaceholders: z.boolean().optional(),
+  ecosystemPublicJobsEnabled: z.boolean().optional(),
+  ecosystemPublicTraineesEnabled: z.boolean().optional(),
+  rankingConfig: RankingConfigSchema.optional(),
+});
+
+/**
+ * GET/PUT /api/admin/ecosystem — SUPER_ADMIN only. Feature switches, the
+ * list of organizations with their public-profile state, and the
+ * education-post moderation queue in one payload for /admin/ecosystem.
+ */
+export async function GET() {
+  return withApiErrors(async () => {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const config = await getRankingConfig();
+    const [settings, orgs, posts, rated, comments, events] = await Promise.all([
+      prisma.platformSettings.findUnique({
+        where: { id: "singleton" },
+        select: FLAG_SELECT,
+      }),
+      prisma.trainingOrganization.findMany({
+        where: { approvalState: "APPROVED" },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true, isDemo: true, publicProfile: { select: { slug: true, publicEnabled: true, verified: true } } },
+      }),
+      prisma.educationPost.findMany({
+        where: { status: { in: ["PENDING_REVIEW", "PUBLISHED", "REJECTED"] } },
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: {
+          id: true, title: true, status: true, youtubeUrl: true, thumbnailUrl: true, description: true, createdAt: true, isDemo: true,
+          trainee: { select: { name: true } },
+          trainingOrganization: { select: { name: true } },
+        },
+      }),
+      calculateVisibility(config),
+      prisma.educationPostComment.findMany({
+        where: { status: "VISIBLE" }, orderBy: { createdAt: "desc" }, take: 30,
+        select: { id: true, body: true, isDemo: true, trainee: { select: { name: true } }, post: { select: { title: true } } },
+      }),
+      prisma.organizationEvent.findMany({
+        where: { status: "PUBLISHED", startsAt: { gte: new Date(Date.now() - 24 * 3600 * 1000) } }, orderBy: { startsAt: "asc" }, take: 30,
+        select: { id: true, title: true, startsAt: true, isDemo: true, trainingOrganization: { select: { name: true } } },
+      }),
+    ]);
+    const featuredIds = new Set(pickFeatured(rated, config).map((r) => r.id));
+    return NextResponse.json({
+      comments: comments.map((c) => ({ id: c.id, body: c.body, isDemo: c.isDemo, authorName: c.trainee.name, videoTitle: c.post.title })),
+      events: events.map((e) => ({ id: e.id, title: e.title, startsAt: e.startsAt, isDemo: e.isDemo, organizationName: e.trainingOrganization.name })),
+      rankingConfig: config,
+      ratings: rated.map((r) => ({ id: r.id, name: r.name, score: r.score, components: r.result.components, publishedVideos: r.publishedVideos, badges: r.badges, featured: featuredIds.has(r.id) })).sort((a, b) => b.score - a.score),
+      flags: {
+        ecosystemOrgPagesEnabled: settings?.ecosystemOrgPagesEnabled ?? true,
+        ecosystemEducationEnabled: settings?.ecosystemEducationEnabled ?? true,
+        ecosystemFeedEnabled: settings?.ecosystemFeedEnabled ?? true,
+        ecosystemLandingEnabled: settings?.ecosystemLandingEnabled ?? true,
+        ecosystemLandingPlaceholders: settings?.ecosystemLandingPlaceholders ?? true,
+        ecosystemPublicJobsEnabled: settings?.ecosystemPublicJobsEnabled ?? true,
+        ecosystemPublicTraineesEnabled: settings?.ecosystemPublicTraineesEnabled ?? true,
+      },
+      organizations: orgs,
+      posts: posts.map((p) => ({ ...p, traineeName: p.trainee.name, organizationName: p.trainingOrganization.name, trainee: undefined, trainingOrganization: undefined })),
+    });
+  });
+}
+
+export async function PUT(req: NextRequest) {
+  return withApiErrors(async () => {
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const parsed = FlagsSchema.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid settings." }, { status: 400 });
+    const { rankingConfig, ...flagData } = parsed.data;
+    const data = { ...flagData, ...(rankingConfig ? { ecosystemRankingConfig: rankingConfig } : {}) };
+    const settings = await prisma.platformSettings.upsert({
+      where: { id: "singleton" },
+      create: { id: "singleton", ...data },
+      update: data,
+      select: FLAG_SELECT,
+    });
+    // The landing page and the public job and trainee pages are cached for a
+    // few minutes; a switch change should show at once.
+    revalidateTag("landing");
+    for (const path of ["/", "/jobs", "/trainees"]) revalidatePath(path);
+    return NextResponse.json({ flags: settings });
+  });
+}

@@ -30,18 +30,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <>
-        <header className="fixed top-0 left-64 right-0 h-16 bg-surface/90 backdrop-blur-xl z-40 flex items-center justify-between px-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-1 text-on-surface-variant font-body-sm text-body-sm">
-              <span className="font-label-md text-label-md text-secondary font-medium">Configuration Workspace</span>
-              <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
-              <span className="font-label-md text-label-md text-on-surface font-bold">Settings & Setup</span>
-            </div>
-          </div>
-        </header>
-
-        <main className="relative pt-24 min-h-screen w-full px-8 pb-space-xl overflow-y-auto">
+    <div className="flex flex-col gap-6 lg:gap-8 w-full h-full max-w-5xl">
           <div className="max-w-4xl mx-auto space-y-8">
             <div className="flex flex-col gap-2">
               <h1 className="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight">Organization Settings</h1>
@@ -170,7 +159,6 @@ export default async function SettingsPage() {
               </div>
             </section>
           </div>
-        </main>
-    </>
+    </div>
   );
 }

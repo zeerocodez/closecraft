@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import LoopGuide from "@/components/guide/LoopGuide";
 import "./globals.css";
 
 const inter = Inter({
@@ -36,6 +37,7 @@ export default function RootLayout({
         className={`${inter.variable} ${plusJakartaSans.variable} font-body-lg antialiased bg-surface text-on-surface flex flex-col min-h-screen selection:bg-primary selection:text-on-primary`}
       >
         {children}
+        <LoopGuide />
       </body>
     </html>
   );

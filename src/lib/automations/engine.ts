@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { inngest } from './client';
+import { inngest } from '@/lib/inngest/client';
 import { db } from '@/lib/db';
 import { generateObject } from 'ai';
 import { openai } from '@ai-sdk/openai';

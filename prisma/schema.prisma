@@ -729,3 +729,83 @@ model Resource {
   @@index([organizationId])
   @@index([courseId])
 }
+
+
+model PlatformSettings {
+  id String @id @default("singleton")
+  ecosystemOrgPagesEnabled  Boolean  @default(true)
+  ecosystemEducationEnabled Boolean  @default(true)
+  ecosystemFeedEnabled      Boolean  @default(true)
+  ecosystemLandingEnabled         Boolean @default(true)
+  ecosystemLandingPlaceholders    Boolean @default(true)
+  ecosystemPublicJobsEnabled      Boolean @default(true)
+  ecosystemPublicTraineesEnabled  Boolean @default(true)
+  guideEnabled                    Boolean @default(true)
+  ecosystemRankingConfig    Json?
+}
+
+model JobPosting {
+  id        String   @id @default(cuid())
+  title     String
+  company   String
+  location  String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model EcosystemEvent {
+  id        String   @id @default(cuid())
+  type      String
+  title     String?
+  createdAt DateTime @default(now())
+  courseId  String?
+  organizationId String?
+}
+
+model EducationPost {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  createdAt DateTime @default(now())
+}
+
+
+// Loop guide, answers written by SUPER_ADMIN. The built-in answers live in
+// code (src/lib/guide/defaults.ts); these are the additions, kept when a
+// question the guide could not answer gets an answer.
+model GuideEntry {
+  id          String   @id @default(cuid())
+  question    String
+  answer      String
+  // [{ "label": "Explore programs", "href": "/courses" }], internal paths only.
+  links       Json     @default("[]")
+  keywords    String[] @default([])
+  enabled     Boolean  @default(true)
+  createdById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([enabled])
+}
+
+enum GuideQuestionStatus {
+  OPEN
+  ANSWERED
+  DISMISSED
+}
+
+// Questions the guide could not answer, grouped by their normalized text so
+// the same question asked twenty times is one row with a count. Only the
+// question text is kept (with emails, phone numbers and long digit runs
+// removed first): no account, no IP address, no browser details.
+model GuideUnanswered {
+  id           String              @id @default(cuid())
+  text         String              @unique
+  asked        Int                 @default(1)
+  status       GuideQuestionStatus @default(OPEN)
+  firstAskedAt DateTime            @default(now())
+  lastAskedAt  DateTime            @default(now())
+  entryId      String?
+
+  @@index([status, lastAskedAt])
+}

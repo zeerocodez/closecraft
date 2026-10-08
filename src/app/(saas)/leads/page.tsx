@@ -31,41 +31,22 @@ export default async function LeadsPage() {
   const needsReviewCount = leads.filter(l => l.status === 'NEW').length;
 
   return (
-    <>
-        <header className="fixed top-0 left-64 right-0 h-16 bg-surface/90 backdrop-blur-xl z-40 flex items-center justify-between px-8 shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-space-xs text-on-surface-variant font-body-sm text-body-sm">
-              <span className="font-label-md text-label-md text-secondary font-medium">Revenue Workspace</span>
-              <span className="material-symbols-outlined text-[16px] text-outline-variant">chevron_right</span>
-              <span className="font-label-md text-label-md text-on-surface font-bold">Leads</span>
-            </div>
+    <div className="flex flex-col gap-6 lg:gap-8 w-full h-full">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl md:text-3xl font-heading font-semibold text-on-surface">Leads Management</h1>
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-primary text-xs font-bold tracking-wider uppercase shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+              {totalLeads} Total Leads • {formattedPipeline} Pipeline
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <AddLeadModal />
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer hover:bg-primary-container transition-colors">
-              <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
-            </div>
-          </div>
-        </header>
-
-        <main className="relative pt-24 min-h-screen w-full px-8 pb-space-xl overflow-y-auto">
-          {/* Command Header */}
-          <div className="flex flex-col gap-2 pt-1 mb-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <h1 className="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">Leads Management</h1>
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-high text-primary font-label-caps text-label-caps font-bold tracking-wider uppercase shadow-sm">
-                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></span>
-                      {totalLeads} Total Leads • {formattedPipeline} Qualified Pipeline
-                    </span>
-                  </div>
-                  <span className="font-body-sm text-body-sm text-on-surface-variant mt-1">Real-time ICP scoring, authority graphs, and AI pipeline orchestration</span>
-                </div>
-              </div>
-            </div>
-          </div>
+          <p className="text-sm text-on-surface-variant mt-1">Real-time ICP scoring, authority graphs, and AI pipeline orchestration.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <AddLeadModal />
+        </div>
+      </div>
 
           {/* Filters & Actions */}
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 bg-surface-container-lowest p-2 rounded-xl shadow-sm mb-4">
@@ -213,8 +194,7 @@ export default async function LeadsPage() {
                 </tbody>
               </table>
             </div>
-          </div>
-        </main>
-    </>
+            </div>
+        </div>
   );
 }

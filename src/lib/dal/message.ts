@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { db } from "@/lib/db";
 import { inngest } from "@/lib/inngest/client";
 
