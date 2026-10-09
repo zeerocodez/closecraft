@@ -8,9 +8,9 @@ export const dynamic = "force-dynamic";
 
 /** GET /api/admin/ecosystem/analytics — SUPER_ADMIN, platform-wide totals (demo organizations excluded). */
 export async function GET() {
-  return withApiErrors(async () => {
-    const session = await auth();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    return NextResponse.json(await getPlatformAnalytics());
-  });
+ return withApiErrors(async () => {
+ const session = await auth();
+ if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ return NextResponse.json(await getPlatformAnalytics());
+ });
 }

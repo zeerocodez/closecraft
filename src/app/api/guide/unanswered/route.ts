@@ -18,17 +18,17 @@ const Body = z.object({ question: z.string().min(1).max(500) });
  * before it is kept.
  */
 export async function POST(req: NextRequest) {
-  return withApiErrors(async () => {
-    const parsed = Body.safeParse(await req.json().catch(() => null));
-    if (!parsed.success) return NextResponse.json({ error: "Invalid question." }, { status: 400 });
+ return withApiErrors(async () => {
+ const parsed = Body.safeParse(await req.json().catch(() => null));
+ if (!parsed.success) return NextResponse.json({ error: "Invalid question." }, { status: 400 });
 
-    const settings = await prisma.platformSettings.findUnique({ where: { id: "singleton" }, select: { guideEnabled: true } });
-    if (settings && !settings.guideEnabled) return new NextResponse(null, { status: 204 });
+ const settings = await prisma.platformSettings.findUnique({ where: { id: "singleton" }, select: { guideEnabled: true } });
+ if (settings && !settings.guideEnabled) return new NextResponse(null, { status: 204 });
 
-    const limit = await rateLimit(`guide-unanswered:${clientIp(req)}`, 20, 10 * 60 * 1000);
-    if (!limit.allowed) return new NextResponse(null, { status: 204 });
+ const limit = await rateLimit(`guide-unanswered:${clientIp(req)}`, 20, 10 * 60 * 1000);
+ if (!limit.allowed) return new NextResponse(null, { status: 204 });
 
-    await recordUnanswered(parsed.data.question);
-    return new NextResponse(null, { status: 204 });
-  });
+ await recordUnanswered(parsed.data.question);
+ return new NextResponse(null, { status: 204 });
+ });
 }

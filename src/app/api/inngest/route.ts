@@ -7,12 +7,12 @@ import { processBillingEvent } from '@/lib/inngest/billing';
 import { executeAutomations } from '@/lib/automations/engine';
 
 export const { GET, POST, PUT } = serve({
-  client: inngest,
-  functions: [
-    processNewLead,
-    detectRevenueLeaks,
-    gradeSubmission,
-    processBillingEvent,
-    executeAutomations
-  ],
+ client: inngest,
+ functions: [
+ processNewLead,
+ detectRevenueLeaks,
+ gradeSubmission,
+ processBillingEvent,
+ executeAutomations
+ ],
 });

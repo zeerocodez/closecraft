@@ -12,8 +12,8 @@ export const dynamic = "force-dynamic";
  * reaches visitors within a minute.
  */
 export async function GET() {
-  return withApiErrors(async () => {
-    const config = await loadGuideConfig();
-    return NextResponse.json(config, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
-  });
+ return withApiErrors(async () => {
+ const config = await loadGuideConfig();
+ return NextResponse.json(config, { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } });
+ });
 }

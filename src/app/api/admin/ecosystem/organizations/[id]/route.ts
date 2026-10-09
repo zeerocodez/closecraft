@@ -10,22 +10,22 @@ const Body = z.object({ verified: z.boolean().optional(), publicEnabled: z.boole
 
 /** PUT /api/admin/ecosystem/organizations/[id] — SUPER_ADMIN verifies an organization or switches its public page. */
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  return withApiErrors(async () => {
-    const session = await auth();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    const parsed = Body.safeParse(await req.json().catch(() => null));
-    if (!parsed.success) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
-    const org = await prisma.trainingOrganization.findUnique({ where: { id: params.id }, select: { id: true, name: true, approvalState: true } });
-    if (!org || org.approvalState !== "APPROVED") return NextResponse.json({ error: "Organization not found." }, { status: 404 });
+ return withApiErrors(async () => {
+ const session = await auth();
+ if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ const parsed = Body.safeParse(await req.json().catch(() => null));
+ if (!parsed.success) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+ const org = await prisma.trainingOrganization.findUnique({ where: { id: params.id }, select: { id: true, name: true, approvalState: true } });
+ if (!org || org.approvalState !== "APPROVED") return NextResponse.json({ error: "Organization not found." }, { status: 404 });
 
-    let slug = slugify(org.name);
-    if (await prisma.organizationPublicProfile.findUnique({ where: { slug }, select: { id: true } })) slug = `${slug}-${org.id.slice(-4)}`;
-    const profile = await prisma.organizationPublicProfile.upsert({
-      where: { trainingOrganizationId: org.id },
-      create: { trainingOrganizationId: org.id, slug, ...parsed.data },
-      update: parsed.data,
-      select: { slug: true, publicEnabled: true, verified: true },
-    });
-    return NextResponse.json({ profile });
-  });
+ let slug = slugify(org.name);
+ if (await prisma.organizationPublicProfile.findUnique({ where: { slug }, select: { id: true } })) slug = `${slug}-${org.id.slice(-4)}`;
+ const profile = await prisma.organizationPublicProfile.upsert({
+ where: { trainingOrganizationId: org.id },
+ create: { trainingOrganizationId: org.id, slug, ...parsed.data },
+ update: parsed.data,
+ select: { slug: true, publicEnabled: true, verified: true },
+ });
+ return NextResponse.json({ profile });
+ });
 }
