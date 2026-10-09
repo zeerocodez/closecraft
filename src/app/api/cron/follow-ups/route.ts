@@ -15,72 +15,97 @@ export async function GET(request: Request) {
  }
  }
 
- try {
- // 1. Find all active conversations
- // For real production, threshold is usually 24 hours. For testing, we might ignore time or use 1 minute.
- const thresholdDate = new Date(Date.now() - (isTest ? 60 * 1000 : 24 * 60 * 60 * 1000));
+  try {
+    // 1. Process explicit scheduled FollowUpTasks (e.g., Post-Clinic Prompts)
+    const scheduledTasks = await db.followUpTask.findMany({
+      where: {
+        status: 'PENDING',
+        scheduledFor: {
+          lte: new Date()
+        }
+      },
+      include: {
+        lead: true
+      }
+    });
 
- const staleConversations = await db.conversation.findMany({
- where: {
- status: 'ACTIVE',
- updatedAt: {
- lt: thresholdDate
- },
- lead: {
- status: {
- in: ['NEW', 'ENGAGED', 'QUALIFYING']
- }
- }
- },
- include: {
- lead: true
- }
- });
+    for (const task of scheduledTasks) {
+      if (task.actionType === 'SEND_POST_CLINIC_PROMPT') {
+        console.log(`[Follow-Up Engine] Sending post-clinic prompt to ${task.lead.email}`);
+        // Email or SMS logic would go here
+      }
 
- console.log(`[Follow-Up Engine] Found ${staleConversations.length} stale conversations to follow up.`);
+      await db.followUpTask.update({
+        where: { id: task.id },
+        data: { status: 'EXECUTED' }
+      });
+    }
 
- let processedCount = 0;
+    // 2. Find all active conversations (Stale AI conversations)
+    // For real production, threshold is usually 24 hours. For testing, we might ignore time or use 1 minute.
+    const thresholdDate = new Date(Date.now() - (isTest ? 60 * 1000 : 24 * 60 * 60 * 1000));
 
- for (const conversation of staleConversations) {
- const lead = conversation.lead;
+    const staleConversations = await db.conversation.findMany({
+      where: {
+        status: 'ACTIVE',
+        updatedAt: {
+          lt: thresholdDate
+        },
+        lead: {
+          status: {
+            in: ['NEW', 'ENGAGED', 'QUALIFYING']
+          }
+        }
+      },
+      include: {
+        lead: true
+      }
+    });
 
- // 2. Determine "Next Best Action"
- let followUpText = "Hi there, just checking in to see if you had any more questions about CloseCraft?";
- 
- if (lead.buyingIntent && lead.buyingIntent >= 80) {
- followUpText = `Hi ${lead.name.split(' ')[0]}, you mentioned you were very interested. Did you want me to go ahead and get a specialist to call you today?`;
- } else if (lead.status === 'NEW') {
- followUpText = `Hi ${lead.name.split(' ')[0]}, I noticed you reached out but we haven't properly connected yet. What's the main goal you are trying to achieve?`;
- }
+    console.log(`[Follow-Up Engine] Found ${staleConversations.length} stale conversations to follow up.`);
 
- // 3. Save AI message
- await db.message.create({
- data: {
- conversationId: conversation.id,
- content: followUpText,
- senderType: 'AI'
- }
- });
+    let processedCount = 0;
 
- // 4. Update timestamps to reset the inactivity clock
- await db.conversation.update({
- where: { id: conversation.id },
- data: { updatedAt: new Date() }
- });
+    for (const conversation of staleConversations) {
+      const lead = conversation.lead;
 
- await db.lead.update({
- where: { id: lead.id },
- data: { updatedAt: new Date() }
- });
+      // 3. Determine "Next Best Action"
+      let followUpText = "Hi there, just checking in to see if you had any more questions about CloseCraft?";
+      
+      if (lead.buyingIntent && lead.buyingIntent >= 80) {
+        followUpText = `Hi ${lead.name.split(' ')[0]}, you mentioned you were very interested. Did you want me to go ahead and get a specialist to call you today?`;
+      } else if (lead.status === 'NEW') {
+        followUpText = `Hi ${lead.name.split(' ')[0]}, I noticed you reached out but we haven't properly connected yet. What's the main goal you are trying to achieve?`;
+      }
 
- console.log(`[WhatsApp API Mock] Sending Automated Follow-Up to ${lead.phone}: "${followUpText}"`);
- processedCount++;
- }
+      // 4. Save AI message
+      await db.message.create({
+        data: {
+          conversationId: conversation.id,
+          content: followUpText,
+          senderType: 'AI'
+        }
+      });
 
- return NextResponse.json({ success: true, processed: processedCount }, { status: 200 });
+      // 5. Update timestamps to reset the inactivity clock
+      await db.conversation.update({
+        where: { id: conversation.id },
+        data: { updatedAt: new Date() }
+      });
 
- } catch (error) {
- console.error('[Follow-Up Engine] Error:', error);
- return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
- }
+      await db.lead.update({
+        where: { id: lead.id },
+        data: { updatedAt: new Date() }
+      });
+
+      console.log(`[WhatsApp API Mock] Sending Automated Follow-Up to ${lead.phone}: "${followUpText}"`);
+      processedCount++;
+    }
+
+    return NextResponse.json({ success: true, processedConversations: processedCount, processedTasks: scheduledTasks.length }, { status: 200 });
+
+  } catch (error) {
+    console.error('[Follow-Up Engine] Error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
 }
