@@ -7,8 +7,7 @@ import { createLeadForTenant } from '@/lib/dal/lead';
 // Background Job: Process inbound leads from webhooks, create them, and trigger AI Qualification
 // @ts-ignore
 export const processNewLead = inngest.createFunction(
-  { id: 'process-new-lead' },
-  { event: 'revenue/lead.created' },
+  { id: 'process-new-lead', triggers: [{ event: 'revenue/lead.created' }] },
   async ({ event, step }: { event: any, step: any }) => {
     
     // Step 1: Create the lead in the database using the Data Access Layer

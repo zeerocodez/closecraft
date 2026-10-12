@@ -3,8 +3,7 @@ import { inngest } from './client';
 import { db } from '@/lib/db';
 
 export const processBillingEvent = inngest.createFunction(
-  { id: 'process-billing-event' },
-  { event: 'billing/payment.success' },
+  { id: 'process-billing-event', triggers: [{ event: 'billing/payment.success' }] },
   async ({ event, step }) => {
     const { organizationId, amount, plan, type, courseId, studentId } = event.data;
 

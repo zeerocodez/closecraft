@@ -7,8 +7,7 @@ import { z } from 'zod';
 
 // Background Job: AI Assessor for DSS Submissions
 export const gradeSubmission = inngest.createFunction(
-  { id: 'grade-dss-submission' },
-  { event: 'dss/assessment.submitted' },
+  { id: 'grade-dss-submission', triggers: [{ event: 'dss/assessment.submitted' }] },
   async ({ event, step }) => {
     const { submissionId, studentId, moduleId } = event.data;
 

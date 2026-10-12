@@ -15,13 +15,14 @@ export const dynamic = "force-dynamic";
  * everyone and the question is marked answered), dismiss it, or reopen a
  * dismissed one.
  */
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
- return withApiErrors(async () => {
- const session = await auth();
- if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
- const parsed = UnansweredAction.safeParse(await req.json().catch(() => null));
- if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request." }, { status: 400 });
- const row = await prisma.guideUnanswered.findUnique({ where: { id: params.id } });
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return withApiErrors(async () => {
+    const session = await auth();
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const parsed = UnansweredAction.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request." }, { status: 400 });
+    const row = await prisma.guideUnanswered.findUnique({ where: { id } });
  if (!row) return NextResponse.json({ error: "Question not found." }, { status: 404 });
 
  const a = parsed.data;

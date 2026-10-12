@@ -8,14 +8,14 @@ import { slugify } from "@/lib/ecosystem/educationPostCore";
 
 const Body = z.object({ verified: z.boolean().optional(), publicEnabled: z.boolean().optional() });
 
-/** PUT /api/admin/ecosystem/organizations/[id] — SUPER_ADMIN verifies an organization or switches its public page. */
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
- return withApiErrors(async () => {
- const session = await auth();
- if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
- const parsed = Body.safeParse(await req.json().catch(() => null));
- if (!parsed.success) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
- const org = await prisma.trainingOrganization.findUnique({ where: { id: params.id }, select: { id: true, name: true, approvalState: true } });
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return withApiErrors(async () => {
+    const session = await auth();
+    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const parsed = Body.safeParse(await req.json().catch(() => null));
+    if (!parsed.success) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    const org = await prisma.trainingOrganization.findUnique({ where: { id }, select: { id: true, name: true, approvalState: true } });
  if (!org || org.approvalState !== "APPROVED") return NextResponse.json({ error: "Organization not found." }, { status: 404 });
 
  let slug = slugify(org.name);

@@ -6,8 +6,7 @@ import { openai } from '@ai-sdk/openai';
 import { z } from 'zod';
 
 export const executeAutomations = inngest.createFunction(
-  { id: 'execute-automations-engine' },
-  { event: 'revenue/signal.evaluated' },
+  { id: 'execute-automations-engine', triggers: [{ event: 'revenue/signal.evaluated' }] },
   async ({ event, step }) => {
     const { leadId, organizationId, buyingIntent } = event.data;
     

@@ -4,8 +4,7 @@ import { db } from '@/lib/db';
 
 // Cron Job: Detect Revenue Leaks (e.g. deals stuck in PROPOSAL for > 7 days)
 export const detectRevenueLeaks = inngest.createFunction(
-  { id: 'detect-revenue-leaks' },
-  { cron: '0 0 * * *' }, // Runs every day at midnight
+  { id: 'detect-revenue-leaks', triggers: [{ cron: '0 0 * * *' }] }, // Runs every day at midnight
   async ({ step }) => {
     
     // Find all Deals in PROPOSAL stage that haven't been updated in 7 days
