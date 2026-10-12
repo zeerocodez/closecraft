@@ -2,6 +2,12 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
 export async function GET(request: Request) {
+  const authHeader = request.headers.get('Authorization');
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.warn('[RevenueLeak Cron] Unauthorized execution attempt');
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
   try {
     console.log('[RevenueLeak Cron] Scanning for SLA breaches...');
 

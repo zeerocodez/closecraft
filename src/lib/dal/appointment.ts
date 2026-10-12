@@ -20,6 +20,16 @@ export async function createAppointmentForTenant(data: {
   organizerId: string;
   organizationId: string;
 }) {
+  // Enforce tenant isolation on the lead
+  const lead = await db.lead.findFirst({
+    where: { id: data.leadId, organizationId: data.organizationId },
+    select: { id: true },
+  });
+
+  if (!lead) {
+    throw new Error('Cannot create appointment: Lead not found or does not belong to this organization');
+  }
+
   return await db.appointment.create({
     data: {
       title: data.title,

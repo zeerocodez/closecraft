@@ -1,8 +1,18 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 
-export async function GET() {
- try {
+export async function GET(request: Request) {
+  // Never permit open seeding in production
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_SEED !== 'true') {
+    return NextResponse.json({ error: 'Seeding is disabled in production environments' }, { status: 403 });
+  }
+
+  const authHeader = request.headers.get('Authorization');
+  if (process.env.ADMIN_SECRET && authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  try {
  let org = await db.organization.findFirst();
  if (!org) {
  org = await db.organization.create({

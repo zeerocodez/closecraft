@@ -3,7 +3,13 @@ import { db } from '@/lib/db';
 import { sendTransactionalEmail } from '@/lib/email';
 
 export async function GET(request: Request) {
- try {
+  const authHeader = request.headers.get('Authorization');
+  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    console.warn('[RevenueEngine Cron] Unauthorized execution attempt');
+    return new NextResponse('Unauthorized', { status: 401 });
+  }
+
+  try {
  console.log('[RevenueEngine Cron] Starting automation tick...');
 
  // 1. Fetch pending automation actions

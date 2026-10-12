@@ -76,12 +76,22 @@ export async function createAppointment(data: { title: string; startTime: string
 }
 
 export async function runAIQualification(leadId: string) {
- const session = await auth();
- const organizationId = (session as any)?.organizationId;
- if (!organizationId) throw new Error("Unauthorized");
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
 
- // Run the AI qualification (this calls OpenAI and updates the DB)
- await qualifyLead(leadId);
+  // Strictly verify tenant resource ownership
+  const lead = await db.lead.findFirst({
+    where: { id: leadId, organizationId },
+    select: { id: true },
+  });
+
+  if (!lead) {
+    throw new Error("Lead not found or unauthorized");
+  }
+
+  // Run the AI qualification (this calls OpenAI and updates the DB)
+  await qualifyLead(leadId);
 
  revalidatePath('/leads');
  revalidatePath('/pipeline');
