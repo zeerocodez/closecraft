@@ -43,15 +43,23 @@ export default async function DSSAdminPage() {
  </div>
  <span className="font-serif font-bold text-white ml-2 text-lg">DSS Faculty Portal</span>
  </div>
- <div className="flex items-center gap-6">
- <nav className="hidden md:flex gap-8 text-sm font-bold">
- <Link href="/dss/admin" className="text-[#45bfae] border-b-2 border-[#45bfae] py-5">Curriculum</Link>
- <Link href="/dss/admin/students" className="text-gray-400 hover:text-white transition-colors py-5">Students</Link>
- <Link href="/dss/admin/roleplays" className="text-gray-400 hover:text-white transition-colors py-5">AI Scenarios</Link>
- </nav>
- <div className="w-8 h-8 rounded-full bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae] font-bold text-sm uppercase">
- {session.user.name?.substring(0, 2) || 'AD'}
- </div>
+ <div className="flex items-center gap-4">
+  <nav className="hidden md:flex gap-6 text-sm font-bold">
+    <Link href="/dss/admin" className="text-[#45bfae] border-b-2 border-[#45bfae] py-5">Curriculum</Link>
+    <Link href="/dss/admin/students" className="text-gray-400 hover:text-white transition-colors py-5">Students</Link>
+    <Link href="/dss/admin/roleplays" className="text-gray-400 hover:text-white transition-colors py-5">AI Scenarios</Link>
+  </nav>
+  <div className="flex items-center gap-2">
+    <Link href="/" className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition-colors border border-white/10">
+      &larr; Home
+    </Link>
+    <Link href="/dashboard" className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-semibold flex items-center gap-1 transition-colors border border-white/10">
+      Dashboard
+    </Link>
+  </div>
+  <div className="w-8 h-8 rounded-full bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae] font-bold text-sm uppercase">
+    {session.user.name?.substring(0, 2) || 'AD'}
+  </div>
  </div>
  </div>
  </header>

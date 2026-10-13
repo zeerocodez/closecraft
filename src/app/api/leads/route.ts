@@ -66,37 +66,58 @@ export async function POST(request: Request) {
       phone,
     });
 
-    // Fire event to Inngest background bus.
-    // The background job will create the lead via the DAL and trigger AI qualification.
-    await inngest.send({
-      name: 'revenue/lead.created',
+    // Directly persist lead to the database (Single Source of Truth)
+    const lead = await db.lead.create({
       data: {
-        organizationId: org.id,
         name: name.trim(),
         email: email.toLowerCase().trim(),
+        phone: phone ? phone.trim() : null,
         source: 'Website Revenue Audit Form',
         message: `Revenue Audit Request from ${business}. Volume: ${monthlyLeadVolume}. Bottleneck: ${biggestSalesBottleneck}`,
-        customData,
+        status: 'NEW',
+        organizationId: org.id,
       },
     });
 
-    // Send a transactional email welcoming the new applicant
-    await sendTransactionalEmail({
-      to: email.toLowerCase().trim(),
-      subject: 'Revenue Audit Request Received - Zeerocodes',
-      html: `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-          <h2 style="color: #789d2e;">Audit Request Received</h2>
-          <p>Hi ${name.trim().split(' ')[0]},</p>
-          <p>We've received your request for a Revenue Audit for <strong>${business.trim()}</strong>.</p>
-          <p>Our team is reviewing your details regarding your current lead volume (${monthlyLeadVolume}) and the bottleneck you're experiencing (${biggestSalesBottleneck}).</p>
-          <p>You will hear from us shortly to schedule your audit call.</p>
-          <p>Best,<br>Zeerocodes Revenue Engine</p>
-        </div>
-      `,
-    });
+    // Fire event to Inngest background bus if available
+    try {
+      await inngest.send({
+        name: 'revenue/lead.created',
+        data: {
+          leadId: lead.id,
+          organizationId: org.id,
+          name: lead.name,
+          email: lead.email,
+          source: lead.source,
+          message: lead.message,
+          customData,
+        },
+      });
+    } catch (inngestErr) {
+      console.warn('[Leads API] Inngest event dispatch failed (lead safely persisted to DB):', inngestErr);
+    }
 
-    return NextResponse.json({ success: true, lead: { name: name.trim() } }, { status: 201 });
+    // Send a transactional email welcoming the new applicant
+    try {
+      await sendTransactionalEmail({
+        to: email.toLowerCase().trim(),
+        subject: 'Revenue Audit Request Received - Zeerocodes',
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+            <h2 style="color: #789d2e;">Audit Request Received</h2>
+            <p>Hi ${name.trim().split(' ')[0]},</p>
+            <p>We've received your request for a Revenue Audit for <strong>${business.trim()}</strong>.</p>
+            <p>Our team is reviewing your details regarding your current lead volume (${monthlyLeadVolume}) and the bottleneck you're experiencing (${biggestSalesBottleneck}).</p>
+            <p>You will hear from us shortly to schedule your audit call.</p>
+            <p>Best,<br>Zeerocodes Revenue Engine</p>
+          </div>
+        `,
+      });
+    } catch (emailErr) {
+      console.warn('[Leads API] Email dispatch failed:', emailErr);
+    }
+
+    return NextResponse.json({ success: true, lead: { id: lead.id, name: lead.name } }, { status: 201 });
   } catch (error) {
     console.error('Failed to create lead:', error);
     return NextResponse.json({ error: 'Failed to create lead' }, { status: 500 });

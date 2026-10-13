@@ -23,12 +23,57 @@ import {
  TrendingUp,
  X,
  Zap,
+ Award,
+ Bot,
+ Sparkles,
+ Users,
+ CheckCircle,
 } from 'lucide-react';
 import './landing.css';
+
+interface PipelineStage {
+  step: string;
+  title: string;
+  desc: string;
+  metric: string;
+  tag: string;
+}
+
+const pipelineStages: PipelineStage[] = [
+  {
+    step: '01',
+    title: 'Multi-Channel Inbound Capture',
+    desc: 'Meta Ads, website forms, and WhatsApp chats ingested in under 800ms with zero manual data entry.',
+    metric: '< 800ms',
+    tag: 'Instant Ingestion',
+  },
+  {
+    step: '02',
+    title: 'AI Intent Scoring & Routing',
+    desc: 'Determines buyer budget, urgency, and fit. Assigns deterministic Next Best Action with active SLA timers.',
+    metric: '98% Fit Score',
+    tag: 'Automated Triage',
+  },
+  {
+    step: '03',
+    title: 'Live Human Closer Handoff',
+    desc: 'High-intent leads are passed directly to certified Digital Sales School closers for video discovery calls.',
+    metric: '34.8% Close Rate',
+    tag: 'DSS Verified Closers',
+  },
+  {
+    step: '04',
+    title: 'Instant Settlement & Accounting',
+    desc: 'Contracts signed and client deposits settled immediately via Paystack with automated receipts and CRM updates.',
+    metric: '₦45.2M Tracked',
+    tag: 'Automated Payouts',
+  },
+];
 
 export default function LandingClientWrapper({ eco, flags }: { eco: LandingView | null, flags: EcosystemFlags | null }) {
  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
  const [showAuditModal, setShowAuditModal] = useState(false);
+ const [activePipelineStage, setActivePipelineStage] = useState(0);
  const [auditBusy, setAuditBusy] = useState(false);
  const [auditSuccess, setAuditSuccess] = useState<string | null>(null);
  const [auditError, setAuditError] = useState<string | null>(null);
@@ -71,32 +116,66 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <div className="landing-shell" style={{ paddingTop: '80px' }}>
  {/* 1. Navigation */}
  <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
- <div className="h-20 w-full px-8 lg:px-12 max-w-[1440px] mx-auto flex items-center justify-between">
- <div className="flex items-center gap-8">
- <Link className="flex items-center gap-2 group" href="#hero">
- <div className="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-on-primary font-headline-lg text-headline-lg shadow-sm">
- <span className="material-symbols-outlined text-[20px] text-primary-fixed">bolt</span>
- </div>
- <span className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Closecraft</span>
- </Link>
- <nav className="hidden xl:flex items-center gap-4" data-active-classes="bg-surface-container text-primary font-medium rounded-lg">
- <Link className="px-4 py-2 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/platform">Platform</Link>
- <Link className="px-4 py-2 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/solutions">Solutions</Link>
- <Link className="px-4 py-2 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/integrations">Integrations</Link>
- <Link className="px-4 py-2 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/pricing">Pricing</Link>
- <Link className="px-4 py-2 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/#faq">FAQ</Link>
- <Link className="px-4 py-2 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/dss">DSS Academy</Link>
- </nav>
- </div>
- <div className="flex items-center gap-4">
- <Link className="hidden sm:inline-flex items-center px-4 py-2 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/login">Client Sign In</Link>
- <button onClick={openAudit} className="inline-flex items-center justify-center px-6 py-2 bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container text-sm font-medium rounded-lg shadow-sm transition-all">Book Executive Demo</button>
- <Link href="/dashboard" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center ml-2">
- <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
- </Link>
- </div>
- </div>
- </header>
+  {/* Announcement bar for DSS Academy */}
+  <div className="bg-[#0f1214] border-b border-[#248277]/30 px-4 py-1.5 text-center text-xs text-gray-300 flex items-center justify-center gap-2">
+    <span className="px-1.5 py-0.5 rounded bg-[#248277] text-white font-bold text-[10px] uppercase tracking-wider">ACADEMY</span>
+    <span>Looking for Digital Sales School?</span>
+    <Link href="/dss" className="text-[#45bfae] font-bold hover:underline flex items-center gap-1">
+      Go to DSS Academy &rarr;
+    </Link>
+  </div>
+  <div className="h-16 w-full px-4 sm:px-8 lg:px-12 max-w-[1440px] mx-auto flex items-center justify-between">
+    <div className="flex items-center gap-6 xl:gap-8">
+      <Link className="flex items-center gap-2 group" href="/">
+        <div className="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-on-primary font-headline-lg text-headline-lg shadow-sm">
+          <span className="material-symbols-outlined text-[20px] text-primary-fixed">bolt</span>
+        </div>
+        <span className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Closecraft</span>
+      </Link>
+      <nav className="hidden lg:flex items-center gap-2 xl:gap-3">
+        <Link className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/platform">Platform</Link>
+        <Link className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/solutions">Solutions</Link>
+        <Link className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/integrations">Integrations</Link>
+        <Link className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/pricing">Pricing</Link>
+        <Link className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/#faq">FAQ</Link>
+      </nav>
+    </div>
+    <div className="flex items-center gap-2 sm:gap-3">
+      <Link href="/dss" className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#248277] text-white hover:bg-[#1f6f65] text-xs font-bold tracking-wide transition-all shadow-sm">
+        <span className="material-symbols-outlined text-[15px]">school</span>
+        <span>DSS Academy</span>
+      </Link>
+      <Link className="hidden sm:inline-flex items-center px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/login">Client Sign In</Link>
+      <button onClick={openAudit} className="inline-flex items-center justify-center px-4 py-1.5 bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container text-xs sm:text-sm font-medium rounded-lg shadow-sm transition-all">Book Demo</button>
+      <Link href="/dashboard" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center" title="SaaS Dashboard">
+        <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
+      </Link>
+      <button 
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="lg:hidden p-1.5 text-on-surface hover:bg-surface-container rounded-lg transition-colors ml-1"
+        aria-label="Toggle navigation menu"
+      >
+        {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+    </div>
+  </div>
+  {mobileMenuOpen && (
+    <div className="lg:hidden bg-surface-container-lowest border-b border-surface-container px-6 py-4 flex flex-col gap-3 shadow-lg animate-in slide-in-from-top-2 duration-150">
+      <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg bg-[#248277]/15 text-[#248277] font-bold text-sm flex items-center gap-2 border border-[#248277]/30" href="/dss">
+        <span className="material-symbols-outlined text-[18px]">school</span>
+        <span>Digital Sales School (DSS) Academy</span>
+      </Link>
+      <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-on-surface hover:bg-surface-container-low rounded-lg text-sm font-medium" href="/platform">Platform</Link>
+      <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-on-surface hover:bg-surface-container-low rounded-lg text-sm font-medium" href="/solutions">Solutions</Link>
+      <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-on-surface hover:bg-surface-container-low rounded-lg text-sm font-medium" href="/integrations">Integrations</Link>
+      <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-on-surface hover:bg-surface-container-low rounded-lg text-sm font-medium" href="/pricing">Pricing</Link>
+      <div className="pt-2 border-t border-surface-container flex flex-col gap-2">
+        <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-on-surface hover:bg-surface-container-low rounded-lg text-sm font-medium" href="/login">Client Sign In</Link>
+        <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-primary font-bold text-sm" href="/dashboard">SaaS Revenue Workspace</Link>
+      </div>
+    </div>
+  )}
+</header>
 
 
  {eco && flags ? (
@@ -146,72 +225,70 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  </p>
  </div>
 
- {/* Hero Visual: Lead Pipeline & Stalled Opportunity */}
- <div className="hero-visual-card">
- <div className="visual-header">
- <span>LEAD-TO-SALE FLOW</span>
- <div className="live-badge">
- <span className="live-dot" /> ENGINE ACTIVE
- </div>
- </div>
+ {/* Hero Visual: 3D High-Definition Revenue Command Centre Mockup */}
+ <div className="relative group w-full lg:max-w-xl xl:max-w-2xl">
+   {/* Animated glow aura behind card */}
+   <div className="absolute -inset-1 bg-gradient-to-r from-[#248277]/30 via-[#6AD6A7]/20 to-[#F5BF65]/20 rounded-3xl blur-2xl opacity-75 group-hover:opacity-100 transition duration-1000 -z-10" />
 
- {/* Pipeline Steps */}
- <div className="pipeline-track">
- <div className="pipeline-step">
- <span>LEADS</span>
- <strong>100</strong>
- </div>
- <span className="pipeline-arrow">&rarr;</span>
- <div className="pipeline-step">
- <span>CONTACTED</span>
- <strong>72</strong>
- </div>
- <span className="pipeline-arrow">&rarr;</span>
- <div className="pipeline-step">
- <span>QUALIFIED</span>
- <strong>20</strong>
- </div>
- <span className="pipeline-arrow">&rarr;</span>
- <div className="pipeline-step">
- <span>BOOKED</span>
- <strong>8</strong>
- </div>
- <span className="pipeline-arrow">&rarr;</span>
- <div className="pipeline-step">
- <span style={{ color: 'var(--accent)' }}>SOLD</span>
- <strong style={{ color: 'var(--accent)' }}>3</strong>
- </div>
- </div>
+   <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#090D12]">
+     <img
+       src="/images/closecraft_hero_dashboard.jpg"
+       alt="Closecraft Revenue Command Centre Dashboard"
+       className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+     />
 
- {/* Opportunity At Risk Card */}
- <div className="opportunity-box">
- <div className="opp-badge">
- <div className="opp-badge-label">
- <Zap size={13} /> REVENUE AT RISK
- </div>
- <span className="opp-badge-tag">NO FOLLOW-UP</span>
- </div>
- <div className="opp-name">David — ABC Consulting</div>
- <div className="opp-grid">
- <div>
- <small>ESTIMATED VALUE</small>
- <strong>₦2,000,000 NGN</strong>
- </div>
- <div>
- <small>CURRENT STATE</small>
- <strong style={{ color: 'var(--warning)' }}>Qualified (Idle 32m)</strong>
- </div>
- </div>
- <div className="opp-action-block">
- <div className="opp-action-text">
- <small>NEXT BEST ACTION</small>
- <strong>High-value lead with no appointment</strong>
- </div>
- <div className="opp-action-btn">
- CALL NOW &rarr;
- </div>
- </div>
- </div>
+     {/* Floating Telemetry Badge 1: Top-Left Revenue Metric */}
+     <div className="absolute top-3 left-3 sm:top-5 sm:left-5 bg-[#0B1117]/90 backdrop-blur-md border border-[#6AD6A7]/30 rounded-2xl p-3 sm:p-3.5 shadow-xl animate-float-slow max-w-[220px]">
+       <div className="flex items-center gap-1.5 mb-1">
+         <span className="w-2 h-2 rounded-full bg-[#6AD6A7] animate-ping" />
+         <span className="text-[10px] font-bold text-[#6AD6A7] uppercase tracking-wider">ENGINE ACTIVE</span>
+       </div>
+       <div className="text-xs sm:text-sm font-bold text-white">₦45,280,000 NGN</div>
+       <div className="text-[10px] text-[#A7B7C7] mt-0.5">Live Pipeline Volume Tracked</div>
+     </div>
+
+     {/* Floating Telemetry Badge 2: Bottom-Right AI Next-Best-Action */}
+     <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 bg-[#0B1117]/90 backdrop-blur-md border border-[#45BFAE]/40 rounded-2xl p-3 sm:p-3.5 shadow-xl animate-float-reverse max-w-[240px]">
+       <div className="flex items-center justify-between gap-2 mb-1">
+         <div className="flex items-center gap-1.5">
+           <Zap size={13} className="text-[#F5BF65]" />
+           <span className="text-[10px] font-bold text-[#45BFAE] uppercase tracking-wider">AI NEXT-BEST-ACTION</span>
+         </div>
+         <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-[#45BFAE]/20 text-[#45BFAE] font-bold">2.4s SLA</span>
+       </div>
+       <div className="text-xs sm:text-sm font-bold text-white">David — ABC Consulting</div>
+       <div className="text-[10px] text-[#A7B7C7] mt-0.5">Assigned to Closer Somtochukwu O.</div>
+     </div>
+
+     {/* Floating Telemetry Badge 3: Bottom-Left Paystack Settlement */}
+     <div className="hidden sm:block absolute bottom-5 left-5 bg-[#15352F]/90 backdrop-blur-md border border-[#6AD6A7]/40 rounded-2xl p-3 shadow-xl">
+       <div className="flex items-center gap-2">
+         <CheckCircle size={15} className="text-[#6AD6A7]" />
+         <span className="text-xs font-bold text-white">₦1,250,000 Closed</span>
+         <span className="text-[10px] text-[#6AD6A7] font-mono">PAYSTACK CLEARED</span>
+       </div>
+     </div>
+   </div>
+
+   {/* 4-Metric Command Strip Directly Below Hero Card */}
+   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+     <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
+       <div className="text-xl font-black text-white">₦45M+</div>
+       <div className="text-[10px] text-[#8A9CAE] mt-0.5">Pipeline Flow</div>
+     </div>
+     <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
+       <div className="text-xl font-black text-[#6AD6A7]">2.4s</div>
+       <div className="text-[10px] text-[#8A9CAE] mt-0.5">Speed to Lead SLA</div>
+     </div>
+     <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
+       <div className="text-xl font-black text-[#45BFAE]">34.8%</div>
+       <div className="text-[10px] text-[#8A9CAE] mt-0.5">Close Rate</div>
+     </div>
+     <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
+       <div className="text-xl font-black text-[#F5BF65]">100%</div>
+       <div className="text-[10px] text-[#8A9CAE] mt-0.5">Audit Trail</div>
+     </div>
+   </div>
  </div>
  </div>
  </section>
@@ -224,19 +301,26 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
 
 
 
- {/* 3. Linear Mechanism Flow Strip */}
- <div className="flow-banner">
- <div className="flow-banner-title">
- <span>THE CONVERSION MECHANISM:</span>
- </div>
- <div className="flow-banner-steps">
- <span>LEAD</span> <i>&rarr;</i>
- <span>FAST RESPONSE</span> <i>&rarr;</i>
- <span>FOLLOW-UP</span> <i>&rarr;</i>
- <span>QUALIFICATION</span> <i>&rarr;</i>
- <span>APPOINTMENT</span> <i>&rarr;</i>
- <span style={{ color: 'var(--ink)' }}>SALE</span>
- </div>
+ {/* STOP-SCROLL CONTINUOUS ANIMATED TICKER MARQUEE */}
+ <div className="border-y border-white/5 bg-[#0D151D] py-3.5 overflow-hidden shadow-inner">
+   <div className="animate-ticker text-xs font-mono text-[#A7B7C7] flex items-center gap-10">
+     <span className="flex items-center gap-2">
+       <span className="w-2 h-2 rounded-full bg-[#45BFAE] animate-ping" />
+       <span className="text-white font-bold">REAL-TIME LEAD-TO-SALE OPERATING SYSTEM</span>
+     </span>
+     <span className="text-white/20">•</span>
+     <span className="text-[#6AD6A7] font-bold">₦45,280,000+ IN PIPELINE REVENUE TRACKED</span>
+     <span className="text-white/20">•</span>
+     <span>AVERAGE SPEED TO LEAD: UNDER 2.4 SECONDS</span>
+     <span className="text-white/20">•</span>
+     <span className="text-[#F5BF65] font-bold">AI QUALIFICATION + HUMAN CLOSER HANDOFF</span>
+     <span className="text-white/20">•</span>
+     <span>POWERED BY ZEEROCODES AUTOMATION & DIGITAL SALES SCHOOL CLOSERS</span>
+     <span className="text-white/20">•</span>
+     <span className="text-[#45BFAE] font-bold">INSTANT PAYSTACK SETTLEMENTS & DEPOSIT TRACKING</span>
+     <span className="text-white/20">•</span>
+     <span>ZERO LEADS FALLING THROUGH THE CRACKS</span>
+   </div>
  </div>
 
  {/* 4. Problem Section */}
@@ -321,56 +405,88 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  </div>
  </section>
 
- {/* 6. "How It Works" */}
- <section id="how-it-works" className="section-wrap how-it-works-section">
- <div className="section-intro" style={{ textAlign: 'center' }}>
- <div className="eyebrow" style={{ justifyContent: 'center' }}>STEP-BY-STEP PROCESS</div>
- <h2>From lead to sale.</h2>
- <p style={{ margin: '0 auto' }}>
- A disciplined progression from the moment an enquiry lands to the completed deal.
- </p>
- </div>
+ {/* 6. "How It Works": Interactive 4-Stage Revenue Machine */}
+ <section id="how-it-works" className="section-wrap how-it-works-section py-20">
+   <div className="section-intro text-center mb-12">
+     <div className="eyebrow justify-center">STEP-BY-STEP CONVERSION ENGINE</div>
+     <h2>From Inbound Lead to Bank Settlement.</h2>
+     <p className="max-w-2xl mx-auto">
+       A disciplined progression connecting your paid traffic directly to qualified appointments and verified cash collections.
+     </p>
+   </div>
 
- <div className="process-chain">
- <div className="process-node">
- <div className="process-node-num">1</div>
- <strong>LEAD</strong>
- </div>
- <span className="process-divider">&rarr;</span>
+   {/* Two-Column Interactive Showcase */}
+   <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center max-w-6xl mx-auto">
+     {/* Left Column: Interactive Stage Selector Pills & Details (5 cols) */}
+     <div className="lg:col-span-5 space-y-3">
+       {pipelineStages.map((stage, idx) => {
+         const active = activePipelineStage === idx;
+         return (
+           <div
+             key={stage.step}
+             onClick={() => setActivePipelineStage(idx)}
+             className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+               active
+                 ? 'bg-[#111C26] border-[#45BFAE] shadow-lg shadow-[#45BFAE]/10 scale-[1.02]'
+                 : 'bg-[#0B1117] border-white/5 hover:border-white/20'
+             }`}
+           >
+             <div className="flex items-center justify-between mb-2">
+               <span className="text-xs font-mono font-bold text-[#F5BF65]">STAGE {stage.step}</span>
+               <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                 active ? 'bg-[#45BFAE]/20 text-[#45BFAE] font-bold' : 'bg-white/5 text-[#8A9CAE]'
+               }`}>
+                 {stage.tag}
+               </span>
+             </div>
+             <h3 className={`text-base font-bold mb-1 ${active ? 'text-white' : 'text-[#A7B7C7]'}`}>
+               {stage.title}
+             </h3>
+             <p className="text-xs text-[#8A9CAE] leading-relaxed">
+               {stage.desc}
+             </p>
+             <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between text-xs">
+               <span className="text-[#8A9CAE]">Benchmark Metric:</span>
+               <span className="font-bold text-[#6AD6A7]">{stage.metric}</span>
+             </div>
+           </div>
+         );
+       })}
+     </div>
 
- <div className="process-node">
- <div className="process-node-num">2</div>
- <strong>RESPOND</strong>
- </div>
- <span className="process-divider">&rarr;</span>
+     {/* Right Column: 3D Isometric Pipeline Asset (7 cols) */}
+     <div className="lg:col-span-7 relative">
+       <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#090D12] group">
+         <img
+           src="/images/closecraft_revenue_pipeline.jpg"
+           alt="Closecraft 4-Stage Lead to Revenue Pipeline"
+           className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
+         />
 
- <div className="process-node">
- <div className="process-node-num">3</div>
- <strong>QUALIFY</strong>
- </div>
- <span className="process-divider">&rarr;</span>
+         {/* Floating Active Stage Badge */}
+         <div className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-[#0B1117]/90 backdrop-blur-md border border-[#45BFAE]/40 rounded-2xl p-4 shadow-xl max-w-xs">
+           <div className="flex items-center gap-2 mb-1">
+             <span className="w-2.5 h-2.5 rounded-full bg-[#45BFAE] animate-ping" />
+             <span className="text-[10px] font-bold text-[#45BFAE] uppercase tracking-wider">ACTIVE ENGINE STAGE</span>
+           </div>
+           <div className="text-sm font-bold text-white">
+             {pipelineStages[activePipelineStage].title}
+           </div>
+           <div className="text-xs text-[#A7B7C7] mt-1">
+             Benchmark: <strong className="text-[#6AD6A7]">{pipelineStages[activePipelineStage].metric}</strong>
+           </div>
+         </div>
 
- <div className="process-node">
- <div className="process-node-num">4</div>
- <strong>BOOK</strong>
- </div>
- <span className="process-divider">&rarr;</span>
-
- <div className="process-node">
- <div className="process-node-num">5</div>
- <strong>CLOSE</strong>
- </div>
- <span className="process-divider">&rarr;</span>
-
- <div className="process-node">
- <div className="process-node-num" style={{ background: 'var(--ink)', color: 'var(--accent)' }}>6</div>
- <strong style={{ color: 'var(--accent-deep)' }}>REVENUE</strong>
- </div>
- </div>
-
- <p className="process-caption">
- Zeerocodes sits in the middle of this process and helps your team keep opportunities moving.
- </p>
+         {/* Bottom Callout */}
+         <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 bg-[#0B1117]/90 backdrop-blur-md border border-[#6AD6A7]/30 rounded-2xl p-3 shadow-xl">
+           <div className="text-[11px] font-bold text-white flex items-center gap-1.5">
+             <CheckCircle size={14} className="text-[#6AD6A7]" />
+             <span>Integrated with Paystack & Closecraft CRM</span>
+           </div>
+         </div>
+       </div>
+     </div>
+   </div>
  </section>
 
  {/* 7. Revenue Leakage Funnel */}

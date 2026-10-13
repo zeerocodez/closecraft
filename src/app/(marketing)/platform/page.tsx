@@ -5,6 +5,14 @@ export default function PlatformPage() {
  return (
  <div className="min-h-screen bg-surface flex flex-col pt-24 px-4 pb-20">
  <div className="max-w-6xl mx-auto w-full">
+      <div className="mb-8 flex items-center justify-between">
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface hover:text-primary transition-colors px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 shadow-sm">
+          &larr; Back to Home
+        </Link>
+        <Link href="/dss" className="inline-flex items-center gap-1.5 text-xs font-bold text-[#45bfae] bg-[#248277]/15 hover:bg-[#248277]/25 px-3.5 py-2 rounded-lg border border-[#248277]/30 transition-colors shadow-sm">
+          DSS Academy &rarr;
+        </Link>
+      </div>
  
  <div className="text-center mb-16">
  <div className="eyebrow mb-4">THE OPERATING SYSTEM FOR SALES</div>

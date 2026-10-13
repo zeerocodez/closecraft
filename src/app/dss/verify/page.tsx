@@ -29,9 +29,14 @@ export default function CertificateVerificationPage() {
  <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Credential Verification</span>
  </div>
  </Link>
- <Link href="/dss" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors flex items-center gap-2">
- <ArrowLeft size={16} /> Back to Academy
- </Link>
+ <div className="flex items-center gap-3">
+            <Link href="/" className="text-xs font-semibold text-gray-400 hover:text-white transition-colors flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              &larr; Back to Home
+            </Link>
+            <Link href="/dss" className="text-xs font-semibold text-[#2ea043] hover:underline flex items-center gap-1">
+              DSS Academy
+            </Link>
+          </div>
  </div>
  </header>
 

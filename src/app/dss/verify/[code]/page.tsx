@@ -2,9 +2,10 @@ import React from 'react';
 import Link from 'next/link';
 import { ShieldCheck, ArrowLeft, CheckCircle, XCircle, Calendar, User, Award, Check, Search } from 'lucide-react';
 
-export default function CertificateResultPage({ params }: { params: { code: string } }) {
- const code = decodeURIComponent(params.code);
- const isValid = code.toUpperCase().startsWith('DSS-');
+export default async function CertificateResultPage({ params }: { params: Promise<{ code: string }> | { code: string } }) {
+  const resolvedParams = await Promise.resolve(params);
+  const code = decodeURIComponent(resolvedParams.code);
+  const isValid = code.toUpperCase().startsWith('DSS-');
 
  return (
  <div className="min-h-screen bg-[#0d1117] text-gray-300 relative font-sans flex flex-col">

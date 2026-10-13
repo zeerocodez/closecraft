@@ -145,3 +145,54 @@
 .loop-face[data-state="thinking"] .loop-head { animation: loop-tilt 1.2s ease-in-out infinite; }
 .loop-face[data-state="thinking"] .loop-eyes { transform: translateY(-1.5px); }
 .loop-face[data-state="helpful"] .loop-check { display: block; animation: loop-pop 0.35s ease-out; }
+
+/* Modern Dribbble-inspired animations for stop-scroll landing pages */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes float-reverse {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(8px); }
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 15px rgba(69, 191, 174, 0.2); }
+  50% { box-shadow: 0 0 35px rgba(69, 191, 174, 0.6); }
+}
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+@keyframes shimmer-sweep {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes soundwave-beat {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.animate-float-slow {
+  animation: float-slow 4s ease-in-out infinite;
+}
+.animate-float-reverse {
+  animation: float-reverse 4.5s ease-in-out infinite;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2.5s infinite;
+}
+.animate-ticker {
+  display: flex;
+  width: max-content;
+  animation: ticker-scroll 25s linear infinite;
+}
+.animate-ticker:hover {
+  animation-play-state: paused;
+}
+.shimmer-text {
+  background: linear-gradient(90deg, #F3F7FA 0%, #45BFAE 50%, #6AD6A7 75%, #F3F7FA 100%);
+  background-size: 200% auto;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shimmer-sweep 4s linear infinite;
+}

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { auth } from '@/lib/auth';
-import { ShieldCheck, LogOut, LayoutDashboard, BookOpen, FileText, CheckSquare, Award, BarChart2, MessageSquare, HelpCircle, Settings } from 'lucide-react';
+import { ShieldCheck, ArrowLeft, LogOut, LayoutDashboard, BookOpen, FileText, CheckSquare, Award, BarChart2, MessageSquare, HelpCircle, Settings } from 'lucide-react';
 import { redirect } from 'next/navigation';
 
 export default async function TraineeLayout({ children }: { children: React.ReactNode }) {
@@ -44,7 +44,16 @@ export default async function TraineeLayout({ children }: { children: React.Reac
  </button>
  </div>
 
- <nav className="flex-1 px-4 space-y-1">
+ <div className="px-4 mb-3">
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 text-xs font-semibold text-gray-300 hover:text-white px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition-colors w-full"
+            title="Return to CloseCraft Marketing Home"
+          >
+            <ArrowLeft size={14} /> Back to Closecraft Home
+          </Link>
+        </div>
+        <nav className="flex-1 px-4 space-y-1">
  <Link href="/dss/dashboard" className="flex items-center gap-3 px-3 py-3 hover:bg-white/5 text-gray-400 hover:text-white rounded-lg font-medium text-sm transition-colors">
  <LayoutDashboard size={18} /> Dashboard
  </Link>

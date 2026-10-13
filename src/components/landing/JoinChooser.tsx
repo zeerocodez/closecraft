@@ -4,10 +4,10 @@ import { ArrowRight, Briefcase, Building2, GraduationCap, Landmark, type LucideI
 import Icon from "@/components/ui/Icon";
 
 const ROLES: Array<{ title: string; text: string; icon: LucideIcon; register: string; login: string }> = [
-  { title: "I want to learn", text: "Join programs, earn verified certificates, and choose whether to be seen.", icon: GraduationCap, register: "/trainee/register", login: "/trainee/login" },
-  { title: "I run training", text: "Put your programs, events and trainees' work in front of people looking for them.", icon: Building2, register: "/org/register", login: "/org/login" },
-  { title: "I'm hiring", text: "Post roles and find people whose skills are backed by real evidence.", icon: Briefcase, register: "/employer/register", login: "/employer/login" },
-  { title: "I invest", text: "Discover organizations and the pitches trainees choose to share.", icon: Landmark, register: "/investor/register", login: "/investor/login" },
+  { title: "I want to learn", text: "Join DSS programs, earn verified certificates, and close high-ticket deals.", icon: GraduationCap, register: "/dss/apply", login: "/login" },
+  { title: "I run training", text: "Put your programs, events and trainees' work in front of businesses looking for revenue talent.", icon: Building2, register: "/dss/apply", login: "/login" },
+  { title: "I'm hiring", text: "Post roles and find closers whose skills are backed by real evidence.", icon: Briefcase, register: "/dss/apply", login: "/login" },
+  { title: "I invest", text: "Discover revenue organizations and top-performing closers.", icon: Landmark, register: "/dss/apply", login: "/login" },
 ];
 
 /** The sign-up step: choose how you will use the ecosystem. Each card goes to that role's own registration. */

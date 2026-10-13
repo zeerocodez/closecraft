@@ -1,0 +1,141 @@
+{
+  "programme": {
+    "selar": "https://selar.com/dss-closers",
+    "nestuge": "https://nestuge.com/dss",
+    "price": 8000000,
+    "rate": 3500,
+    "holdDays": 14,
+    "minimum": 2000000,
+    "live": 1
+  },
+  "affiliates": [
+    {
+      "userId": "demo-partner-001",
+      "code": "DSS-DEMO8820A1",
+      "name": "Emmanuel Partner",
+      "email": "partner@closecraft.ng",
+      "channel": "WhatsApp Community & LinkedIn Network (2,400 sales professionals)",
+      "status": "approved",
+      "created": 1789299229047
+    }
+  ],
+  "clicks": [
+    {
+      "id": "c-1",
+      "affiliate": "DSS-DEMO8820A1",
+      "visitor": "v-101",
+      "created": 1791372829047
+    },
+    {
+      "id": "c-2",
+      "affiliate": "DSS-DEMO8820A1",
+      "visitor": "v-102",
+      "created": 1791459229047
+    },
+    {
+      "id": "c-3",
+      "affiliate": "DSS-DEMO8820A1",
+      "visitor": "v-103",
+      "created": 1791545629047
+    },
+    {
+      "id": "c-4",
+      "affiliate": "DSS-DEMO8820A1",
+      "visitor": "v-104",
+      "created": 1791632029047
+    },
+    {
+      "id": "c-5",
+      "affiliate": "DSS-DEMO8820A1",
+      "visitor": "v-105",
+      "created": 1791718429047
+    },
+    {
+      "id": "c-6",
+      "affiliate": "DSS-DEMO8820A1",
+      "visitor": "v-106",
+      "created": 1791804829047
+    },
+    {
+      "id": "4ac9b271-6ed5-46c5-bdb7-5f9b44b2f88c",
+      "affiliate": "DSS-DEMO8820A1",
+      "visitor": "9598e150-07c7-43b3-be40-528d8d536695",
+      "created": 1791891229057
+    }
+  ],
+  "sales": [
+    {
+      "id": "sale-1",
+      "affiliate": "DSS-DEMO8820A1",
+      "reference": "DSS-PAY-882194",
+      "platform": "Paystack",
+      "amount": 8000000,
+      "commission": 2800000,
+      "status": "paid",
+      "eligible": 1790595229047,
+      "created": 1789990429047
+    },
+    {
+      "id": "sale-2",
+      "affiliate": "DSS-DEMO8820A1",
+      "reference": "DSS-PAY-993821",
+      "platform": "Selar",
+      "amount": 8000000,
+      "commission": 2800000,
+      "status": "paid",
+      "eligible": 1791200029047,
+      "created": 1790508829047
+    },
+    {
+      "id": "sale-3",
+      "affiliate": "DSS-DEMO8820A1",
+      "reference": "DSS-PAY-441092",
+      "platform": "Nestuge",
+      "amount": 8000000,
+      "commission": 2800000,
+      "status": "pending",
+      "eligible": 1791718429047,
+      "created": 1791459229047
+    },
+    {
+      "id": "sale-4",
+      "affiliate": "DSS-DEMO8820A1",
+      "reference": "DSS-PAY-773105",
+      "platform": "Paystack",
+      "amount": 8000000,
+      "commission": 2800000,
+      "status": "pending",
+      "eligible": 1792323229047,
+      "created": 1791718429047
+    }
+  ],
+  "payouts": [
+    {
+      "id": "payout-1",
+      "affiliate": "DSS-DEMO8820A1",
+      "amount": 5600000,
+      "reference": "TRANSFER-ZENITH-883921",
+      "created": 1791027229047
+    }
+  ],
+  "enquiries": [
+    {
+      "id": "enq-1",
+      "name": "Tunde Bakare",
+      "email": "tunde.bakare@gmail.com",
+      "phone": "+2348039281726",
+      "goal": "Remote Sales Starter",
+      "referral": "DSS-DEMO8820A1",
+      "created": 1791286429047
+    },
+    {
+      "id": "enq-2",
+      "name": "Ngozi Eze",
+      "email": "ngozi.eze@techcraft.ng",
+      "phone": "+2348129384711",
+      "goal": "Business Builder",
+      "referral": "DSS-DEMO8820A1",
+      "created": 1791632029047
+    }
+  ]
+}

@@ -14,9 +14,14 @@ export default function ForgotPasswordPage() {
  <button className="w-full h-12 rounded bg-primary hover:bg-primary-container text-on-primary font-medium font-semibold flex items-center justify-center transition-all mb-4">
  Send Reset Link
  </button>
- <Link href="/login" className="text-sm text-primary hover:underline">
- Back to Login
- </Link>
+ <div className="flex items-center justify-between w-full mt-2">
+            <Link href="/" className="text-sm text-on-surface-variant hover:text-on-surface flex items-center gap-1">
+              &larr; Back to Home
+            </Link>
+            <Link href="/login" className="text-sm text-primary hover:underline">
+              Back to Login
+            </Link>
+          </div>
  </div>
  </div>
  </div>

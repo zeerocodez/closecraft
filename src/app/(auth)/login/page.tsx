@@ -34,6 +34,16 @@ export default function LoginPage() {
  return (
  <div className="flex flex-col w-full px-4 md:px-8 pb-8 pt-8 min-h-screen justify-center items-center bg-surface">
  <div className="w-full max-w-md mx-auto flex flex-col pt-4">
+        <div className="flex items-center justify-between mb-4">
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-colors py-1.5 px-3 rounded-lg bg-surface-container-high/60 hover:bg-surface-container-high">
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>Back to Home</span>
+          </Link>
+          <Link href="/dss" className="inline-flex items-center gap-1 text-xs font-bold text-[#45bfae] hover:underline">
+            <span className="material-symbols-outlined text-[16px]">school</span>
+            <span>DSS Academy &rarr;</span>
+          </Link>
+        </div>
  <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container mb-6 shadow-sm">
  <div className="flex items-center gap-2">
  <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>

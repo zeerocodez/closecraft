@@ -11,9 +11,14 @@ export default function SignupPage() {
  
  <div className="w-full bg-surface-container-lowest shadow-xl p-6 rounded-xl border border-surface-container mb-6">
  <p className="text-sm text-on-surface-variant mb-4">Account creation is temporarily disabled in this deployment environment. Please contact your administrator or book an audit.</p>
- <Link href="/login" className="w-full h-12 rounded bg-primary hover:bg-primary-container text-on-primary font-medium font-semibold flex items-center justify-center transition-all">
- Back to Login
- </Link>
+ <div className="flex items-center gap-3 w-full">
+            <Link href="/" className="flex-1 h-12 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-semibold flex items-center justify-center transition-all text-sm">
+              &larr; Back to Home
+            </Link>
+            <Link href="/login" className="flex-1 h-12 rounded bg-primary hover:bg-primary-container text-on-primary font-semibold flex items-center justify-center transition-all text-sm">
+              Back to Login
+            </Link>
+          </div>
  </div>
  </div>
  </div>

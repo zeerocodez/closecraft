@@ -12,6 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    "DSS_Complete_Website_Source/**",
   ]),
 ]);
 

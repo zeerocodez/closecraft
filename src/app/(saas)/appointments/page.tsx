@@ -9,8 +9,7 @@ export default async function Page() {
  }
 
  return (
- <>
- <header className="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 px-6 flex items-center justify-between gap-4"><div className="flex items-center gap-4 min-w-0"><div className="flex items-center gap-space-xs text-sm text-on-surface-variant"><span className="hover:text-on-surface cursor-pointer">Closecraft</span><span className="material-symbols-outlined text-[14px]">chevron_right</span><span className="text-on-surface font-semibold">Revenue Ops</span></div></div><div className="flex-1 max-w-lg mx-space-lg"><div className="relative flex items-center w-full"><span className="material-symbols-outlined absolute left-space-md text-on-surface-variant text-[18px]">search</span><input className="w-full pl-9 pr-14 py-space-xs rounded-lg bg-surface-container-lowest text-on-surface placeholder:text-outline-variant font-body-md text-body-md shadow-[0_1px_4px_rgba(12,20,36,0.05)] focus:outline-none" placeholder="Search leads, companies, deals..." type="text"/><div className="absolute right-space-md flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-surface-container-high text-on-secondary-container text-xs font-semibold uppercase">⌘K</div></div></div><div className="flex items-center gap-4 shrink-0"><div className="hidden xl:flex items-center gap-space-xs px-space-sm py-1 rounded bg-surface-container-low text-on-surface-variant"><span className="w-2 h-2 rounded-full bg-primary"></span><span className="text-sm">Telemetry: 340ms • 99.98% Integrity</span></div><button className="relative p-space-xs rounded-lg hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface transition-colors"><span className="material-symbols-outlined text-[20px]">notifications</span><span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span></button><button className="flex items-center gap-space-xs px-4 py-space-xs bg-primary text-on-primary rounded-lg text-sm font-medium hover:bg-primary-container transition-colors shadow-[0_1px_2px_rgba(12,20,36,0.1)]"><span className="material-symbols-outlined text-[18px]">add</span><span>Add Lead</span></button><div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span className="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></header><main className="w-full pt-16 bg-surface"><div className="flex flex-col w-full p-8 gap-6">
+    <div className="flex flex-col w-full gap-6">
 {/* Operational Sub-Header & Controls Bar */}
 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
 <div className="flex flex-col">
@@ -434,7 +433,6 @@ export default async function Page() {
 </div>
 </div>
 </div>
-</div></main>
- </>
- );
+</div>
+  );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import React, { useState } from 'react';
 import { ArrowRight, Calendar, Download } from 'lucide-react';
 import { submitClinicRegistration } from './actions';
@@ -28,7 +29,15 @@ export default function DSSClinicPage() {
     <div className="min-h-screen bg-[#0d1117] text-gray-300 flex flex-col pt-12 pb-24 font-sans">
       <div className="flex-1 max-w-3xl mx-auto w-full px-6 flex flex-col items-center">
         
-        <div className="text-center mb-12">
+        <div className="w-full flex items-center justify-between mb-8">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-gray-400 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 transition-colors">
+              &larr; Back to Closecraft Home
+            </Link>
+            <Link href="/dss" className="text-xs sm:text-sm font-bold text-[#2ea043] hover:underline">
+              DSS Academy Home &rarr;
+            </Link>
+          </div>
+          <div className="text-center mb-12">
           <div className="text-[#2ea043] font-bold text-xs uppercase tracking-widest mb-6">
             Free Live Clinic
           </div>

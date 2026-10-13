@@ -6,6 +6,14 @@ export default function DSSRegisterPage() {
  return (
  <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
  <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-lg border border-surface-container p-8">
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant hover:text-on-surface">
+            &larr; Back to Home
+          </Link>
+          <Link href="/dss" className="text-xs font-bold text-primary hover:underline">
+            DSS Academy &rarr;
+          </Link>
+        </div>
  <div className="flex justify-center mb-6">
  <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
  <BookOpen className="text-primary" size={24} />

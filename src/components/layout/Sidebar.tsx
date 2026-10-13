@@ -24,6 +24,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
   };
 
   const navItems = [
+    { href: '/', icon: 'Home', label: 'Back to Home', exact: true },
     { href: '/dashboard', icon: 'LayoutDashboard', label: 'Overview', exact: true },
     { href: '/dashboard/revenue-engine', icon: 'Zap', label: 'Revenue Engine' },
     { href: '/dashboard/analytics', icon: 'BarChart2', label: 'Analytics' },
@@ -32,7 +33,8 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     { href: '/pipeline', icon: 'KanbanSquare', label: 'Pipeline' },
     { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
     { href: '/automations', icon: 'Bot', label: 'Automations' },
-    { href: '/settings', icon: 'Settings', label: 'Settings' }
+    { href: '/settings', icon: 'Settings', label: 'Settings' },
+    { href: '/dss', icon: 'GraduationCap', label: 'DSS Academy' }
   ];
 
   const sidebarClasses = `
@@ -45,14 +47,14 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     <aside className={sidebarClasses}>
       <div className="flex flex-col flex-1 overflow-y-auto scrollbar-none">
         <div className="h-16 px-4 flex items-center justify-between border-b border-outline-variant/30">
-          <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap">
+          <Link href="/" className="flex items-center gap-3 overflow-hidden whitespace-nowrap group hover:opacity-80 transition-opacity" title="Back to CloseCraft Home">
             <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
                <Icon name="Rocket" size={16} className="text-primary" />
             </div>
             {(isExpanded || isMobile) && (
               <span className="font-heading text-lg font-semibold text-on-surface tracking-tight transition-opacity duration-120">Closecraft</span>
             )}
-          </div>
+          </Link>
           {isMobile && (
             <button onClick={() => setIsOpen(false)} className="p-1 text-on-surface-variant shrink-0 hover:text-on-surface">
               <Icon name="X" size={20} />

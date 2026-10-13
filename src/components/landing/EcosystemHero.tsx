@@ -48,9 +48,9 @@ function actions(key: NodeKey, on: HeroLinks): Array<{ label: string; href: stri
   switch (key) {
     case "trainees":
       return [
-        { label: "Find training", href: "/courses" },
+        { label: "Digital Sales School (DSS)", href: "/dss" },
+        { label: "Apply to DSS", href: "/dss/apply" },
         ...(on.trainees ? [{ label: "Explore trainees", href: "/trainees" }] : []),
-        { label: "Create a trainee account", href: "/trainee/register" },
       ];
     case "organizations":
       return [
@@ -119,7 +119,7 @@ export default function EcosystemHero({ stats, links }: { stats: LandingStats; l
         </div>
         <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm font-semibold">
           {[
-            { label: "Find training", href: "/courses", show: true },
+            { label: "Digital Sales School (DSS)", href: "/dss", show: true },
             { label: "Discover opportunities", href: "/jobs", show: links.jobs },
             { label: "Meet organizations", href: "/organizations", show: links.organizations },
             { label: "Explore trainees", href: "/trainees", show: links.trainees },
