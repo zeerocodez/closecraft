@@ -91,7 +91,7 @@ export function ActionQueue({ actions, emptyStateTitle, emptyStateDesc }: { acti
                 <td className="px-4 py-4">
                   <p className="text-sm text-on-surface-variant line-clamp-2">{action.reason || 'No reason provided'}</p>
                 </td>
-                <td className="px-4 py-4 text-right text-xs text-on-surface-muted whitespace-nowrap">
+                <td suppressHydrationWarning className="px-4 py-4 text-right text-xs text-on-surface-muted whitespace-nowrap">
                   {formatDistanceToNow(new Date(action.createdAt), { addSuffix: true })}
                 </td>
               </tr>

@@ -2,33 +2,38 @@ import React from 'react';
 import { auth } from "@/lib/auth";
 import { redirect } from 'next/navigation';
 import { db } from "@/lib/db";
-import { getDashboardMetrics, getChartData } from '@/lib/revenue-engine/dashboardService';
+import { getDashboardMetrics, getChartData, getRevenueActions } from '@/lib/revenue-engine/dashboardService';
 import MetricCard from '@/components/dashboard/MetricCard';
 import { Icon } from '@/components/ui/Icon';
 import { RevenueChart } from '@/components/revenue-engine/RevenueChart';
+import { ActionQueue } from '@/components/revenue-engine/ActionQueue';
+import { ImportLeadsModal } from '@/app/(saas)/leads/ImportLeadsModal';
+import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
 
-export default async function DashboardPage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function DashboardPage({ searchParams }: { searchParams: any }) {
  const session = await auth();
  if (!session?.user) redirect('/login');
  if (!session.organizationId) redirect('/login');
 
  const { organizationId } = session;
  
- // Date range parsing from searchParams
+ const resolvedParams = searchParams ? await searchParams : {};
  const now = new Date();
  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
- const startDateStr = typeof searchParams.start === 'string' ? searchParams.start : null;
- const endDateStr = typeof searchParams.end === 'string' ? searchParams.end : null;
+ const startDateStr = typeof resolvedParams?.start === 'string' ? resolvedParams.start : null;
+ const endDateStr = typeof resolvedParams?.end === 'string' ? resolvedParams.end : null;
  
  const startDate = startDateStr ? new Date(startDateStr) : thirtyDaysAgo;
  const endDate = endDateStr ? new Date(endDateStr) : now;
- const currency = typeof searchParams.currency === 'string' ? searchParams.currency : 'USD';
+ const currency = typeof resolvedParams?.currency === 'string' ? resolvedParams.currency : 'USD';
 
- const [metrics, org, chartData] = await Promise.all([
+ const [metrics, org, chartData, pendingActions] = await Promise.all([
  getDashboardMetrics(organizationId, startDate, endDate, currency),
  db.organization.findUnique({ where: { id: organizationId }, select: { name: true } }),
- getChartData(organizationId, startDate, endDate, currency)
+ getChartData(organizationId, startDate, endDate, currency),
+ getRevenueActions(organizationId, 'needs_attention')
  ]);
+
  
  const formatter = new Intl.NumberFormat('en-US', {
  style: 'currency',
@@ -44,16 +49,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
  <h1 className="text-2xl md:text-3xl font-heading font-semibold text-on-surface">Revenue overview</h1>
  <p className="text-sm text-on-surface-variant mt-1">Working data for {org?.name || 'Workspace'}</p>
  </div>
- <div className="flex items-center gap-3">
- <div className="h-10 px-3 bg-surface-container border border-outline-variant rounded-md flex items-center gap-2 text-sm text-on-surface-variant">
- <Icon name="Calendar" size={16} />
- <span>Last 30 days</span>
- </div>
- <button className="h-10 px-4 bg-primary text-on-primary rounded-md font-medium text-sm shadow-sm hover:bg-primary-fixed transition-colors flex items-center gap-2">
- <Icon name="Plus" size={16} />
- Add Lead
- </button>
- </div>
+        <div className="flex items-center gap-3">
+          <div className="h-10 px-3 bg-surface-container border border-outline-variant rounded-md flex items-center gap-2 text-sm text-on-surface-variant">
+            <Icon name="Calendar" size={16} />
+            <span>Last 30 days</span>
+          </div>
+          <ImportLeadsModal />
+          <AddLeadModal />
+        </div>
  </div>
 
  {/* Primary Metric Row */}
@@ -127,20 +130,15 @@ export default async function DashboardPage({ searchParams }: { searchParams: { 
 
  {/* Needs attention action queue: 8 cols */}
  <div className="lg:col-span-8 bg-surface-container border border-outline-variant rounded-xl p-6 min-h-[400px]">
- <h3 className="text-lg font-semibold text-on-surface mb-4">Needs attention</h3>
- {metrics.pendingHumanActions === 0 ? (
- <div className="flex flex-col items-center justify-center h-[280px] text-center">
- <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mb-4">
- <Icon name="Inbox" size={24} className="text-on-surface-variant" />
+ <div className="flex items-center justify-between mb-4">
+ <h3 className="text-lg font-semibold text-on-surface">Needs attention</h3>
+ <span className="text-xs text-primary font-semibold uppercase tracking-wider">{pendingActions.length} Pending Actions</span>
  </div>
- <h4 className="text-on-surface font-medium">No human actions waiting.</h4>
- <p className="text-sm text-on-surface-muted max-w-sm mt-1">New recommendations will appear here when a lead needs your attention.</p>
- </div>
- ) : (
- <div className="flex items-center justify-center h-[280px] border border-dashed border-outline-variant rounded-lg">
- <p className="text-on-surface-muted">Action queue table rendering pending.</p>
- </div>
- )}
+ <ActionQueue 
+ actions={pendingActions}
+ emptyStateTitle="No human actions waiting."
+ emptyStateDesc="New recommendations will appear here when a lead needs your attention."
+ />
  </div>
 
  {/* Open revenue leaks: 4 cols */}
