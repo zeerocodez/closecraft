@@ -29,6 +29,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     { href: '/dashboard/revenue-engine', icon: 'Zap', label: 'Revenue Engine' },
     { href: '/dashboard/analytics', icon: 'BarChart2', label: 'Analytics' },
     { href: '/leads', icon: 'Users', label: 'Leads' },
+    { href: '/rep', icon: 'Target', label: 'Closer & Setter Hub' },
     { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
     { href: '/pipeline', icon: 'KanbanSquare', label: 'Pipeline' },
     { href: '/team', icon: 'UserCheck', label: 'Team & Closers' },

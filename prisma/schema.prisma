@@ -25,6 +25,8 @@ model User {
   memberships   OrganizationMember[]
   studentProfile StudentProfile?
   assignedLeads Lead[]                    @relation("LeadAssignee")
+  closedDeals   Deal[]                    @relation("DealCloser")
+  appointments  Appointment[]             @relation("AppointmentCloser")
 }
 
 model Organization {
@@ -61,11 +63,16 @@ model Organization {
 }
 
 model OrganizationMember {
-  id             String       @id @default(cuid())
-  role           String       @default("MEMBER") // ADMIN, CLOSER, SETTER, MEMBER
-  isAvailable    Boolean      @default(true)     // Available to receive/claim qualified leads
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                      String       @id @default(cuid())
+  role                    String       @default("MEMBER") // ADMIN, CLOSER, SETTER, MEMBER
+  isAvailable             Boolean      @default(true)     // Available to receive/claim qualified leads
+  commissionRate          Float        @default(10.0)     // Commission percentage or fixed payout
+  commissionType          String       @default("PERCENTAGE") // PERCENTAGE, FIXED_PER_DEAL, FIXED_PER_APPOINTMENT
+  googleCalendarConnected Boolean      @default(false)
+  googleCalendarEmail     String?
+  reminderChannels        String       @default("WHATSAPP_EMAIL") // WHATSAPP, EMAIL, WHATSAPP_EMAIL, SMS
+  createdAt               DateTime     @default(now())
+  updatedAt               DateTime     @updatedAt
 
   // Foreign Keys
   userId         String
@@ -144,21 +151,30 @@ model Conversation {
 }
 
 model Appointment {
-  id             String       @id @default(cuid())
-  scheduledAt    DateTime
-  status         String       @default("SCHEDULED") // SCHEDULED, COMPLETED, NO_SHOW, CANCELLED
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id              String       @id @default(cuid())
+  title           String?
+  scheduledAt     DateTime
+  durationMinutes Int          @default(30)
+  status          String       @default("SCHEDULED") // SCHEDULED, CONFIRMED, COMPLETED, NO_SHOW, CANCELLED
+  meetingUrl      String?      // Zoom or Google Meet link
+  notes           String?
+  googleEventId   String?      // Synced Google Calendar event ID
+  reminderSent    Boolean      @default(false)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
   // Foreign Keys
   leadId         String
   organizationId String
+  closerId       String?      // Assigned closer or setter
 
   // Relations
   lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  closer         User?        @relation("AppointmentCloser", fields: [closerId], references: [id], onDelete: SetNull)
 
   @@index([organizationId])
+  @@index([closerId])
 }
 
 model AiAction {
@@ -182,13 +198,18 @@ model AiAction {
 }
 
 model Deal {
-  id             String       @id @default(cuid())
-  amount         Float
-  currency       String       @default("USD")
-  stage          String       @default("OPPORTUNITY") // OPPORTUNITY, PROPOSAL, WON, LOST
-  closedAt       DateTime?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id               String       @id @default(cuid())
+  title            String?
+  amount           Float
+  currency         String       @default("NGN")
+  stage            String       @default("OPPORTUNITY") // OPPORTUNITY, PROPOSAL, NEGOTIATION, WON, LOST
+  closedAt         DateTime?
+  closerId         String?      // Assigned closer
+  commissionAmount Float?       // Computed commission
+  commissionStatus String       @default("PENDING") // PENDING, APPROVED, PAID
+  notes            String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
   // Foreign Keys
   leadId         String
@@ -197,8 +218,10 @@ model Deal {
   // Relations
   lead           Lead         @relation(fields: [leadId], references: [id], onDelete: Cascade)
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  closer         User?        @relation("DealCloser", fields: [closerId], references: [id], onDelete: SetNull)
 
   @@index([organizationId])
+  @@index([closerId])
 }
 
 model Message {

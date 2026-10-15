@@ -9,7 +9,10 @@ export async function getDealForTenant(dealId: string, organizationId: string) {
       id: dealId,
       organizationId // Strictly isolate to tenant
     },
-    include: { lead: true }
+    include: { 
+      lead: true,
+      closer: { select: { id: true, name: true, email: true, image: true } }
+    }
   });
 
   if (!deal) throw new Error("Deal not found or does not belong to this organization");
@@ -20,6 +23,7 @@ export async function getDealsForTenant(organizationId: string) {
   return await db.deal.findMany({
     where: { organizationId },
     include: { 
+      closer: { select: { id: true, name: true, email: true, image: true } },
       lead: {
         include: {
           revenueActions: {
@@ -34,7 +38,28 @@ export async function getDealsForTenant(organizationId: string) {
   });
 }
 
-export async function createDealForTenant(data: { amount: number; leadId: string; organizationId: string }) {
+export async function getDealsForCloser(organizationId: string, closerId: string) {
+  return await db.deal.findMany({
+    where: { 
+      organizationId,
+      closerId
+    },
+    include: {
+      lead: true,
+      closer: { select: { id: true, name: true, email: true, image: true } }
+    },
+    orderBy: { updatedAt: 'desc' }
+  });
+}
+
+export async function createDealForTenant(data: { 
+  amount: number; 
+  leadId: string; 
+  organizationId: string;
+  title?: string;
+  closerId?: string;
+  notes?: string;
+}) {
   // First ensure the lead belongs to this tenant!
   const lead = await db.lead.findFirst({
     where: { id: data.leadId, organizationId: data.organizationId }
@@ -44,10 +69,13 @@ export async function createDealForTenant(data: { amount: number; leadId: string
 
   return await db.deal.create({
     data: {
+      title: data.title || `${lead.name} Deal`,
       amount: data.amount,
       stage: 'OPPORTUNITY',
       leadId: data.leadId,
-      organizationId: data.organizationId
+      organizationId: data.organizationId,
+      closerId: data.closerId || lead.assignedUserId,
+      notes: data.notes
     }
   });
 }
