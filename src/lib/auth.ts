@@ -24,8 +24,10 @@ export const {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
+        const email = (credentials.email as string).trim().toLowerCase();
+
         const user = await db.user.findUnique({
-          where: { email: credentials.email as string },
+          where: { email },
           include: { memberships: true }
         });
 
@@ -52,22 +54,62 @@ export const {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
         if (!user.email) return false;
+        const email = user.email.trim().toLowerCase();
         
         let dbUser = await db.user.findUnique({
-          where: { email: user.email },
+          where: { email },
           include: { memberships: true }
         });
 
         if (!dbUser) {
+          const baseName = user.name || email.split('@')[0] || 'My';
+          const baseSlug = baseName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 25) || 'workspace';
+          const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+
+          const org = await db.organization.create({
+            data: {
+              name: `${baseName}'s Workspace`,
+              slug,
+              plan: 'STARTER',
+            }
+          });
+
           dbUser = await db.user.create({
             data: {
-              email: user.email,
+              email,
               name: user.name,
               image: user.image,
               emailVerified: new Date(),
+              memberships: {
+                create: {
+                  role: 'ADMIN',
+                  organizationId: org.id
+                }
+              }
             },
             include: { memberships: true }
           });
+        } else if (dbUser.memberships.length === 0) {
+          const baseName = dbUser.name || email.split('@')[0] || 'My';
+          const baseSlug = baseName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').slice(0, 25) || 'workspace';
+          const slug = `${baseSlug}-${Math.random().toString(36).substring(2, 6)}`;
+
+          const org = await db.organization.create({
+            data: {
+              name: `${baseName}'s Workspace`,
+              slug,
+              plan: 'STARTER',
+            }
+          });
+
+          const membership = await db.organizationMember.create({
+            data: {
+              role: 'ADMIN',
+              userId: dbUser.id,
+              organizationId: org.id
+            }
+          });
+          dbUser.memberships = [membership];
         }
         
         // Pass db user details to token via user object
