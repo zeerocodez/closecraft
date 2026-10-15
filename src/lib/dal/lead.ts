@@ -32,14 +32,26 @@ export async function getLeadsForTenant(organizationId: string) {
   });
 }
 
-export async function createLeadForTenant(data: { name: string; email: string; source: string; status?: string; organizationId: string }) {
+export async function createLeadForTenant(data: { 
+  name: string; 
+  email: string; 
+  source: string; 
+  status?: string; 
+  organizationId: string;
+  phone?: string;
+  message?: string;
+  buyingIntent?: number;
+}) {
   return await db.lead.create({
     data: {
       name: data.name,
       email: data.email,
       source: data.source,
       status: data.status || 'NEW',
-      organizationId: data.organizationId
+      organizationId: data.organizationId,
+      phone: data.phone,
+      message: data.message,
+      buyingIntent: data.buyingIntent,
     }
   });
 }

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
 import { claimRevenueAction } from '@/app/(saas)/actions';
 import { AddLeadModal } from './AddLeadModal';
+import { ImportLeadsModal } from './ImportLeadsModal';
 import { getLeadsForTenant } from '@/lib/dal/lead';
 
 export default async function LeadsPage() {
@@ -44,9 +45,11 @@ export default async function LeadsPage() {
  <p className="text-sm text-on-surface-variant mt-1">Real-time ICP scoring, authority graphs, and AI pipeline orchestration.</p>
  </div>
  <div className="flex items-center gap-3">
+ <ImportLeadsModal />
  <AddLeadModal />
  </div>
  </div>
+
 
  {/* Filters & Actions */}
  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2 bg-surface-container-lowest p-2 rounded-xl shadow-sm mb-4">

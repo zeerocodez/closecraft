@@ -2,16 +2,23 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
+import { RevenueEngine } from '@/lib/revenue-engine/engine';
 
 const MAX_IMPORT_BATCH = 500;
 
 const ImportItemSchema = z.object({
+  name: z.string().max(160).optional(),
   firstName: z.string().max(80).optional(),
   lastName: z.string().max(80).optional(),
   email: z.string().email("Invalid lead email").max(180),
   phone: z.string().max(40).optional(),
+  company: z.string().max(120).optional(),
+  business: z.string().max(120).optional(),
   buyingIntent: z.union([z.number(), z.string()]).optional(),
-  notes: z.string().max(1000).optional(),
+  intent: z.union([z.number(), z.string()]).optional(),
+  notes: z.string().max(1500).optional(),
+  message: z.string().max(1500).optional(),
+  dealValue: z.union([z.number(), z.string()]).optional(),
 });
 
 export async function POST(req: Request) {
@@ -40,6 +47,7 @@ export async function POST(req: Request) {
       phone: string | null;
       buyingIntent: number;
       message: string;
+      company?: string;
     }[] = [];
 
     for (let i = 0; i < body.leads.length; i++) {
@@ -51,24 +59,36 @@ export async function POST(req: Request) {
         );
       }
       const item = parsed.data;
-      const fullName = `${item.firstName || ''} ${item.lastName || ''}`.trim() || 'Imported Lead';
-      let parsedIntent = 50;
-      if (item.buyingIntent !== undefined) {
-        const rawNum = typeof item.buyingIntent === 'number' ? item.buyingIntent : parseInt(item.buyingIntent, 10);
+      const explicitName = item.name?.trim();
+      const splitName = `${item.firstName || ''} ${item.lastName || ''}`.trim();
+      const fullName = explicitName || splitName || 'Imported Lead';
+      
+      const rawIntent = item.buyingIntent ?? item.intent;
+      let parsedIntent = 55;
+      if (rawIntent !== undefined) {
+        const rawNum = typeof rawIntent === 'number' ? rawIntent : parseInt(rawIntent, 10);
         if (!isNaN(rawNum)) {
           parsedIntent = Math.min(100, Math.max(0, rawNum));
         }
       }
+
+      const noteText = item.notes?.trim() || item.message?.trim() || '';
+      const companyName = item.company?.trim() || item.business?.trim() || '';
+      const leadMessage = noteText 
+        ? (companyName ? `[${companyName}] ${noteText}` : noteText)
+        : (companyName ? `Inquiry from ${companyName}` : 'Imported via CSV');
 
       validatedLeads.push({
         name: fullName,
         email: item.email.toLowerCase().trim(),
         phone: item.phone?.trim() || null,
         buyingIntent: parsedIntent,
-        message: item.notes?.trim() || 'Imported via CSV',
+        message: leadMessage,
+        company: companyName,
       });
     }
 
+    // 1. Bulk insert the leads in transaction
     const createdLeads = await db.$transaction(
       validatedLeads.map((lead) => {
         return db.lead.create({
@@ -86,9 +106,24 @@ export async function POST(req: Request) {
       })
     );
 
-    return NextResponse.json({ count: createdLeads.length });
+    // 2. Run the Revenue Engine across every imported lead to derive signals, Next Best Action, and pipeline deals
+    console.log(`[CSV Import] Ingesting ${createdLeads.length} leads through Revenue Engine...`);
+    for (const lead of createdLeads) {
+      try {
+        await RevenueEngine.processNewLead(lead.id);
+      } catch (engineErr) {
+        console.error(`[CSV Import] RevenueEngine evaluation error for lead ${lead.id}:`, engineErr);
+      }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      count: createdLeads.length,
+      leads: createdLeads.map(l => ({ id: l.id, name: l.name, email: l.email }))
+    });
   } catch (error) {
     console.error('CSV Import error:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
