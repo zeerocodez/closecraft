@@ -5,31 +5,45 @@ import { getRevenueActions } from '@/lib/revenue-engine/dashboardService';
 import { ActionQueue } from '@/components/revenue-engine/ActionQueue';
 import { Icon } from '@/components/ui/Icon';
 import Link from 'next/link';
+import { db } from "@/lib/db";
+import { ImportLeadsModal } from '@/app/(saas)/leads/ImportLeadsModal';
+import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
+import { QualificationPolicyModal } from '@/components/revenue-engine/QualificationPolicyModal';
 
-export default async function RevenueEnginePage({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
- const session = await auth();
- if (!session?.user) redirect('/login');
- if (!session.organizationId) redirect('/login');
+export default async function RevenueEnginePage({ searchParams }: { searchParams: any }) {
+  const session = await auth();
+  if (!session?.user) redirect('/login');
+  if (!session.organizationId) redirect('/login');
 
- const { organizationId } = session;
- const currentTab = typeof searchParams.tab === 'string' ? searchParams.tab : 'needs_attention';
- const filter = currentTab === 'needs_attention' ? 'needs_attention' : currentTab === 'my_actions' ? 'my_actions' : 'all';
- 
- const actions = await getRevenueActions(organizationId, filter, session.user.id);
+  const { organizationId } = session;
+  const resolvedParams = searchParams ? await searchParams : {};
+  const currentTab = typeof resolvedParams?.tab === 'string' ? resolvedParams.tab : 'needs_attention';
+  const filter = currentTab === 'needs_attention' ? 'needs_attention' : currentTab === 'my_actions' ? 'my_actions' : 'all';
+  
+  const [actions, org] = await Promise.all([
+    getRevenueActions(organizationId, filter, session.user.id),
+    db.organization.findUnique({ where: { id: organizationId }, select: { qualificationPolicy: true, name: true } })
+  ]);
 
- const tabs = [
- { id: 'needs_attention', label: 'Needs attention' },
- { id: 'my_actions', label: 'My actions' },
- { id: 'all', label: 'All actions' }
- ];
+  const tabs = [
+    { id: 'needs_attention', label: 'Needs attention' },
+    { id: 'my_actions', label: 'My actions' },
+    { id: 'all', label: 'All actions' }
+  ];
 
- return (
- <div className="flex flex-col gap-6 lg:gap-8 w-full">
- {/* Page Heading */}
- <div className="flex flex-col gap-1">
- <h1 className="text-2xl md:text-3xl font-heading font-semibold text-on-surface">Revenue Command Centre</h1>
- <p className="text-sm text-on-surface-variant">Review signals, prioritize leads, and execute the next best action.</p>
- </div>
+  return (
+    <div className="flex flex-col gap-6 lg:gap-8 w-full">
+      {/* Page Heading */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-2xl md:text-3xl font-heading font-semibold text-on-surface">Revenue Command Centre</h1>
+          <p className="text-sm text-on-surface-variant">Review signals, prioritize leads, and execute the next best action for {org?.name || 'Workspace'}.</p>
+        </div>
+        <QualificationPolicyModal currentPolicy={org?.qualificationPolicy} />
+      </div>
+
+      {/* Qualification Logic Configuration Banner */}
+      <QualificationPolicyModal triggerVariant="banner" currentPolicy={org?.qualificationPolicy} />
 
  {/* Tabs & Filters */}
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/30 pb-4">
@@ -55,6 +69,8 @@ export default async function RevenueEnginePage({ searchParams }: { searchParams
  <Icon name="Filter" size={16} />
  <span>Filter</span>
  </div>
+ <ImportLeadsModal />
+ <AddLeadModal />
  </div>
  </div>
 

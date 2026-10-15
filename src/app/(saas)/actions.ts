@@ -9,32 +9,41 @@ import { qualifyLead } from "@/lib/ai/qualification";
 import { createLeadForTenant } from "@/lib/dal/lead";
 import { createDealForTenant } from "@/lib/dal/deal";
 
-export async function addManualLead(data: { name: string, email: string, source: string }) {
- const session = await auth();
- const organizationId = (session as any)?.organizationId;
- if (!organizationId) throw new Error("Unauthorized");
+export async function addManualLead(data: { 
+  name: string; 
+  email: string; 
+  source: string;
+  phone?: string;
+  message?: string;
+  buyingIntent?: number;
+}) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
 
- const lead = await createLeadForTenant({
- name: data.name,
- email: data.email,
- source: data.source,
- organizationId
- });
+  const lead = await createLeadForTenant({
+    name: data.name,
+    email: data.email,
+    source: data.source,
+    phone: data.phone,
+    message: data.message,
+    buyingIntent: data.buyingIntent,
+    organizationId
+  });
 
- // Since it was added manually in the UI, trigger the AI asynchronously
- // We can just invoke the background job directly or fire a separate event,
- // but calling qualifyLead here without awaiting (or firing an event) works.
- // Actually, we'll just fire an evaluate event, or call it directly.
- try {
- await qualifyLead(lead.id);
- } catch(e) {
- console.error("AI qualification failed", e);
- }
+  try {
+    const { RevenueEngine } = await import('@/lib/revenue-engine/engine');
+    await RevenueEngine.processNewLead(lead.id);
+  } catch(e) {
+    console.error("RevenueEngine processing failed", e);
+  }
 
- revalidatePath('/leads');
- revalidatePath('/pipeline');
- 
- return lead;
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/revenue-engine');
+  revalidatePath('/leads');
+  revalidatePath('/pipeline');
+  
+  return lead;
 }
 
 export async function createDeal(leadId: string, amount: number) {
@@ -53,6 +62,68 @@ export async function createDeal(leadId: string, amount: number) {
 
  return deal;
 }
+
+export async function updateDealStage(dealId: string, newStage: string) {
+ const session = await auth();
+ const organizationId = (session as any)?.organizationId;
+ const userId = session?.user?.id;
+ if (!organizationId || !userId) throw new Error("Unauthorized");
+
+ const allowedStages = ['OPPORTUNITY', 'PROPOSAL', 'WON', 'LOST'];
+ if (!allowedStages.includes(newStage)) {
+   throw new Error("Invalid deal stage");
+ }
+
+ const deal = await db.deal.findFirst({
+   where: { id: dealId, organizationId }
+ });
+ if (!deal) throw new Error("Deal not found");
+
+ const isTerminal = newStage === 'WON' || newStage === 'LOST';
+
+ const updatedDeal = await db.$transaction(async (tx) => {
+   const d = await tx.deal.update({
+     where: { id: dealId },
+     data: {
+       stage: newStage,
+       closedAt: isTerminal ? new Date() : null,
+     }
+   });
+
+   // Update lead status
+   await tx.lead.update({
+     where: { id: deal.leadId },
+     data: {
+       status: newStage === 'WON' ? 'CLOSED' : newStage
+     }
+   });
+
+   // Record audit log
+   await tx.auditLog.create({
+     data: {
+       organizationId,
+       actorId: userId,
+       actorType: 'USER',
+       action: 'DEAL_STAGE_CHANGED',
+       resourceType: 'Deal',
+       resourceId: dealId,
+       oldState: JSON.stringify({ stage: deal.stage }),
+       newState: JSON.stringify({ stage: newStage, amount: deal.amount }),
+       leadId: deal.leadId
+     }
+   });
+
+   return d;
+ });
+
+ revalidatePath('/pipeline');
+ revalidatePath('/dashboard');
+ revalidatePath('/dashboard/revenue-engine');
+ revalidatePath('/leads');
+
+ return updatedDeal;
+}
+
 
 export async function createAppointment(data: { title: string; startTime: string; endTime: string; leadId: string }) {
  const session = await auth();
@@ -180,16 +251,25 @@ export async function claimRevenueAction(rawActionId: string) {
  }
 }
 
-export async function updateQualificationPolicy(policy: string) {
- const session = await auth();
- const organizationId = (session as any)?.organizationId;
- if (!organizationId) throw new Error("Unauthorized");
+export async function updateQualificationPolicy(policy: string, reprocessExisting: boolean = false) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
 
- await db.organization.update({
- where: { id: organizationId },
- data: { qualificationPolicy: policy }
- });
+  await db.organization.update({
+    where: { id: organizationId },
+    data: { qualificationPolicy: policy }
+  });
 
- revalidatePath('/settings');
- return { success: true };
+  if (reprocessExisting) {
+    const { RevenueEngine } = await import('@/lib/revenue-engine/engine');
+    await RevenueEngine.reprocessAllLeads(organizationId);
+  }
+
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/revenue-engine');
+  revalidatePath('/leads');
+  revalidatePath('/pipeline');
+  revalidatePath('/settings');
+  return { success: true };
 }
