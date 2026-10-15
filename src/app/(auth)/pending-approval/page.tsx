@@ -75,8 +75,8 @@ export default async function PendingApprovalPage() {
             <h1 className="text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight mb-2">
               Your Workspace is Under Review
             </h1>
-            <p className="text-sm text-on-surface-variant max-w-md leading-relaxed">
-              CloseCraft onboards select Nigerian training academies, consulting firms, and sales agencies through vetted pilot cohorts to guarantee dedicated AI capacity.
+            <p className="text-sm text-on-surface-variant max-w-lg leading-relaxed">
+              CloseCraft onboards select service-based businesses, tech firms, digital creators, and high-growth companies with active leads and enquiries through vetted pilot cohorts to guarantee dedicated AI capacity and WhatsApp Business integration.
             </p>
           </div>
 

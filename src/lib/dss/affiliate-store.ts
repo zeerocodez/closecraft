@@ -473,3 +473,28 @@ export function getDemoDashboardData(): AffiliateData {
     ],
   };
 }
+
+export async function getAllAffiliateStoreData(): Promise<StoreData> {
+  return readStore();
+}
+
+export async function processAffiliateSalePayout(saleId: string, referencePrefix: string = 'TRANSFER-AUTO'): Promise<boolean> {
+  const store = readStore();
+  const sale = store.sales.find((s) => s.id === saleId);
+  if (!sale || sale.status === 'paid') return false;
+
+  sale.status = 'paid';
+  const payoutRef = `${referencePrefix}-${Date.now().toString(36).toUpperCase()}`;
+
+  store.payouts.push({
+    id: `payout-${Date.now()}`,
+    affiliate: sale.affiliate,
+    amount: sale.commission,
+    reference: payoutRef,
+    created: Date.now(),
+  });
+
+  writeStore(store);
+  return true;
+}
+

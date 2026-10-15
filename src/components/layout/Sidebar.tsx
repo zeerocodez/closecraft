@@ -34,6 +34,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
     { href: '/automations', icon: 'Bot', label: 'Automations' },
     { href: '/settings', icon: 'Settings', label: 'Settings' },
+    { href: '/admin', icon: 'Shield', label: 'Platform Admin' },
     { href: '/dss', icon: 'GraduationCap', label: 'DSS Academy' }
   ];
 
