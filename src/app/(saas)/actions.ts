@@ -273,3 +273,36 @@ export async function updateQualificationPolicy(policy: string, reprocessExistin
   revalidatePath('/settings');
   return { success: true };
 }
+
+export async function setOrganizationStatus(targetOrgId: string, newStatus: 'APPROVED' | 'PENDING' | 'SUSPENDED') {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId || !session?.user?.id) throw new Error("Unauthorized");
+
+  // Verify caller has administrative privileges
+  const callerOrg = await db.organization.findUnique({
+    where: { id: organizationId },
+    select: { slug: true }
+  });
+
+  const callerMember = await db.organizationMember.findFirst({
+    where: {
+      userId: session.user.id,
+      organizationId,
+      role: 'ADMIN'
+    }
+  });
+
+  if (!callerMember || (callerOrg?.slug !== 'zeerocodes' && callerOrg?.slug !== 'acme-corp')) {
+    throw new Error("Forbidden: Super-admin privileges required to manage organization approval status.");
+  }
+
+  const updated = await db.organization.update({
+    where: { id: targetOrgId },
+    data: { status: newStatus }
+  });
+
+  revalidatePath('/dashboard');
+  revalidatePath('/settings');
+  return { success: true, organization: updated };
+}

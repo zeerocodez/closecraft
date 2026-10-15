@@ -30,6 +30,7 @@ model Organization {
   id                  String    @id @default(cuid())
   name                String
   slug                String    @unique
+  status              String    @default("PENDING") // PENDING, APPROVED, SUSPENDED
   plan                String    @default("STARTER") // e.g. STARTER, GROWTH, SCALE
   qualificationPolicy String?   // Custom ICP/Qualification rules for this tenant
   createdAt           DateTime  @default(now())

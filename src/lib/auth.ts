@@ -28,7 +28,11 @@ export const {
 
         const user = await db.user.findUnique({
           where: { email },
-          include: { memberships: true }
+          include: {
+            memberships: {
+              include: { organization: true }
+            }
+          }
         });
 
         if (!user || !user.passwordHash) return null;
@@ -40,11 +44,14 @@ export const {
 
         if (!isPasswordValid) return null;
 
+        const primaryOrg = user.memberships[0]?.organization;
+
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          organizationId: user.memberships[0]?.organizationId || null
+          organizationId: primaryOrg?.id || null,
+          organizationStatus: primaryOrg?.status || "PENDING",
         };
       }
     })
@@ -58,7 +65,11 @@ export const {
         
         let dbUser = await db.user.findUnique({
           where: { email },
-          include: { memberships: true }
+          include: {
+            memberships: {
+              include: { organization: true }
+            }
+          }
         });
 
         if (!dbUser) {
@@ -71,6 +82,7 @@ export const {
               name: `${baseName}'s Workspace`,
               slug,
               plan: 'STARTER',
+              status: 'PENDING', // Organizations registered via Google default to PENDING review
             }
           });
 
@@ -87,7 +99,11 @@ export const {
                 }
               }
             },
-            include: { memberships: true }
+            include: {
+              memberships: {
+                include: { organization: true }
+              }
+            }
           });
         } else if (dbUser.memberships.length === 0) {
           const baseName = dbUser.name || email.split('@')[0] || 'My';
@@ -99,6 +115,7 @@ export const {
               name: `${baseName}'s Workspace`,
               slug,
               plan: 'STARTER',
+              status: 'PENDING',
             }
           });
 
@@ -107,28 +124,33 @@ export const {
               role: 'ADMIN',
               userId: dbUser.id,
               organizationId: org.id
-            }
+            },
+            include: { organization: true }
           });
           dbUser.memberships = [membership];
         }
         
         // Pass db user details to token via user object
+        const primaryOrg = dbUser.memberships[0]?.organization;
         user.id = dbUser.id;
-        (user as any).organizationId = dbUser.memberships[0]?.organizationId || null;
+        user.organizationId = primaryOrg?.id || null;
+        user.organizationStatus = primaryOrg?.status || 'PENDING';
       }
       return true;
     },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.organizationId = (user as any).organizationId ?? null;
+        token.organizationId = user.organizationId ?? null;
+        token.organizationStatus = user.organizationStatus ?? null;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
-        (session as any).organizationId = typeof token.organizationId === "string" ? token.organizationId : null;
+        session.organizationId = typeof token.organizationId === "string" ? token.organizationId : null;
+        session.organizationStatus = typeof token.organizationStatus === "string" ? token.organizationStatus : null;
       }
       return session;
     }

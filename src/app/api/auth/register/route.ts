@@ -73,6 +73,7 @@ export async function POST(req: Request) {
           name: cleanCompanyName,
           slug,
           plan: "STARTER",
+          status: "PENDING",
         }
       });
 
