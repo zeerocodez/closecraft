@@ -24,6 +24,7 @@ model User {
   // Relations
   memberships   OrganizationMember[]
   studentProfile StudentProfile?
+  assignedLeads Lead[]                    @relation("LeadAssignee")
 }
 
 model Organization {
@@ -33,6 +34,7 @@ model Organization {
   status              String    @default("PENDING") // PENDING, APPROVED, SUSPENDED
   plan                String    @default("STARTER") // e.g. STARTER, GROWTH, SCALE
   qualificationPolicy String?   // Custom ICP/Qualification rules for this tenant
+  leadRoutingMode     String    @default("OPEN_POOL") // OPEN_POOL, ROUND_ROBIN, OWNER_MANUAL
   createdAt           DateTime  @default(now())
   updatedAt           DateTime  @updatedAt
 
@@ -60,7 +62,8 @@ model Organization {
 
 model OrganizationMember {
   id             String       @id @default(cuid())
-  role           String       @default("MEMBER") // ADMIN, CLOSER, MEMBER
+  role           String       @default("MEMBER") // ADMIN, CLOSER, SETTER, MEMBER
+  isAvailable    Boolean      @default(true)     // Available to receive/claim qualified leads
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -95,9 +98,15 @@ model Lead {
 
   // Foreign Keys
   organizationId String?      // Optional for platform-owned marketing leads, required for SaaS leads
+  assignedUserId String?      // Assigned Setter, Closer, or Team Member
+  assignedRole   String?      // SETTER, CLOSER
+  claimedAt      DateTime?
+  aiAssessment   String?      // Deep AI qualification breakdown & deal risk
+  nextStepsRecommendation String? // Prescriptive coaching for setter/closer
 
   // Relations
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignedUser   User?         @relation("LeadAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
   conversations  Conversation[]
   appointments   Appointment[]
   aiActions      AiAction[]
@@ -111,6 +120,7 @@ model Lead {
 
   @@index([organizationId])
   @@index([email])
+  @@index([assignedUserId])
 }
 
 model Conversation {

@@ -26,7 +26,10 @@ export async function getLeadsForTenant(organizationId: string) {
     include: {
       deals: true,
       revenueActions: { where: { status: 'PENDING' }, orderBy: { priority: 'desc' }, take: 1 },
-      revenueSignals: { where: { type: 'INTENT' }, orderBy: { createdAt: 'desc' }, take: 1 }
+      revenueSignals: { where: { type: 'INTENT' }, orderBy: { createdAt: 'desc' }, take: 1 },
+      assignedUser: {
+        select: { id: true, name: true, email: true, image: true }
+      }
     },
     orderBy: { createdAt: 'desc' }
   });

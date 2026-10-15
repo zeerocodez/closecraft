@@ -255,8 +255,11 @@ export default function AdminDashboardClient({
     return nameMatch || emailMatch || orgMatch;
   });
 
-  // Pending affiliate count
-  const pendingSales = affiliateData.sales.filter(s => s.status === 'pending');
+  // Safe fallbacks for affiliate data
+  const safeSales = affiliateData?.sales || [];
+  const safeAffiliates = affiliateData?.affiliates || [];
+  const safePayouts = affiliateData?.payouts || [];
+  const pendingSales = safeSales.filter(s => s.status === 'pending');
 
   return (
     <div className="flex flex-col gap-6 lg:gap-8 w-full max-w-7xl mx-auto pb-16">
@@ -895,7 +898,7 @@ export default function AdminDashboardClient({
                 {formatMoney(finances.totalAffiliateCommissionNgn)}
               </div>
               <span className="text-xs text-on-surface-variant mt-1 block">
-                Across {affiliateData.sales.length} qualifying enrollments
+                Across {safeSales.length} qualifying enrollments
               </span>
             </div>
 
@@ -905,7 +908,7 @@ export default function AdminDashboardClient({
                 {formatMoney(finances.paidAffiliateCommissionNgn)}
               </div>
               <span className="text-xs text-on-surface-variant mt-1 block">
-                {affiliateData.payouts.length} completed bank transfers
+                {safePayouts.length} completed bank transfers
               </span>
             </div>
 
@@ -930,7 +933,7 @@ export default function AdminDashboardClient({
                 </p>
               </div>
               <div className="text-xs font-bold text-on-surface-variant">
-                {affiliateData.sales.length} Total Sales Records
+                {safeSales.length} Total Sales Records
               </div>
             </div>
 
@@ -947,14 +950,14 @@ export default function AdminDashboardClient({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/20">
-                  {affiliateData.sales.map((sale) => {
+                  {safeSales.map((sale) => {
                     const grossNgn = sale.amount / 100;
                     const commissionNgn = sale.commission / 100;
                     const isPaid = sale.status === 'paid';
                     const isPendingPayout = sale.status === 'pending';
 
                     // Find partner name if available
-                    const partner = affiliateData.affiliates.find(a => a.code === sale.affiliate);
+                    const partner = safeAffiliates.find(a => a.code === sale.affiliate);
 
                     return (
                       <tr key={sale.id} className="hover:bg-surface-container/30 transition-colors">
@@ -1019,7 +1022,7 @@ export default function AdminDashboardClient({
           <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden p-5">
             <h3 className="text-sm font-bold text-on-surface mb-3">Active Affiliate Partners & Distribution Channels</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {affiliateData.affiliates.map((aff) => (
+              {safeAffiliates.map((aff) => (
                 <div key={aff.code} className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/20">
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-bold text-on-surface text-sm">{aff.name}</span>

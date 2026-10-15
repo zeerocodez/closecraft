@@ -31,6 +31,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     { href: '/leads', icon: 'Users', label: 'Leads' },
     { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
     { href: '/pipeline', icon: 'KanbanSquare', label: 'Pipeline' },
+    { href: '/team', icon: 'UserCheck', label: 'Team & Closers' },
     { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
     { href: '/automations', icon: 'Bot', label: 'Automations' },
     { href: '/settings', icon: 'Settings', label: 'Settings' },

@@ -82,13 +82,45 @@ export const RevenueEngine = {
       })
     ]);
 
-    // 3. Update Lead Status & Intent Score
+    // 3. Update Lead Status, AI Assessment & Prescriptive Next Steps
     const updatedStatus = aiData.intentScore >= 80 ? 'OPPORTUNITY' : (aiData.intentScore >= 50 ? 'ENGAGED' : 'NEW');
+    
+    // Check Team Routing Mode & Availability
+    const routingMode = lead.organization?.leadRoutingMode || 'OPEN_POOL';
+    let assignedUserId = lead.assignedUserId;
+    let assignedRole = lead.assignedRole || aiData.targetRole;
+    let claimedAt = lead.claimedAt;
+
+    if (!assignedUserId && routingMode === 'ROUND_ROBIN') {
+      // Auto-push qualified lead to next available team member
+      const availableMembers = await db.organizationMember.findMany({
+        where: {
+          organizationId: lead.organizationId,
+          isAvailable: true,
+          role: { in: ['CLOSER', 'SETTER', 'ADMIN'] }
+        }
+      });
+
+      if (availableMembers.length > 0) {
+        const matched = availableMembers.filter(m => m.role === aiData.targetRole);
+        const pool = matched.length > 0 ? matched : availableMembers;
+        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        assignedUserId = chosen.userId;
+        assignedRole = chosen.role;
+        claimedAt = new Date();
+      }
+    }
+
     await db.lead.update({
       where: { id: lead.id },
       data: {
         buyingIntent: aiData.intentScore,
-        status: lead.status === 'NEW' ? updatedStatus : lead.status
+        status: lead.status === 'NEW' ? updatedStatus : lead.status,
+        aiAssessment: aiData.aiAssessment,
+        nextStepsRecommendation: aiData.nextStepsRecommendation,
+        assignedRole,
+        assignedUserId,
+        claimedAt
       }
     });
     

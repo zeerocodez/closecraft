@@ -18,6 +18,9 @@ export interface LeadQualificationResult {
   intentEvidence: string;
   fitEvidence: string;
   urgencyEvidence: string;
+  targetRole: 'CLOSER' | 'SETTER';
+  aiAssessment: string;
+  nextStepsRecommendation: string;
 }
 
 /**
@@ -195,13 +198,35 @@ function deterministicAnalyze(
     actionReason = `Low intent exploration (${intentScore}/100). Enroll in automated nurture sequence to warm up deal.`;
   }
 
+  const isCloserTier = intentScore >= 75 || fitScore >= 80 || (leadAmount && leadAmount >= 250000);
+  const targetRole: 'CLOSER' | 'SETTER' = isCloserTier ? 'CLOSER' : 'SETTER';
+
+  const statedBudget = leadAmount ? `₦${leadAmount.toLocaleString()}` : (text.includes('budget') ? 'Stated in notes' : 'Pending verification');
+  const authorityRole = text.includes('founder') || text.includes('ceo') || text.includes('director') || text.includes('manager') ? 'Executive Decision Maker' : 'Evaluator';
+
+  const aiAssessment = `Fit Score: ${fitScore}/100 • Intent: ${intentScore}/100 • Priority: ${priority}/100\n` +
+    `Authority: ${authorityRole} • Budget: ${statedBudget}\n` +
+    `Identified Need: ${(message || 'Sales pipeline automation').slice(0, 100)}\n` +
+    `Deal Health: ${fitScore >= 75 && intentScore >= 70 ? '🟢 High Conversion Probability' : '🟡 Requires Qualification Discovery'}`;
+
+  const nextStepsRecommendation = isCloserTier
+    ? `🎯 CLOSER ACTION PROTOCOL:\n` +
+      `• Prescribed Opener: "Hi! I reviewed your notes regarding your pipeline goals. Based on your budget of ${statedBudget}, we have trained closing capacity ready to plug in."\n` +
+      `• Best Channel: WhatsApp Direct Audio / Zoom Demo Call\n` +
+      `• Objective: Confirm sales targets, present CloseCraft closer tier, lock in 14-day pilot agreement within 48h.\n` +
+      `• SLA: Respond within 15 minutes.`
+    : `📋 SETTER ACTION PROTOCOL:\n` +
+      `• Prescribed Opener: "Hello! Thank you for reaching out to CloseCraft. To connect you with our senior closer, are you looking for remote closers or training an internal team?"\n` +
+      `• Best Channel: WhatsApp Message or 5-minute Discovery Call\n` +
+      `• Objective: Qualify lead volume and book appointment directly onto the Closer calendar within 24 hours.`;
+
   return {
     intentScore,
     fitScore,
     urgencyScore,
     estimatedValue,
     budget: leadAmount ? `₦${leadAmount.toLocaleString()}` : (text.includes('budget') ? 'Stated in notes' : undefined),
-    authority: text.includes('founder') || text.includes('ceo') || text.includes('director') || text.includes('manager') ? 'Executive Decision Maker' : 'Evaluator',
+    authority: authorityRole,
     need: message ? message.slice(0, 150) : 'Revenue & Sales Pipeline Automation',
     timeline: urgencyScore >= 80 ? 'Immediate (< 30 days)' : '1-3 months',
     priority,
@@ -212,7 +237,10 @@ function deterministicAnalyze(
     fitEvidence: policyEvaluated 
       ? `ICP Fit assessed at ${fitScore}/100. Lead verified against Tenant Qualification Policy.`
       : `ICP Fit assessed at ${fitScore}/100 based on B2B profile and team requirements.`,
-    urgencyEvidence: `Urgency scored at ${urgencyScore}/100 based on deployment timeline.`
+    urgencyEvidence: `Urgency scored at ${urgencyScore}/100 based on deployment timeline.`,
+    targetRole,
+    aiAssessment,
+    nextStepsRecommendation
   };
 }
 

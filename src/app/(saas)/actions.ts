@@ -306,3 +306,188 @@ export async function setOrganizationStatus(targetOrgId: string, newStatus: 'APP
   revalidatePath('/settings');
   return { success: true, organization: updated };
 }
+
+export async function addTenantTeamMember(data: { name: string; email: string; role: 'SETTER' | 'CLOSER' | 'ADMIN' | 'MEMBER' }) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
+
+  const cleanEmail = data.email.trim().toLowerCase();
+  const cleanName = data.name.trim() || cleanEmail.split('@')[0];
+
+  let user = await db.user.findUnique({
+    where: { email: cleanEmail }
+  });
+
+  if (!user) {
+    const bcrypt = await import('bcryptjs');
+    const tempHash = await bcrypt.default.hash(Math.random().toString(36), 10);
+    user = await db.user.create({
+      data: {
+        email: cleanEmail,
+        name: cleanName,
+        passwordHash: tempHash,
+      }
+    });
+  }
+
+  // Check if membership already exists in this tenant
+  const existingMembership = await db.organizationMember.findUnique({
+    where: {
+      userId_organizationId: {
+        userId: user.id,
+        organizationId
+      }
+    }
+  });
+
+  if (existingMembership) {
+    await db.organizationMember.update({
+      where: { id: existingMembership.id },
+      data: { role: data.role, isAvailable: true }
+    });
+  } else {
+    await db.organizationMember.create({
+      data: {
+        userId: user.id,
+        organizationId,
+        role: data.role,
+        isAvailable: true,
+      }
+    });
+  }
+
+  revalidatePath('/team');
+  revalidatePath('/settings');
+  revalidatePath('/leads');
+  return { success: true };
+}
+
+export async function removeTenantTeamMember(memberId: string) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
+
+  await db.organizationMember.deleteMany({
+    where: {
+      id: memberId,
+      organizationId // Strictly tenant isolated
+    }
+  });
+
+  revalidatePath('/team');
+  revalidatePath('/settings');
+  return { success: true };
+}
+
+export async function toggleMemberAvailability(memberId: string, isAvailable: boolean) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
+
+  await db.organizationMember.updateMany({
+    where: {
+      id: memberId,
+      organizationId
+    },
+    data: { isAvailable }
+  });
+
+  revalidatePath('/team');
+  revalidatePath('/leads');
+  return { success: true };
+}
+
+export async function updateTenantRoutingMode(mode: 'OPEN_POOL' | 'ROUND_ROBIN' | 'OWNER_MANUAL') {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
+
+  await db.organization.update({
+    where: { id: organizationId },
+    data: { leadRoutingMode: mode }
+  });
+
+  revalidatePath('/team');
+  revalidatePath('/settings');
+  revalidatePath('/leads');
+  return { success: true };
+}
+
+export async function claimLead(leadId: string) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId || !session?.user?.id) throw new Error("Unauthorized");
+
+  // Get caller member role in this organization
+  const member = await db.organizationMember.findFirst({
+    where: {
+      userId: session.user.id,
+      organizationId
+    }
+  });
+
+  if (!member) throw new Error("Forbidden: Not a member of this workspace");
+
+  const lead = await db.lead.findFirst({
+    where: {
+      id: leadId,
+      organizationId
+    }
+  });
+
+  if (!lead) throw new Error("Lead not found");
+
+  const updatedLead = await db.lead.update({
+    where: { id: lead.id },
+    data: {
+      assignedUserId: session.user.id,
+      assignedRole: member.role === 'SETTER' ? 'SETTER' : 'CLOSER',
+      claimedAt: new Date()
+    }
+  });
+
+  revalidatePath('/leads');
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/revenue-engine');
+  return { success: true, lead: updatedLead };
+}
+
+export async function assignLeadToUser(leadId: string, targetUserId: string, targetRole?: string) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error("Unauthorized");
+
+  // Verify target user belongs to this organization
+  const targetMember = await db.organizationMember.findFirst({
+    where: {
+      userId: targetUserId,
+      organizationId
+    }
+  });
+
+  if (!targetMember) throw new Error("Target user is not a member of this workspace");
+
+  const lead = await db.lead.findFirst({
+    where: {
+      id: leadId,
+      organizationId
+    }
+  });
+
+  if (!lead) throw new Error("Lead not found");
+
+  const updatedLead = await db.lead.update({
+    where: { id: lead.id },
+    data: {
+      assignedUserId: targetUserId,
+      assignedRole: targetRole || targetMember.role,
+      claimedAt: new Date()
+    }
+  });
+
+  revalidatePath('/leads');
+  revalidatePath('/dashboard');
+  revalidatePath('/dashboard/revenue-engine');
+  return { success: true, lead: updatedLead };
+}
