@@ -26,19 +26,31 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
   const navItems = [
     { href: '/', icon: 'Home', label: 'Back to Home', exact: true },
     { href: '/dashboard', icon: 'LayoutDashboard', label: 'Overview', exact: true },
-    { href: '/dashboard/revenue-engine', icon: 'Zap', label: 'Revenue Engine' },
-    { href: '/dashboard/analytics', icon: 'BarChart2', label: 'Analytics' },
+    { href: '/rep', icon: 'Target', label: (user?.role === 'CLOSER' || user?.role === 'SETTER') ? 'My Sales Hub' : 'Closer & Setter Hub' },
+    { href: '/team', icon: 'UserCheck', label: user?.role === 'MANAGER' ? 'Team Management' : 'Team & Closers' },
     { href: '/leads', icon: 'Users', label: 'Leads' },
-    { href: '/rep', icon: 'Target', label: 'Closer & Setter Hub' },
     { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
     { href: '/pipeline', icon: 'KanbanSquare', label: 'Pipeline' },
-    { href: '/team', icon: 'UserCheck', label: 'Team & Closers' },
     { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
+    { href: '/dashboard/revenue-engine', icon: 'Zap', label: 'Revenue Engine' },
+    { href: '/dashboard/analytics', icon: 'BarChart2', label: 'Analytics' },
     { href: '/automations', icon: 'Bot', label: 'Automations' },
     { href: '/settings', icon: 'Settings', label: 'Settings' },
     { href: '/admin', icon: 'Shield', label: 'Platform Admin' },
     { href: '/dss', icon: 'GraduationCap', label: 'DSS Academy' }
   ];
+
+  const userRole = user?.role || 'MEMBER';
+  const visibleNavItems = navItems.filter(item => {
+    if (userRole === 'CLOSER' || userRole === 'SETTER') {
+      return ['/', '/rep', '/leads', '/inbox', '/pipeline', '/appointments', '/dss'].includes(item.href);
+    }
+    if (userRole === 'MANAGER') {
+      return ['/', '/team', '/rep', '/leads', '/inbox', '/pipeline', '/appointments', '/dashboard/analytics', '/automations', '/dss'].includes(item.href);
+    }
+    // ADMIN / SUPER_ADMIN sees all
+    return true;
+  });
 
   const sidebarClasses = `
     fixed left-0 top-0 h-full bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col justify-between select-none shadow-sm
@@ -66,7 +78,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
         </div>
         
         <nav className="flex-1 px-3 py-4 space-y-1">
-          {navItems.map((item) => {
+          {visibleNavItems.map((item) => {
             const isActive = item.exact ? pathname === item.href : pathname?.startsWith(item.href);
             return (
               <Link 

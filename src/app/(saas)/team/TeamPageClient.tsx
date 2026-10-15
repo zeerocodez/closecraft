@@ -73,9 +73,9 @@ export default function TeamPageClient({
   // New member form
   const [newName, setNewName] = useState('');
   const [newEmail, setNewEmail] = useState('');
-  const [newRole, setNewRole] = useState<'SETTER' | 'CLOSER' | 'ADMIN' | 'MEMBER'>('CLOSER');
+  const [newRole, setNewRole] = useState<'SETTER' | 'CLOSER' | 'ADMIN' | 'MANAGER' | 'MEMBER'>('CLOSER');
 
-  const isOwnerOrAdmin = currentUserRole === 'ADMIN' || currentUserRole === 'SUPER_ADMIN';
+  const canManageTeam = currentUserRole === 'ADMIN' || currentUserRole === 'MANAGER' || currentUserRole === 'SUPER_ADMIN';
 
   const showToast = (msg: string) => {
     setNotification(msg);
@@ -188,7 +188,7 @@ export default function TeamPageClient({
         </div>
 
         <div className="flex items-center gap-3">
-          {isOwnerOrAdmin && (
+          {canManageTeam && (
             <button
               onClick={() => setShowAddModal(true)}
               className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-primary/20 transition-all active:scale-[0.98]"
@@ -371,6 +371,8 @@ export default function TeamPageClient({
                   roleBadgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
                 } else if (member.role === 'SETTER') {
                   roleBadgeColor = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+                } else if (member.role === 'MANAGER') {
+                  roleBadgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
                 } else if (member.role === 'ADMIN') {
                   roleBadgeColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
                 }
@@ -398,7 +400,7 @@ export default function TeamPageClient({
                     <td className="p-4">
                       <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-bold tracking-wide uppercase ${roleBadgeColor}`}>
                         <span className="material-symbols-outlined text-[13px]">
-                          {member.role === 'CLOSER' ? 'verified' : member.role === 'SETTER' ? 'event_available' : 'badge'}
+                          {member.role === 'MANAGER' ? 'manage_accounts' : member.role === 'CLOSER' ? 'verified' : member.role === 'SETTER' ? 'event_available' : 'badge'}
                         </span>
                         <span>{member.role}</span>
                       </span>
@@ -410,7 +412,7 @@ export default function TeamPageClient({
                         <span className="font-mono font-bold text-primary text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
                           {rateFormatted}
                         </span>
-                        {isOwnerOrAdmin && (
+                        {canManageTeam && (
                           <button
                             onClick={() => {
                               setEditingMember(member);
@@ -480,7 +482,7 @@ export default function TeamPageClient({
 
                     {/* Actions */}
                     <td className="p-4 text-right">
-                      {isOwnerOrAdmin && (
+                      {canManageTeam && (
                         <button
                           disabled={isPending}
                           onClick={() => handleRemoveMember(member.id, displayName)}
@@ -633,6 +635,7 @@ export default function TeamPageClient({
                 >
                   <option value="CLOSER">High-Ticket Sales Closer</option>
                   <option value="SETTER">Appointment Setter (Discovery)</option>
+                  <option value="MANAGER">Sales & Team Manager (Manages Setters & Closers)</option>
                   <option value="ADMIN">Organization Administrator</option>
                   <option value="MEMBER">Standard Team Member</option>
                 </select>

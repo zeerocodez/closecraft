@@ -7,7 +7,9 @@ import {
   updateGoogleCalendarIntegration, 
   toggleMemberAvailability,
   bookOrUpdateAppointment,
-  updateAppointmentStatus
+  updateAppointmentStatus,
+  claimLead,
+  handoffLeadToCloser
 } from '@/app/(saas)/actions';
 
 interface RepLead {
@@ -88,6 +90,7 @@ interface RepDashboardClientProps {
     };
   };
   leads: RepLead[];
+  openPoolLeads?: RepLead[];
   deals: RepDeal[];
   appointments: RepAppointment[];
   teamMembers: any[];
@@ -103,16 +106,20 @@ interface RepDashboardClientProps {
 export default function RepDashboardClient({
   member,
   leads,
+  openPoolLeads = [],
   deals,
   appointments,
   teamMembers,
   metrics,
 }: RepDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<'LEADS' | 'DEALS' | 'CALENDAR' | 'COMMISSIONS'>('LEADS');
+  const [activeTab, setActiveTab] = useState<'LEADS' | 'OPEN_POOL' | 'DEALS' | 'CALENDAR' | 'COMMISSIONS'>('LEADS');
   const [selectedLeadForAi, setSelectedLeadForAi] = useState<RepLead | null>(null);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showCreateDealModal, setShowCreateDealModal] = useState<RepLead | null>(null);
   const [showScheduleModal, setShowScheduleModal] = useState<RepLead | null>(null);
+  const [showHandoffModal, setShowHandoffModal] = useState<RepLead | null>(null);
+  const [selectedCloserId, setSelectedCloserId] = useState<string>('');
+  const [handoffNotes, setHandoffNotes] = useState<string>('');
 
   const [isPending, startTransition] = useTransition();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -135,6 +142,38 @@ export default function RepDashboardClient({
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleClaimLead = (leadId: string, leadName: string) => {
+    startTransition(async () => {
+      try {
+        await claimLead(leadId);
+        showToast(`✅ Claimed "${leadName}" into your active queue!`);
+      } catch (err: any) {
+        alert(err.message || 'Failed to claim lead');
+      }
+    });
+  };
+
+  const handleHandoffSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!showHandoffModal || !selectedCloserId) return;
+
+    startTransition(async () => {
+      try {
+        await handoffLeadToCloser({
+          leadId: showHandoffModal.id,
+          closerUserId: selectedCloserId,
+          notes: handoffNotes,
+        });
+        showToast(`✅ Successfully handed off ${showHandoffModal.name} to closer!`);
+        setShowHandoffModal(null);
+        setSelectedCloserId('');
+        setHandoffNotes('');
+      } catch (err: any) {
+        alert(err.message || 'Failed to hand off lead');
+      }
+    });
   };
 
   const displayName = member.user.name || member.user.email.split('@')[0];
@@ -360,6 +399,25 @@ export default function RepDashboardClient({
         </button>
 
         <button
+          onClick={() => setActiveTab('OPEN_POOL')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'OPEN_POOL'
+              ? 'bg-primary text-on-primary shadow-sm'
+              : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[16px]">touch_app</span>
+          <span>Open Pool (Claim Leads)</span>
+          {openPoolLeads.length > 0 && (
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+              activeTab === 'OPEN_POOL' ? 'bg-white text-primary' : 'bg-primary/20 text-primary'
+            }`}>
+              {openPoolLeads.length} Available
+            </span>
+          )}
+        </button>
+
+        <button
           onClick={() => setActiveTab('DEALS')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
             activeTab === 'DEALS'
@@ -516,6 +574,19 @@ export default function RepDashboardClient({
                         <td className="p-4 text-right">
                           <div className="inline-flex items-center gap-2">
                             <button
+                              onClick={() => {
+                                setShowHandoffModal(lead);
+                                setSelectedCloserId('');
+                                setHandoffNotes('');
+                              }}
+                              className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-secondary hover:text-on-surface text-xs font-semibold transition-colors flex items-center gap-1"
+                              title="Hand off lead to a closer"
+                            >
+                              <span className="material-symbols-outlined text-[15px]">send_time_extension</span>
+                              <span>Handoff</span>
+                            </button>
+
+                            <button
                               onClick={() => setShowScheduleModal(lead)}
                               className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface text-xs font-semibold transition-colors flex items-center gap-1"
                               title="Schedule Meeting"
@@ -537,6 +608,142 @@ export default function RepDashboardClient({
                               </a>
                             )}
                           </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Open Lead Pool (Unassigned Leads to Claim) */}
+      {activeTab === 'OPEN_POOL' && (
+        <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-on-surface">Unassigned Open Lead Pool</h3>
+                <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary font-bold text-[10px]">
+                  {openPoolLeads.length} Available to Claim
+                </span>
+              </div>
+              <p className="text-xs text-on-surface-variant mt-0.5">
+                Fresh inbound leads waiting to be claimed by active Setters or Closers. Claiming moves the lead directly into your personal workflow.
+              </p>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-surface-container-low/70 border-b border-outline-variant/30 text-secondary uppercase font-bold tracking-wider text-[11px]">
+                  <th className="p-4">Contact & Company</th>
+                  <th className="p-4">Intent & ICP Score</th>
+                  <th className="p-4">AI Coaching Protocol</th>
+                  <th className="p-4">Inbound Channel</th>
+                  <th className="p-4 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant/20">
+                {openPoolLeads.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="py-12 text-center text-on-surface-variant text-xs">
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <span className="material-symbols-outlined text-[32px] text-on-surface-variant/40">done_all</span>
+                        <p className="font-semibold text-on-surface">No unassigned leads in the open pool</p>
+                        <p className="text-[11px] text-on-surface-variant max-w-sm">
+                          All incoming prospects have already been routed or claimed. New inbound leads from the website or ads will appear here instantly.
+                        </p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  openPoolLeads.map((lead) => {
+                    const intentSignal = lead.revenueSignals[0];
+                    const intentScore = intentSignal ? intentSignal.value : (lead.buyingIntent || 50);
+                    const isHot = intentScore >= 75;
+
+                    return (
+                      <tr key={lead.id} className="hover:bg-surface-container/30 transition-colors">
+                        {/* Contact */}
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-9 h-9 rounded-full ${isHot ? 'bg-primary/20 text-primary' : 'bg-surface-container-high text-on-surface'} text-xs font-bold flex items-center justify-center shrink-0`}>
+                              {lead.name ? lead.name[0].toUpperCase() : '?'}
+                            </div>
+                            <div>
+                              <div className="font-bold text-on-surface flex items-center gap-1.5">
+                                <span>{lead.name}</span>
+                                {isHot && (
+                                  <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold text-[9px] uppercase tracking-wider">
+                                    Hot
+                                  </span>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-on-surface-variant font-mono">{lead.email}</div>
+                              {lead.phone && (
+                                <div className="text-[11px] text-on-surface-variant/80 font-mono">{lead.phone}</div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+
+                        {/* Intent */}
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 h-2 rounded-full bg-surface-container overflow-hidden">
+                              <div 
+                                className={`h-full ${isHot ? 'bg-emerald-400' : 'bg-primary'}`}
+                                style={{ width: `${intentScore}%` }}
+                              />
+                            </div>
+                            <span className="font-mono font-bold text-xs">{intentScore}%</span>
+                          </div>
+                          <span className="text-[10px] text-on-surface-variant block mt-0.5">
+                            {isHot ? 'High Purchase Intent' : 'Standard Intent'}
+                          </span>
+                        </td>
+
+                        {/* AI Protocol */}
+                        <td className="p-4">
+                          {lead.aiAssessment ? (
+                            <div className="max-w-xs">
+                              <div className="text-[11px] text-on-surface font-medium line-clamp-2">
+                                {lead.nextStepsRecommendation || lead.aiAssessment}
+                              </div>
+                              <button
+                                onClick={() => setSelectedLeadForAi(lead)}
+                                className="text-[10px] text-primary hover:underline font-bold mt-1 inline-flex items-center gap-0.5"
+                              >
+                                <span className="material-symbols-outlined text-[12px]">psychology</span>
+                                <span>View AI Assessment</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[11px] text-on-surface-variant italic">Assessing signals...</span>
+                          )}
+                        </td>
+
+                        {/* Source */}
+                        <td className="p-4">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-surface-container text-on-surface-variant uppercase">
+                            {lead.source || 'INBOUND_FORM'}
+                          </span>
+                        </td>
+
+                        {/* Claim Action */}
+                        <td className="p-4 text-right">
+                          <button
+                            onClick={() => handleClaimLead(lead.id, lead.name)}
+                            disabled={isPending}
+                            className="px-3.5 py-1.5 rounded-lg bg-primary hover:bg-primary-container text-on-primary text-xs font-bold transition-all shadow-sm flex items-center gap-1.5 ml-auto active:scale-95 disabled:opacity-50"
+                          >
+                            <span className="material-symbols-outlined text-[15px]">touch_app</span>
+                            <span>Claim Lead</span>
+                          </button>
                         </td>
                       </tr>
                     );
@@ -1167,6 +1374,92 @@ export default function RepDashboardClient({
                   className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs shadow-md transition-all active:scale-[0.98]"
                 >
                   {isPending ? 'Booking...' : 'Confirm & Sync Google Calendar'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Handoff Lead to Closer Modal */}
+      {showHandoffModal && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95">
+            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-4">
+              <div>
+                <h3 className="font-bold text-base text-on-surface">Hand Off Lead to Closer</h3>
+                <p className="text-xs text-on-surface-variant mt-0.5">
+                  Transfer {showHandoffModal.name} with qualification briefing
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowHandoffModal(null)}
+                className="p-1 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <form onSubmit={handleHandoffSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
+                  Select Closer
+                </label>
+                <select
+                  value={selectedCloserId}
+                  onChange={(e) => setSelectedCloserId(e.target.value)}
+                  className="w-full h-10 px-3 bg-surface-container-low text-on-surface text-xs rounded-xl border border-outline-variant/30 focus:outline-none focus:border-primary"
+                  required
+                >
+                  <option value="">-- Choose Closer or Manager --</option>
+                  {teamMembers
+                    .filter((m: any) => m.role === 'CLOSER' || m.role === 'MANAGER' || m.role === 'ADMIN')
+                    .map((m: any) => (
+                      <option key={m.id} value={m.userId || m.user?.id}>
+                        {m.user?.name || m.user?.email} ({m.role}) {m.isAvailable ? '🟢 Available' : '⚪ Away'}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
+                  Qualification Notes & Briefing
+                </label>
+                <textarea
+                  value={handoffNotes}
+                  onChange={(e) => setHandoffNotes(e.target.value)}
+                  placeholder="e.g. Prospect has budget approved and needs demo focused on multi-location reporting. Demo booked for tomorrow."
+                  rows={3}
+                  className="w-full p-3 bg-surface-container-low text-on-surface text-xs rounded-xl border border-outline-variant/30 focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              {showHandoffModal.aiAssessment && (
+                <div className="p-3 rounded-xl bg-surface-container-low/70 border border-outline-variant/20">
+                  <div className="text-[10px] font-bold uppercase tracking-wider text-primary mb-1">
+                    AI Qualification Summary
+                  </div>
+                  <p className="text-xs text-on-surface-variant line-clamp-3">
+                    {showHandoffModal.aiAssessment}
+                  </p>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/20">
+                <button
+                  type="button"
+                  onClick={() => setShowHandoffModal(null)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending || !selectedCloserId}
+                  className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs shadow-md transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  {isPending ? 'Transferring...' : 'Confirm Handoff'}
                 </button>
               </div>
             </form>

@@ -11,13 +11,28 @@ import { ImportLeadsModal } from '@/app/(saas)/leads/ImportLeadsModal';
 import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
 
 export default async function DashboardPage({ searchParams }: { searchParams: any }) {
- const session = await auth();
- if (!session?.user) redirect('/login');
- if (!session.organizationId) redirect('/login');
+  const session = await auth();
+  if (!session?.user) redirect('/login');
+  if (!session.organizationId) redirect('/login');
 
- const { organizationId } = session;
- 
- const resolvedParams = searchParams ? await searchParams : {};
+  const { organizationId } = session;
+
+  // Role-based dashboard isolation:
+  // Closers and Setters see their personal Rep Dashboard (not the organization owner's executive dashboard)
+  const member = await db.organizationMember.findFirst({
+    where: { userId: session.user.id, organizationId },
+    select: { role: true }
+  });
+
+  const userRole = member?.role || 'MEMBER';
+  if (userRole === 'CLOSER' || userRole === 'SETTER') {
+    redirect('/rep');
+  }
+  if (userRole === 'MANAGER') {
+    redirect('/team');
+  }
+  
+  const resolvedParams = searchParams ? await searchParams : {};
  const now = new Date();
  const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
  const startDateStr = typeof resolvedParams?.start === 'string' ? resolvedParams.start : null;

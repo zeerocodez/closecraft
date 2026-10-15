@@ -25,8 +25,19 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
     redirect('/pending-approval');
   }
 
+  const member = await db.organizationMember.findFirst({
+    where: { userId: session.user.id, organizationId },
+    select: { role: true }
+  });
+
+  const userWithRole = {
+    ...session.user,
+    role: member?.role || 'MEMBER',
+    organizationName: org.name
+  };
+
   return (
-    <AppShell user={session.user}>
+    <AppShell user={userWithRole}>
       {children}
     </AppShell>
   );

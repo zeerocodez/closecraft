@@ -64,7 +64,7 @@ model Organization {
 
 model OrganizationMember {
   id                      String       @id @default(cuid())
-  role                    String       @default("MEMBER") // ADMIN, CLOSER, SETTER, MEMBER
+  role                    String       @default("MEMBER") // ADMIN, MANAGER, CLOSER, SETTER, MEMBER
   isAvailable             Boolean      @default(true)     // Available to receive/claim qualified leads
   commissionRate          Float        @default(10.0)     // Commission percentage or fixed payout
   commissionType          String       @default("PERCENTAGE") // PERCENTAGE, FIXED_PER_DEAL, FIXED_PER_APPOINTMENT

@@ -331,10 +331,17 @@ export async function setOrganizationStatus(targetOrgId: string, newStatus: 'APP
   return { success: true, organization: updated };
 }
 
-export async function addTenantTeamMember(data: { name: string; email: string; role: 'SETTER' | 'CLOSER' | 'ADMIN' | 'MEMBER' }) {
+export async function addTenantTeamMember(data: { name: string; email: string; role: 'SETTER' | 'CLOSER' | 'ADMIN' | 'MANAGER' | 'MEMBER' }) {
   const session = await auth();
   const organizationId = (session as any)?.organizationId;
   if (!organizationId) throw new Error("Unauthorized");
+
+  const caller = await db.organizationMember.findFirst({
+    where: { userId: session?.user?.id, organizationId }
+  });
+  if (caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
+    throw new Error("Only organization owners and managers can add team members");
+  }
 
   const cleanEmail = data.email.trim().toLowerCase();
   const cleanName = data.name.trim() || cleanEmail.split('@')[0];
@@ -426,6 +433,13 @@ export async function updateTenantRoutingMode(mode: 'OPEN_POOL' | 'ROUND_ROBIN' 
   const session = await auth();
   const organizationId = (session as any)?.organizationId;
   if (!organizationId) throw new Error("Unauthorized");
+
+  const caller = await db.organizationMember.findFirst({
+    where: { userId: session?.user?.id, organizationId }
+  });
+  if (caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
+    throw new Error("Only organization owners and managers can update lead distribution");
+  }
 
   await db.organization.update({
     where: { id: organizationId },
@@ -525,12 +539,12 @@ export async function updateMemberCommission(data: {
   const organizationId = (session as any)?.organizationId;
   if (!organizationId) throw new Error("Unauthorized");
 
-  // Verify caller is admin
+  // Verify caller is admin or manager
   const caller = await db.organizationMember.findFirst({
     where: { userId: session?.user?.id, organizationId }
   });
-  if (caller?.role !== 'ADMIN' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
-    throw new Error("Only organization owners/admins can configure commission rates");
+  if (caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
+    throw new Error("Only organization owners/managers can configure commission rates");
   }
 
   const updated = await db.organizationMember.update({
@@ -586,8 +600,8 @@ export async function updateCommissionPayoutStatus(dealId: string, status: 'PEND
   const caller = await db.organizationMember.findFirst({
     where: { userId: session?.user?.id, organizationId }
   });
-  if (caller?.role !== 'ADMIN' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
-    throw new Error("Only organization owners/admins can approve commission payouts");
+  if (caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
+    throw new Error("Only organization owners/managers can approve commission payouts");
   }
 
   const deal = await db.deal.findFirst({
@@ -605,6 +619,54 @@ export async function updateCommissionPayoutStatus(dealId: string, status: 'PEND
   revalidatePath('/closer');
   revalidatePath('/pipeline');
   return { success: true, deal: updated };
+}
+
+export async function handoffLeadToCloser(data: {
+  leadId: string;
+  closerUserId: string;
+  notes?: string;
+}) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  const callerId = session?.user?.id;
+  if (!organizationId || !callerId) throw new Error("Unauthorized");
+
+  // Verify caller belongs to organization
+  const callerMember = await db.organizationMember.findFirst({
+    where: { userId: callerId, organizationId }
+  });
+  if (!callerMember) throw new Error("Caller not in workspace");
+
+  // Verify target closer belongs to organization
+  const targetMember = await db.organizationMember.findFirst({
+    where: { userId: data.closerUserId, organizationId }
+  });
+  if (!targetMember) throw new Error("Target closer is not in this workspace");
+
+  const lead = await db.lead.findFirst({
+    where: { id: data.leadId, organizationId }
+  });
+  if (!lead) throw new Error("Lead not found");
+
+  const existingNotes = lead.message || '';
+  const updatedMessage = data.notes 
+    ? `${existingNotes}\n[Handoff from ${callerMember.role} (${session.user.name || session.user.email})]: ${data.notes}`
+    : existingNotes;
+
+  const updatedLead = await db.lead.update({
+    where: { id: data.leadId },
+    data: {
+      assignedUserId: data.closerUserId,
+      assignedRole: 'CLOSER',
+      message: updatedMessage,
+      claimedAt: new Date()
+    }
+  });
+
+  revalidatePath('/leads');
+  revalidatePath('/rep');
+  revalidatePath('/team');
+  return { success: true, lead: updatedLead };
 }
 
 export async function bookOrUpdateAppointment(data: {

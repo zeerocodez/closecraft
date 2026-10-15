@@ -48,6 +48,21 @@ export default async function RepDashboardPage() {
     orderBy: { updatedAt: 'desc' }
   });
 
+  // Fetch open pool leads available to be claimed
+  const openPoolLeads = await db.lead.findMany({
+    where: {
+      organizationId,
+      assignedUserId: null
+    },
+    include: {
+      deals: true,
+      revenueActions: { where: { status: 'PENDING' }, orderBy: { priority: 'desc' }, take: 1 },
+      revenueSignals: { where: { type: 'INTENT' }, orderBy: { createdAt: 'desc' }, take: 1 },
+      appointments: { orderBy: { scheduledAt: 'asc' }, take: 1 }
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
   // Fetch deals assigned to or owned by this rep
   const deals = await db.deal.findMany({
     where: {
@@ -101,6 +116,7 @@ export default async function RepDashboardPage() {
     <RepDashboardClient
       member={membership}
       leads={leads}
+      openPoolLeads={openPoolLeads}
       deals={deals}
       appointments={appointments}
       teamMembers={teamMembers}

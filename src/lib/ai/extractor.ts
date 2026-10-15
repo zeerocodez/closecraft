@@ -169,7 +169,10 @@ function deterministicAnalyze(
       actionReason,
       intentEvidence: `Score ${intentScore}/100 adjusted because lead did not satisfy tenant qualification rules.`,
       fitEvidence: `Evaluated against Tenant ICP Policy: Disqualified (${policyFailureReason})`,
-      urgencyEvidence: `Urgency scored at ${urgencyScore}/100 based on prospect timeline.`
+      urgencyEvidence: `Urgency scored at ${urgencyScore}/100 based on prospect timeline.`,
+      targetRole: 'SETTER',
+      aiAssessment: `Disqualified by Organization ICP Policy: ${policyFailureReason}`,
+      nextStepsRecommendation: 'Do not assign to closer. Send automated nurture campaign or request additional qualification details.'
     };
   }
 
@@ -274,7 +277,10 @@ export async function extractLeadQualificationData(
         actionReason: z.string().describe('Reason for the recommended next action referencing the qualification policy.'),
         intentEvidence: z.string().describe('Explainable evidence for intent.'),
         fitEvidence: z.string().describe('Explainable evidence for ICP fit evaluated against the tenant policy.'),
-        urgencyEvidence: z.string().describe('Explainable evidence for urgency.')
+        urgencyEvidence: z.string().describe('Explainable evidence for urgency.'),
+        targetRole: z.enum(['CLOSER', 'SETTER']).describe('Whether lead should be assigned to a CLOSER or SETTER.'),
+        aiAssessment: z.string().describe('AI summary assessment of qualification and buyer intent.'),
+        nextStepsRecommendation: z.string().describe('Prescribed next steps and recommended opener for sales team.')
       }),
       prompt: `Analyze the following lead information for the Closecraft Revenue Engine according to the Tenant's Specific Qualification Policy.
 
