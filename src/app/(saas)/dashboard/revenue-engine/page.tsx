@@ -9,6 +9,7 @@ import { db } from "@/lib/db";
 import { ImportLeadsModal } from '@/app/(saas)/leads/ImportLeadsModal';
 import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
 import { QualificationPolicyModal } from '@/components/revenue-engine/QualificationPolicyModal';
+import { RevenueEngineOnboardingGuide } from '@/components/revenue-engine/RevenueEngineOnboardingGuide';
 
 export default async function RevenueEnginePage({ searchParams }: { searchParams: any }) {
   const session = await auth();
@@ -42,8 +43,8 @@ export default async function RevenueEnginePage({ searchParams }: { searchParams
         <QualificationPolicyModal currentPolicy={org?.qualificationPolicy} />
       </div>
 
-      {/* Qualification Logic Configuration Banner */}
-      <QualificationPolicyModal triggerVariant="banner" currentPolicy={org?.qualificationPolicy} />
+      {/* Interactive Step-by-Step Onboarding & Launch Guide */}
+      <RevenueEngineOnboardingGuide currentPolicy={org?.qualificationPolicy} orgName={org?.name || 'Workspace'} />
 
  {/* Tabs & Filters */}
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/30 pb-4">
