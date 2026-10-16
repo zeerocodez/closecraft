@@ -63,6 +63,7 @@ export function RevenueEngineOnboardingGuide({
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isExpanded, setIsExpanded] = useState<boolean>(true);
+  const [showVideoModal, setShowVideoModal] = useState<boolean>(false);
 
   // Load progress from localStorage on mount
   useEffect(() => {
@@ -139,6 +140,13 @@ export function RevenueEngineOnboardingGuide({
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-center">
+          <button
+            onClick={() => setShowVideoModal(true)}
+            className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all active:scale-95"
+          >
+            <span className="material-symbols-outlined text-[16px]">play_circle</span>
+            <span>Watch Video</span>
+          </button>
           <span className="text-xs font-mono font-semibold text-primary">
             {completedSteps.length} / {STEPS.length} Completed
           </span>
@@ -806,6 +814,51 @@ export function RevenueEngineOnboardingGuide({
             </div>
           )}
 
+        </div>
+      )}
+
+      {/* Video Walkthrough Modal */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="w-full max-w-4xl bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-4 md:p-6 shadow-2xl animate-in zoom-in-95 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-[20px]">smart_display</span>
+                </div>
+                <div>
+                  <h3 className="font-bold text-base text-on-surface">Revenue Engine Walkthrough & Masterclass</h3>
+                  <p className="text-xs text-on-surface-variant font-mono">Step-by-step explainer for {orgName}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container transition-colors"
+              >
+                <span className="material-symbols-outlined text-[22px]">close</span>
+              </button>
+            </div>
+
+            <div className="relative rounded-xl overflow-hidden aspect-video bg-black shadow-inner border border-outline-variant/30">
+              <video
+                src="/videos/closecraft-onboarding.mp4"
+                controls
+                autoPlay
+                playsInline
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 text-xs text-on-surface-variant">
+              <span>💡 Follow along with the 5 interactive steps below to certify your workspace.</span>
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="px-4 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-semibold transition-colors"
+              >
+                Close Video
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
