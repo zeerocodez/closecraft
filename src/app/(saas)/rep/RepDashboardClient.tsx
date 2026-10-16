@@ -11,6 +11,7 @@ import {
   claimLead,
   handoffLeadToCloser
 } from '@/app/(saas)/actions';
+import { LeadAiAssessmentModal } from '@/components/revenue-engine/LeadAiAssessmentModal';
 
 interface RepLead {
   id: string;
@@ -21,6 +22,9 @@ interface RepLead {
   status: string;
   source?: string | null;
   buyingIntent?: number | null;
+  assignedRole?: string | null;
+  assignedUserId?: string | null;
+  assignedUser?: { id?: string; name?: string | null; email?: string; image?: string | null } | null;
   aiAssessment?: string | null;
   nextStepsRecommendation?: string | null;
   createdAt: Date;
@@ -711,8 +715,8 @@ export default function RepDashboardClient({
                         <td className="p-4">
                           {lead.aiAssessment ? (
                             <div className="max-w-xs">
-                              <div className="text-[11px] text-on-surface font-medium line-clamp-2">
-                                {lead.nextStepsRecommendation || lead.aiAssessment}
+                              <div className="text-[11px] text-on-surface font-mono line-clamp-2">
+                                {lead.aiAssessment}
                               </div>
                               <button
                                 onClick={() => setSelectedLeadForAi(lead)}
@@ -1063,74 +1067,19 @@ export default function RepDashboardClient({
 
       {/* AI Assessment & Prescriptive Next Steps Drawer */}
       {selectedLeadForAi && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-2xl bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 md:p-8 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[24px]">psychology</span>
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg text-on-surface">{selectedLeadForAi.name}</h3>
-                  <span className="text-xs text-on-surface-variant font-mono">{selectedLeadForAi.email}</span>
-                </div>
-              </div>
-              <button
-                onClick={() => setSelectedLeadForAi(null)}
-                className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container"
-              >
-                <span className="material-symbols-outlined text-[22px]">close</span>
-              </button>
-            </div>
-
-            <div className="space-y-6">
-              {/* Prescribed Opener Script */}
-              <div className="p-4 rounded-xl bg-surface-container border border-outline-variant/20">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold text-primary flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[16px]">chat</span>
-                    <span>Prescribed Opener Script</span>
-                  </span>
-                  <button
-                    onClick={() => handleCopyScript(selectedLeadForAi.nextStepsRecommendation || `Hi ${selectedLeadForAi.name}, I reviewed your enquiry and have customized revenue projections ready for your review.`)}
-                    className="px-2.5 py-1 rounded bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-[11px] font-bold flex items-center gap-1 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">content_copy</span>
-                    <span>{copiedScript ? 'Copied!' : 'Copy Script'}</span>
-                  </button>
-                </div>
-                <p className="text-xs text-on-surface leading-relaxed italic bg-surface-container-low p-3 rounded-lg border border-outline-variant/10">
-                  "{selectedLeadForAi.nextStepsRecommendation || `Hi ${selectedLeadForAi.name}, saw you were exploring how to increase your pipeline conversion. When are you free for a quick 15-minute briefing?`}"
-                </p>
-              </div>
-
-              {/* Direct Actions */}
-              <div className="flex items-center gap-3">
-                {selectedLeadForAi.phone && (
-                  <a
-                    href={`https://wa.me/${selectedLeadForAi.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(selectedLeadForAi.nextStepsRecommendation || `Hi ${selectedLeadForAi.name}`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex-1 py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">chat</span>
-                    <span>Dispatch via WhatsApp</span>
-                  </a>
-                )}
-                <button
-                  onClick={() => {
-                    setShowScheduleModal(selectedLeadForAi);
-                    setSelectedLeadForAi(null);
-                  }}
-                  className="flex-1 py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]"
-                >
-                  <span className="material-symbols-outlined text-[18px]">event</span>
-                  <span>Book Demo Meeting</span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <LeadAiAssessmentModal
+          lead={selectedLeadForAi}
+          onClose={() => setSelectedLeadForAi(null)}
+          onClaim={(leadId, leadName) => {
+            handleClaimLead(leadId, leadName);
+            setSelectedLeadForAi(null);
+          }}
+          onBookDemo={(lead) => {
+            setShowScheduleModal(lead as RepLead);
+            setSelectedLeadForAi(null);
+          }}
+          isPending={isPending}
+        />
       )}
 
       {/* Google Calendar & Reminders Modal */}
