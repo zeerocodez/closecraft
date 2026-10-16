@@ -19,7 +19,7 @@ export const DEFAULT_FLAGS: EcosystemFlags = {
   orgPages: true,
   education: true,
   feed: true,
-  landing: true,
+  landing: false,
   placeholders: true,
   publicJobs: true,
   publicTrainees: true,
