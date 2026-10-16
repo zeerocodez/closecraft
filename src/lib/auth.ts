@@ -62,7 +62,10 @@ export const {
   callbacks: {
     async signIn({ user, account }) {
       if (account?.provider === 'google') {
-        if (!user.email) return false;
+        if (!user.email) {
+          console.error("[auth][signIn][google] No email returned by Google provider");
+          return '/login?error=NoEmail';
+        }
         const email = user.email.trim().toLowerCase();
         
         try {
@@ -139,9 +142,10 @@ export const {
           user.organizationId = primaryOrg?.id || null;
           user.organizationStatus = primaryOrg?.status || 'PENDING';
           return true;
-        } catch (dbError) {
-          console.error("[auth][signIn][google] Database error during sign-in:", dbError);
-          return false;
+        } catch (dbError: unknown) {
+          const errMsg = dbError instanceof Error ? dbError.message : String(dbError);
+          console.error("[auth][signIn][google] Database error during sign-in:", errMsg);
+          return `/login?error=DatabaseError&details=${encodeURIComponent(errMsg.slice(0, 100))}`;
         }
       }
       return true;

@@ -8,6 +8,7 @@ import { useSearchParams } from 'next/navigation';
 function AuthStatusBanner() {
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
+  const details = searchParams.get('details');
   const registered = searchParams.get('registered');
 
   if (error === 'Configuration') {
@@ -24,11 +25,48 @@ function AuthStatusBanner() {
     );
   }
 
+  if (error === 'DatabaseError') {
+    return (
+      <div className="mb-5 p-3.5 rounded-lg bg-red-950/40 border border-red-500/40 text-left flex items-start gap-3">
+        <span className="material-symbols-outlined text-red-400 text-[20px] shrink-0 mt-0.5">database</span>
+        <div className="text-xs space-y-1">
+          <p className="font-semibold text-red-200">Database Connection Error</p>
+          <p className="text-slate-300 leading-relaxed text-[11px]">
+            Google verified your account, but the server failed to reach the database to provision or load your workspace. Ensure <code className="text-red-300 font-mono text-[10px] bg-red-900/60 px-1 py-0.5 rounded">DATABASE_URL</code> is added to Vercel environment variables.
+          </p>
+          {details && (
+            <p className="text-red-300 font-mono text-[10px] bg-red-900/40 p-1.5 rounded break-all mt-1">
+              Details: {details}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   if (error === 'AccessDenied') {
     return (
-      <div className="mb-5 p-3 rounded-lg bg-amber-950/40 border border-amber-500/40 text-xs text-amber-200 flex items-center gap-2">
-        <span className="material-symbols-outlined text-[18px] text-amber-400">lock</span>
-        <span>Access was denied or cancelled. Please try again.</span>
+      <div className="mb-5 p-3.5 rounded-lg bg-amber-950/40 border border-amber-500/40 text-left flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-400 text-[20px] shrink-0 mt-0.5">lock</span>
+        <div className="text-xs space-y-1">
+          <p className="font-semibold text-amber-200">Access Denied During Sign-in</p>
+          <p className="text-slate-300 leading-relaxed text-[11px]">
+            Your sign-in request could not complete. This usually happens for one of two reasons:
+          </p>
+          <ul className="text-slate-300 text-[11px] list-disc list-inside space-y-0.5 pt-0.5">
+            <li><strong className="text-amber-200">Database variable:</strong> <code className="text-amber-300 font-mono text-[10px] bg-amber-900/40 px-1 py-0.5 rounded">DATABASE_URL</code> is not set in Vercel.</li>
+            <li><strong className="text-amber-200">Google OAuth mode:</strong> Your Google Cloud app is still in <em>Testing</em> mode, and your email is not in the <em>Test Users</em> list under Audience.</li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  if (error === 'NoEmail') {
+    return (
+      <div className="mb-5 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
+        <span className="material-symbols-outlined text-[18px] text-red-400">mail</span>
+        <span>Google did not provide an email address. Please allow email access on your account.</span>
       </div>
     );
   }
@@ -37,7 +75,7 @@ function AuthStatusBanner() {
     return (
       <div className="mb-5 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
         <span className="material-symbols-outlined text-[18px] text-red-400">warning</span>
-        <span>Authentication failed ({error}). Please check credentials or try again.</span>
+        <span>Authentication failed ({error}). {details && <span className="font-mono text-[10px] ml-1">({details})</span>}</span>
       </div>
     );
   }
