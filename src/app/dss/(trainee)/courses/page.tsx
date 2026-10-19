@@ -47,60 +47,60 @@ export default async function CoursesPage() {
  <p className="text-gray-400 text-sm">Your organization has not published any courses yet.</p>
  </div>
  ) : (
- courses.map((course) => {
- const isEnrolled = course.enrollments.length > 0;
- const totalModules = course.modules.length;
- const totalLessons = course.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
- 
- return (
- <div key={course.id} className="group relative bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-6 shadow-xl flex flex-col h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-[#248277]/60">
- <div className="flex items-center justify-between mb-4">
- <span className="text-xs font-bold uppercase tracking-widest text-[#45bfae]">Program</span>
- <div className="flex items-center gap-2">
- {course.isFree ? (
- <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-md border border-emerald-400/20">
- Free
- </span>
- ) : (
- <span className="text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#45bfae]/10 px-2 py-1 rounded-md border border-[#45bfae]/20">
- {course.price ? `$${course.price}` : 'Premium'}
- </span>
- )}
- {isEnrolled && (
- <span className="text-[10px] uppercase font-bold tracking-widest text-white bg-white/10 px-2 py-1 rounded-md border border-white/10">
- Enrolled
- </span>
- )}
- </div>
- </div>
- 
- <h2 className="text-2xl font-serif font-bold text-white mb-3 line-clamp-2">
- {course.title}
- </h2>
- 
- <p className="text-sm text-gray-400 mb-6 line-clamp-3 flex-1">
- {course.description || "Master the fundamentals and advanced techniques of this curriculum to achieve certification."}
- </p>
- 
- <div className="flex items-center gap-4 mb-6">
- <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
- <Layers size={14} className="text-[#45bfae]" /> {totalModules} Modules
- </span>
- <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
- <BookOpen size={14} className="text-[#45bfae]" /> {totalLessons} Lessons
- </span>
- </div>
- 
- <Link href={`/dss/courses/${course.slug}`} className="mt-auto inline-flex items-center justify-between w-full p-3 bg-[#45bfae] hover:bg-[#5cd4c3] text-[#0f1214] font-bold rounded-xl transition-colors shadow-lg">
- <span>
- {isEnrolled ? 'Continue Course' : (course.isFree ? 'Enroll for Free' : `Buy for $${course.price || 0}`)}
- </span>
- <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
- </Link>
- </div>
- );
- })
- )}
+        courses.map((course) => {
+          const isEnrolled = course.enrollments.length > 0;
+          const totalModules = course.modules.length;
+          const totalLessons = course.modules.reduce((acc, mod) => acc + mod.lessons.length, 0);
+          
+          const priceDisplay = course.isFree 
+            ? 'Free'
+            : course.currency === 'NGN'
+              ? `₦${(course.price || 0).toLocaleString()} / $${course.price === 150000 ? 150 : 100}`
+              : `$${course.price || 0}`;
+          
+          return (
+            <div key={course.id} className="group relative bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-6 shadow-xl flex flex-col h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-[#248277]/60">
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#45bfae]">Program Route</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#45bfae]/10 px-2.5 py-1 rounded-md border border-[#45bfae]/20">
+                    {priceDisplay}
+                  </span>
+                  {isEnrolled && (
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-white bg-white/10 px-2 py-1 rounded-md border border-white/10">
+                      Enrolled
+                    </span>
+                  )}
+                </div>
+              </div>
+              
+              <h2 className="text-2xl font-serif font-bold text-white mb-3 line-clamp-2">
+                {course.title}
+              </h2>
+              
+              <p className="text-sm text-gray-400 mb-6 line-clamp-3 flex-1">
+                {course.description || "Master the fundamentals and advanced techniques of this curriculum to achieve certification."}
+              </p>
+              
+              <div className="flex items-center gap-4 mb-6">
+                <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
+                  <Layers size={14} className="text-[#45bfae]" /> {totalModules} Modules
+                </span>
+                <span className="text-xs text-gray-500 font-medium flex items-center gap-1">
+                  <BookOpen size={14} className="text-[#45bfae]" /> {totalLessons} Lessons
+                </span>
+              </div>
+              
+              <Link href={`/dss/courses/${course.slug}`} className="mt-auto inline-flex items-center justify-between w-full p-3 bg-[#45bfae] hover:bg-[#5cd4c3] text-[#0f1214] font-bold rounded-xl transition-colors shadow-lg">
+                <span>
+                  {isEnrolled ? 'Continue Course' : (course.isFree ? 'Enroll for Free' : `View Curriculum (${priceDisplay})`)}
+                </span>
+                <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          );
+        })
+      )}
  </div>
  </div>
  );

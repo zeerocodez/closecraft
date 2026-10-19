@@ -18,15 +18,15 @@ DISQUALIFICATION RULES:
 - High urgency leads (<30 days) that meet criteria must immediately trigger ASSIGN_HUMAN with 15m SLA.`
   },
   {
-    name: 'Digital Sales School (DSS) Academy (₦80k+)',
+    name: 'Digital Sales School (DSS) Academy (₦100k - ₦150k / $100 - $150)',
     text: `A lead is QUALIFIED if:
-1. Prospect is an aspiring sales closer, freelancer, career switcher, or junior rep.
-2. Budget is at least ₦80,000 for tuition or coaching fees.
-3. Seeking enrollment in the upcoming 8-week cohort.
-4. Shows clear motivation and time commitment for live practice sessions.
+1. Prospect is an aspiring sales closer, setter, freelancer, career switcher, or B2B founder.
+2. Budget is at least ₦100,000 / $100 for single route (Setters, Closers, Live Roleplays/Internship) or ₦150,000 / $150 for Both Routes bundle.
+3. Seeking enrollment in the upcoming cohort tracks.
+4. Shows clear motivation and time commitment for live practice and roleplay sessions.
 
 DISQUALIFICATION RULES:
-- If budget is strictly below ₦80,000, route to AUTOMATION for tuition installment/scholarship guide.
+- If budget is strictly below ₦100,000 / $100, route to AUTOMATION for tuition installment/sample lesson guide.
 - Qualified applicants should receive SEND_BOOKING_LINK for admissions diagnostic.`
   }
 ];

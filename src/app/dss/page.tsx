@@ -3,9 +3,9 @@ import type { Metadata } from 'next';
 import DSSLandingClient from './DSSLandingClient';
 
 export const metadata: Metadata = {
-  title: 'Digital Sales School (DSS) | Master High-Ticket Closing',
+  title: 'Digital Sales School (DSS) | Productized Sales Tracks & Closing Academy',
   description:
-    'Learn the skill behind the sale. Master high-ticket closing, discovery calls, and objection handling in an 8-week intensive. Powered by Closecraft.',
+    'Learn the skill behind the sale. 4 productized sales tracks: Setters Route (₦100k / $100), Closers Route (₦100k / $100), Live Role Plays/Internship (₦100k / $100), and Both Routes (₦150k / $150). Powered by Closecraft.',
 };
 
 export default function DSSPage() {

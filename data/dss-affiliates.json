@@ -2,7 +2,7 @@
   "programme": {
     "selar": "https://selar.com/dss-closers",
     "nestuge": "https://nestuge.com/dss",
-    "price": 8000000,
+    "price": 10000000,
     "rate": 3500,
     "holdDays": 14,
     "minimum": 2000000,

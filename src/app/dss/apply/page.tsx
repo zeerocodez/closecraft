@@ -2,18 +2,13 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { ArrowRight, BookOpen, ShieldCheck } from 'lucide-react';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { submitDSSApplication } from './actions';
 
 export default function DSSApplyPage() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubmitted(true);
-  };
 
   if (submitted) {
     return (
@@ -46,10 +41,10 @@ export default function DSSApplyPage() {
           </div>
           <div className="text-center mb-12">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-6 font-serif">
-            Digital Sales School November Application
+            Digital Sales School Cohort Application
           </h1>
           <p className="text-lg text-gray-400">
-            Tell us what you want to improve and whether the schedule works for you. This form requests a fit review; it does not reserve a paid place. Tuition is ₦80,000. Read the full offer at <Link href="/dss" className="text-[#2ea043] hover:underline">the landing page</Link> before submitting.
+            Tell us what you want to improve, your schedule availability, and select your preferred route (Setters Route: ₦100,000 / $100 • Closers Route: ₦100,000 / $100 • Live Role Plays/Internship: ₦100,000 / $100 • Both Routes: ₦150,000 / $150). This form requests a fit review; it does not reserve a paid place. Read the full program breakdown at <Link href="/dss" className="text-[#2ea043] hover:underline">the landing page</Link> before submitting.
           </p>
         </div>
 
@@ -69,7 +64,7 @@ export default function DSSApplyPage() {
               } else {
                 setErrorMessage(res.error || "Failed to submit application. Please try again.");
               }
-            } catch (err) {
+            } catch {
               setErrorMessage("An unexpected error occurred. Please try again.");
             } finally {
               setSubmitting(false);
@@ -104,9 +99,22 @@ export default function DSSApplyPage() {
               </div>
             </div>
 
-            {/* 4 */}
+            {/* Preferred Route */}
             <div>
-              <label className="block text-sm font-bold text-white mb-2">4. Which best describes your current work? <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-bold text-white mb-2">4. Which DSS Route are you applying for? <span className="text-red-500">*</span></label>
+              <p className="text-xs text-gray-500 mb-2">Select the track that matches your immediate revenue goal.</p>
+              <select name="preferredRoute" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
+                <option value="">Select your preferred route...</option>
+                <option value="Setters Route (₦100,000 / $100)">Setters Route (₦100,000 / $100) — Outbound Prospecting & Appointment Setting</option>
+                <option value="Closers Route (₦100,000 / $100)">Closers Route (₦100,000 / $100) — High-Ticket Discovery & Deal Closing</option>
+                <option value="Live Role Plays / Internship Track (₦100,000 / $100)">Live Role Plays / Internship Track (₦100,000 / $100) — Live Sparring & Deal Placement</option>
+                <option value="Both Routes Bundle (₦150,000 / $150)">Both Routes Bundle (₦150,000 / $150) — Complete Sales Mastery (Save ₦50,000 / $50)</option>
+              </select>
+            </div>
+
+            {/* 5 */}
+            <div>
+              <label className="block text-sm font-bold text-white mb-2">5. Which best describes your current work? <span className="text-red-500">*</span></label>
               <select name="role" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
                 <option value="">Select role...</option>
                 <option>Business Owner</option>
@@ -119,29 +127,29 @@ export default function DSSApplyPage() {
               </select>
             </div>
 
-            {/* 5 */}
-            <div>
-              <label className="block text-sm font-bold text-white mb-2">5. What offer do you sell, or what sales role are you preparing for? <span className="text-red-500">*</span></label>
-              <textarea name="offer" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none" placeholder="A business link is optional."></textarea>
-            </div>
-
             {/* 6 */}
             <div>
-              <label className="block text-sm font-bold text-white mb-2">6. Describe one recent sales conversation you found difficult. <span className="text-red-500">*</span></label>
-              <p className="text-xs text-gray-500 mb-2">Please remove customer names and private details.</p>
-              <textarea name="difficultConv" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none"></textarea>
+              <label className="block text-sm font-bold text-white mb-2">6. What offer do you sell, or what sales role are you preparing for? <span className="text-red-500">*</span></label>
+              <textarea name="offer" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none" placeholder="A business link is optional."></textarea>
             </div>
 
             {/* 7 */}
             <div>
-              <label className="block text-sm font-bold text-white mb-2">7. What would you like to handle better after the programme? <span className="text-red-500">*</span></label>
-              <p className="text-xs text-gray-500 mb-2">Ask for a skill or behaviour, rather than an earnings target alone.</p>
-              <textarea name="handleBetter" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none"></textarea>
+              <label className="block text-sm font-bold text-white mb-2">7. Describe one recent sales conversation you found difficult. <span className="text-red-500">*</span></label>
+              <p className="text-xs text-gray-500 mb-2">Please remove customer names and private details.</p>
+              <textarea name="difficultConv" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none"></textarea>
             </div>
 
             {/* 8 */}
             <div>
-              <label className="block text-sm font-bold text-white mb-2">8. Can you attend Monday and Wednesday classes from 7 pm to 8.30 pm WAT, from 9 November to 30 December? <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-bold text-white mb-2">8. What would you like to handle better after the programme? <span className="text-red-500">*</span></label>
+              <p className="text-xs text-gray-500 mb-2">Ask for a skill or behaviour, rather than an earnings target alone.</p>
+              <textarea name="handleBetter" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none"></textarea>
+            </div>
+
+            {/* 9 */}
+            <div>
+              <label className="block text-sm font-bold text-white mb-2">9. Can you attend Monday and Wednesday classes from 7 pm to 8.30 pm WAT, from 9 November to 30 December? <span className="text-red-500">*</span></label>
               <select name="schedule" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
                 <option value="">Select answer...</option>
                 <option>Yes</option>
@@ -150,9 +158,9 @@ export default function DSSApplyPage() {
               </select>
             </div>
 
-            {/* 9 */}
+            {/* 10 */}
             <div>
-              <label className="block text-sm font-bold text-white mb-2">9. Can you allow about two additional hours weekly for exercises, with adequate data and laptop access? <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-bold text-white mb-2">10. Can you allow about two additional hours weekly for exercises, with adequate data and laptop access? <span className="text-red-500">*</span></label>
               <select name="access" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
                 <option value="">Select answer...</option>
                 <option>Yes</option>
@@ -160,9 +168,9 @@ export default function DSSApplyPage() {
               </select>
             </div>
 
-            {/* 10 */}
+            {/* 11 */}
             <div>
-              <label className="block text-sm font-bold text-white mb-2">10. Who will approve and pay for your place? <span className="text-red-500">*</span></label>
+              <label className="block text-sm font-bold text-white mb-2">11. Who will approve and pay for your place? <span className="text-red-500">*</span></label>
               <select name="approver" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
                 <option value="">Select answer...</option>
                 <option>I will</option>
@@ -172,15 +180,19 @@ export default function DSSApplyPage() {
               </select>
             </div>
 
-            {/* 11 */}
+            {/* 12 */}
             <div>
-              <label className="block text-sm font-bold text-white mb-2">11. Which payment arrangement would you like us to review? <span className="text-red-500">*</span></label>
-              <p className="text-xs text-gray-500 mb-2">This is not a credit application or a commitment to pay.</p>
+              <label className="block text-sm font-bold text-white mb-2">12. Which payment arrangement would you like us to review? <span className="text-red-500">*</span></label>
+              <p className="text-xs text-gray-500 mb-2">This is not a credit application or an immediate commitment to pay.</p>
               <select name="payment" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
                 <option value="">Select answer...</option>
-                <option>Full ₦80,000</option>
-                <option>Approved ₦56,000 + ₦24,000 arrangement</option>
-                <option>I need to discuss whether either is workable</option>
+                <option>Setters Route (₦100,000 / $100 Full Payment)</option>
+                <option>Closers Route (₦100,000 / $100 Full Payment)</option>
+                <option>Live Role Plays / Internship Track (₦100,000 / $100 Full Payment)</option>
+                <option>Both Routes Bundle (₦150,000 / $150 Full Payment - Save ₦50k/$50)</option>
+                <option>Two-Part Installment Arrangement</option>
+                <option>Corporate / Employer Direct Invoice</option>
+                <option>I need to discuss whether another arrangement is workable</option>
               </select>
             </div>
 

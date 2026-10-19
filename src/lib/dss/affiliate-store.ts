@@ -47,6 +47,7 @@ export type EnquiryRecord = {
   email: string;
   phone?: string;
   goal: string;
+  route?: string;
   referral?: string;
   created: number;
 };
@@ -302,6 +303,7 @@ export async function recordEnquiry(params: {
   email: string;
   phone?: string;
   goal: string;
+  route?: string;
   referral?: string;
 }): Promise<EnquiryRecord> {
   const store = readStore();
@@ -311,6 +313,7 @@ export async function recordEnquiry(params: {
     email: params.email.toLowerCase().trim(),
     phone: params.phone?.trim(),
     goal: params.goal,
+    route: params.route,
     referral: params.referral,
     created: Date.now(),
   };
@@ -328,7 +331,7 @@ export async function recordEnquiry(params: {
         phone: params.phone,
         type: 'SALES_LEAD',
         source: params.referral ? `DSS Referral (${params.referral})` : 'DSS Direct Website',
-        message: `DSS Enrollment Goal: ${params.goal}`,
+        message: `DSS Enrollment Goal: ${params.goal} | Route: ${params.route || 'General'}`,
         status: 'NEW',
         buyingIntent: 85,
         organizationId: org?.id,

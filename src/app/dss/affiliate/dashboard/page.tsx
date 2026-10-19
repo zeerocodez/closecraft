@@ -8,8 +8,6 @@ import {
   Wallet,
   FolderOpen,
   UserRound,
-  ArrowUpRight,
-  ArrowRight,
   Copy,
   Check,
   Download,
@@ -18,9 +16,7 @@ import {
   Link2,
   RefreshCw,
   Sparkles,
-  HelpCircle,
   FileText,
-  Share2,
 } from 'lucide-react';
 import { formatNaira } from '@/lib/dss/rules';
 
@@ -60,7 +56,13 @@ type DashboardData = {
 
 export default function DSSAffiliateDashboardPage() {
   const [tab, setTab] = useState<'overview' | 'referrals' | 'payouts' | 'toolkit' | 'profile'>('overview');
-  const [isDemo, setIsDemo] = useState(false);
+  const [isDemo, setIsDemo] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('demo') === '1';
+    }
+    return false;
+  });
   const [data, setData] = useState<DashboardData>({
     profile: null,
     clicks: 0,
@@ -73,7 +75,7 @@ export default function DSSAffiliateDashboardPage() {
   const [copiedCaption, setCopiedCaption] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'paid' | 'reversed'>('all');
 
-  async function loadData(demoMode: boolean) {
+  const fetchData = React.useCallback(async (demoMode: boolean) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/dss/affiliate${demoMode ? '?demo=1' : ''}`, { cache: 'no-store' });
@@ -86,20 +88,42 @@ export default function DSSAffiliateDashboardPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  const [now] = useState(() => Date.now());
 
   useEffect(() => {
-    // Check if ?demo=1 is in URL
-    const params = new URLSearchParams(window.location.search);
-    const demoParam = params.get('demo') === '1';
-    setIsDemo(demoParam);
-    loadData(demoParam);
+    let ignore = false;
+    const demoParam = typeof window !== 'undefined'
+      ? new URLSearchParams(window.location.search).get('demo') === '1'
+      : false;
+
+    fetch(`/api/dss/affiliate${demoParam ? '?demo=1' : ''}`, { cache: 'no-store' })
+      .then((res) => res.json())
+      .then((json) => {
+        if (!ignore) {
+          setData(json);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!ignore) {
+          console.error('Failed to load affiliate dashboard data:', err);
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      ignore = true;
+    };
   }, []);
 
   function toggleDemo() {
-    const next = !isDemo;
-    setIsDemo(next);
-    loadData(next);
+    setIsDemo((prev) => {
+      const next = !prev;
+      fetchData(next);
+      return next;
+    });
   }
 
   const profile = data.profile;
@@ -121,7 +145,6 @@ export default function DSSAffiliateDashboardPage() {
 
   // Calculate totals
   const totalCommissionEarned = data.sales.reduce((acc, s) => acc + s.commission, 0);
-  const now = Date.now();
   const availableCommission = data.sales
     .filter((s) => s.status === 'pending' && s.eligible <= now)
     .reduce((acc, s) => acc + s.commission, 0);
@@ -155,9 +178,9 @@ export default function DSSAffiliateDashboardPage() {
 
   // Toolkit captions
   const captions = {
-    whatsapp: `🔥 If you are in Nigeria and looking to land high-paying remote sales clients or improve how you close deals, check out Digital Sales School (DSS).\n\nEmmanuel Effiong is running an intensive 8-week founding cohort starting this November. You practice real discovery calls and roleplays instead of just reading boring theories. Tuition is ₦80k and includes placement into Closecraft's sales engine.\n\nRead the full program and get a free sample lesson here: ${referralLink}`,
-    twitter: `Most people struggle to sell not because their offer is bad, but because they don't know how to handle "it's too expensive".\n\nDigital Sales School (DSS) is launching its founding cohort. 8 weeks of live practice, discovery call roleplays, and direct placement opportunities.\n\nCheck out the syllabus & free sample lesson:\n${referralLink}`,
-    linkedin: `Excited to recommend Digital Sales School (DSS) by Zeerocodes Automation. In B2B sales and high-ticket consulting, the ability to lead a structured discovery conversation determines your revenue.\n\nDSS bridges the gap between having an offer and knowing how to close it. The founding cohort tuition is ₦80,000 for 8 weeks of observed roleplays and rubric-based feedback.\n\nLearn more here: ${referralLink}`,
+    whatsapp: `🔥 Looking to master high-ticket sales or land high-paying remote client roles? Check out Digital Sales School (DSS) by Zeerocodes Automation.\n\nDSS now offers 4 productized tracks:\n• Setters Route: ₦100k / $100\n• Closers Route: ₦100k / $100\n• Live Role Plays/Internship: ₦100k / $100\n• Both Routes Bundle: ₦150k / $150 (Save ₦50k/$50)\n\nPractice live discovery calls, unscripted roleplays, and earn placement into Closecraft's sales engine.\n\nExplore all tracks and get a free sample lesson: ${referralLink}`,
+    twitter: `Most people struggle to sell not because their offer is bad, but because they don't know how to handle "it's too expensive" or book qualified meetings.\n\nDigital Sales School (DSS) launched 4 productized routes: Setters, Closers, Live Roleplays/Internship, and Both Routes.\n\nCheck out the syllabus & free sample lesson:\n${referralLink}`,
+    linkedin: `Excited to recommend Digital Sales School (DSS) by Zeerocodes Automation. In B2B sales and high-ticket consulting, the ability to lead a structured discovery conversation determines your revenue.\n\nDSS offers 4 tailored tracks: Setters Route (₦100k / $100), Closers Route (₦100k / $100), Live Role Plays & Internship (₦100k / $100), and Both Routes Bundle (₦150k / $150).\n\nLearn more here: ${referralLink}`,
   };
 
   return (
@@ -225,7 +248,7 @@ export default function DSSAffiliateDashboardPage() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setTab(item.id as any)}
+                  onClick={() => setTab(item.id as 'overview' | 'referrals' | 'payouts' | 'toolkit' | 'profile')}
                   className={`w-full flex items-center justify-between px-4 py-3 rounded-xl text-xs font-semibold transition-all ${
                     active
                       ? 'bg-[#15352F] text-[#45BFAE] border border-[#45BFAE]/30'
@@ -467,7 +490,7 @@ export default function DSSAffiliateDashboardPage() {
                     <div className="flex items-center gap-3">
                       <select
                         value={statusFilter}
-                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                        onChange={(e) => setStatusFilter(e.target.value as 'all' | 'pending' | 'paid' | 'reversed')}
                         className="bg-[#0B1117] border border-white/10 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-[#45BFAE]"
                       >
                         <option value="all">All Statuses</option>
@@ -693,7 +716,7 @@ export default function DSSAffiliateDashboardPage() {
                         </div>
                         <h4 className="text-sm font-bold text-white mb-2">DSS Sample Lesson & Rubric Sheet</h4>
                         <p className="text-xs text-[#A7B7C7] leading-relaxed mb-4">
-                          Instead of asking people to buy directly, share the free sample lesson worksheet. When they see the depth of Emmanuel Effiong's discovery framework, they convert on their own.
+                          Instead of asking people to buy directly, share the free sample lesson worksheet. When they see the depth of Emmanuel Effiong&apos;s discovery framework, they convert on their own.
                         </p>
                       </div>
                       <Link

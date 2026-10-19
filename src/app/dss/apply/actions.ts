@@ -8,6 +8,7 @@ export async function submitDSSApplication(formData: FormData) {
   const email = formData.get("email") as string;
   const phone = formData.get("phone") as string;
   const contactRoute = formData.get("contactRoute") as string;
+  const preferredRoute = (formData.get("preferredRoute") as string) || "Not Specified";
   const role = formData.get("role") as string;
   const offer = formData.get("offer") as string;
   const difficultConv = formData.get("difficultConv") as string;
@@ -33,7 +34,7 @@ export async function submitDSSApplication(formData: FormData) {
         status: "NEW",
         source: "DSS Application Form",
         organizationId: org.id,
-        message: `New DSS Application. Role: ${role}, Offer: ${offer}, Payment: ${payment}`,
+        message: `New DSS Application. Route: ${preferredRoute}, Role: ${role}, Offer: ${offer}, Payment: ${payment}`,
         qualificationData: {
           create: {
             authority: approver,
@@ -41,6 +42,7 @@ export async function submitDSSApplication(formData: FormData) {
             timeline: schedule,
             need: handleBetter,
             customData: JSON.stringify({
+              preferredRoute,
               contactRoute,
               difficultConv,
               access,

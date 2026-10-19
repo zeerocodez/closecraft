@@ -4,7 +4,7 @@ import { recordEnquiry } from '@/lib/dss/affiliate-store';
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, email, phone, goal, referral, consent, website } = body;
+    const { name, email, phone, goal, route, referral, consent, website } = body;
 
     // Honeypot spam trap
     if (website) {
@@ -24,12 +24,14 @@ export async function POST(req: Request) {
       email,
       phone,
       goal,
+      route,
       referral: referral || undefined,
     });
 
     return NextResponse.json({ success: true, enquiry });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('DSS enquiry submission error:', error);
-    return NextResponse.json({ error: error?.message || 'Failed to submit enquiry' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Failed to submit enquiry';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

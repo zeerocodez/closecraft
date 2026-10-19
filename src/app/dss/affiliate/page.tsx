@@ -3,17 +3,13 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  ShieldCheck,
   ArrowRight,
   ArrowUpRight,
   CheckCircle,
   Copy,
   Check,
-  TrendingUp,
   Wallet,
-  Users,
   Award,
-  Download,
   Share2,
   Sparkles,
   HelpCircle,
@@ -29,8 +25,8 @@ export default function DSSAffiliateProgramPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [copied, setCopied] = useState(false);
 
-  // 35% of ₦80,000 is ₦28,000 per referral
-  const commissionPerSale = 28000;
+  // 35% commission on ₦100,000 route is ₦35,000 ($35); on ₦150,000 route is ₦52,500 ($52.50)
+  const commissionPerSale = 35000;
   const totalProjectedEarnings = referralCount * commissionPerSale;
 
   async function handleRegister(e: React.FormEvent<HTMLFormElement>) {
@@ -58,8 +54,9 @@ export default function DSSAffiliateProgramPage() {
 
       setPartnerCode(data.affiliate.code);
       setRegistered(true);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Something went wrong. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setErrorMsg(message);
     } finally {
       setLoading(false);
     }
@@ -152,7 +149,7 @@ export default function DSSAffiliateProgramPage() {
           <div className="bg-[#111C26] border border-white/5 rounded-2xl p-5 text-left">
             <div className="text-xs text-[#8A9CAE] font-medium mb-1">Commission Rate</div>
             <div className="text-2xl font-bold text-[#45BFAE]">35% Flat</div>
-            <div className="text-[11px] text-[#A7B7C7] mt-1">₦28,000 on ₦80,000 tuition</div>
+            <div className="text-[11px] text-[#A7B7C7] mt-1">₦35k - ₦52.5k ($35 - $52.5) per sale</div>
           </div>
           <div className="bg-[#111C26] border border-white/5 rounded-2xl p-5 text-left">
             <div className="text-xs text-[#8A9CAE] font-medium mb-1">Cookie Window</div>
@@ -197,10 +194,10 @@ export default function DSSAffiliateProgramPage() {
                   className="w-full h-2 bg-[#1C2D3C] rounded-lg appearance-none cursor-pointer accent-[#45BFAE]"
                 />
                 <div className="flex justify-between text-xs text-[#8A9CAE] mt-2">
-                  <span>1 sale (₦28k)</span>
-                  <span>10 sales (₦280k)</span>
-                  <span>25 sales (₦700k)</span>
-                  <span>50 sales (₦1.4M)</span>
+                  <span>1 sale (₦35k)</span>
+                  <span>10 sales (₦350k)</span>
+                  <span>25 sales (₦875k)</span>
+                  <span>50 sales (₦1.75M)</span>
                 </div>
               </div>
 
@@ -212,7 +209,7 @@ export default function DSSAffiliateProgramPage() {
                   {formatNaira(totalProjectedEarnings * 100)}
                 </div>
                 <div className="text-xs text-[#8A9CAE]">
-                  ₦28,000 commission × {referralCount} confirmed enrolments
+                  ₦35,000 baseline commission × {referralCount} confirmed enrolments (up to ₦52,500 per bundle)
                 </div>
               </div>
             </div>
@@ -254,7 +251,7 @@ export default function DSSAffiliateProgramPage() {
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Closecraft Pipeline Backing</h3>
             <p className="text-sm text-[#A7B7C7] leading-relaxed">
-              DSS isn't just an ebook course. It’s the talent engine for Closecraft SaaS. Graduates get listed in the Closecraft Closer Network for business placement.
+              DSS isn&apos;t just an ebook course. It’s the talent engine for Closecraft SaaS. Graduates get listed in the Closecraft Closer Network for business placement.
             </p>
           </div>
 
@@ -264,7 +261,7 @@ export default function DSSAffiliateProgramPage() {
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Done-For-You Marketing Kit</h3>
             <p className="text-sm text-[#A7B7C7] leading-relaxed">
-              We provide you with proven WhatsApp status captions, Twitter threads, email swipes, and a free sample lesson lead magnet so you don't start from scratch.
+              We provide you with proven WhatsApp status captions, Twitter threads, email swipes, and a free sample lesson lead magnet so you don&apos;t start from scratch.
             </p>
           </div>
         </div>
@@ -286,7 +283,7 @@ export default function DSSAffiliateProgramPage() {
                   {'★'.repeat(5)}
                 </div>
                 <p className="text-sm text-[#F3F7FA] italic mb-6 leading-relaxed">
-                  "I shared my referral link with my tech community WhatsApp group of 800 members. Within 5 days, 8 people enrolled for the November cohort. I received ₦224,000 paid directly to my Access Bank account."
+                  &ldquo;I shared my referral link with my tech community WhatsApp group of 800 members. Within 5 days, 8 people enrolled for the November cohort. I received ₦224,000 paid directly to my Access Bank account.&rdquo;
                 </p>
               </div>
               <div className="flex items-center gap-3 pt-4 border-t border-white/5">
@@ -306,7 +303,7 @@ export default function DSSAffiliateProgramPage() {
                   {'★'.repeat(5)}
                 </div>
                 <p className="text-sm text-[#F3F7FA] italic mb-6 leading-relaxed">
-                  "The free sample lesson PDF makes promoting effortless. I didn’t pitch anything; I simply shared the sample rubric on Twitter/X. People read it, realized the value, and enrolled through my link."
+                  &ldquo;The free sample lesson PDF makes promoting effortless. I didn’t pitch anything; I simply shared the sample rubric on Twitter/X. People read it, realized the value, and enrolled through my link.&rdquo;
                 </p>
               </div>
               <div className="flex items-center gap-3 pt-4 border-t border-white/5">
@@ -326,7 +323,7 @@ export default function DSSAffiliateProgramPage() {
                   {'★'.repeat(5)}
                 </div>
                 <p className="text-sm text-[#F3F7FA] italic mb-6 leading-relaxed">
-                  "The real-time dashboard gives 100% transparency. I can see my clicks, visitor conversions, and exact eligible payout dates. Closecraft and DSS do not play games with affiliates."
+                  &ldquo;The real-time dashboard gives 100% transparency. I can see my clicks, visitor conversions, and exact eligible payout dates. Closecraft and DSS do not play games with affiliates.&rdquo;
                 </p>
               </div>
               <div className="flex items-center gap-3 pt-4 border-t border-white/5">
@@ -477,7 +474,7 @@ export default function DSSAffiliateProgramPage() {
           {[
             {
               q: 'How much do I get paid per referral?',
-              a: 'You receive 35% of the tuition fee. For the founding cohort tuition of ₦80,000, your commission is ₦28,000 per paid student.',
+              a: 'You receive a 35% commission on all productized DSS tracks. For the Setters Route, Closers Route, and Live Roleplays/Internship (₦100,000 / $100), your commission is ₦35,000 ($35). For the Both Routes bundle (₦150,000 / $150), your commission is ₦52,500 ($52.50) per paid student.',
             },
             {
               q: 'When and how do I receive my commission payout?',

@@ -1,36 +1,26 @@
 'use client';
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
   Calendar,
-  BookOpen,
   CheckCircle,
-  ChevronRight,
   ArrowRight,
   ArrowUpRight,
-  Check,
-  FileText,
-  BarChart3,
-  Target,
-  Mic,
   Download,
-  MoveUpRight,
   Headphones,
   Sparkles,
-  Users,
   Wallet,
   Award,
-  Layers,
   HelpCircle,
   X,
   CreditCard,
   Building,
   Bot,
-  Zap,
 } from 'lucide-react';
 import { formatNaira } from '@/lib/dss/rules';
+import { DSS_PRODUCTS } from '@/lib/dss/products';
 
 const objectionScenarios = {
   price: {
@@ -68,6 +58,7 @@ const objectionScenarios = {
 const curriculumModules = [
   {
     number: '01',
+    routeBadge: 'SETTERS ROUTE',
     title: 'Sales Foundations & Offer Understanding',
     duration: 'Week 1 • Lessons 1 & 2',
     desc: 'Understand the sales job. Learn to deconstruct any high-ticket offer into its core value transformation without hype or overselling.',
@@ -75,6 +66,7 @@ const curriculumModules = [
   },
   {
     number: '02',
+    routeBadge: 'SETTERS ROUTE',
     title: 'Buyer Research, ICP & Lead Qualification',
     duration: 'Week 2 • Lessons 3 & 4',
     desc: 'Find and profile the exact decision-makers your offer can help. Learn to qualify for budget authority, urgency, and need before jumping on a call.',
@@ -82,6 +74,7 @@ const curriculumModules = [
   },
   {
     number: '03',
+    routeBadge: 'SETTERS ROUTE',
     title: 'Outreach & Appointment Setting',
     duration: 'Week 3 • Lessons 5 & 6',
     desc: 'Master pattern-interrupt messaging across WhatsApp, LinkedIn, and email. Turn casual inbound queries into confirmed discovery meetings.',
@@ -89,6 +82,7 @@ const curriculumModules = [
   },
   {
     number: '04',
+    routeBadge: 'CLOSERS ROUTE',
     title: 'Discovery & The Million-Dollar Call Framework',
     duration: 'Week 4 • Lessons 7 & 8',
     desc: 'Ask penetrating diagnostic questions. Uncover the cost of inaction, emotional drivers, and internal roadblocks. Discovery comes before the pitch.',
@@ -96,6 +90,7 @@ const curriculumModules = [
   },
   {
     number: '05',
+    routeBadge: 'CLOSERS ROUTE',
     title: 'Value Engineering & High-Ticket Proposals',
     duration: 'Week 5 • Lessons 9 & 10',
     desc: 'Present your solution strictly in terms of what matters to this buyer. Frame your pricing so it feels trivial compared to their problem.',
@@ -103,6 +98,7 @@ const curriculumModules = [
   },
   {
     number: '06',
+    routeBadge: 'CLOSERS ROUTE',
     title: 'Objection Mastery & Authorized Negotiation',
     duration: 'Week 6 • Lessons 11 & 12',
     desc: 'Turn a "NO" into clarity. Handle "it’s too expensive", "need to speak to my partner", and "not right now" without flinching or discounting.',
@@ -110,6 +106,7 @@ const curriculumModules = [
   },
   {
     number: '07',
+    routeBadge: 'CLOSERS ROUTE',
     title: 'Sales Operations & Closecraft AI CRM Integration',
     duration: 'Week 7 • Lessons 13 & 14',
     desc: 'Track next actions, manage pipelines, coordinate follow-up cadences, and review AI-generated revenue recommendations in Closecraft CRM.',
@@ -117,38 +114,41 @@ const curriculumModules = [
   },
   {
     number: '08',
+    routeBadge: 'LIVE ROLE PLAYS & INTERNSHIP',
     title: 'Applied Sales Lab & Observed Certification',
     duration: 'Week 8 • Lessons 15 & 16',
-    desc: 'Put all the pieces together in a complete, unscripted high-ticket sales simulation observed by Emmanuel Effiong and senior assessors.',
+    desc: 'Put all the pieces together in a complete, unscripted high-ticket sales simulation observed by Emmanuel Effiong and senior assessors. Direct placement into Closecraft Network.',
     output: 'Official DSS Closer Certification and placement entry into Closecraft Network.',
   },
 ];
 
 export default function DSSLandingClient() {
   const [route, setRoute] = useState<'business' | 'remote'>('remote');
+  const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
+  const [selectedRouteSlug, setSelectedRouteSlug] = useState<string>('dss-both-routes');
   const [dealValue, setDealValue] = useState(1000000); // ₦1,000,000
   const [dealsCount, setDealsCount] = useState(4);
   const [commissionRate, setCommissionRate] = useState(15); // 15%
   const [openModule, setOpenModule] = useState<number | null>(0);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedObjection, setSelectedObjection] = useState<'price' | 'proposal' | 'partner'>('price');
-  const [referral, setReferral] = useState('');
+  const [referral] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref');
+      if (ref && /^DSS-[A-F0-9]{12}$/.test(ref)) {
+        try { sessionStorage.setItem('dss_ref', ref); } catch {}
+        return ref;
+      }
+      try {
+        return sessionStorage.getItem('dss_ref') || '';
+      } catch {}
+    }
+    return '';
+  });
   const [submitting, setSubmitting] = useState(false);
   const [enquirySuccess, setEnquirySuccess] = useState(false);
   const [formError, setFormError] = useState('');
-
-  // Extract ?ref= referral code
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const ref = params.get('ref');
-    if (ref && /^DSS-[A-F0-9]{12}$/.test(ref)) {
-      setReferral(ref);
-      sessionStorage.setItem('dss_ref', ref);
-    } else {
-      const stored = sessionStorage.getItem('dss_ref');
-      if (stored) setReferral(stored);
-    }
-  }, []);
 
   const totalCalculatedEarnings = (dealValue * dealsCount * commissionRate) / 100;
 
@@ -162,6 +162,7 @@ export default function DSSLandingClient() {
     const email = form.get('email') as string;
     const phone = form.get('phone') as string;
     const goal = form.get('goal') as string;
+    const selectedRoute = (form.get('route') as string) || selectedRouteSlug;
     const consent = form.get('consent') === 'on';
     const website = form.get('website') as string;
 
@@ -174,6 +175,7 @@ export default function DSSLandingClient() {
           email,
           phone,
           goal,
+          route: selectedRoute,
           consent,
           website,
           referral: referral || undefined,
@@ -186,8 +188,9 @@ export default function DSSLandingClient() {
       }
 
       setEnquirySuccess(true);
-    } catch (err: any) {
-      setFormError(err.message || 'Something went wrong. Please try again.');
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setFormError(message);
     } finally {
       setSubmitting(false);
     }
@@ -199,12 +202,12 @@ export default function DSSLandingClient() {
       <div className="bg-gradient-to-r from-[#15352F] via-[#111C26] to-[#15352F] border-b border-[#45BFAE]/20 px-4 py-2 text-center text-xs text-[#A7B7C7] flex flex-wrap items-center justify-center gap-3">
         <span className="flex items-center gap-1.5 font-semibold text-white">
           <span className="h-2 w-2 rounded-full bg-[#45BFAE] animate-ping" />
-          FOUNDING COHORT ADMISSIONS:
+          4 PRODUCTIZED TRACKS AVAILABLE:
         </span>
-        <span>Starts November 9, 2026 • ₦80,000 Tuition • 11 of 15 seats reserved</span>
+        <span>Setters (₦100k/$100) • Closers (₦100k/$100) • Live Roleplays/Internship (₦100k/$100) • Both Routes (₦150k/$150)</span>
         <span className="text-white/20">|</span>
         <Link href="/dss/affiliate" className="text-[#45BFAE] font-bold hover:underline">
-          Earn 35% (₦28k) in Partner Program &rarr;
+          Earn 35% (₦35k - ₦52.5k) in Partner Program &rarr;
         </Link>
       </div>
 
@@ -233,13 +236,14 @@ export default function DSSLandingClient() {
 
           {/* Navigation Links */}
           <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#A7B7C7]">
+            <a href="#routes" className="text-[#45BFAE] hover:underline font-bold">Tracks & Pricing</a>
             <a href="#why" className="hover:text-white transition-colors">Why Closing?</a>
             <a href="#curriculum" className="hover:text-white transition-colors">Curriculum</a>
             <a href="#calculator" className="hover:text-white transition-colors">Calculator</a>
             <a href="#proof" className="hover:text-white transition-colors">Payment Proof</a>
             <a href="#pipeline" className="hover:text-white transition-colors">Closecraft Pipeline</a>
             <Link href="/dss/affiliate" className="text-[#45BFAE] hover:underline font-bold flex items-center gap-1">
-              Affiliates (₦28k)
+              Affiliates (35%)
             </Link>
           </nav>
 
@@ -252,7 +256,7 @@ export default function DSSLandingClient() {
               Partner Portal
             </Link>
             <button
-              onClick={() => setModalOpen(true)}
+              onClick={() => { setSelectedRouteSlug('dss-both-routes'); setModalOpen(true); }}
               className="px-4 py-2 rounded-lg bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] text-xs font-bold transition-all shadow-md shadow-[#45BFAE]/20"
             >
               Apply for Cohort &rarr;
@@ -278,24 +282,30 @@ export default function DSSLandingClient() {
           <p className="text-lg md:text-xl text-[#A7B7C7] max-w-3xl mx-auto leading-relaxed mb-10">
             You can build a brilliant product and still struggle to sell it. DSS teaches you the discovery frameworks, psychology, and objection-handling tactics that convert hesitant buyers into cleared payments.
             <span className="block mt-2 text-[#F3F7FA] font-medium">
-              DSS certified graduates feed directly into Closecraft's Revenue Engine for placement with high-paying businesses.
+              DSS certified graduates feed directly into Closecraft&apos;s Revenue Engine for placement with high-paying businesses.
             </span>
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
-            <button
-              onClick={() => setModalOpen(true)}
+            <a
+              href="#routes"
               className="w-full sm:w-auto px-8 py-4 bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] rounded-xl font-bold text-base transition-all shadow-xl shadow-[#45BFAE]/25 flex items-center justify-center gap-2"
             >
-              Build Your Closing Skill (₦80,000) <ArrowRight size={18} />
+              Explore 4 Productized Routes &rarr;
+            </a>
+            <button
+              onClick={() => { setSelectedRouteSlug('dss-both-routes'); setModalOpen(true); }}
+              className="w-full sm:w-auto px-8 py-4 bg-[#111C26] hover:bg-[#172431] text-white rounded-xl font-bold text-base border border-[#45BFAE]/30 transition-all flex items-center justify-center gap-2"
+            >
+              Apply for Fit Review (From ₦100k / $100)
             </button>
             <a
               href="/DSS_Sample_Lesson.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-8 py-4 bg-[#111C26] hover:bg-[#172431] text-white rounded-xl font-bold text-base border border-white/10 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-6 py-4 bg-transparent hover:bg-white/5 text-[#A7B7C7] hover:text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
             >
-              <Download size={18} className="text-[#45BFAE]" /> Try Free Sample Lesson (PDF)
+              <Download size={16} className="text-[#45BFAE]" /> Sample Lesson (PDF)
             </a>
           </div>
 
@@ -439,7 +449,7 @@ export default function DSSLandingClient() {
               <div className="text-xs font-mono text-[#F5BF65] font-bold mb-2">GAP 02</div>
               <h3 className="text-lg font-bold text-white mb-2">Fear of Objections</h3>
               <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                Untrained sellers cave in and offer immediate discounts when buyers say "expensive". Closers know an objection is simply an unaddressed decision criterion.
+                Untrained sellers cave in and offer immediate discounts when buyers say &ldquo;expensive&rdquo;. Closers know an objection is simply an unaddressed decision criterion.
               </p>
             </div>
 
@@ -638,7 +648,7 @@ export default function DSSLandingClient() {
                   Close High-Ticket Deals for Foreign & Local Businesses.
                 </h3>
                 <p className="text-sm text-[#A7B7C7] leading-relaxed mb-6">
-                  You don't need your own product, website, or ad budget. High-ticket businesses generate leads every day and need hungry, skilled closers to take the calls and collect payments.
+                  You don&apos;t need your own product, website, or ad budget. High-ticket businesses generate leads every day and need hungry, skilled closers to take the calls and collect payments.
                 </p>
                 <div className="space-y-3 text-xs text-[#F3F7FA]">
                   <div className="flex items-center gap-2">
@@ -850,8 +860,13 @@ export default function DSSLandingClient() {
                       {m.number}
                     </span>
                     <div>
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#15352F] text-[#45BFAE] border border-[#45BFAE]/30">
+                          {m.routeBadge}
+                        </span>
+                        <span className="text-xs text-[#8A9CAE]">{m.duration}</span>
+                      </div>
                       <h4 className="text-base sm:text-lg font-bold text-white">{m.title}</h4>
-                      <div className="text-xs text-[#8A9CAE] mt-0.5">{m.duration}</div>
                     </div>
                   </div>
                   <span className="text-[#45BFAE] text-xl font-bold">{isOpen ? '−' : '+'}</span>
@@ -1025,7 +1040,7 @@ export default function DSSLandingClient() {
                 </div>
                 <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-4">
                   <div className="text-[#6AD6A7] font-bold text-sm mb-1">02. Talent Match</div>
-                  <p className="text-xs text-[#8A9CAE]">Listed in Closecraft's verified closer network for SaaS and agency client hires.</p>
+                  <p className="text-xs text-[#8A9CAE]">Listed in Closecraft&apos;s verified closer network for SaaS and agency client hires.</p>
                 </div>
                 <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-4">
                   <div className="text-[#F5BF65] font-bold text-sm mb-1">03. Earn & Scale</div>
@@ -1159,53 +1174,148 @@ export default function DSSLandingClient() {
         </div>
       </section>
 
-      {/* ADMISSIONS & TUITION OFFER SECTION */}
-      <section id="enrol" className="py-20 px-6 bg-[#0D151D] border-t border-b border-white/5">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">NOVEMBER FOUNDING COHORT</div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">
-            Own The Skill That Creates Revenue.
-          </h2>
-          <p className="text-base text-[#A7B7C7] max-w-2xl mx-auto mb-12">
-            Admissions close 30 October at 12 noon WAT. Only 15 places available to maintain personal feedback and observed grading quality.
-          </p>
-
-          <div className="bg-[#111C26] border border-[#45BFAE]/30 rounded-3xl p-8 md:p-12 max-w-2xl mx-auto shadow-2xl">
-            <div className="inline-block px-3 py-1 rounded-full bg-[#15352F] text-[#45BFAE] text-xs font-bold uppercase tracking-wider mb-4">
-              COMPLETE 8-WEEK IMMERSION
+      {/* PRODUCTIZED ROUTES & TUITION OFFER SECTION */}
+      <section id="routes" className="py-24 px-6 bg-[#0D151D] border-t border-b border-white/5 scroll-mt-20">
+        <div id="enrol" className="max-w-7xl mx-auto">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#15352F] border border-[#45BFAE]/30 text-[#45BFAE] text-xs font-bold uppercase tracking-wider mb-4">
+              PRODUCTIZED SALES TRACKS • CHOOSE YOUR SPECIALIZATION
             </div>
-            <div className="text-5xl font-extrabold text-white mb-2">₦80,000</div>
-            <div className="text-xs text-[#8A9CAE] mb-8">
-              One-time tuition or 2 installments (₦56,000 + ₦24,000). Official invoice provided.
-            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">
+              Transparent, Value-Engineered Pricing
+            </h2>
+            <p className="text-base text-[#A7B7C7] leading-relaxed">
+              Tailored curriculum tracks designed for specific deal-making milestones. Learn appointment setting, master high-ticket closing, spar in live unscripted roleplays, or bundle both routes for complete sales mastery.
+            </p>
 
-            <div className="text-left space-y-3 text-xs text-[#F3F7FA] mb-8 max-w-md mx-auto">
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={16} className="text-[#6AD6A7]" /> 8 weeks of live coaching (Mon & Wed 7:00 PM WAT)
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={16} className="text-[#6AD6A7]" /> Complete Student Handbook & Practical Workbook
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={16} className="text-[#6AD6A7]" /> Live observed roleplays scored by Emmanuel Effiong
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={16} className="text-[#6AD6A7]" /> Closecraft AI CRM access & pipeline tracker
-              </div>
-              <div className="flex items-center gap-2.5">
-                <CheckCircle size={16} className="text-[#6AD6A7]" /> Direct listing in Closecraft Closer Network for client placement
+            {/* Currency Selector Toggle */}
+            <div className="inline-flex items-center gap-2 mt-8 p-1.5 rounded-full bg-[#111C26] border border-white/10 shadow-lg">
+              <button
+                type="button"
+                onClick={() => setCurrency('NGN')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  currency === 'NGN'
+                    ? 'bg-[#45BFAE] text-[#08231F] shadow-md shadow-[#45BFAE]/25'
+                    : 'text-[#8A9CAE] hover:text-white'
+                }`}
+              >
+                🇳🇬 Nigerian Naira (NGN ₦)
+              </button>
+              <button
+                type="button"
+                onClick={() => setCurrency('USD')}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
+                  currency === 'USD'
+                    ? 'bg-[#45BFAE] text-[#08231F] shadow-md shadow-[#45BFAE]/25'
+                    : 'text-[#8A9CAE] hover:text-white'
+                }`}
+              >
+                🌐 US Dollar (USD $)
+              </button>
+            </div>
+          </div>
+
+          {/* 4 Productized Routes Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {DSS_PRODUCTS.map((prod) => {
+              const priceDisplay = currency === 'NGN' ? `₦${prod.priceNGN.toLocaleString()}` : `$${prod.priceUSD}`;
+              const altPriceDisplay = currency === 'NGN' ? `$${prod.priceUSD} USD` : `₦${prod.priceNGN.toLocaleString()} NGN`;
+
+              return (
+                <div
+                  key={prod.id}
+                  className={`relative rounded-3xl p-6 md:p-8 flex flex-col h-full transition-all duration-300 hover:-translate-y-1 ${
+                    prod.isBestValue
+                      ? 'bg-gradient-to-b from-[#15352F]/90 via-[#111C26] to-[#0D151D] border-2 border-[#45BFAE] shadow-[0_0_35px_rgba(69,191,174,0.2)]'
+                      : prod.isPopular
+                      ? 'bg-[#111C26] border border-[#45BFAE]/40 shadow-xl'
+                      : 'bg-[#111C26] border border-white/10 hover:border-white/20'
+                  }`}
+                >
+                  {prod.badge && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider whitespace-nowrap shadow-md ${
+                        prod.isBestValue
+                          ? 'bg-[#45BFAE] text-[#08231F]'
+                          : 'bg-[#15352F] text-[#45BFAE] border border-[#45BFAE]/40'
+                      }`}>
+                        {prod.badge}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="mb-4 mt-2">
+                    <h3 className="text-xl font-bold text-white mb-1">{prod.title}</h3>
+                    <p className="text-xs text-[#8A9CAE] min-h-[32px]">{prod.tagline}</p>
+                  </div>
+
+                  <div className="mb-6 pb-6 border-b border-white/5">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <span className="text-3xl sm:text-4xl font-extrabold text-white">{priceDisplay}</span>
+                      <span className="text-xs text-[#8A9CAE]">/ {altPriceDisplay}</span>
+                    </div>
+                    {prod.savingsNGN && (
+                      <div className="inline-block mt-2 px-2.5 py-0.5 rounded-md bg-[#6AD6A7]/10 text-[#6AD6A7] text-[11px] font-bold border border-[#6AD6A7]/20">
+                        Save {currency === 'NGN' ? `₦${prod.savingsNGN.toLocaleString()}` : `$${prod.savingsUSD}`} vs separate routes
+                      </div>
+                    )}
+                    <div className="text-[11px] text-[#A7B7C7] mt-3 flex items-center gap-1.5">
+                      <Calendar size={13} className="text-[#45BFAE]" />
+                      <span>{prod.duration}</span>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-[#A7B7C7] mb-6 flex-1 space-y-2.5">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-[#8A9CAE] mb-2">What’s Included:</div>
+                    {prod.features.slice(0, 5).map((f, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <CheckCircle size={14} className="text-[#6AD6A7] shrink-0 mt-0.5" />
+                        <span className="leading-tight text-[#E0E7EC]">{f}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-auto pt-4 border-t border-white/5">
+                    <button
+                      onClick={() => {
+                        setSelectedRouteSlug(prod.slug);
+                        setModalOpen(true);
+                      }}
+                      className={`w-full py-3.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-lg ${
+                        prod.isBestValue
+                          ? 'bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] shadow-[#45BFAE]/20'
+                          : 'bg-[#15352F] hover:bg-[#1C473E] text-white border border-[#45BFAE]/40'
+                      }`}
+                    >
+                      {prod.isBestValue ? 'Get Both Routes (Save ₦50k / $50)' : `Select ${prod.shortTitle}`} <ArrowRight size={15} />
+                    </button>
+                    <div className="text-center text-[10px] text-[#8A9CAE] mt-2">
+                      Instant invoice • Verified Certificate
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Guarantee & Financing Banner */}
+          <div className="mt-12 p-6 rounded-2xl bg-[#111C26] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#A7B7C7]">
+            <div className="flex items-center gap-3">
+              <ShieldCheck size={28} className="text-[#45BFAE] shrink-0" />
+              <div>
+                <strong className="text-white block mb-0.5">Corporate Sponsorships & Installments Available</strong>
+                <span>Company tax invoices provided for sponsored teams. Two-part installment arrangements available upon fit review.</span>
               </div>
             </div>
-
             <button
-              onClick={() => setModalOpen(true)}
-              className="w-full py-4 bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] font-bold text-sm rounded-xl transition-all shadow-xl shadow-[#45BFAE]/25 flex items-center justify-center gap-2"
+              onClick={() => {
+                setSelectedRouteSlug('dss-both-routes');
+                setModalOpen(true);
+              }}
+              className="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-semibold whitespace-nowrap border border-white/10 transition-colors"
             >
-              Apply for Fit Review (Admissions Form) <ArrowRight size={18} />
+              Request Custom Invoice / Fit Review
             </button>
-            <div className="text-[11px] text-[#8A9CAE] mt-4">
-              Free to apply. We verify your goal and schedule fit before requesting payment.
-            </div>
           </div>
         </div>
       </section>
@@ -1304,11 +1414,11 @@ export default function DSSLandingClient() {
               <div>
                 <div className="mb-6">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-[#45BFAE]">
-                    FOUNDING COHORT APPLICATION
+                    DSS ADMISSIONS • FIT REVIEW APPLICATION
                   </div>
-                  <h3 className="text-2xl font-bold text-white mt-1">Apply for Fit Review</h3>
+                  <h3 className="text-2xl font-bold text-white mt-1">Apply for Your Track</h3>
                   <p className="text-xs text-[#8A9CAE] mt-1">
-                    Free application. Tuition is ₦80,000 upon admission approval.
+                    Free application. We review your background and schedule fit before issuing your official invoice.
                   </p>
                 </div>
 
@@ -1319,6 +1429,22 @@ export default function DSSLandingClient() {
                 )}
 
                 <form onSubmit={handleEnquirySubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-semibold text-[#A7B7C7] mb-1">Select Training Track *</label>
+                    <select
+                      name="route"
+                      value={selectedRouteSlug}
+                      onChange={(e) => setSelectedRouteSlug(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-[#0B1117] border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-[#45BFAE]"
+                    >
+                      {DSS_PRODUCTS.map((prod) => (
+                        <option key={prod.slug} value={prod.slug}>
+                          {prod.title} — {currency === 'NGN' ? `₦${prod.priceNGN.toLocaleString()} / $${prod.priceUSD}` : `$${prod.priceUSD} / ₦${prod.priceNGN.toLocaleString()}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
                   <div>
                     <label className="block text-xs font-semibold text-[#A7B7C7] mb-1">Full Name *</label>
                     <input
@@ -1357,7 +1483,9 @@ export default function DSSLandingClient() {
                       className="w-full px-4 py-2.5 bg-[#0B1117] border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-[#45BFAE]"
                     >
                       <option>Remote Sales Closer (Earn Commissions)</option>
+                      <option>Appointment Setter (Book Qualified Discovery Calls)</option>
                       <option>Business Builder (Sell Own High-Ticket Offer)</option>
+                      <option>Deal Sparring & Live Placement Internship</option>
                       <option>Company Sponsorship (Train Staff Member)</option>
                     </select>
                   </div>

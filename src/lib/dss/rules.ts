@@ -11,11 +11,18 @@ export type Programme = {
 export const defaultProgramme: Programme = {
   selar: 'https://selar.com/dss-closers',
   nestuge: 'https://nestuge.com/dss',
-  price: 8000000, // ₦80,000
-  rate: 3500, // 35% commission (₦28,000 per sale)
+  price: 10000000, // ₦100,000 standard route price
+  rate: 3500, // 35% commission (₦35,000 on standard routes, ₦52,500 on Both Routes)
   holdDays: 14,
   minimum: 2000000, // ₦20,000
   live: 1,
+};
+
+export const ROUTE_PRICES_KOBO = {
+  SETTERS: 10000000, // ₦100,000
+  CLOSERS: 10000000, // ₦100,000
+  ROLEPLAY_INTERNSHIP: 10000000, // ₦100,000
+  BOTH: 15000000, // ₦150,000
 };
 
 export function commissionFor(amount: number, rate: number): number {
