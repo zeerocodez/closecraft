@@ -37,7 +37,7 @@ export async function getLeadsForTenant(organizationId: string) {
 
 export async function createLeadForTenant(data: { 
   name: string; 
-  email: string; 
+  email?: string; 
   source: string; 
   status?: string; 
   organizationId: string;
@@ -48,7 +48,7 @@ export async function createLeadForTenant(data: {
   return await db.lead.create({
     data: {
       name: data.name,
-      email: data.email,
+      email: data.email || "",
       source: data.source,
       status: data.status || 'NEW',
       organizationId: data.organizationId,

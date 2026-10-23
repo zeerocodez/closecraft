@@ -265,7 +265,9 @@ export default function LeadsTableClient({
                                 </span>
                               )}
                             </div>
-                            <span className="text-[11px] font-mono text-on-surface-variant truncate">{lead.email}</span>
+                            <span className="text-[11px] font-mono text-on-surface-variant truncate">
+                              {lead.email || (lead.phone ? 'WhatsApp / Phone Lead' : 'No contact address')}
+                            </span>
                             {lead.phone && (
                               <span className="text-[10px] text-secondary font-mono">{lead.phone}</span>
                             )}

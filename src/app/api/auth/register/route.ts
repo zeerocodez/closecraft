@@ -67,13 +67,13 @@ export async function POST(req: Request) {
     }
 
     // Atomic transaction: create Organization, User, and OrganizationMember
-    const { user, org, welcomeLeadId } = await db.$transaction(async (tx) => {
+    const { user, org } = await db.$transaction(async (tx) => {
       const org = await tx.organization.create({
         data: {
           name: cleanCompanyName,
           slug,
-          plan: "STARTER",
-          status: "PENDING",
+          plan: "FREE_PILOT",
+          status: "APPROVED", // Instant free pilot activation for real user testing
         }
       });
 
@@ -92,30 +92,8 @@ export async function POST(req: Request) {
         }
       });
 
-      // Create an initial sample lead so the new workspace immediately displays the Revenue Engine in action
-      const welcomeLead = await tx.lead.create({
-        data: {
-          organizationId: org.id,
-          name: "Adaeze Okoro",
-          email: "adaeze.sample@cedarops.com",
-          source: "Website Revenue Audit",
-          status: "NEW",
-          buyingIntent: 85,
-          message: "We need an automated Revenue Growth Engine to qualify inbound consulting leads and schedule calls with our sales closers within 24 hours.",
-        }
-      });
-
-      return { user, org, welcomeLeadId: welcomeLead.id };
+      return { user, org };
     });
-
-    // Process the welcome lead asynchronously with the Revenue Engine
-    try {
-      if (welcomeLeadId) {
-        await RevenueEngine.processNewLead(welcomeLeadId);
-      }
-    } catch (engineErr) {
-      console.warn("[Register] Non-blocking RevenueEngine preview error:", engineErr);
-    }
 
     return NextResponse.json(
       {

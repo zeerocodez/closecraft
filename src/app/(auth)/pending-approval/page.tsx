@@ -32,7 +32,7 @@ export default async function PendingApprovalPage() {
     redirect('/dashboard');
   }
 
-  const fastTrackUrl = `https://wa.me/2348000000000?text=${encodeURIComponent(
+  const fastTrackUrl = `https://wa.me/2349026365853?text=${encodeURIComponent(
     `Hello CloseCraft Team, I just registered "${organization?.name || 'My Organization'}" for the CloseCraft Pilot and would like to fast-track our verification and WhatsApp activation.`
   )}`;
 
@@ -147,23 +147,39 @@ export default async function PendingApprovalPage() {
 
           {/* Call to action buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            {organization && organization.status !== 'APPROVED' && (
+              <form
+                action={async () => {
+                  'use server';
+                  if (organizationId) {
+                    await db.organization.update({
+                      where: { id: organizationId },
+                      data: { status: 'APPROVED', plan: 'FREE_PILOT' }
+                    });
+                  }
+                  redirect('/dashboard');
+                }}
+                className="flex-1"
+              >
+                <button
+                  type="submit"
+                  className="w-full h-11 px-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.99] cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
+                  <span>Activate Free Pilot Workspace</span>
+                </button>
+              </form>
+            )}
+
             <a
               href={fastTrackUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-1 h-11 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"
+              className="h-11 px-4 rounded-xl bg-emerald-600/90 hover:bg-emerald-500 text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.99]"
             >
               <span className="material-symbols-outlined text-[18px]">chat</span>
-              <span>Fast-Track via WhatsApp</span>
+              <span>Support via WhatsApp</span>
             </a>
-
-            <Link
-              href="/dashboard"
-              className="h-11 px-4 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-semibold text-xs flex items-center justify-center gap-2 transition-colors border border-outline-variant/20"
-            >
-              <span className="material-symbols-outlined text-[18px]">refresh</span>
-              <span>Check Status</span>
-            </Link>
           </div>
 
           {/* Sign Out Form */}

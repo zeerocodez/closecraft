@@ -97,13 +97,23 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
         </nav>
       </div>
       
-      {!isMobile && (
-        <div className="p-3 border-t border-outline-variant/30 flex justify-end">
-          <button onClick={toggleExpanded} className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors" title="Toggle Sidebar">
+      <div className="p-3 border-t border-outline-variant/30 flex items-center justify-between">
+        <a
+          href="https://wa.me/2349026365853?text=Hello%20CloseCraft%2C%20I%20need%20support%20with%20my%20pilot%20workspace."
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-xs text-on-surface-variant hover:text-emerald-400 transition-colors p-1.5 rounded-md hover:bg-surface-container-high"
+          title="WhatsApp Support: +234 902 636 5853"
+        >
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+          <span className={`font-medium transition-opacity duration-120 ${(!isExpanded && !isMobile) ? 'hidden' : 'inline'}`}>WhatsApp Support</span>
+        </a>
+        {!isMobile && (
+          <button onClick={toggleExpanded} className="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors shrink-0" title="Toggle Sidebar">
             <Icon name={isExpanded ? 'PanelLeftClose' : 'PanelLeftOpen'} size={20} />
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   );
 }

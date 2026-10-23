@@ -17,13 +17,25 @@ export function AddLeadModal({ buttonLabel = "Add Lead", className = "" }: { but
     const formData = new FormData(e.currentTarget);
 
     const name = (formData.get('name') as string)?.trim();
-    const email = (formData.get('email') as string)?.trim();
+    const email = (formData.get('email') as string)?.trim() || "";
     const company = (formData.get('company') as string)?.trim();
     const phone = (formData.get('phone') as string)?.trim();
     const source = (formData.get('source') as string)?.trim() || 'Manual Entry';
     const intentStr = formData.get('buyingIntent') as string;
     const buyingIntent = intentStr ? parseInt(intentStr, 10) : 80;
     const notes = (formData.get('notes') as string)?.trim();
+
+    if (!name) {
+      setError("Please provide the prospect's full name.");
+      setLoading(false);
+      return;
+    }
+
+    if (!email && !phone) {
+      setError("Please provide at least a Phone/WhatsApp number or an Email address.");
+      setLoading(false);
+      return;
+    }
 
     const message = company 
       ? `[${company}] ${notes || 'Inbound inquiry'}`
@@ -32,7 +44,7 @@ export function AddLeadModal({ buttonLabel = "Add Lead", className = "" }: { but
     try {
       await addManualLead({
         name,
-        email,
+        email: email || undefined,
         source,
         phone: phone || undefined,
         message,
@@ -95,19 +107,19 @@ export function AddLeadModal({ buttonLabel = "Add Lead", className = "" }: { but
                   <input required name="name" type="text" className="w-full h-10 px-3 bg-surface-container-low border border-surface-container rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary" placeholder="Adaeze Okoro" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Work Email *</label>
-                  <input required name="email" type="email" className="w-full h-10 px-3 bg-surface-container-low border border-surface-container rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary" placeholder="adaeze@cedarops.ng" />
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Phone / WhatsApp Number</label>
+                  <input name="phone" type="text" className="w-full h-10 px-3 bg-surface-container-low border border-surface-container rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary" placeholder="+234 803 000 0000" />
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Company / Organization</label>
-                  <input name="company" type="text" className="w-full h-10 px-3 bg-surface-container-low border border-surface-container rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary" placeholder="Cedar Consulting" />
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Work Email (Optional)</label>
+                  <input name="email" type="email" className="w-full h-10 px-3 bg-surface-container-low border border-surface-container rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary" placeholder="adaeze@cedarops.ng" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Phone Number</label>
-                  <input name="phone" type="text" className="w-full h-10 px-3 bg-surface-container-low border border-surface-container rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary" placeholder="+234 803 000 0000" />
+                  <label className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1">Company / Organization</label>
+                  <input name="company" type="text" className="w-full h-10 px-3 bg-surface-container-low border border-surface-container rounded-lg text-on-surface text-sm focus:outline-none focus:border-primary" placeholder="Cedar Consulting" />
                 </div>
               </div>
 

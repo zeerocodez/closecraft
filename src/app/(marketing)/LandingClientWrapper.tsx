@@ -146,7 +146,8 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
         <span>DSS Academy</span>
       </Link>
       <Link className="hidden sm:inline-flex items-center px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/login">Client Sign In</Link>
-      <button onClick={openAudit} className="inline-flex items-center justify-center px-4 py-1.5 bg-primary text-on-primary hover:bg-primary-container hover:text-on-primary-container text-xs sm:text-sm font-medium rounded-lg shadow-sm transition-all">Book Demo</button>
+      <Link href="/signup" className="inline-flex items-center justify-center px-3.5 py-1.5 bg-[#248277] text-white hover:bg-[#1f6f65] text-xs sm:text-sm font-bold rounded-lg shadow-sm transition-all">Start Free</Link>
+      <button onClick={openAudit} className="hidden md:inline-flex items-center justify-center px-3.5 py-1.5 bg-primary/20 text-primary border border-primary/30 hover:bg-primary hover:text-on-primary text-xs sm:text-sm font-medium rounded-lg shadow-sm transition-all">Book Demo</button>
       <Link href="/dashboard" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center" title="SaaS Dashboard">
         <span className="material-symbols-outlined text-on-primary text-[18px]">person</span>
       </Link>
@@ -209,19 +210,22 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  Whether your leads come from Facebook Ads, website forms, or CSV uploads, pull them in instantly. Work them in real-time and hand verified prospects off to your closers or appointment setters before they go cold.
  </p>
  <div className="hero-actions">
+ <Link
+ href="/signup"
+ className="button"
+ >
+ START FREE PILOT <ArrowRight size={15} />
+ </Link>
  <button
  type="button"
  onClick={openAudit}
- className="button"
+ className="button button-ghost"
  >
- BOOK A REVENUE AUDIT <ArrowRight size={15} />
+ Book A Revenue Audit
  </button>
- <Link href="/solutions" className="button button-ghost">
- See How It Works
- </Link>
  </div>
  <p className="hero-subtext" style={{ marginTop: '16px' }}>
- See where your leads are being lost. No obligation.
+ 100% Free during live pilot testing. Instant workspace setup, no credit card required.
  </p>
  </div>
 
@@ -1018,19 +1022,19 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  Let's find out where your lead-to-sale process is leaking opportunities.
  </p>
  <div className="final-cta-actions">
+ <Link
+ href="/signup"
+ className="button"
+ >
+ JOIN FREE PILOT <ArrowRight size={15} />
+ </Link>
  <button
  type="button"
  onClick={openAudit}
- className="button"
- >
- BOOK A REVENUE AUDIT <ArrowRight size={15} />
- </button>
- <Link
- href="/dashboard"
  className="button button-ghost"
  >
- Launch Operational Dashboard
- </Link>
+ Book A Revenue Audit
+ </button>
  </div>
  </div>
  </section>
@@ -1068,6 +1072,15 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <Link href="/revenue-engine">Revenue Leakage</Link>
  <Link href="/platform">Who It's For</Link>
  <Link href="/#faq">FAQ</Link>
+ <a
+ href="https://wa.me/2349026365853?text=Hello%20CloseCraft%20Team%2C%20I%20am%20interested%20in%20the%20Free%20Pilot."
+ target="_blank"
+ rel="noopener noreferrer"
+ className="footer-button"
+ style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#45bfae', marginTop: '6px' }}
+ >
+ WhatsApp: +234 902 636 5853
+ </a>
  <button onClick={openAudit} className="footer-button" style={{ display: 'inline-block', marginTop: '10px' }}>Book Revenue Audit</button>
  </div>
  </div>

@@ -10,8 +10,8 @@ const ImportItemSchema = z.object({
   name: z.string().max(160).optional(),
   firstName: z.string().max(80).optional(),
   lastName: z.string().max(80).optional(),
-  email: z.string().email("Invalid lead email").max(180),
-  phone: z.string().max(40).optional(),
+  email: z.string().email("Invalid lead email").max(180).optional().or(z.literal('')),
+  phone: z.string().max(40).optional().or(z.literal('')),
   company: z.string().max(120).optional(),
   business: z.string().max(120).optional(),
   buyingIntent: z.union([z.number(), z.string()]).optional(),
@@ -19,6 +19,8 @@ const ImportItemSchema = z.object({
   notes: z.string().max(1500).optional(),
   message: z.string().max(1500).optional(),
   dealValue: z.union([z.number(), z.string()]).optional(),
+}).refine(data => Boolean((data.email && data.email.trim()) || (data.phone && data.phone.trim())), {
+  message: "Either email or phone number is required for each lead."
 });
 
 export async function POST(req: Request) {
@@ -80,7 +82,7 @@ export async function POST(req: Request) {
 
       validatedLeads.push({
         name: fullName,
-        email: item.email.toLowerCase().trim(),
+        email: item.email ? item.email.toLowerCase().trim() : '',
         phone: item.phone?.trim() || null,
         buyingIntent: parsedIntent,
         message: leadMessage,

@@ -91,12 +91,12 @@ export default function SignupPage() {
         {/* Enterprise Protocol Badge */}
         <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container mb-6 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Workspace Provisioning</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Free Pilot Access</span>
           </div>
-          <div className="flex items-center gap-1 text-primary">
-            <span className="material-symbols-outlined text-[16px]">verified_user</span>
-            <span className="text-xs font-semibold uppercase">14-Day Full Trial</span>
+          <div className="flex items-center gap-1 text-emerald-400">
+            <span className="material-symbols-outlined text-[16px]">check_circle</span>
+            <span className="text-xs font-semibold uppercase">Instant Activation</span>
           </div>
         </div>
 
@@ -111,10 +111,10 @@ export default function SignupPage() {
             <span className="px-1.5 py-0.5 rounded bg-primary text-on-primary text-xs font-semibold uppercase tracking-widest text-[10px]">REVENUE OS</span>
           </div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight mb-2">
-            Create your Workspace
+            Join the Free Pilot
           </h1>
           <p className="font-body-md text-body-md text-on-surface-variant max-w-xs leading-relaxed">
-            Start your 14-day free trial. Full AI Autopilot & Revenue Engine included.
+            Test CloseCraft with real leads. Instant workspace access & complete Revenue Engine included.
           </p>
         </div>
 
@@ -257,7 +257,7 @@ export default function SignupPage() {
                 </>
               ) : (
                 <>
-                  <span>Create Workspace & Start Trial</span>
+                  <span>Launch Free Pilot Workspace</span>
                   <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                 </>
               )}
