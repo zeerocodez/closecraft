@@ -1,37 +1,36 @@
-// @ts-nocheck
 import { inngest } from './client';
-import { qualifyLead } from '@/lib/ai/qualification';
-
+import { db } from '@/lib/db';
 import { createLeadForTenant } from '@/lib/dal/lead';
+import { RevenueEngine } from '@/lib/revenue-engine/engine';
 
-// Background Job: Process inbound leads from webhooks, create them, and trigger AI Qualification
-// @ts-ignore
+// Background Job: Process inbound leads idempotently and trigger Revenue Engine qualification
 export const processNewLead = inngest.createFunction(
   { id: 'process-new-lead', triggers: [{ event: 'revenue/lead.created' }] },
   async ({ event, step }: { event: any, step: any }) => {
-    
-    // Step 1: Create the lead in the database using the Data Access Layer
-    const lead = await step.run('create-lead', async () => {
-      const data = event.data;
+    const data = event.data;
+
+    // Step 1: Idempotently fetch existing lead by leadId if provided, or create if new
+    const lead = await step.run('resolve-lead', async () => {
+      if (data.leadId) {
+        const existing = await db.lead.findUnique({ where: { id: data.leadId } });
+        if (existing) return existing;
+      }
       return await createLeadForTenant({
         name: data.name,
-        email: data.email,
-        source: data.source,
+        email: data.email || '',
+        phone: data.phone || undefined,
+        message: data.message || undefined,
+        source: data.source || 'Inbound Event',
         organizationId: data.organizationId
       });
     });
 
-    // Step 2: Add a tiny delay to ensure replication (if any) is complete
-    await step.sleep('wait-for-db', '1s');
-
-    // Step 3: Qualify the lead using the AI core
-    const qualificationResult = await step.run('run-ai-qualification', async () => {
-      return await qualifyLead(lead.id);
+    // Step 2: Run Revenue Engine qualification & signals on the lead
+    const result = await step.run('run-revenue-engine', async () => {
+      await RevenueEngine.processNewLead(lead.id);
+      return { leadId: lead.id, processed: true };
     });
 
-    // Step 4: Depending on the qualification, we could trigger secondary workflows here
-    // e.g. if qualificationResult.recommendedActor === 'HUMAN' -> send slack notification
-
-    return { success: true, leadId: lead.id, result: qualificationResult };
+    return { success: true, leadId: lead.id, result };
   }
 );

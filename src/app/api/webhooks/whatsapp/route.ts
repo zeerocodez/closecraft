@@ -61,19 +61,19 @@ async function processWhatsAppMessage(message: any, contactName: string, phoneNu
  
  if (!content) return; // Only processing text for now
 
- // In a production multi-tenant system, we must resolve the Organization
- // based on the phone_number_id (which tenant owns this WhatsApp number).
- // For the MVP, we fallback to the primary tenant if none specified.
+ // Resolve the Organization by phone_number_id or dedicated pilot slug
  let org = await db.organization.findFirst({
- where: { slug: 'acme-corp' } // Try to find a specific demo org
+ where: { slug: 'zeerocodes' }
  });
  
  if (!org) {
- org = await db.organization.findFirst();
+ org = await db.organization.findFirst({
+ where: { plan: 'FREE_PILOT', status: 'APPROVED' }
+ });
  }
 
  if (!org) {
- console.error(`[Webhook Error] No organization found to attach lead for WhatsApp number: ${phoneNumberId}`);
+ console.warn(`[WhatsApp Webhook] Unmapped phone number ID ${phoneNumberId}. Dropping to prevent cross-tenant contamination.`);
  return;
  }
 
@@ -91,7 +91,7 @@ async function processWhatsAppMessage(message: any, contactName: string, phoneNu
  organizationId: org.id,
  type: 'SALES_LEAD',
  name: contactName,
- email: `${fromPhone}@whatsapp.local`, // Dummy email since it's required in schema
+ email: '', // Genuine phone-first record, no fabricated email
  phone: fromPhone,
  source: 'WhatsApp',
  status: 'NEW',

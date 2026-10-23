@@ -43,18 +43,34 @@ export async function POST(request: Request) {
 
     const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck } = result.data;
 
-    // A Lead must belong to an organization.
-    let org = await db.organization.findFirst({
-      where: { slug: 'acme-corp' }, // fallback to demo org
-    });
+    // Server-bound tenant isolation: authenticate caller or resolve explicit workspace slug
+    const { auth } = await import('@/lib/auth');
+    const session = await auth().catch(() => null);
+    let targetOrgId = session?.organizationId;
 
-    if (!org) {
-      org = await db.organization.findFirst();
+    if (!targetOrgId && (body.workspaceSlug || body.organizationSlug)) {
+      const targetSlug = String(body.workspaceSlug || body.organizationSlug).trim();
+      const matchedOrg = await db.organization.findUnique({
+        where: { slug: targetSlug },
+        select: { id: true }
+      });
+      if (matchedOrg) targetOrgId = matchedOrg.id;
     }
 
-    if (!org) {
-      console.error('[Leads API] Cannot create lead: No organization exists in the system to own this lead.');
-      return NextResponse.json({ error: 'System configuration error' }, { status: 500 });
+    if (!targetOrgId) {
+      // Find dedicated platform acquisition tenant, never randomly fall back to customer workspaces
+      const platformOrg = await db.organization.findFirst({
+        where: { slug: { in: ['zeerocodes', 'closecraft', 'closecraft-hq'] } },
+        select: { id: true }
+      });
+      targetOrgId = platformOrg?.id;
+    }
+
+    if (!targetOrgId) {
+      return NextResponse.json(
+        { error: 'Tenant routing required. Please specify a verified workspaceSlug or submit leads from your authenticated workspace.' },
+        { status: 400 }
+      );
     }
 
     // Store custom data
@@ -75,9 +91,17 @@ export async function POST(request: Request) {
         source: 'Website Revenue Audit Form',
         message: `Revenue Audit Request from ${business}. Volume: ${monthlyLeadVolume}. Bottleneck: ${biggestSalesBottleneck}`,
         status: 'NEW',
-        organizationId: org.id,
+        organizationId: targetOrgId,
       },
     });
+
+    // Directly evaluate via RevenueEngine for immediate intelligence
+    try {
+      const { RevenueEngine } = await import('@/lib/revenue-engine/engine');
+      await RevenueEngine.processNewLead(lead.id);
+    } catch (engineErr) {
+      console.warn('[Leads API] RevenueEngine evaluation notice:', engineErr);
+    }
 
     // Fire event to Inngest background bus if available
     try {
@@ -85,7 +109,7 @@ export async function POST(request: Request) {
         name: 'revenue/lead.created',
         data: {
           leadId: lead.id,
-          organizationId: org.id,
+          organizationId: targetOrgId,
           name: lead.name,
           email: lead.email,
           source: lead.source,

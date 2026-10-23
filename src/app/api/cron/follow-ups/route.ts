@@ -16,7 +16,15 @@ export async function GET(request: Request) {
  }
 
   try {
-    // 1. Process explicit scheduled FollowUpTasks (e.g., Post-Clinic Prompts)
+    // Audit Requirement: Unattended automated message delivery is disabled in the pilot
+    // to guarantee all customer communications are verified and sent via authentic business channels.
+    if (process.env.PILOT_AUTOPILOT_CRON_ENABLED !== 'true') {
+      return NextResponse.json({
+        success: true,
+        message: 'Unattended background delivery is disabled during the pilot. Outreach must be verified via authentic business channels (wa.me / manual dispatch).',
+        pilotMode: true
+      });
+    }
     const scheduledTasks = await db.followUpTask.findMany({
       where: {
         status: 'PENDING',

@@ -22,6 +22,12 @@ export async function POST(req: Request) {
   }
 
   try {
+    const apiKey = req.headers.get('x-closecraft-key') || req.headers.get('authorization')?.replace('Bearer ', '');
+    const validSecret = process.env.LEADS_WEBHOOK_SECRET || process.env.AUTH_SECRET;
+    if (process.env.NODE_ENV === 'production' && (!apiKey || apiKey !== validSecret)) {
+      return NextResponse.json({ error: 'Unauthorized: Valid webhook authorization key required.' }, { status: 401 });
+    }
+
     const body = await req.json();
 
     // Validate the incoming payload
