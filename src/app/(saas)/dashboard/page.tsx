@@ -9,6 +9,7 @@ import { RevenueChart } from '@/components/revenue-engine/RevenueChart';
 import { ActionQueue } from '@/components/revenue-engine/ActionQueue';
 import { ImportLeadsModal } from '@/app/(saas)/leads/ImportLeadsModal';
 import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
+import { RevenuePilotGuide } from '@/components/dashboard/RevenuePilotGuide';
 
 export default async function DashboardPage({ searchParams }: { searchParams: any }) {
   const session = await auth();
@@ -40,24 +41,37 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
  
  const startDate = startDateStr ? new Date(startDateStr) : thirtyDaysAgo;
  const endDate = endDateStr ? new Date(endDateStr) : now;
- const currency = typeof resolvedParams?.currency === 'string' ? resolvedParams.currency : 'USD';
+ const currency = typeof resolvedParams?.currency === 'string' ? resolvedParams.currency : 'NGN';
 
- const [metrics, org, chartData, pendingActions] = await Promise.all([
- getDashboardMetrics(organizationId, startDate, endDate, currency),
- db.organization.findUnique({ where: { id: organizationId }, select: { name: true } }),
- getChartData(organizationId, startDate, endDate, currency),
- getRevenueActions(organizationId, 'needs_attention')
- ]);
+  const [metrics, org, chartData, pendingActions, totalLeadsCount, qualifiedSignalsCount, wonDealsCount, humanMessagesCount] = await Promise.all([
+    getDashboardMetrics(organizationId, startDate, endDate, currency),
+    db.organization.findUnique({ where: { id: organizationId }, select: { name: true, qualificationPolicy: true } }),
+    getChartData(organizationId, startDate, endDate, currency),
+    getRevenueActions(organizationId, 'needs_attention'),
+    db.lead.count({ where: { organizationId } }),
+    db.revenueSignal.count({ where: { organizationId } }),
+    db.deal.count({ where: { organizationId, stage: 'WON' } }),
+    db.message.count({ where: { conversation: { organizationId }, senderType: 'HUMAN' } })
+  ]);
 
- 
- const formatter = new Intl.NumberFormat('en-US', {
- style: 'currency',
- currency: currency,
- maximumFractionDigits: 0,
- });
+  const formatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: currency,
+    maximumFractionDigits: 0,
+  });
 
- return (
- <div className="flex flex-col gap-6 lg:gap-8 w-full">
+  return (
+    <div className="flex flex-col gap-6 lg:gap-8 w-full">
+      {/* Interactive Step-by-Step Pilot Guide */}
+      <RevenuePilotGuide 
+        workspaceName={org?.name || 'Workspace'}
+        totalLeads={totalLeadsCount}
+        hasQualifiedLeads={qualifiedSignalsCount > 0}
+        hasExecutedAction={humanMessagesCount > 0 || (pendingActions.length === 0 && totalLeadsCount > 0)}
+        dealsWonCount={wonDealsCount}
+        totalPipelineValue={metrics.closedWon + metrics.openPipeline}
+        qualificationPolicy={org?.qualificationPolicy}
+      />
  {/* Page Heading & Filters */}
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
  <div>

@@ -164,6 +164,18 @@ export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
  </div>
 
  <div className="p-3 bg-surface-container-lowest border-t border-surface-container shrink-0">
+ <div className="flex items-center justify-between mb-2">
+ <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
+ <span className="material-symbols-outlined text-[15px] text-emerald-400">chat</span>
+ <span>Direct WhatsApp Outreach</span>
+ </div>
+ {activeLead.phone && (
+ <span className="text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+ wa.me ready
+ </span>
+ )}
+ </div>
+
  <form 
  onSubmit={async (e) => {
  e.preventDefault();
@@ -181,7 +193,8 @@ export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
  body: JSON.stringify({
  conversationId: activeConversation.id,
  content,
- senderType: 'HUMAN'
+ senderType: 'HUMAN',
+ isManuallySent: false
  })
  });
  
@@ -198,19 +211,81 @@ export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
  >
  <textarea 
  name="content"
+ id="inbox-composer-input"
  disabled={isSending}
  className="w-full bg-surface-container-low text-on-surface placeholder:text-outline-variant font-body-md text-sm p-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary resize-none border border-surface-container disabled:opacity-50" 
- placeholder="Type WhatsApp response..." 
+ placeholder="Type WhatsApp response or click 'Open in WhatsApp' to chat directly..." 
  rows={2}
  />
- <div className="flex items-center justify-between mt-2">
+ <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
  <div className="flex items-center gap-2">
- <span className="material-symbols-outlined text-[18px] text-outline cursor-pointer hover:text-on-surface">attach_file</span>
- </div>
- <button type="submit" disabled={isSending} className="flex items-center gap-1 px-4 py-1.5 rounded-lg bg-primary text-on-primary text-sm font-medium font-semibold hover:bg-primary-container shadow-sm disabled:opacity-50">
- <span className="material-symbols-outlined text-[16px]">send</span>
- <span>{isSending ? 'Sending...' : 'Send'}</span>
+ {activeLead.nextStepsRecommendation && (
+ <button
+ type="button"
+ onClick={() => {
+ const lines = String(activeLead.nextStepsRecommendation).split('\n');
+ const openerLine = lines.find((l: string) => l.includes('Prescribed WhatsApp Opener') || l.includes('Prescribed Opener'));
+ const textarea = document.getElementById('inbox-composer-input') as HTMLTextAreaElement;
+ if (openerLine && textarea) {
+ const cleaned = openerLine.replace(/^[^:]*:\s*"?/, '').replace(/"?$/, '');
+ textarea.value = cleaned;
+ textarea.focus();
+ }
+ }}
+ className="text-xs text-primary font-semibold hover:underline flex items-center gap-1 bg-primary/10 px-2 py-1 rounded cursor-pointer"
+ >
+ <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
+ <span>Load AI Opener</span>
  </button>
+ )}
+ </div>
+
+ <div className="flex items-center gap-2">
+ {activeLead.phone && (
+ <button
+ type="button"
+ onClick={async () => {
+ const textarea = document.getElementById('inbox-composer-input') as HTMLTextAreaElement;
+ const draft = (textarea?.value || '').trim() || `Hi ${activeLead.name}, thanks for reaching out. Let's discuss your requirements.`;
+ const cleanPhone = activeLead.phone.replace(/[^0-9]/g, '');
+ 
+ window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(draft)}`, '_blank');
+
+ if (activeConversation) {
+ try {
+ await fetch('/api/messages', {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify({
+ conversationId: activeConversation.id,
+ content: draft,
+ senderType: 'HUMAN',
+ isManuallySent: true
+ })
+ });
+ if (textarea) textarea.value = '';
+ router.refresh();
+ } catch (e) {
+ console.error('Failed to log WhatsApp send:', e);
+ }
+ }
+ }}
+ className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 shadow-sm transition-all cursor-pointer"
+ >
+ <span className="material-symbols-outlined text-[16px]">chat</span>
+ <span>Open in WhatsApp</span>
+ </button>
+ )}
+
+ <button 
+ type="submit" 
+ disabled={isSending} 
+ className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold shadow-sm disabled:opacity-50 cursor-pointer"
+ >
+ <span className="material-symbols-outlined text-[16px]">save</span>
+ <span>{isSending ? 'Saving...' : 'Log in App'}</span>
+ </button>
+ </div>
  </div>
  </form>
  </div>

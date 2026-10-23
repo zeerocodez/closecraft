@@ -75,9 +75,9 @@ export const RevenueEngine = {
           organizationId: lead.organizationId,
           leadId: lead.id,
           type: 'VALUE',
-          value: Math.min(100, Math.max(10, Math.round(aiData.estimatedValue / 150000))),
+          value: aiData.estimatedValue > 0 ? Math.min(100, Math.max(10, Math.round(aiData.estimatedValue / 150000))) : 20,
           source: 'SYSTEM',
-          evidence: `Estimated Deal Value: ₦${(aiData.estimatedValue / 1000000).toFixed(1)}M`
+          evidence: aiData.estimatedValue > 0 ? `Estimated Deal Value: ₦${(aiData.estimatedValue / 1000000).toFixed(1)}M` : 'Deal Value: Unspecified (Pending Discovery)'
         }
       })
     ]);
@@ -98,13 +98,30 @@ export const RevenueEngine = {
           organizationId: lead.organizationId,
           isAvailable: true,
           role: { in: ['CLOSER', 'SETTER', 'ADMIN'] }
+        },
+        include: {
+          user: {
+            include: {
+              assignedLeads: {
+                select: { id: true, claimedAt: true },
+                orderBy: { claimedAt: 'desc' },
+                take: 1
+              }
+            }
+          }
         }
       });
 
       if (availableMembers.length > 0) {
         const matched = availableMembers.filter(m => m.role === aiData.targetRole);
         const pool = matched.length > 0 ? matched : availableMembers;
-        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        // Fair sequential round-robin: assign to the member who has waited the longest since last lead
+        const sorted = [...pool].sort((a, b) => {
+          const aLast = a.user?.assignedLeads?.[0]?.claimedAt ? new Date(a.user.assignedLeads[0].claimedAt).getTime() : 0;
+          const bLast = b.user?.assignedLeads?.[0]?.claimedAt ? new Date(b.user.assignedLeads[0].claimedAt).getTime() : 0;
+          return aLast - bLast;
+        });
+        const chosen = sorted[0];
         assignedUserId = chosen.userId;
         assignedRole = chosen.role;
         claimedAt = new Date();
@@ -160,7 +177,7 @@ export const RevenueEngine = {
     });
 
     // 6. Determine & Create Next Best Action
-    const createdAction = await db.revenueAction.create({
+    await db.revenueAction.create({
       data: {
         organizationId: lead.organizationId,
         leadId: lead.id,
@@ -180,7 +197,7 @@ export const RevenueEngine = {
           organizationId: lead.organizationId,
           leadId: lead.id,
           amount: aiData.estimatedValue,
-          currency: 'USD',
+          currency: 'NGN',
           stage: 'OPPORTUNITY',
         }
       });

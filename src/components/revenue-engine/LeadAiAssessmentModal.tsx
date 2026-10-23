@@ -49,14 +49,14 @@ export function LeadAiAssessmentModal({
 
   const fallbackAssessment =
     `• Fit Score: ${intentScore}/100 • Intent: ${isHot ? 'High Urgency' : 'Standard Urgency'}\n` +
-    `• Stated Need: "${lead.message || 'Sales closer & revenue pipeline scaling'}"\n` +
+    `• Stated Need: "${lead.message || 'Commercial requirements inquiry'}"\n` +
     `• Verified against Organization ICP Policy.`;
 
   const fallbackProtocol =
-    `🎯 CLOSER ACTION PROTOCOL:\n` +
-    `• Prescribed Opener: "Hi ${lead.name}, I reviewed your note regarding your sales pipeline goals. We have verified closer capacity ready to deploy for your team."\n` +
-    `• Best Channel: WhatsApp Direct Audio / Zoom Demo Call.\n` +
-    `• Objective: Confirm monthly lead volume and lock in 14-day closer pilot within 48h.\n` +
+    `🎯 CONSULTATIVE OUTREACH PROTOCOL (HUMAN REVIEW REQUIRED):\n` +
+    `• Prescribed WhatsApp Opener: "Hi ${lead.name}, thanks for reaching out. I'm reviewing your inquiry with our team—do you have 10 minutes today for a quick chat to discuss your requirements?"\n` +
+    `• Best Channel: WhatsApp Direct Message / Quick Call.\n` +
+    `• Objective: Qualify scope, validate timeline, and confirm readiness for proposal.\n` +
     `• SLA: Respond within 15 minutes.`;
 
   const assessmentText = lead.aiAssessment || fallbackAssessment;

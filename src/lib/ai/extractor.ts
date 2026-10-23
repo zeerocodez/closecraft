@@ -27,19 +27,26 @@ export interface LeadQualificationResult {
  * Parses a numerical amount from a string (handles 500k, 500000, ₦12M, etc.)
  */
 function parseAmount(text: string): number | null {
-  const mMatch = text.match(/(\d+[\d,.]*)\s*(m|million)/i);
+  const mMatch = text.match(/(?:₦|NGN|\$|€|£)?\s*(\d+[\d,.]*)\s*(?:m|million)\b/i);
   if (mMatch) {
     const val = parseFloat(mMatch[1].replace(/,/g, ''));
     if (!isNaN(val)) return val * 1000000;
   }
-  const kMatch = text.match(/(\d+[\d,.]*)\s*(k|thousand)/i);
+  const kMatch = text.match(/(?:₦|NGN|\$|€|£)?\s*(\d+[\d,.]*)\s*(?:k|thousand)\b/i);
   if (kMatch) {
     const val = parseFloat(kMatch[1].replace(/,/g, ''));
     if (!isNaN(val)) return val * 1000;
   }
-  const rawMatch = text.match(/(\d{2,}[\d,.]*)/);
-  if (rawMatch) {
-    const val = parseFloat(rawMatch[1].replace(/,/g, ''));
+  // Explicit currency symbol match: ₦500,000 or NGN 500,000 or $5,000
+  const currencyMatch = text.match(/(?:₦|NGN|\$|€|£)\s*(\d+[\d,.]*)/i);
+  if (currencyMatch) {
+    const val = parseFloat(currencyMatch[1].replace(/,/g, ''));
+    if (!isNaN(val)) return val;
+  }
+  // Explicit budget keyword: budget: 500000 or budget is 500000
+  const budgetKeywordMatch = text.match(/(?:budget|amount|worth|cost|spend|paying)(?:\s*(?:is|of|:|-)?\s*)(?:₦|NGN|\$)?\s*(\d+[\d,.]*)/i);
+  if (budgetKeywordMatch) {
+    const val = parseFloat(budgetKeywordMatch[1].replace(/,/g, ''));
     if (!isNaN(val)) return val;
   }
   return null;
@@ -97,11 +104,9 @@ function deterministicAnalyze(
 
   // 3. Calculate ICP Fit & Extract Financials
   let fitScore = 70;
-  let estimatedValue = 3500000; // default ₦3.5M
   const leadAmount = parseAmount(text);
-  if (leadAmount) {
-    estimatedValue = leadAmount;
-  }
+  // Do not inflate pipeline with unconfirmed default estimates; represent unknown value as 0 (Pending Discovery)
+  const estimatedValue = leadAmount ?? 0;
 
   // 4. Evaluate against Organization Qualification Policy (if configured)
   let policyEvaluated = false;
@@ -189,8 +194,8 @@ function deterministicAnalyze(
     nextActionType = 'ASSIGN_HUMAN';
     recommendedActor = 'HUMAN';
     actionReason = policyEvaluated 
-      ? `High intent (${intentScore}/100) & verified match with Organization ICP Policy. Fast-track human closer discovery call within 15m SLA.`
-      : `High intent (${intentScore}/100) & urgent buying signals. Fast-track human closer discovery call within 15m SLA.`;
+      ? `High intent (${intentScore}/100) & verified match with Organization ICP Policy. Fast-track human discovery call within 15m SLA.`
+      : `High intent (${intentScore}/100) & urgent buying signals. Fast-track human discovery call within 15m SLA.`;
   } else if (intentScore >= 55) {
     nextActionType = 'SEND_BOOKING_LINK';
     recommendedActor = 'AI';
@@ -208,20 +213,22 @@ function deterministicAnalyze(
   const authorityRole = text.includes('founder') || text.includes('ceo') || text.includes('director') || text.includes('manager') ? 'Executive Decision Maker' : 'Evaluator';
 
   const aiAssessment = `Fit Score: ${fitScore}/100 • Intent: ${intentScore}/100 • Priority: ${priority}/100\n` +
-    `Authority: ${authorityRole} • Budget: ${statedBudget}\n` +
-    `Identified Need: ${(message || 'Sales pipeline automation').slice(0, 100)}\n` +
+    `Authority: ${authorityRole} • Stated Budget: ${statedBudget}\n` +
+    `Identified Need: ${(message || 'Commercial requirements inquiry').slice(0, 100)}\n` +
     `Deal Health: ${fitScore >= 75 && intentScore >= 70 ? '🟢 High Conversion Probability' : '🟡 Requires Qualification Discovery'}`;
 
+  const needSummary = message ? message.slice(0, 80) : 'your inquiry';
+
   const nextStepsRecommendation = isCloserTier
-    ? `🎯 CLOSER ACTION PROTOCOL:\n` +
-      `• Prescribed Opener: "Hi! I reviewed your notes regarding your pipeline goals. Based on your budget of ${statedBudget}, we have trained closing capacity ready to plug in."\n` +
-      `• Best Channel: WhatsApp Direct Audio / Zoom Demo Call\n` +
-      `• Objective: Confirm sales targets, present CloseCraft closer tier, lock in 14-day pilot agreement within 48h.\n` +
-      `• SLA: Respond within 15 minutes.`
-    : `📋 SETTER ACTION PROTOCOL:\n` +
-      `• Prescribed Opener: "Hello! Thank you for reaching out to CloseCraft. To connect you with our senior closer, are you looking for remote closers or training an internal team?"\n` +
-      `• Best Channel: WhatsApp Message or 5-minute Discovery Call\n` +
-      `• Objective: Qualify lead volume and book appointment directly onto the Closer calendar within 24 hours.`;
+    ? `🎯 HIGH-INTENT CLOSING PROTOCOL (HUMAN REVIEW REQUIRED):\n` +
+      `• Prescribed WhatsApp Opener: "Hi! Thanks for reaching out regarding ${needSummary}. I'm reviewing your requirements with our team—do you have 10 minutes today or tomorrow for a quick call?"\n` +
+      `• Channel: WhatsApp Direct Message / Quick Call\n` +
+      `• Objective: Validate scope, confirm timeline, and schedule a formal proposal discussion.\n` +
+      `• SLA: Reach out within 15 minutes while intent is high.`
+    : `📋 DISCOVERY & QUALIFICATION PROTOCOL (HUMAN REVIEW REQUIRED):\n` +
+      `• Prescribed WhatsApp Opener: "Hello! Thanks for connecting. We received your note regarding ${needSummary}. Could you share a bit more about what you're looking to achieve so we can prepare the right solution for you?"\n` +
+      `• Channel: WhatsApp Message or Discovery Call\n` +
+      `• Objective: Gather project details, confirm budget, and qualify readiness for proposal.`;
 
   return {
     intentScore,

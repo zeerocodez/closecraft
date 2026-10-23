@@ -10,7 +10,7 @@ export interface DashboardMetrics {
   currency: string;
 }
 
-export async function getDashboardMetrics(organizationId: string, startDate: Date, endDate: Date, currency: string = 'USD'): Promise<DashboardMetrics> {
+export async function getDashboardMetrics(organizationId: string, startDate: Date, endDate: Date, currency: string = 'NGN'): Promise<DashboardMetrics> {
   const [
     closedWonResult,
     openPipelineResult,
@@ -92,7 +92,7 @@ export async function getRevenueActions(organizationId: string, filter: 'needs_a
   }) as RevenueActionWithRelations[];
 }
 
-export async function getChartData(organizationId: string, startDate: Date, endDate: Date, currency: string = 'USD') {
+export async function getChartData(organizationId: string, startDate: Date, endDate: Date, currency: string = 'NGN') {
   // Aggregate WON deals by day for the chart
   const deals = await db.deal.findMany({
     where: { organizationId, stage: 'WON', currency, closedAt: { gte: startDate, lt: endDate } },

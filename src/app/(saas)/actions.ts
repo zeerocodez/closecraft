@@ -11,7 +11,7 @@ import { createDealForTenant } from "@/lib/dal/deal";
 
 export async function addManualLead(data: { 
   name: string; 
-  email: string; 
+  email?: string; 
   source: string;
   phone?: string;
   message?: string;
@@ -21,11 +21,18 @@ export async function addManualLead(data: {
   const organizationId = (session as any)?.organizationId;
   if (!organizationId) throw new Error("Unauthorized");
 
+  const cleanEmail = data.email?.trim() || "";
+  const cleanPhone = data.phone?.trim() || null;
+
+  if (!cleanEmail && !cleanPhone) {
+    throw new Error("Please provide either a phone number or an email address.");
+  }
+
   const lead = await createLeadForTenant({
-    name: data.name,
-    email: data.email,
+    name: data.name.trim(),
+    email: cleanEmail,
     source: data.source,
-    phone: data.phone,
+    phone: cleanPhone || undefined,
     message: data.message,
     buyingIntent: data.buyingIntent,
     organizationId
@@ -199,80 +206,80 @@ const ClaimActionSchema = z.object({
 });
 
 export async function claimRevenueAction(rawActionId: string) {
- const session = await auth();
- const userId = session?.user?.id;
- const organizationId = session?.organizationId;
- 
- if (!userId || !organizationId) {
- return { success: false, error: "Unauthorized" };
- }
+  const session = await auth();
+  const userId = session?.user?.id;
+  const organizationId = session?.organizationId;
+  
+  if (!userId || !organizationId) {
+    return { success: false, error: "Unauthorized" };
+  }
 
- const parseResult = ClaimActionSchema.safeParse({ actionId: rawActionId });
- if (!parseResult.success) {
- return { success: false, error: "Invalid input" };
- }
- 
- const { actionId } = parseResult.data;
+  const parseResult = ClaimActionSchema.safeParse({ actionId: rawActionId });
+  if (!parseResult.success) {
+    return { success: false, error: "Invalid input" };
+  }
+  
+  const { actionId } = parseResult.data;
 
- // Transaction to conditionally claim the action and audit it
- try {
- const result = await db.$transaction(async (tx) => {
- // 1. Check ownership and current status
- const action = await tx.revenueAction.findUnique({
- where: { id: actionId }
- });
- 
- if (!action) {
- throw new Error("NOT_FOUND");
- }
- if (action.organizationId !== organizationId) {
- throw new Error("FORBIDDEN");
- }
- if (action.status !== 'PENDING') {
- throw new Error("NOT_PENDING");
- }
- if (action.assignedUserId && action.assignedUserId !== userId) {
- throw new Error("ALREADY_CLAIMED");
- }
+  // Race-proof atomic conditional update within transaction
+  try {
+    const result = await db.$transaction(async (tx) => {
+      const updateResult = await tx.revenueAction.updateMany({
+        where: {
+          id: actionId,
+          organizationId: organizationId,
+          status: 'PENDING',
+          OR: [
+            { assignedUserId: null },
+            { assignedUserId: userId }
+          ]
+        },
+        data: {
+          assignedUserId: userId,
+          status: 'EXECUTING'
+        }
+      });
 
- // 2. Perform conditional update (state transition)
- const updatedAction = await tx.revenueAction.update({
- where: { id: actionId },
- data: {
- assignedUserId: userId,
- status: 'EXECUTING'
- }
- });
+      if (updateResult.count === 0) {
+        const existing = await tx.revenueAction.findUnique({ where: { id: actionId } });
+        if (!existing || existing.organizationId !== organizationId) throw new Error("NOT_FOUND");
+        if (existing.status !== 'PENDING') throw new Error("NOT_PENDING");
+        if (existing.assignedUserId && existing.assignedUserId !== userId) throw new Error("ALREADY_CLAIMED");
+        throw new Error("CLAIM_FAILED");
+      }
 
- // 3. Audit the consequential change
- await tx.auditLog.create({
- data: {
- action: "CLAIM_REVENUE_ACTION",
- resourceId: actionId,
- resourceType: "RevenueAction",
- organizationId: organizationId,
- actorId: userId,
- actorType: "USER",
- oldState: JSON.stringify({ status: action.status }),
- newState: JSON.stringify({ status: 'EXECUTING', originalRecommendedActor: action.recommendedActor })
- }
- });
+      const updatedAction = await tx.revenueAction.findUniqueOrThrow({
+        where: { id: actionId }
+      });
 
- return updatedAction;
- });
+      await tx.auditLog.create({
+        data: {
+          action: "CLAIM_REVENUE_ACTION",
+          resourceId: actionId,
+          resourceType: "RevenueAction",
+          organizationId: organizationId,
+          actorId: userId,
+          actorType: "USER",
+          oldState: JSON.stringify({ status: 'PENDING' }),
+          newState: JSON.stringify({ status: 'EXECUTING', originalRecommendedActor: updatedAction.recommendedActor })
+        }
+      });
 
- revalidatePath('/dashboard/revenue-engine');
- revalidatePath('/dashboard');
- return { success: true, data: result };
- 
- } catch (error: any) {
- const msg = error.message;
- if (msg === 'ALREADY_CLAIMED') return { success: false, error: "Another user has already claimed this action." };
- if (msg === 'NOT_PENDING') return { success: false, error: "This action is no longer pending." };
- if (msg === 'NOT_FOUND' || msg === 'FORBIDDEN') return { success: false, error: "Action not found." };
- 
- return { success: false, error: "Failed to claim action. Please try again." };
- }
+      return updatedAction;
+    });
+
+    revalidatePath('/dashboard/revenue-engine');
+    revalidatePath('/dashboard');
+    return { success: true, data: result };
+    
+  } catch (error: any) {
+    const msg = error.message;
+    if (msg === 'ALREADY_CLAIMED') return { success: false, error: "Another user has already claimed this action." };
+    if (msg === 'NOT_PENDING') return { success: false, error: "This action is no longer pending." };
+    if (msg === 'NOT_FOUND' || msg === 'FORBIDDEN') return { success: false, error: "Action not found." };
+    
+    return { success: false, error: "Failed to claim action. Please try again." };
+  }
 }
 
 export async function updateQualificationPolicy(policy: string, reprocessExisting: boolean = false) {
