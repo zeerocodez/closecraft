@@ -58,7 +58,7 @@ export default function SignupPage() {
         // Fallback to login page with success notification
         window.location.href = '/login?registered=true';
       } else {
-        window.location.href = '/dashboard';
+        window.location.href = '/onboarding';
       }
     } catch (err: any) {
       setErrorMessage('A network error occurred. Please try again.');

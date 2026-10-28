@@ -120,7 +120,9 @@ export default function LoginPage() {
       setFormError("Invalid email or password. Please verify your credentials or register a new workspace.");
       setIsLoading(false);
     } else {
-      window.location.href = '/billing';
+      const searchParams = new URLSearchParams(window.location.search);
+      const callback = searchParams.get('callbackUrl') || '/today';
+      window.location.href = callback;
     }
   };
 
