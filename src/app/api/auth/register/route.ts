@@ -88,12 +88,18 @@ export async function POST(req: Request) {
         }
       });
 
+      // Generate 6-digit email verification code (expires in 24 hours)
+      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+      const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
       const user = await tx.user.create({
         data: {
           email: cleanEmail,
           name: cleanName,
           passwordHash,
-          emailVerified: new Date(),
+          emailVerified: null, // Required email verification
+          emailVerificationCode: verificationCode,
+          emailVerificationExpiresAt: verificationExpiresAt,
           memberships: {
             create: {
               role: "ADMIN",
@@ -103,15 +109,23 @@ export async function POST(req: Request) {
         }
       });
 
-      return { user, org };
+      console.log(`\n=========================================`);
+      console.log(`[MOCK EMAIL SENT TO: ${cleanEmail}]`);
+      console.log(`Subject: Verify your Closecraft Workspace Email`);
+      console.log(`Your 6-digit verification code is: ${verificationCode}`);
+      console.log(`=========================================\n`);
+
+      return { user, org, verificationCode };
     });
 
     return NextResponse.json(
       {
         success: true,
-        message: "Workspace created successfully.",
+        message: "Workspace created successfully. Verification required.",
         userId: user.id,
-        organizationId: org.id
+        organizationId: org.id,
+        verificationRequired: true,
+        mockCode: process.env.NODE_ENV !== 'production' ? (user.emailVerificationCode || undefined) : undefined,
       },
       { status: 201 }
     );

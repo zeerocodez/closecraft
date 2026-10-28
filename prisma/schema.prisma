@@ -18,6 +18,8 @@ model User {
   role          String    @default("USER") // USER, OPERATOR, SUPER_ADMIN
   passwordHash  String?
   emailVerified DateTime?
+  emailVerificationCode String?
+  emailVerificationExpiresAt DateTime?
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

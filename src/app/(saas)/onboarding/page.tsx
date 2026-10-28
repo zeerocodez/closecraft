@@ -15,6 +15,33 @@ export default async function OnboardingPage() {
   const organizationId = (session as any).organizationId;
   if (!organizationId) redirect('/login');
 
+  // Enforce email verification
+  if (!(session.user as any)?.emailVerified) {
+    // Check database to ensure fresh state
+    const dbUser = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { emailVerified: true },
+    });
+    if (!dbUser?.emailVerified) {
+      redirect('/verify-email');
+    }
+  }
+
+  // Check member role: invited members enter their existing workspace directly
+  const member = await db.organizationMember.findFirst({
+    where: { userId: session.user.id, organizationId },
+    select: { role: true },
+  });
+
+  if (member?.role === 'EXTERNAL_PROFESSIONAL') {
+    redirect('/rep');
+  }
+
+  const isOwnerOrAdmin = member?.role === 'OWNER' || member?.role === 'ADMIN';
+  if (!isOwnerOrAdmin) {
+    redirect('/today');
+  }
+
   const org = await db.organization.findUnique({
     where: { id: organizationId },
     select: { id: true, name: true },

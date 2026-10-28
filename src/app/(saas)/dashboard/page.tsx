@@ -26,11 +26,34 @@ export default async function DashboardPage({ searchParams }: { searchParams: an
   });
 
   const userRole = member?.role || 'MEMBER';
-  if (userRole === 'CLOSER' || userRole === 'SETTER') {
+  if (userRole === 'CLOSER' || userRole === 'SETTER' || userRole === 'EXTERNAL_PROFESSIONAL') {
     redirect('/rep');
   }
   if (userRole === 'MANAGER') {
     redirect('/team');
+  }
+
+  // Enforce email verification
+  if (!(session.user as any)?.emailVerified) {
+    const dbUser = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { emailVerified: true },
+    });
+    if (!dbUser?.emailVerified) {
+      redirect('/verify-email');
+    }
+  }
+
+  // Business owner onboarding check: do not send a new owner directly to an empty dashboard
+  const isOwnerOrAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
+  if (isOwnerOrAdmin) {
+    const qual = await db.workspaceQualification.findFirst({
+      where: { organizationId },
+      orderBy: { createdAt: 'desc' }
+    });
+    if (!qual || qual.status === 'DRAFT') {
+      redirect('/onboarding');
+    }
   }
   
   const resolvedParams = searchParams ? await searchParams : {};

@@ -19,15 +19,20 @@ export default async function SettingsPage() {
  // Fetch organization details
  const [org, qualification] = await Promise.all([
     db.organization.findUnique({
- where: { id: organizationId },
- include: {
- members: {
- include: { user: true }
- }
- }
- });
+      where: { id: organizationId },
+      include: {
+        members: {
+          include: { user: true }
+        }
+      }
+    }),
+    db.workspaceQualification.findFirst({
+      where: { organizationId: organizationId },
+      orderBy: { createdAt: 'desc' }
+    })
+  ]);
 
- if (!org) {
+  if (!org) {
  return <div>Organization not found.</div>;
  }
 

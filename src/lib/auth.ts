@@ -56,6 +56,7 @@ authProviders.push(
         name: user.name,
         organizationId: primaryOrg?.id || null,
         organizationStatus: primaryOrg?.status || "PENDING",
+        emailVerified: user.emailVerified,
       };
     }
   })
@@ -154,12 +155,14 @@ export const {
         token.id = user.id;
         token.organizationId = (user as any).organizationId ?? null;
         token.organizationStatus = (user as any).organizationStatus ?? null;
+        token.emailVerified = (user as any).emailVerified ?? null;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.id as string;
+        (session.user as any).emailVerified = token.emailVerified ?? null;
         (session as any).organizationId = typeof token.organizationId === "string" ? token.organizationId : null;
         (session as any).organizationStatus = typeof token.organizationStatus === "string" ? token.organizationStatus : null;
       }

@@ -403,3 +403,26 @@ export async function overrideQualificationAction(data: {
   revalidatePath('/operator');
   return { success: true, qualification: updated };
 }
+
+/**
+ * Update essential workspace setup during step 1 of onboarding.
+ */
+export async function updateWorkspaceSetupAction(data: {
+  name: string;
+  currency?: string;
+}) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Authentication required.');
+  const organizationId = (session as any).organizationId;
+  if (!organizationId) throw new Error('Organization context missing.');
+
+  if (data.name && data.name.trim()) {
+    await db.organization.update({
+      where: { id: organizationId },
+      data: { name: data.name.trim() },
+    });
+  }
+
+  return { success: true };
+}
+

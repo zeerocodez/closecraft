@@ -23,6 +23,36 @@ export default async function TodayPage() {
 
   const userRole = member?.role || 'MEMBER';
 
+  if (userRole === 'EXTERNAL_PROFESSIONAL') {
+    redirect('/rep');
+  }
+
+  // Enforce email verification
+  if (!(session.user as any)?.emailVerified) {
+    const dbUser = await db.user.findUnique({
+      where: { id: session.user.id },
+      select: { emailVerified: true },
+    });
+    if (!dbUser?.emailVerified) {
+      redirect('/verify-email');
+    }
+  }
+
+  // Fetch qualification state if exists (optional profile update for established users)
+  const latestQualification = await db.workspaceQualification.findFirst({
+    where: { organizationId },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Automated onboarding for business owners:
+  // If owner/admin has neither completed nor explicitly skipped qualification, guide them to /onboarding
+  const isOwnerOrAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
+  if (isOwnerOrAdmin) {
+    if (!latestQualification || latestQualification.status === 'DRAFT') {
+      redirect('/onboarding');
+    }
+  }
+
   // Fetch today view data with strict tenant and role isolation
   const todayData = await getTodayViewData(organizationId, session.user.id, userRole);
 
@@ -39,12 +69,6 @@ export default async function TodayPage() {
     name: m.user?.name || m.user?.email || 'Team Member',
     role: m.role,
   }));
-
-  // Fetch qualification state if exists (optional profile update for established users)
-  const latestQualification = await db.workspaceQualification.findFirst({
-    where: { organizationId },
-    orderBy: { createdAt: 'desc' }
-  });
 
   return (
     <TodayViewClient

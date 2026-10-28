@@ -47,6 +47,10 @@ export default function SignupPage() {
         return;
       }
 
+      try {
+        sessionStorage.setItem('pendingVerificationEmail', email);
+      } catch {}
+
       // Automatically sign in the new user
       const loginRes = await signIn('credentials', {
         redirect: false,
@@ -58,7 +62,7 @@ export default function SignupPage() {
         // Fallback to login page with success notification
         window.location.href = '/login?registered=true';
       } else {
-        window.location.href = '/onboarding';
+        window.location.href = '/verify-email';
       }
     } catch (err: any) {
       setErrorMessage('A network error occurred. Please try again.');
