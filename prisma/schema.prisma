@@ -1189,13 +1189,13 @@ model WorkspaceSubscription {
   status                  String          @default("TRIALING") // TRIALING, ACTIVE, GRACE, EXPIRED, PILOT_INCLUDED
   trialStartedAt          DateTime        @default(now())
   trialEndsAt             DateTime
-  plan                    String          @default("STARTER") // STARTER (NGN 15,000/mo)
-  pricePerMonth           Float           @default(15000.0)
+  plan                    String          @default("STARTER") // STARTER (NGN 20,000/mo), PRO (NGN 45,000/mo)
+  pricePerMonth           Float           @default(20000.0)
   currency                String          @default("NGN")
   billingMode             String          @default("MANUAL_MONTHLY") // "Monthly, renew manually"
   paidThroughDate         DateTime?
   gracePeriodEndsAt       DateTime?       // 7-day grace period
-  maxInternalSeats        Int             @default(5)
+  maxInternalSeats        Int             @default(3)
   activePilotEngagementId String?
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt

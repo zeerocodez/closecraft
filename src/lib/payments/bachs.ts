@@ -17,6 +17,7 @@ export interface BachsCheckoutParams {
   invoiceId?: string;
   engagementId?: string;
   type: 'SOFTWARE_SUBSCRIPTION' | 'PILOT_ENGAGEMENT' | 'PERFORMANCE_FEE';
+  plan?: 'STARTER' | 'PRO';
   successUrl: string;
   cancelUrl: string;
   metadata?: Record<string, string>;
@@ -97,6 +98,7 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
       invoiceId: invoice.id,
       engagementId: params.engagementId || '',
       type: params.type,
+      plan: params.plan || (params.metadata as any)?.plan || 'STARTER',
       ...(params.metadata || {}),
     }
   };
@@ -287,6 +289,15 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
 
     // 2. Fulfill Software Subscription
     if (purchaseType === 'SOFTWARE_SUBSCRIPTION') {
+      let parsedMetadata: any = {};
+      try {
+        parsedMetadata = typeof invoice?.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice?.metadata || {});
+      } catch (_) {}
+
+      const targetPlan = (metadata.plan || parsedMetadata.plan || (invoice?.amount && invoice.amount >= 40000 ? 'PRO' : 'STARTER')).toUpperCase() === 'PRO' ? 'PRO' : 'STARTER';
+      const planPrice = targetPlan === 'PRO' ? 45000.0 : 20000.0;
+      const planSeats = targetPlan === 'PRO' ? 10 : 3;
+
       const sub = await db.workspaceSubscription.findUnique({
         where: { organizationId: targetOrgId }
       });
@@ -309,12 +320,18 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
         where: { organizationId: targetOrgId },
         update: {
           status: 'ACTIVE',
+          plan: targetPlan,
+          pricePerMonth: planPrice,
+          maxInternalSeats: planSeats,
           paidThroughDate: nextPaidThrough,
           gracePeriodEndsAt: gracePeriodEnd,
         },
         create: {
           organizationId: targetOrgId,
           status: 'ACTIVE',
+          plan: targetPlan,
+          pricePerMonth: planPrice,
+          maxInternalSeats: planSeats,
           trialStartedAt: now,
           trialEndsAt: now,
           paidThroughDate: nextPaidThrough,
@@ -324,7 +341,7 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
 
       await db.organization.update({
         where: { id: targetOrgId },
-        data: { plan: 'STARTER', status: 'APPROVED' }
+        data: { plan: targetPlan, status: 'APPROVED' }
       });
 
       await db.auditLog.create({

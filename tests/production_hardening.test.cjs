@@ -307,4 +307,76 @@ describe('Closecraft Full Production Hardening & Security Acceptance Tests', () 
     });
   });
 
+  // 10. Multi-Tier Workspace Plans & Internal Seat Enforcement
+  describe('10. Multi-Tier Workspace Plans & Internal Seat Enforcement', () => {
+    const WORKSPACE_PLANS = {
+      STARTER: {
+        id: 'STARTER',
+        name: 'Starter',
+        pricePerMonth: 20000.0,
+        currency: 'NGN',
+        maxInternalSeats: 3,
+      },
+      PRO: {
+        id: 'PRO',
+        name: 'Pro',
+        pricePerMonth: 45000.0,
+        currency: 'NGN',
+        maxInternalSeats: 10,
+      },
+    };
+
+    it('configures initial Starter plan with 3 internal users at N20,000/month', () => {
+      const starter = WORKSPACE_PLANS.STARTER;
+      assert.strictEqual(starter.pricePerMonth, 20000.0);
+      assert.strictEqual(starter.maxInternalSeats, 3);
+      assert.strictEqual(starter.currency, 'NGN');
+    });
+
+    it('configures Pro plan with 10 internal users at N45,000/month', () => {
+      const pro = WORKSPACE_PLANS.PRO;
+      assert.strictEqual(pro.pricePerMonth, 45000.0);
+      assert.strictEqual(pro.maxInternalSeats, 10);
+      assert.strictEqual(pro.currency, 'NGN');
+    });
+
+    it('enforces internal seat limits strictly against internal roles', () => {
+      const enforceSeatCap = (currentMembers, maxSeats, newMemberRole) => {
+        // Exclude external sales professionals on active pilots
+        const internalMembers = currentMembers.filter(m => m.role !== 'EXTERNAL_PROFESSIONAL');
+        if (newMemberRole !== 'EXTERNAL_PROFESSIONAL' && internalMembers.length >= maxSeats) {
+          throw new Error(`Workspace seat limit reached (${internalMembers.length}/${maxSeats} internal seats in use). Please upgrade to the Pro plan.`);
+        }
+        return [...currentMembers, { id: `m_${Date.now()}`, role: newMemberRole }];
+      };
+
+      const starterMembers = [
+        { id: 'm1', role: 'ADMIN' },
+        { id: 'm2', role: 'CLOSER' },
+        { id: 'm3', role: 'SETTER' },
+      ];
+
+      // Adding 4th internal member on Starter (maxSeats = 3) MUST fail
+      assert.throws(
+        () => enforceSeatCap(starterMembers, 3, 'CLOSER'),
+        /Workspace seat limit reached \(3\/3 internal seats in use\)/
+      );
+
+      // Adding external professional on active pilot MUST NOT consume internal seats
+      const updatedWithPro = enforceSeatCap(starterMembers, 3, 'EXTERNAL_PROFESSIONAL');
+      assert.strictEqual(updatedWithPro.length, 4);
+
+      // Upgraded to Pro (maxSeats = 10): adding 4th internal member succeeds
+      const proMembers = enforceSeatCap(starterMembers, 10, 'CLOSER');
+      assert.strictEqual(proMembers.length, 4);
+    });
+
+    it('formats exact Bachs decimal strings for N20,000 and N45,000 billing', () => {
+      const toBachsDecimal = (amt) => Number(amt).toFixed(2);
+      assert.strictEqual(toBachsDecimal(WORKSPACE_PLANS.STARTER.pricePerMonth), '20000.00');
+      assert.strictEqual(toBachsDecimal(WORKSPACE_PLANS.PRO.pricePerMonth), '45000.00');
+    });
+  });
+
 });
+

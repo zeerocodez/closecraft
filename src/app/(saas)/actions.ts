@@ -385,6 +385,23 @@ export async function addTenantTeamMember(data: { name: string; email: string; r
       data: { role: data.role, isAvailable: true }
     });
   } else {
+    // Check internal seat limit from workspace subscription
+    const { getOrCreateWorkspaceSubscription } = await import('@/lib/payments/subscription');
+    const sub = await getOrCreateWorkspaceSubscription(organizationId);
+
+    const internalCount = await db.organizationMember.count({
+      where: {
+        organizationId,
+        role: { not: 'EXTERNAL_PROFESSIONAL' },
+      }
+    });
+
+    if (internalCount >= sub.maxInternalSeats) {
+      throw new Error(
+        `Workspace seat limit reached (${internalCount}/${sub.maxInternalSeats} internal seats in use). Please upgrade to the Pro plan (10 seats) in Billing to add more team members.`
+      );
+    }
+
     await db.organizationMember.create({
       data: {
         userId: user.id,
@@ -1108,7 +1125,8 @@ export async function acceptPilotTermsAction(engagementId: string, termsText: st
 
 export async function createBachsCheckoutAction(params: {
   type: 'SOFTWARE_SUBSCRIPTION' | 'PILOT_ENGAGEMENT';
-  amount: number;
+  amount?: number;
+  plan?: 'STARTER' | 'PRO';
   currency?: string;
   engagementId?: string;
   successUrl: string;
@@ -1120,10 +1138,23 @@ export async function createBachsCheckoutAction(params: {
   if (!organizationId) throw new Error("Unauthorized");
 
   const { createBachsCheckoutSession } = await import('@/lib/payments/bachs');
+  const { WORKSPACE_PLANS } = await import('@/lib/payments/subscription');
+
+  let finalAmount = params.amount;
+  if (!finalAmount) {
+    if (params.type === 'SOFTWARE_SUBSCRIPTION') {
+      const selectedPlan = params.plan === 'PRO' ? WORKSPACE_PLANS.PRO : WORKSPACE_PLANS.STARTER;
+      finalAmount = selectedPlan.pricePerMonth;
+    } else {
+      finalAmount = 150000;
+    }
+  }
+
   const checkout = await createBachsCheckoutSession({
     organizationId,
     type: params.type,
-    amount: params.amount,
+    plan: params.plan,
+    amount: finalAmount,
     currency: params.currency || 'NGN',
     customerEmail: session.user.email || undefined,
     customerName: session.user.name || undefined,

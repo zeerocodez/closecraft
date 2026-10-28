@@ -922,31 +922,32 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col">
  <h3 className="font-medium font-bold text-lg text-on-surface">Starter Engine</h3>
  <div className="mt-4 mb-6">
- <span className="text-3xl font-bold">₦15,000</span>
+ <span className="text-3xl font-bold">₦20,000</span>
  <span className="text-on-surface-variant text-sm"> / month</span>
  </div>
  <ul className="space-y-3 mb-8 flex-1 text-sm text-on-surface-variant">
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Up to 500 leads/month</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Automated Email Nurture</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> <strong>3 Internal Team Seats</strong></li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Up to 1,000 leads/month</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Automated Follow-up Alerts</li>
  <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Basic Command Centre</li>
  </ul>
- <button onClick={openAudit} className="w-full py-2 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary-container transition-colors">Request Proposal</button>
+ <button onClick={openAudit} className="w-full py-2 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary-container transition-colors">Start 14-Day Trial</button>
  </div>
  
  <div className="bg-primary p-6 rounded-xl border border-primary text-on-primary shadow-md relative transform md:-translate-y-2 flex flex-col">
  <div className="absolute top-0 right-0 bg-accent text-ink text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">MOST POPULAR</div>
- <h3 className="font-medium font-bold text-lg text-on-primary">Growth Engine</h3>
+ <h3 className="font-medium font-bold text-lg text-on-primary">Pro Engine</h3>
  <div className="mt-4 mb-6">
- <span className="text-3xl font-bold">₦35,000</span>
+ <span className="text-3xl font-bold">₦45,000</span>
  <span className="text-primary-container text-sm"> / month</span>
  </div>
  <ul className="space-y-3 mb-8 flex-1 text-sm text-on-primary/90">
- <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Up to 2,500 leads/month</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Advanced AI Triage</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> <strong>10 Internal Team Seats</strong></li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Round-Robin Auto-Routing</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Advanced AI Triage & Coaching</li>
  <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> WhatsApp Gateway Integration</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Deal Pipeline Tracking</li>
  </ul>
- <button onClick={openAudit} className="w-full py-2 rounded-lg bg-accent text-ink font-bold hover:bg-[#b5f03d] transition-colors border border-transparent">Request Proposal</button>
+ <button onClick={openAudit} className="w-full py-2 rounded-lg bg-accent text-ink font-bold hover:bg-[#b5f03d] transition-colors border border-transparent">Start 14-Day Trial</button>
  </div>
 
  <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col">

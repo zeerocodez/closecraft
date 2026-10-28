@@ -1,5 +1,53 @@
 import { db } from '@/lib/db';
 
+export interface WorkspacePlanConfig {
+  id: 'STARTER' | 'PRO';
+  name: string;
+  pricePerMonth: number;
+  currency: string;
+  maxInternalSeats: number;
+  headline: string;
+  description: string;
+  features: string[];
+}
+
+export const WORKSPACE_PLANS: Record<'STARTER' | 'PRO', WorkspacePlanConfig> = {
+  STARTER: {
+    id: 'STARTER',
+    name: 'Starter',
+    pricePerMonth: 20000.0,
+    currency: 'NGN',
+    maxInternalSeats: 3,
+    headline: '3 Internal Seats · 14-Day Free Trial',
+    description: 'Designed for lean service businesses looking to capture enquiries and establish structured follow-up routines.',
+    features: [
+      'Up to 3 internal team seats',
+      '14-day free trial (no card required)',
+      'Enquiry inbox & lead assignment',
+      'Follow-up reminders & leakage radar',
+      'Bachs.io hosted checkout (cards, bank transfer, MoMo)',
+      'Add remote sales support pilots anytime',
+    ],
+  },
+  PRO: {
+    id: 'PRO',
+    name: 'Pro',
+    pricePerMonth: 45000.0,
+    currency: 'NGN',
+    maxInternalSeats: 10,
+    headline: '10 Internal Seats · High-Velocity Operations',
+    description: 'Built for growing sales organizations requiring multi-rep capacity, automated round-robin distribution, and manager coaching tools.',
+    features: [
+      'Up to 10 internal team seats',
+      'Round-robin and automated lead assignment',
+      'Manager call review & coaching queue',
+      'Revenue health analytics & leakage detection',
+      'Priority WhatsApp & email notification dispatch',
+      'Dedicated pilot onboarding assistance',
+    ],
+  },
+};
+
 export interface SubscriptionStatusInfo {
   status: 'TRIALING' | 'ACTIVE' | 'GRACE' | 'EXPIRED' | 'PILOT_INCLUDED';
   isOperational: boolean; // Can user perform operational CRM actions?
@@ -11,6 +59,8 @@ export interface SubscriptionStatusInfo {
   paidThroughDate: Date | null;
   gracePeriodEndsAt: Date | null;
   activePilotEngagementId: string | null;
+  maxInternalSeats: number;
+  internalSeatsUsed: number;
 }
 
 /**
@@ -40,9 +90,10 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
         trialStartedAt: now,
         trialEndsAt: trialEnd,
         plan: 'STARTER',
-        pricePerMonth: 15000.0,
+        pricePerMonth: 20000.0,
         currency: 'NGN',
         billingMode: 'MANUAL_MONTHLY',
+        maxInternalSeats: 3,
         activePilotEngagementId: activePilot ? activePilot.id : null,
       }
     });
@@ -99,6 +150,14 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
 
   const trialDaysLeft = Math.max(0, Math.ceil((sub.trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
 
+  // Count internal members (excluding external sales professionals on active pilots)
+  const internalSeatsUsed = await db.organizationMember.count({
+    where: {
+      organizationId,
+      role: { not: 'EXTERNAL_PROFESSIONAL' },
+    },
+  });
+
   return {
     status: effectiveStatus,
     isOperational,
@@ -110,6 +169,8 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
     paidThroughDate: sub.paidThroughDate,
     gracePeriodEndsAt: sub.gracePeriodEndsAt,
     activePilotEngagementId: sub.activePilotEngagementId,
+    maxInternalSeats: sub.maxInternalSeats || 3,
+    internalSeatsUsed,
   };
 }
 
