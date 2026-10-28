@@ -23,12 +23,15 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  memberships         OrganizationMember[]
-  studentProfile      StudentProfile?
-  professionalProfile ProfessionalProfile?
-  assignedLeads       Lead[]                    @relation("LeadAssignee")
-  closedDeals         Deal[]                    @relation("DealCloser")
-  appointments        Appointment[]             @relation("AppointmentCloser")
+  memberships               OrganizationMember[]
+  studentProfile            StudentProfile?
+  professionalProfile       ProfessionalProfile?
+  assignedLeads             Lead[]                    @relation("LeadAssignee")
+  closedDeals               Deal[]                    @relation("DealCloser")
+  appointments              Appointment[]             @relation("AppointmentCloser")
+  emergencySupportSessions  EmergencySupportAccess[]  @relation("EmergencyOperator")
+  sentInvites               WorkspaceInvite[]         @relation("InviteSender")
+  sessions                  UserSession[]
 }
 
 model Organization {
@@ -45,6 +48,9 @@ model Organization {
   // Relations
   members             OrganizationMember[]
   leads               Lead[]
+  contacts            Contact[]
+  opportunities       Opportunity[]
+  customStages        CustomPipelineStage[]
   conversations       Conversation[]
   appointments        Appointment[]
   aiActions           AiAction[]
@@ -63,6 +69,12 @@ model Organization {
   blockers            ClientBlocker[]
   operationalIssues   OperationalIssue[]
   bachsInvoices       BachsInvoice[]
+  invites             WorkspaceInvite[]
+  emergencyAccess     EmergencySupportAccess[]
+  servicePackages     ServicePackage[]
+  qualityReviews      CallQualityReview[]
+  attributedOpportunities AttributedOpportunity[]
+  outboxMessages      OutboxMessage[]
 
   // LMS Relations
   studentProfiles StudentProfile[]
@@ -129,10 +141,21 @@ model Lead {
   aiAssessment   String?      // Deep AI qualification breakdown & deal risk
   nextStepsRecommendation String? // Prescriptive coaching for setter/closer
 
+  contactId      String?
+  isArchived     Boolean      @default(false)
+  archivedAt     DateTime?
+  archiveReason  String?
+  mergedIntoLeadId String?
+  customStageId  String?
+
   // Relations
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assignedUser   User?         @relation("LeadAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
   pilotEngagement PilotEngagement? @relation(fields: [pilotEngagementId], references: [id], onDelete: SetNull)
+  contact        Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  customStage    CustomPipelineStage? @relation(fields: [customStageId], references: [id], onDelete: SetNull)
+  opportunities  Opportunity[]
+  qualityReviews CallQualityReview[]
   blockers       ClientBlocker[]
   conversations  Conversation[]
   appointments   Appointment[]
@@ -146,6 +169,8 @@ model Lead {
   revenueLeaks   RevenueLeak[]
 
   @@index([organizationId])
+  @@index([contactId])
+  @@index([isArchived])
   @@index([email])
   @@index([assignedUserId])
   @@index([pilotEngagementId])
@@ -261,11 +286,15 @@ model AuditLog {
   id             String       @id @default(cuid())
   actorId        String?
   actorType      String       // USER, AI, SYSTEM, INTEGRATION
+  actorRole      String?      // e.g. OWNER, OPERATOR, PLATFORM_ADMIN
+  actorIp        String?
   action         String
+  reason         String?      // Stated justification (required for emergency access or overrides)
   resourceType   String
   resourceId     String
   oldState       String?
   newState       String?
+  metadata       String?      // JSON contextual details
   createdAt      DateTime     @default(now())
 
   organizationId String
@@ -275,6 +304,7 @@ model AuditLog {
 
   @@index([organizationId])
   @@index([leadId])
+  @@index([action])
 }
 
 model FollowUpTask {
@@ -956,6 +986,7 @@ model ProfessionalProfile {
   clientReadiness          ClientOfferReadiness[]
   engagements              PilotEngagement[]
   payables                 ProfessionalPayable[]
+  qualityReviews           CallQualityReview[]
 }
 
 model ClientOfferReadiness {
@@ -1047,6 +1078,8 @@ model PilotEngagement {
   invoices                     BachsInvoice[]
   handovers                    PilotHandover[]
   payables                     ProfessionalPayable[]
+  qualityReviews               CallQualityReview[]
+  attributedOpportunities      AttributedOpportunity[]
 
   @@index([organizationId])
   @@index([professionalId])
@@ -1202,26 +1235,275 @@ model BachsInvoice {
 }
 
 model ProfessionalPayable {
-  id               String              @id @default(cuid())
-  engagementId     String
-  professionalId   String
-  amount           Float
-  currency         String              @default("NGN")
-  type             String              @default("FIXED_PILOT_COMPENSATION") // FIXED_PILOT_COMPENSATION, PERFORMANCE_SHARE
-  status           String              @default("EARNED") // EARNED, OPERATOR_APPROVED, PAID_OUT, SHORTFALL_REVIEW
-  approvedAt       DateTime?
-  approvedByUserId String?
-  payoutReference  String?
-  payoutDate       DateTime?
-  notes            String?
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
+  id                   String              @id @default(cuid())
+  engagementId         String
+  professionalId       String
+  amount               Float
+  currency             String              @default("NGN")
+  type                 String              @default("FIXED_PILOT_COMPENSATION") // FIXED_PILOT_COMPENSATION, PERFORMANCE_SHARE
+  status               String              @default("EARNED") // EARNED, AWAITING_REVIEW, OPERATOR_APPROVED, PAID_OUT, SHORTFALL_REVIEW, DISPUTED
+  approvedAt           DateTime?
+  approvedByUserId     String?
+  proposedByUserId     String?             // Maker
+  payoutApprovedByUserId String?           // Checker
+  makerCheckerVerified Boolean             @default(false)
+  disputeReason        String?
+  calculationBasis     String?             // JSON breakdown of hours/collections
+  payoutReference      String?
+  payoutDate           DateTime?
+  notes                String?
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
 
-  engagement       PilotEngagement     @relation(fields: [engagementId], references: [id], onDelete: Cascade)
-  professional     ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  engagement           PilotEngagement     @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  professional         ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
 
   @@index([engagementId])
   @@index([professionalId])
   @@index([status])
+}
+
+// -----------------------------------------------------------------------------
+// PRODUCTION FOUNDATION: IDENTITY, WORKSPACES & PERMISSIONS
+// -----------------------------------------------------------------------------
+
+model WorkspaceInvite {
+  id               String       @id @default(cuid())
+  organizationId   String
+  email            String
+  role             String       @default("INTERNAL_MEMBER") // OWNER, ADMIN, SALES_MANAGER, INTERNAL_MEMBER, EXTERNAL_PROFESSIONAL, READ_ONLY_REVIEWER
+  token            String       @unique
+  invitedByUserId  String
+  expiresAt        DateTime
+  acceptedAt       DateTime?
+  createdAt        DateTime     @default(now())
+
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedByUser    User         @relation("InviteSender", fields: [invitedByUserId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+}
+
+model EmergencySupportAccess {
+  id               String       @id @default(cuid())
+  organizationId   String
+  operatorUserId   String
+  reason           String       // Audited justification for emergency tenant access
+  expiresAt        DateTime     // Strictly time-bounded
+  revokedAt        DateTime?
+  active           Boolean      @default(true)
+  createdAt        DateTime     @default(now())
+
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  operatorUser     User         @relation("EmergencyOperator", fields: [operatorUserId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([operatorUserId])
+  @@index([active])
+}
+
+model UserSession {
+  id               String       @id @default(cuid())
+  userId           String
+  sessionToken     String       @unique
+  ipAddress        String?
+  userAgent        String?
+  revoked          Boolean      @default(false)
+  revokedAt        DateTime?
+  expiresAt        DateTime
+  createdAt        DateTime     @default(now())
+
+  user             User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([revoked])
+}
+
+// -----------------------------------------------------------------------------
+// PRODUCTION SALES OPERATIONS: CONTACTS, OPPORTUNITIES & STAGES
+// -----------------------------------------------------------------------------
+
+model Contact {
+  id                         String        @id @default(cuid())
+  organizationId             String
+  name                       String
+  email                      String?
+  phone                      String?
+  companyName                String?
+  jobTitle                   String?
+  communicationPreferences   String?       // JSON: preferredChannel, timezone, optOut
+  optOutOutreach             Boolean       @default(false)
+  source                     String?
+  isArchived                 Boolean       @default(false)
+  archivedAt                 DateTime?
+  archiveReason              String?
+  createdAt                  DateTime      @default(now())
+  updatedAt                  DateTime      @updatedAt
+
+  organization               Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leads                      Lead[]
+  opportunities              Opportunity[]
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([phone])
+}
+
+model Opportunity {
+  id                   String        @id @default(cuid())
+  organizationId       String
+  contactId            String?
+  leadId               String?
+  title                String
+  stage                String        @default("NEW") // Custom or system category
+  systemCategory       String        @default("INBOX") // INBOX, ACTIVE, QUALIFYING, PROPOSAL, WON, LOST
+  bookedAmount         Float         @default(0.0) // Agreed/booked value
+  verifiedCollections  Float         @default(0.0) // Confirmed collected revenue
+  currency             String        @default("NGN")
+  assignedUserId       String?
+  probability          Int           @default(20)
+  targetCloseDate      DateTime?
+  closedAt             DateTime?
+  lossReason           String?
+  isArchived           Boolean       @default(false)
+  archivedAt           DateTime?
+  archiveReason        String?
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
+
+  organization         Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  contact              Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  lead                 Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  attributions         AttributedOpportunity[]
+
+  @@index([organizationId])
+  @@index([contactId])
+  @@index([leadId])
+  @@index([stage])
+  @@index([isArchived])
+}
+
+model CustomPipelineStage {
+  id                   String        @id @default(cuid())
+  organizationId       String
+  name                 String
+  systemCategory       String        @default("ACTIVE") // INBOX, ACTIVE, QUALIFYING, PROPOSAL, WON, LOST
+  order                Int           @default(0)
+  color                String?
+  isDefault            Boolean       @default(false)
+  createdAt            DateTime      @default(now())
+
+  organization         Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  leads                Lead[]
+
+  @@index([organizationId])
+  @@index([order])
+}
+
+// -----------------------------------------------------------------------------
+// MANAGED SERVICES CATALOGUE & QUALITY REVIEWS
+// -----------------------------------------------------------------------------
+
+model ServicePackage {
+  id                        String        @id @default(cuid())
+  organizationId            String?       // null for platform standard template, or tenant customized
+  packageType               String        // ENQUIRY_RESPONSE, APPOINTMENT_SETTING, SALES_CLOSING, COMBINED_SALES_SUPPORT
+  title                     String
+  description               String
+  suitableCustomerSummary   String
+  activitiesIncluded        String        @default("[]") // JSON string array
+  activitiesExcluded        String        @default("[]") // JSON string array
+  capacityBasis             String        @default("HOURS") // HOURS, OPPORTUNITIES
+  defaultCapacity           Float         @default(40.0)
+  coverageHours             String        @default("9am - 5pm WAT")
+  responseExpectations      String        @default("Within 1 hour")
+  requiredClientInputs      String        @default("")
+  reviewCadence             String        @default("Weekly Friday review")
+  commercialModel           String        @default("FIXED_PLUS_MANAGEMENT")
+  defaultBasePrice          Float         @default(150000.0)
+  currency                  String        @default("NGN")
+  version                   Int           @default(1)
+  isActive                  Boolean       @default(true)
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+
+  organization              Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([packageType])
+}
+
+model CallQualityReview {
+  id                        String        @id @default(cuid())
+  organizationId            String
+  engagementId              String
+  professionalId            String
+  reviewerUserId            String
+  leadId                    String?
+  judgmentScore             Int           // 1-10
+  boundaryAdherenceScore    Int           // 1-10
+  recordCompletenessScore   Int           // 1-10
+  coachingNotes             String
+  customerSentiment         String?       // POSITIVE, NEUTRAL, CRITICAL
+  reviewedAt                DateTime      @default(now())
+
+  organization              Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  engagement                PilotEngagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  professional              ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  lead                      Lead?         @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([engagementId])
+  @@index([professionalId])
+}
+
+// -----------------------------------------------------------------------------
+// PERFORMANCE ATTRIBUTION & OUTBOX
+// -----------------------------------------------------------------------------
+
+model AttributedOpportunity {
+  id                         String        @id @default(cuid())
+  organizationId             String
+  engagementId               String
+  opportunityId              String
+  registeredAt               DateTime      @default(now())
+  priorClientContactDate     DateTime?
+  attributionWindowDays      Int           @default(30)
+  sharedContributionRate     Float         @default(1.0) // 1.0 = 100%, 0.5 = 50%
+  eligibleCollectionBasis    Float         @default(0.0)
+  verifiedCollectionAmount   Float         @default(0.0)
+  status                     String        @default("REGISTERED") // REGISTERED, ATTRIBUTED, DISQUALIFIED_PRIOR_CONTACT, EXPIRED, WON_ATTRIBUTED
+  disqualificationReason     String?
+  createdAt                  DateTime      @default(now())
+
+  organization               Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  engagement                 PilotEngagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  opportunity                Opportunity   @relation(fields: [opportunityId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([engagementId])
+  @@index([opportunityId])
+  @@index([status])
+}
+
+model OutboxMessage {
+  id                   String        @id @default(cuid())
+  organizationId       String?
+  topic                String        // e.g. "lead.created", "reminder.due", "payment.verified", "engagement.activated"
+  payload              String        // JSON string
+  status               String        @default("PENDING") // PENDING, PROCESSING, COMPLETED, FAILED, DEAD_LETTER
+  retryCount           Int           @default(0)
+  maxRetries           Int           @default(5)
+  nextRetryAt          DateTime?
+  errorMessage         String?
+  processedAt          DateTime?
+  createdAt            DateTime      @default(now())
+
+  organization         Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status, nextRetryAt])
+  @@index([topic])
 }
 
