@@ -13,12 +13,12 @@ function AuthStatusBanner() {
 
   if (error === 'Configuration') {
     return (
-      <div className="mb-5 p-3.5 rounded-lg bg-red-950/40 border border-red-500/40 text-left flex items-start gap-3">
-        <span className="material-symbols-outlined text-red-400 text-[20px] shrink-0 mt-0.5">error</span>
+      <div className="mb-5 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-left flex items-start gap-3">
+        <span className="material-symbols-outlined text-amber-400 text-[20px] shrink-0 mt-0.5">info</span>
         <div className="text-xs space-y-1">
-          <p className="font-semibold text-red-200">OAuth Configuration Error</p>
+          <p className="font-semibold text-amber-200">Local Development Note</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
-            Server OAuth credentials are not properly set up in Vercel environment variables. Please ensure <code className="text-red-300 font-mono text-[10px] bg-red-900/60 px-1 py-0.5 rounded">AUTH_SECRET</code>, <code className="text-red-300 font-mono text-[10px] bg-red-900/60 px-1 py-0.5 rounded">AUTH_GOOGLE_ID</code>, and <code className="text-red-300 font-mono text-[10px] bg-red-900/60 px-1 py-0.5 rounded">AUTH_GOOGLE_SECRET</code> are configured in your Vercel Project Settings.
+            Google OAuth requires Google Cloud credentials in production. In local development, please sign in using the <strong>Operator Authentication</strong> form below with the pre-filled demo account.
           </p>
         </div>
       </div>
@@ -93,22 +93,26 @@ function AuthStatusBanner() {
 }
 
 export default function LoginPage() {
+  const [email, setEmail] = useState('sarah.jenkins@acmeops.com');
+  const [password, setPassword] = useState('password123');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+
+  const handleFillDemo = (demoEmail: string, demoPass: string) => {
+    setEmail(demoEmail);
+    setPassword(demoPass);
+    setFormError(null);
+  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setFormError(null);
     
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-
     const res = await signIn('credentials', {
       redirect: false,
-      email,
+      email: email.trim().toLowerCase(),
       password,
     });
 
@@ -116,7 +120,7 @@ export default function LoginPage() {
       setFormError("Invalid email or password. Please verify your credentials or register a new workspace.");
       setIsLoading(false);
     } else {
-      window.location.href = '/dashboard';
+      window.location.href = '/billing';
     }
   };
 
@@ -191,6 +195,8 @@ export default function LoginPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" 
                   id="work-email" 
                   name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="sarah.jenkins@acmeops.com" 
                   required 
                   type="email"
@@ -209,6 +215,8 @@ export default function LoginPage() {
                   className="w-full h-11 pl-10 pr-11 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" 
                   id="password-input"
                   name="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••" 
                   required 
                   type={showPassword ? "text" : "password"}
@@ -222,6 +230,20 @@ export default function LoginPage() {
                   <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
                 </button>
               </div>
+            </div>
+
+            {/* Quick Demo Pill */}
+            <div className="p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 flex items-center justify-between text-xs">
+              <span className="text-on-surface-variant text-[11px]">
+                Demo Account: <strong className="text-on-surface">sarah.jenkins@acmeops.com</strong>
+              </span>
+              <button
+                type="button"
+                onClick={() => handleFillDemo('sarah.jenkins@acmeops.com', 'password123')}
+                className="text-primary hover:underline font-semibold text-[11px]"
+              >
+                Autofill
+              </button>
             </div>
 
             <div className="flex items-center justify-between pt-1">
@@ -263,7 +285,9 @@ export default function LoginPage() {
             <button 
               className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm" 
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
+              onClick={() => {
+                setFormError("Google Workspace SSO requires Google Cloud Client credentials. Please use the Operator Authentication form above with the pre-filled demo account.");
+              }}
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
@@ -273,7 +297,13 @@ export default function LoginPage() {
               </svg>
               <span>Google Workspace</span>
             </button>
-            <button className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm" type="button">
+            <button 
+              className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm" 
+              type="button"
+              onClick={() => {
+                setFormError("Microsoft Azure AD requires enterprise directory credentials. Please use the Operator Authentication form above with the pre-filled demo account.");
+              }}
+            >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 23 23">
                 <path d="M1 1h10v10H1z" fill="#f35325"></path>
                 <path d="M12 1h10v10H12z" fill="#81bc06"></path>
