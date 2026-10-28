@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import LoopGuide from "@/components/guide/LoopGuide";
+import CookieConsent from "@/components/layout/CookieConsent";
 import "./globals.css";
 
 const inter = Inter({
@@ -24,8 +25,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
- title: "Closecraft | Learn to Close. Get Paid to Close.",
- description: "Sales closer training and placement for the remote economy.",
+ title: "Closecraft | Know Who Is Following Up",
+ description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
 };
 
 export default function RootLayout({
@@ -47,6 +48,7 @@ export default function RootLayout({
  >
  {children}
  <LoopGuide />
+ <CookieConsent />
  </body>
  </html>
  );

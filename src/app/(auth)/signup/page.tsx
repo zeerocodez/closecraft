@@ -232,19 +232,30 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Terms checkbox */}
-            <div className="pt-1">
+            {/* Terms of Service & Privacy Notice checkboxes */}
+            <div className="space-y-3 pt-1">
               <label className="flex items-start gap-2 cursor-pointer select-none">
                 <input 
                   className="w-4 h-4 mt-0.5 rounded bg-surface-container-high text-primary focus:ring-0 focus:outline-none cursor-pointer" 
                   id="terms" 
                   name="terms" 
                   type="checkbox" 
-                  defaultChecked 
                   required 
                 />
                 <span className="text-xs text-on-surface-variant leading-relaxed">
-                  I agree to the <Link href="/#terms" className="text-primary hover:underline">Terms of Service</Link> and <Link href="/#privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+                  I agree to the <Link href="/terms" target="_blank" className="text-primary hover:underline font-semibold">Terms of Service</Link> and have read the <Link href="/privacy" target="_blank" className="text-primary hover:underline font-semibold">Privacy Notice</Link>.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-2 cursor-pointer select-none">
+                <input 
+                  className="w-4 h-4 mt-0.5 rounded bg-surface-container-high text-primary focus:ring-0 focus:outline-none cursor-pointer" 
+                  id="marketingConsent" 
+                  name="marketingConsent" 
+                  type="checkbox" 
+                />
+                <span className="text-xs text-on-surface-variant leading-relaxed">
+                  I agree to receive occasional Closecraft product updates and follow-up playbooks (optional).
                 </span>
               </label>
             </div>
