@@ -92,10 +92,11 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     );
   }
 
-  // Standard Business Navigation (Section 7: Today, Enquiries, Sales support, Team, Billing, Settings)
+  // Standard Business Navigation (Section 7: Today, Enquiries, Qualification, Sales support, Team, Billing, Settings)
   const navItems = [
     { href: '/today', icon: 'Clock', label: 'Today', exact: true },
     { href: '/leads', icon: 'Users', label: 'Enquiries' },
+    { href: '/onboarding', icon: 'Compass', label: 'Qualification' },
     { href: '/sales-support', icon: 'HeartHandshake', label: 'Sales Support' },
     { href: '/team', icon: 'UserCheck', label: 'Team' },
     { href: '/billing', icon: 'CreditCard', label: 'Billing' },

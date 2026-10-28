@@ -29,6 +29,14 @@ export default function WorkspaceHeader({ user, onMenuClick, isMobile }: { user:
       </div>
       <div className="flex items-center gap-3 sm:gap-4">
         <Link 
+          href="/onboarding" 
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary/25 text-primary text-xs font-bold transition-all border border-primary/30 shadow-sm"
+          title="Workspace Onboarding & Qualification Wizard"
+        >
+          <Icon name="Compass" size={15} />
+          <span>Qualification</span>
+        </Link>
+        <Link 
           href="/dss" 
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#248277]/15 hover:bg-[#248277]/25 text-[#45bfae] text-xs font-bold transition-all border border-[#248277]/30"
           title="Digital Sales School Academy"

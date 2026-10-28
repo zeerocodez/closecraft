@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
@@ -16,7 +17,8 @@ export default async function SettingsPage() {
  }
 
  // Fetch organization details
- const org = await db.organization.findUnique({
+ const [org, qualification] = await Promise.all([
+    db.organization.findUnique({
  where: { id: organizationId },
  include: {
  members: {
@@ -72,7 +74,41 @@ export default async function SettingsPage() {
  </div>
  </section>
 
- {/* AI Engine Configuration */}
+ {/* Workspace Qualification Profile */}
+        <section className="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="material-symbols-outlined text-primary text-[20px]">explore</span>
+                <h2 className="font-headline-md text-headline-md font-bold text-on-surface">Onboarding & Qualification Profile</h2>
+              </div>
+              <p className="text-sm text-on-surface-variant max-w-xl">
+                Assess your enquiry volume, identify follow-up bottlenecks, and determine if software self-service or managed sales support is recommended.
+              </p>
+              {qualification ? (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="px-2.5 py-1 bg-primary/20 text-primary border border-primary/30 rounded-full text-xs font-semibold">
+                    Fit: {qualification.softwareFit ? qualification.softwareFit.replace(/_/g, ' ') : 'Assessed'}
+                  </span>
+                  <span className="px-2.5 py-1 bg-surface-container text-on-surface-variant rounded-full text-xs font-mono">
+                    Status: {qualification.status} ({new Date(qualification.createdAt).toLocaleDateString()})
+                  </span>
+                </div>
+              ) : (
+                <p className="mt-2 text-xs text-amber-500 font-medium">No qualification completed yet. Run the wizard to personalize your setup.</p>
+              )}
+            </div>
+            <Link
+              href="/onboarding"
+              className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5 self-start sm:self-auto shrink-0"
+            >
+              <span>{qualification ? 'Update Qualification' : 'Start Qualification'}</span>
+              <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+            </Link>
+          </div>
+        </section>
+
+        {/* AI Engine Configuration */}
  <section className="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container overflow-hidden">
  <div className="p-6 border-b border-surface-container bg-surface-container-low/30">
  <h2 className="font-medium text-lg font-bold text-on-surface">AI Engine Configuration</h2>
