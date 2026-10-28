@@ -42,7 +42,10 @@ export default function BillingReturnPage() {
         }
 
         const idToQuery = invoiceIdParam || checkoutIdParam;
-        const res = await fetch(`/api/billing/invoices/${idToQuery}/status`);
+        let res = await fetch(`/api/billing/invoices/${idToQuery}/status`);
+        if (!res.ok) {
+          res = await fetch(`/api/billing/invoices/status?id=${idToQuery}&invoice_id=${invoiceIdParam || ''}&checkout_id=${checkoutIdParam || ''}`);
+        }
 
         if (!res.ok) {
           if (res.status === 404) {

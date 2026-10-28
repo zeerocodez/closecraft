@@ -4,7 +4,7 @@ import { db } from '@/lib/db';
 
 export async function GET(
   req: Request,
-  { params }: { params: Promise<{ id: string }> }
+  props: { params?: Promise<{ id: string }> | { id: string } }
 ) {
   try {
     const session = await auth();
@@ -12,13 +12,17 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
     }
 
-    const { id } = await params;
-    if (!id) {
+    const resolvedParams = props.params ? await Promise.resolve(props.params) : null;
+    const url = new URL(req.url);
+    const queryId = url.searchParams.get('id') || url.searchParams.get('invoice_id') || url.searchParams.get('checkout_id');
+    const targetId = resolvedParams?.id || queryId;
+
+    if (!targetId) {
       return NextResponse.json({ error: 'Invoice ID is required' }, { status: 400 });
     }
 
-    const invoice = await db.bachsInvoice.findUnique({
-      where: { id },
+    let invoice = await db.bachsInvoice.findUnique({
+      where: { id: targetId },
       include: {
         organization: {
           select: {
@@ -34,6 +38,32 @@ export async function GET(
         }
       }
     });
+
+    if (!invoice) {
+      invoice = await db.bachsInvoice.findFirst({
+        where: {
+          OR: [
+            { bachsCheckoutId: targetId },
+            { invoiceNumber: targetId },
+            { id: targetId }
+          ]
+        },
+        include: {
+          organization: {
+            select: {
+              id: true,
+              name: true,
+              subscription: {
+                select: {
+                  status: true,
+                  paidThroughDate: true,
+                }
+              }
+            }
+          }
+        }
+      });
+    }
 
     if (!invoice) {
       return NextResponse.json({ error: 'Invoice not found' }, { status: 404 });
@@ -71,7 +101,7 @@ export async function GET(
     }, { status: 200 });
 
   } catch (error: any) {
-    console.error('[API /api/billing/invoices/[id]/status] Error fetching status:', error);
+    console.error('[API invoice status] Error fetching status:', error);
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
