@@ -27,6 +27,15 @@ export async function POST(req: Request) {
 
     const result = await processBachsWebhookEvent(payload);
 
+    if (!result.handled && result.error) {
+      return NextResponse.json({
+        received: true,
+        handled: false,
+        error: result.error,
+        details: result.details,
+      }, { status: 400 });
+    }
+
     return NextResponse.json({
       received: true,
       result

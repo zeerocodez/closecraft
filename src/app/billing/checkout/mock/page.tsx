@@ -49,11 +49,7 @@ async function simulatePaymentAction(formData: FormData) {
   // Process event idempotently through official payment processor
   await processBachsWebhookEvent(mockWebhookEvent);
 
-  if (invoice.type === 'MANAGED_PILOT' && invoice.engagementId) {
-    redirect(`/sales-support?payment=success&invoice=${invoice.invoiceNumber}`);
-  } else {
-    redirect(`/billing?payment=success&invoice=${invoice.invoiceNumber}`);
-  }
+  redirect(`/billing/return?invoice_id=${invoice.id}&checkout_id=${invoice.bachsCheckoutId || `chk_${invoice.id}`}`);
 }
 
 export default async function MockCheckoutPage({

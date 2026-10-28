@@ -8,7 +8,7 @@ const BACHS_API_BASE = process.env.BACHS_API_BASE || (
 );
 
 export interface BachsCheckoutParams {
-  amount: number; // e.g. 15000 or 150000
+  amount?: number; // e.g. 15000 or 150000
   currency?: string; // e.g. 'NGN'
   customerEmail?: string;
   customerName?: string;
@@ -16,7 +16,7 @@ export interface BachsCheckoutParams {
   organizationId: string;
   invoiceId?: string;
   engagementId?: string;
-  type: 'SOFTWARE_SUBSCRIPTION' | 'PILOT_ENGAGEMENT' | 'PERFORMANCE_FEE';
+  type?: 'SOFTWARE_SUBSCRIPTION' | 'WORKSPACE_INVOICE' | 'PILOT_ENGAGEMENT' | 'PERFORMANCE_FEE';
   plan?: 'STARTER' | 'PRO';
   successUrl: string;
   cancelUrl: string;
@@ -28,39 +28,72 @@ export interface BachsCheckoutResult {
   checkoutUrl: string;
   status: string;
   invoiceNumber: string;
+  invoiceId: string;
 }
 
 /**
  * Creates a Bachs hosted checkout session.
- * Official convention: Money is always a decimal string at the currency's precision ("15000.00").
+ * Official convention: Money is always an exact decimal string at the currency's precision ("15000.00").
+ * Raw pricing checkout uses { pricing: { currency: "NGN", amount: "15000.00" } }.
  * Never use minor units for Bachs.
  */
 export async function createBachsCheckoutSession(params: BachsCheckoutParams): Promise<BachsCheckoutResult> {
   const apiKey = process.env.BACHS_SECRET_KEY || process.env.BACHS_API_KEY;
-  const currency = params.currency || 'NGN';
-  const decimalAmount = params.amount.toFixed(2);
-  const invoiceNumber = `INV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-  // Find or create BachsInvoice record server-side first
-  const invoice = await db.bachsInvoice.create({
-    data: {
-      organizationId: params.organizationId,
-      engagementId: params.engagementId || null,
-      invoiceNumber,
-      type: params.type,
-      amount: params.amount,
-      currency,
-      status: 'ISSUED',
-      customerEmail: params.customerEmail || null,
-      customerName: params.customerName || null,
-      metadata: JSON.stringify(params.metadata || {}),
+  let invoice: any = null;
+
+  if (params.invoiceId) {
+    invoice = await db.bachsInvoice.findUnique({
+      where: { id: params.invoiceId }
+    });
+
+    if (!invoice) {
+      throw new Error(`Invoice with ID ${params.invoiceId} not found`);
     }
-  });
+
+    if (invoice.organizationId !== params.organizationId) {
+      throw new Error("Unauthorized: Invoice does not belong to this organization");
+    }
+
+    if (['PAID', 'CONFIRMED', 'FUNDS_AVAILABLE'].includes(invoice.status)) {
+      throw new Error(`Invoice ${invoice.invoiceNumber} is already paid`);
+    }
+  } else {
+    // Derive amount and currency server-side
+    const baseAmount = params.amount ?? 15000.0;
+    const currency = params.currency || 'NGN';
+    const invoiceNumber = `INV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    invoice = await db.bachsInvoice.create({
+      data: {
+        organizationId: params.organizationId,
+        engagementId: params.engagementId || null,
+        invoiceNumber,
+        type: params.type || 'WORKSPACE_INVOICE',
+        amount: baseAmount,
+        currency,
+        status: 'APPROVED',
+        customerEmail: params.customerEmail || null,
+        customerName: params.customerName || null,
+        metadata: JSON.stringify(params.metadata || {}),
+      }
+    });
+  }
+
+  // Derive amount and currency strictly server-side from invoice record
+  const finalAmount = invoice.amount;
+  const currency = invoice.currency || 'NGN';
+  const decimalAmount = finalAmount.toFixed(2);
+  const idempotencyKey = `checkout-${invoice.id}-${Date.now()}`;
+
+  const resolvedSuccessUrl = params.successUrl.includes('?')
+    ? `${params.successUrl}&checkout_id={CHECKOUT_ID}&invoice_id=${invoice.id}`
+    : `${params.successUrl}?checkout_id={CHECKOUT_ID}&invoice_id=${invoice.id}`;
 
   if (!apiKey) {
-    // If Bachs API key is not yet configured in environment, provide sandbox simulated hosted URL
-    const simulatedCheckoutId = `chk_mock_${invoice.id}`;
-    const simulatedCheckoutUrl = `/billing/checkout/mock?checkout_id=${simulatedCheckoutId}&invoice_id=${invoice.id}&amount=${params.amount}&currency=${currency}`;
+    // If Bachs API key is not yet configured, provide simulated sandbox checkout
+    const simulatedCheckoutId = `chk_mock_${invoice.id}_${Date.now()}`;
+    const simulatedCheckoutUrl = `/billing/checkout/mock?checkout_id=${simulatedCheckoutId}&invoice_id=${invoice.id}&amount=${decimalAmount}&currency=${currency}`;
 
     await db.bachsInvoice.update({
       where: { id: invoice.id },
@@ -70,15 +103,31 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
       }
     });
 
+    await db.paymentAttempt.create({
+      data: {
+        invoiceId: invoice.id,
+        organizationId: invoice.organizationId,
+        checkoutId: simulatedCheckoutId,
+        idempotencyKey,
+        amount: finalAmount,
+        currency,
+        status: 'PENDING',
+        provider: 'BACHS',
+        rawResponse: JSON.stringify({ checkout_id: simulatedCheckoutId, simulated: true }),
+      }
+    });
+
     return {
       checkoutId: simulatedCheckoutId,
       checkoutUrl: simulatedCheckoutUrl,
       status: 'open',
-      invoiceNumber,
+      invoiceNumber: invoice.invoiceNumber,
+      invoiceId: invoice.id,
     };
   }
 
-  const payload: any = {
+  // Raw pricing checkout payload adhering strictly to Bachs specification
+  const payload = {
     pricing: {
       currency,
       amount: decimalAmount,
@@ -88,16 +137,14 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
       name: params.customerName || undefined,
       phone_number: params.customerPhone || undefined,
     } : undefined,
-    success_url: params.successUrl.includes('?') 
-      ? `${params.successUrl}&invoice_id=${invoice.id}`
-      : `${params.successUrl}?invoice_id=${invoice.id}`,
+    success_url: resolvedSuccessUrl,
     cancel_url: params.cancelUrl,
     reference: invoice.invoiceNumber,
     metadata: {
-      organizationId: params.organizationId,
+      organizationId: invoice.organizationId,
       invoiceId: invoice.id,
-      engagementId: params.engagementId || '',
-      type: params.type,
+      engagementId: invoice.engagementId || '',
+      type: invoice.type,
       plan: params.plan || (params.metadata as any)?.plan || 'STARTER',
       ...(params.metadata || {}),
     }
@@ -108,7 +155,7 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
     headers: {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
-      'Idempotency-Key': `chk-${invoice.id}`,
+      'Idempotency-Key': idempotencyKey,
     },
     body: JSON.stringify(payload),
   });
@@ -123,6 +170,7 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
   const checkoutId = data.checkout_id || data.id;
   const checkoutUrl = data.checkout_url || data.url;
 
+  // Persist checkout_id and checkout_url on invoice
   await db.bachsInvoice.update({
     where: { id: invoice.id },
     data: {
@@ -131,17 +179,34 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
     }
   });
 
+  // Record payment attempt
+  await db.paymentAttempt.create({
+    data: {
+      invoiceId: invoice.id,
+      organizationId: invoice.organizationId,
+      checkoutId,
+      idempotencyKey,
+      amount: finalAmount,
+      currency,
+      status: 'PENDING',
+      provider: 'BACHS',
+      rawResponse: JSON.stringify(data),
+    }
+  });
+
   return {
     checkoutId,
     checkoutUrl,
     status: data.status || 'open',
-    invoiceNumber,
+    invoiceNumber: invoice.invoiceNumber,
+    invoiceId: invoice.id,
   };
 }
 
 /**
  * Verifies Bachs webhook authenticity.
  * Checks X-Bachs-Signature-V2 (t={timestamp},v1={sig}) or X-Bachs-Signature + X-Bachs-Timestamp.
+ * Supports webhook-signature and webhook-timestamp header conventions.
  * Uses raw request body HMAC-SHA256 with 300s replay tolerance.
  */
 export function verifyBachsWebhookSignature(
@@ -163,11 +228,10 @@ export function verifyBachsWebhookSignature(
   };
 
   const v2Header = getHeader('X-Bachs-Signature-V2') || getHeader('x-bachs-signature-v2');
-  const sigHeader = getHeader('X-Bachs-Signature') || getHeader('x-bachs-signature');
-  const timestampHeader = getHeader('X-Bachs-Timestamp') || getHeader('x-bachs-timestamp');
+  const sigHeader = getHeader('X-Bachs-Signature') || getHeader('x-bachs-signature') || getHeader('webhook-signature');
+  const timestampHeader = getHeader('X-Bachs-Timestamp') || getHeader('x-bachs-timestamp') || getHeader('webhook-timestamp');
 
   if (v2Header) {
-    // Parse scheme t=..., v1=...
     const parts = v2Header.split(',').map(p => p.trim());
     let timestamp: number | null = null;
     const signatures: string[] = [];
@@ -203,9 +267,13 @@ export function verifyBachsWebhookSignature(
 
   if (sigHeader && timestampHeader) {
     const timestamp = parseInt(timestampHeader, 10);
+    if (isNaN(timestamp)) {
+      return { isValid: false, error: 'Invalid timestamp format' };
+    }
+
     const nowSeconds = Math.floor(Date.now() / 1000);
     if (Math.abs(nowSeconds - timestamp) > toleranceSeconds) {
-      return { isValid: false, error: 'Webhook timestamp outside tolerance window' };
+      return { isValid: false, error: 'Webhook timestamp outside tolerance window (replay protection)' };
     }
 
     const message = `${timestamp}.${rawBody}`;
@@ -219,33 +287,61 @@ export function verifyBachsWebhookSignature(
     }
   }
 
+  // Also support single hex signature if only sigHeader is supplied without timestamp header
+  if (sigHeader && !timestampHeader) {
+    const expected = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('hex');
+    try {
+      const match = crypto.timingSafeEqual(Buffer.from(sigHeader, 'hex'), Buffer.from(expected, 'hex'));
+      return { isValid: match, error: match ? undefined : 'Signature mismatch' };
+    } catch {
+      return { isValid: false, error: 'Invalid signature encoding' };
+    }
+  }
+
   return { isValid: false, error: 'Missing Bachs signature headers' };
 }
 
 /**
  * Idempotently handles Bachs webhook events.
- * Event types:
- * - collection.succeeded: Payment verified
- * - checkout.completed: Checkout session finished
- * - customer.subscription.created / updated / deleted
- * - invoice.paid
+ * Double-level idempotency:
+ * 1. Event-level: ignores duplicate webhook event IDs (WebhookEvent table)
+ * 2. Invoice-level: does not re-process already fulfilled invoices
+ * Entitlement is granted strictly via invoice-to-workspace relationship (never merely payer email).
  */
-export async function processBachsWebhookEvent(event: any): Promise<{ handled: boolean; details?: string }> {
+export async function processBachsWebhookEvent(event: any): Promise<{
+  handled: boolean;
+  duplicate?: boolean;
+  alreadyFulfilled?: boolean;
+  details?: string;
+  error?: string;
+}> {
+  const eventId = event.id;
   const eventType = event.type || event.event;
   const eventData = event.data || {};
   const metadata = eventData.metadata || event.metadata || {};
 
-  console.log(`[Bachs Webhook] Processing event: ${eventType}, ID: ${event.id || 'N/A'}`);
+  console.log(`[Bachs Webhook] Processing event: ${eventType}, ID: ${eventId || 'N/A'}`);
 
+  // Level 1: Event-level idempotency
+  if (eventId) {
+    const existingEvent = await db.webhookEvent.findUnique({
+      where: { eventId }
+    });
+    if (existingEvent) {
+      console.log(`[Bachs Webhook] Event ${eventId} already processed, skipping`);
+      return { handled: true, duplicate: true, details: `Event ${eventId} already processed` };
+    }
+  }
+
+  // Fulfill on collection.succeeded or equivalent successful payment events
   if (eventType === 'collection.succeeded' || eventType === 'invoice.paid' || eventType === 'checkout.completed') {
     const checkoutId = eventData.checkout_id || eventData.id;
-    const chargeId = eventData.charge_id || eventData.payment_id;
-    const organizationId = metadata.organizationId || eventData.organization_id;
+    const chargeId = eventData.charge_id || eventData.payment_id || eventData.id;
     const invoiceId = metadata.invoiceId;
     const engagementId = metadata.engagementId;
-    const purchaseType = metadata.type || 'SOFTWARE_SUBSCRIPTION';
+    const purchaseType = metadata.type || 'WORKSPACE_INVOICE';
 
-    // Find invoice by checkoutId, id, or reference
+    // Find invoice by invoiceId or checkoutId
     let invoice = null;
     if (invoiceId) {
       invoice = await db.bachsInvoice.findUnique({ where: { id: invoiceId } });
@@ -261,40 +357,77 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
       });
     }
 
-    // Idempotency: If invoice already CONFIRMED or FUNDS_AVAILABLE, avoid duplicate activation
-    if (invoice && (invoice.status === 'CONFIRMED' || invoice.status === 'FUNDS_AVAILABLE')) {
-      return { handled: true, details: `Invoice ${invoice.invoiceNumber} already marked as confirmed` };
+    if (!invoice) {
+      console.warn(`[Bachs Webhook] No invoice found for checkout_id=${checkoutId}, invoiceId=${invoiceId}`);
+      return { handled: false, details: 'Invoice not found' };
     }
 
-    const targetOrgId = invoice?.organizationId || organizationId;
-    if (!targetOrgId) {
-      console.warn('[Bachs Webhook] No organizationId associated with payment event');
-      return { handled: false, details: 'Missing organization reference' };
+    // Level 2: Invoice-level idempotency
+    if (['PAID', 'CONFIRMED', 'FUNDS_AVAILABLE'].includes(invoice.status)) {
+      console.log(`[Bachs Webhook] Invoice ${invoice.invoiceNumber} is already fulfilled`);
+      // Record event so subsequent retries are recognized as duplicates
+      if (eventId) {
+        await db.webhookEvent.create({
+          data: {
+            eventId,
+            provider: 'BACHS',
+            eventType,
+            status: 'PROCESSED',
+            payload: JSON.stringify(event),
+          }
+        }).catch(() => {});
+      }
+      return { handled: true, alreadyFulfilled: true, details: `Invoice ${invoice.invoiceNumber} already marked as paid` };
     }
 
+    // Verify expected amount and currency
+    if (eventData.amount !== undefined && eventData.amount !== null) {
+      const payloadAmount = parseFloat(eventData.amount);
+      if (!isNaN(payloadAmount) && Math.abs(payloadAmount - invoice.amount) > 0.01) {
+        console.error(`[Bachs Webhook] Amount mismatch: expected ${invoice.amount}, received ${payloadAmount}`);
+        return { handled: false, error: `Amount mismatch: expected ${invoice.amount}, got ${payloadAmount}` };
+      }
+    }
+
+    if (eventData.currency) {
+      const payloadCurrency = String(eventData.currency).toUpperCase();
+      if (payloadCurrency !== invoice.currency.toUpperCase()) {
+        console.error(`[Bachs Webhook] Currency mismatch: expected ${invoice.currency}, received ${payloadCurrency}`);
+        return { handled: false, error: `Currency mismatch: expected ${invoice.currency}, got ${payloadCurrency}` };
+      }
+    }
+
+    // Entitlement granted strictly through authenticated invoice-to-workspace relationship
+    const targetOrgId = invoice.organizationId;
     const now = new Date();
 
-    // 1. Update invoice status
-    if (invoice) {
-      await db.bachsInvoice.update({
-        where: { id: invoice.id },
-        data: {
-          status: 'CONFIRMED',
-          bachsChargeId: chargeId || invoice.bachsChargeId,
-          paidAt: now,
-          fundsAvailableAt: now,
-        }
+    // 1. Mark invoice as PAID
+    await db.bachsInvoice.update({
+      where: { id: invoice.id },
+      data: {
+        status: 'PAID',
+        bachsChargeId: chargeId || invoice.bachsChargeId,
+        paidAt: now,
+        fundsAvailableAt: now,
+      }
+    });
+
+    // 2. Mark payment attempt as SUCCEEDED
+    if (checkoutId) {
+      await db.paymentAttempt.updateMany({
+        where: { checkoutId },
+        data: { status: 'SUCCEEDED' }
       });
     }
 
-    // 2. Fulfill Software Subscription
-    if (purchaseType === 'SOFTWARE_SUBSCRIPTION') {
+    // 3. Fulfill Workspace Subscription / Software Access
+    if (purchaseType === 'SOFTWARE_SUBSCRIPTION' || purchaseType === 'WORKSPACE_INVOICE') {
       let parsedMetadata: any = {};
       try {
-        parsedMetadata = typeof invoice?.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice?.metadata || {});
+        parsedMetadata = typeof invoice.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice.metadata || {});
       } catch (_) {}
 
-      const targetPlan = (metadata.plan || parsedMetadata.plan || (invoice?.amount && invoice.amount >= 40000 ? 'PRO' : 'STARTER')).toUpperCase() === 'PRO' ? 'PRO' : 'STARTER';
+      const targetPlan = (metadata.plan || parsedMetadata.plan || (invoice.amount >= 40000 ? 'PRO' : 'STARTER')).toUpperCase() === 'PRO' ? 'PRO' : 'STARTER';
       const planPrice = targetPlan === 'PRO' ? 45000.0 : 20000.0;
       const planSeats = targetPlan === 'PRO' ? 10 : 3;
 
@@ -304,13 +437,13 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
 
       let nextPaidThrough: Date;
       if (sub?.paidThroughDate && sub.paidThroughDate > now) {
-        // Early renewal extends existing paid-through date
+        // Early renewal extends existing paid-through date by 30 days
         nextPaidThrough = new Date(sub.paidThroughDate);
-        nextPaidThrough.setMonth(nextPaidThrough.getMonth() + 1);
+        nextPaidThrough.setDate(nextPaidThrough.getDate() + 30);
       } else {
-        // Renewal after expiry starts 1 calendar month from now
+        // Renewal from now grants 30 days of active access
         nextPaidThrough = new Date(now);
-        nextPaidThrough.setMonth(nextPaidThrough.getMonth() + 1);
+        nextPaidThrough.setDate(nextPaidThrough.getDate() + 30);
       }
 
       const gracePeriodEnd = new Date(nextPaidThrough);
@@ -348,34 +481,31 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
         data: {
           organizationId: targetOrgId,
           actorType: 'INTEGRATION',
-          action: 'SOFTWARE_SUBSCRIPTION_RENEWED',
+          action: 'WORKSPACE_INVOICE_PAID',
           resourceType: 'BILLING',
-          resourceId: invoice?.id || checkoutId || 'manual',
-          newState: JSON.stringify({ paidThroughDate: nextPaidThrough, amount: invoice?.amount })
+          resourceId: invoice.id,
+          newState: JSON.stringify({ paidThroughDate: nextPaidThrough, amount: invoice.amount })
         }
       });
     }
 
-    // 3. Fulfill Managed Pilot Engagement
-    if (purchaseType === 'PILOT_ENGAGEMENT' && (engagementId || invoice?.engagementId)) {
-      const targetEngagementId = engagementId || invoice?.engagementId;
+    // 4. Fulfill Managed Pilot Engagement (payment satisfies ONLY payment prerequisite)
+    if (purchaseType === 'PILOT_ENGAGEMENT' && (engagementId || invoice.engagementId)) {
+      const targetEngagementId = engagementId || invoice.engagementId;
       const engagement = await db.pilotEngagement.findUnique({
         where: { id: targetEngagementId },
         include: { professional: true }
       });
 
       if (engagement) {
-        // Set payment verified
+        // Payment verifies payment prerequisite; does NOT bypass accepted terms or professional readiness
+        const canActivate = engagement.isTermsAccepted && engagement.isProfessionalApproved && engagement.isClientReadinessApproved;
         const updatedPrereq = {
           isPaymentVerified: true,
-          status: engagement.isTermsAccepted && engagement.isProfessionalApproved && engagement.isClientReadinessApproved
-            ? 'ACTIVE'
-            : 'AWAITING_READINESS',
-          activatedAt: engagement.isTermsAccepted && engagement.isProfessionalApproved && engagement.isClientReadinessApproved
-            ? now
-            : null,
+          status: canActivate ? 'ACTIVE' : 'AWAITING_READINESS',
+          activatedAt: canActivate ? now : null,
           startDate: engagement.startDate || now,
-          endDate: engagement.endDate || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000), // 30-day fixed pilot term
+          endDate: engagement.endDate || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
         };
 
         await db.pilotEngagement.update({
@@ -383,7 +513,7 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
           data: updatedPrereq
         });
 
-        // Ensure Software Subscription has PILOT_INCLUDED to prevent duplicate software billing!
+        // Ensure Workspace Subscription includes pilot
         const pilotEndDate = updatedPrereq.endDate;
         await db.workspaceSubscription.upsert({
           where: { organizationId: targetOrgId },
@@ -402,30 +532,6 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
           }
         });
 
-        // Create earned ProfessionalPayable (kept strictly separate from client collections)
-        if (engagement.professionalId) {
-          const existingPayable = await db.professionalPayable.findFirst({
-            where: {
-              engagementId: targetEngagementId,
-              professionalId: engagement.professionalId,
-              type: 'FIXED_PILOT_COMPENSATION'
-            }
-          });
-
-          if (!existingPayable) {
-            await db.professionalPayable.create({
-              data: {
-                engagementId: targetEngagementId,
-                professionalId: engagement.professionalId,
-                amount: engagement.professionalCompensation,
-                currency: engagement.currency,
-                type: 'FIXED_PILOT_COMPENSATION',
-                status: 'EARNED',
-              }
-            });
-          }
-        }
-
         await db.auditLog.create({
           data: {
             organizationId: targetOrgId,
@@ -439,7 +545,35 @@ export async function processBachsWebhookEvent(event: any): Promise<{ handled: b
       }
     }
 
-    return { handled: true, details: `Fulfillment completed for ${purchaseType}` };
+    // 5. Record processed WebhookEvent for event-level idempotency
+    if (eventId) {
+      await db.webhookEvent.create({
+        data: {
+          eventId,
+          provider: 'BACHS',
+          eventType,
+          status: 'PROCESSED',
+          payload: JSON.stringify(event),
+        }
+      }).catch((e) => {
+        console.warn('[Bachs Webhook] WebhookEvent record insertion notice:', e.message);
+      });
+    }
+
+    return { handled: true, details: `Fulfillment completed for ${purchaseType} (Invoice ${invoice.invoiceNumber})` };
+  }
+
+  // Record other events for audit trail
+  if (eventId) {
+    await db.webhookEvent.create({
+      data: {
+        eventId,
+        provider: 'BACHS',
+        eventType,
+        status: 'PROCESSED',
+        payload: JSON.stringify(event),
+      }
+    }).catch(() => {});
   }
 
   return { handled: true, details: `Event ${eventType} recorded without action` };

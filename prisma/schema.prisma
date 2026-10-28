@@ -1230,10 +1230,46 @@ model BachsInvoice {
 
   organization     Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   engagement       PilotEngagement? @relation(fields: [engagementId], references: [id], onDelete: SetNull)
+  paymentAttempts  PaymentAttempt[]
 
   @@index([organizationId])
   @@index([engagementId])
   @@index([status])
+}
+
+model PaymentAttempt {
+  id              String       @id @default(cuid())
+  invoiceId       String
+  organizationId  String
+  checkoutId      String       @unique
+  idempotencyKey  String?
+  amount          Float
+  currency        String       @default("NGN")
+  status          String       @default("PENDING") // PENDING, SUCCEEDED, FAILED, CANCELLED
+  provider        String       @default("BACHS")
+  rawResponse     String?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  invoice         BachsInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([organizationId])
+  @@index([checkoutId])
+  @@index([status])
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  eventId     String   @unique
+  provider    String   @default("BACHS")
+  eventType   String
+  status      String   @default("PROCESSED") // PROCESSED, FAILED, IGNORED
+  payload     String?
+  processedAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([provider])
 }
 
 model ProfessionalPayable {

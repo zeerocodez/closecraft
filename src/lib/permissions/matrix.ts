@@ -78,7 +78,7 @@ const WORKSPACE_PERMISSIONS: Record<WorkspaceRole, Permission[]> = {
     'leads:view_all', 'leads:view_assigned', 'leads:create', 'leads:edit', 'leads:delete', 'leads:export', 'leads:archive', 'leads:merge',
     'deals:view_all', 'deals:view_assigned', 'deals:create', 'deals:edit', 'deals:delete',
     'proposals:view', 'proposals:create', 'proposals:approve',
-    'billing:view',
+    'billing:view', 'billing:manage',
     'team:view', 'team:invite',
     'engagements:view', 'engagements:request', 'engagements:review',
     'handover:create', 'handover:acknowledge',

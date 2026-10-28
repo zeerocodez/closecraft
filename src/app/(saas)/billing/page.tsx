@@ -23,8 +23,38 @@ export default async function BillingPage() {
 
   const isOwnerOrAdmin = member?.role === 'OWNER' || member?.role === 'ADMIN';
 
-  // Fetch or initialize subscription
+  // Fetch or initialize 14-day trial workspace subscription
   const sub = await getOrCreateWorkspaceSubscription(organizationId);
+
+  // Ensure active approved invoice exists (base one-time NGN 15,000 workspace invoice)
+  let activeInvoice = await db.bachsInvoice.findFirst({
+    where: {
+      organizationId,
+      status: { in: ['APPROVED', 'ISSUED'] },
+      type: 'WORKSPACE_INVOICE',
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  if (!activeInvoice) {
+    const invoiceNumber = `INV-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    activeInvoice = await db.bachsInvoice.create({
+      data: {
+        organizationId,
+        invoiceNumber,
+        type: 'WORKSPACE_INVOICE',
+        amount: 15000.0,
+        currency: 'NGN',
+        status: 'APPROVED',
+        customerEmail: session.user.email || null,
+        customerName: session.user.name || null,
+        metadata: JSON.stringify({
+          description: 'One-time NGN 15,000 Workspace Invoice (30 Days)',
+          plan: 'STARTER',
+        }),
+      }
+    });
+  }
 
   // Fetch invoices for this organization
   const invoices = await db.bachsInvoice.findMany({
@@ -36,6 +66,7 @@ export default async function BillingPage() {
     <BillingClient
       subscription={sub}
       invoices={invoices as any}
+      activeInvoice={activeInvoice as any}
       isOwnerOrAdmin={isOwnerOrAdmin}
     />
   );
