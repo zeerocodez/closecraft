@@ -269,7 +269,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
        <div className="flex items-center gap-2">
          <CheckCircle size={15} className="text-[#6AD6A7]" />
          <span className="text-xs font-bold text-white">₦1,250,000 Closed</span>
-         <span className="text-[10px] text-[#6AD6A7] font-mono">PAYSTACK CLEARED</span>
+         <span className="text-[10px] text-[#6AD6A7] font-mono">BACHS.IO CLEARED</span>
        </div>
      </div>
    </div>
@@ -1092,7 +1092,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <Link href="/inbox" className="footer-button">Lead Inbox</Link>
  <Link href="/leads" className="footer-button">Lead Sources & CSV</Link>
  <Link href="/pipeline" className="footer-button">SDR Work Queue</Link>
- <Link href="/dashboard" className="footer-button">Revenue Attribution</Link>
+ <Link href="/billing" className="footer-button">Workspace Billing & Plans</Link>
  <Link href="/settings" className="footer-button">Tenant Policy Settings</Link>
  </div>
 
@@ -1101,6 +1101,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <Link href="/solutions">How It Works</Link>
  <Link href="/revenue-engine">Revenue Leakage</Link>
  <Link href="/platform">Who It's For</Link>
+ <Link href="/pricing">Pricing & Tiers</Link>
  <Link href="/#faq">FAQ</Link>
  <a
  href="https://wa.me/2349026365853?text=Hello%20CloseCraft%20Team%2C%20I%20am%20interested%20in%20the%20Free%20Pilot."
@@ -1111,7 +1112,28 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  >
  WhatsApp: +234 902 636 5853
  </a>
- <button onClick={openAudit} className="footer-button" style={{ display: 'inline-block', marginTop: '10px' }}>Book Revenue Audit</button>
+ </div>
+
+ <div>
+ <small>LEGAL & PRIVACY</small>
+ <Link href="/privacy" className="footer-button">Privacy Notice</Link>
+ <Link href="/terms" className="footer-button">Terms of Service</Link>
+ <Link href="/refund-policy" className="footer-button">Cancellation & Refund Policy</Link>
+ <Link href="/cookies" className="footer-button">Cookie Notice</Link>
+ <Link href="/managed-service-terms" className="footer-button">Managed Service Terms</Link>
+ <Link href="/privacy/request" className="footer-button" style={{ color: '#45bfae' }}>Submit Privacy Request &rarr;</Link>
+ <button
+ type="button"
+ onClick={() => {
+   if (typeof window !== 'undefined') {
+     window.dispatchEvent(new Event('closecraft-reopen-consent'));
+   }
+ }}
+ className="footer-button"
+ style={{ textAlign: 'left', background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--dark-muted)' }}
+ >
+ Cookie Settings
+ </button>
  </div>
  </div>
 
