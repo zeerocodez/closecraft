@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import LoopGuide from "@/components/guide/LoopGuide";
 import "./globals.css";
@@ -14,6 +14,14 @@ const plusJakartaSans = Plus_Jakarta_Sans({
  variable: "--font-plus-jakarta",
  weight: ["600", "700"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#0B1117",
+};
 
 export const metadata: Metadata = {
  title: "Closecraft | Learn to Close. Get Paid to Close.",

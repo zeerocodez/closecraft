@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db as prisma } from "@/lib/db";
 import { withApiErrors } from "@/lib/apiError";
 import { auth } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/apiSecurity";
 import { sanitizeLinks } from "@/lib/guide/links";
 import { MAX_CUSTOM_ENTRIES } from "@/lib/guide/server";
 
@@ -16,9 +17,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
  return withApiErrors(async () => {
  const session = await auth();
- if (!session?.user) {
- return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
- }
+ const adminCheck = await requireSuperAdmin(session);
+ if (!adminCheck.authorized) return adminCheck.response;
  const [settings, entries, unanswered, answered, dismissed] = await Promise.all([
  prisma.platformSettings.findUnique({ where: { id: "singleton" }, select: { guideEnabled: true } }),
  prisma.guideEntry.findMany({ orderBy: { createdAt: "desc" }, take: MAX_CUSTOM_ENTRIES }),
@@ -38,9 +38,8 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
  return withApiErrors(async () => {
  const session = await auth();
- if (!session?.user) {
- return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
- }
+ const adminCheck = await requireSuperAdmin(session);
+ if (!adminCheck.authorized) return adminCheck.response;
  const parsed = z.object({ enabled: z.boolean() }).safeParse(await req.json().catch(() => null));
  if (!parsed.success) return NextResponse.json({ error: "Invalid settings." }, { status: 400 });
  const settings = await prisma.platformSettings.upsert({

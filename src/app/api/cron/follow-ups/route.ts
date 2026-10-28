@@ -1,19 +1,18 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { verifyCronAuth } from '@/lib/apiSecurity';
 
 export async function GET(request: Request) {
- const url = new URL(request.url);
- const isTest = url.searchParams.get('test') === 'true';
+  const url = new URL(request.url);
+  const isTest = url.searchParams.get('test') === 'true' && process.env.NODE_ENV !== 'production';
 
- // Secure this endpoint by verifying the Vercel cron secret
- // Bypass only if running locally in test mode
- if (!isTest || process.env.NODE_ENV === 'production') {
- const authHeader = request.headers.get('Authorization');
- if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
- console.warn('[Follow-Up Engine] Unauthorized cron execution attempt');
- return new NextResponse('Unauthorized', { status: 401 });
- }
- }
+  // Secure this endpoint by verifying the cron secret
+  if (!isTest) {
+    const cronCheck = verifyCronAuth(request);
+    if (!cronCheck.authorized) {
+      return cronCheck.response || new NextResponse('Unauthorized', { status: 401 });
+    }
+  }
 
   try {
     // Audit Requirement: Unattended automated message delivery is disabled in the pilot

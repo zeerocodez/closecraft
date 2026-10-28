@@ -8,8 +8,9 @@ export async function GET(request: Request) {
   }
 
   const authHeader = request.headers.get('Authorization');
-  if (process.env.ADMIN_SECRET && authHeader !== `Bearer ${process.env.ADMIN_SECRET}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const adminSecret = process.env.ADMIN_SECRET || process.env.CRON_SECRET;
+  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized: Valid admin bearer authorization required' }, { status: 401 });
   }
 
   try {

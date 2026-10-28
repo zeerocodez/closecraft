@@ -5,6 +5,7 @@ import { z } from "zod";
 import { db as prisma } from "@/lib/db";
 import { withApiErrors } from "@/lib/apiError";
 import { auth } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/apiSecurity";
 import { getRankingConfig, calculateVisibility } from "@/lib/ecosystem/visibility";
 import { RankingConfigSchema, pickFeatured } from "@/lib/ecosystem/visibilityCore";
 
@@ -39,9 +40,8 @@ const FlagsSchema = z.object({
 export async function GET() {
  return withApiErrors(async () => {
  const session = await auth();
- if (!session?.user) {
- return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
- }
+ const adminCheck = await requireSuperAdmin(session);
+ if (!adminCheck.authorized) return adminCheck.response;
  const config = await getRankingConfig();
  const [settings, orgs, posts, rated, comments, events] = await Promise.all([
  prisma.platformSettings.findUnique({
@@ -97,9 +97,8 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
  return withApiErrors(async () => {
  const session = await auth();
- if (!session?.user) {
- return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
- }
+ const adminCheck = await requireSuperAdmin(session);
+ if (!adminCheck.authorized) return adminCheck.response;
  const parsed = FlagsSchema.safeParse(await req.json().catch(() => null));
  if (!parsed.success) return NextResponse.json({ error: "Invalid settings." }, { status: 400 });
  const { rankingConfig, ...flagData } = parsed.data;

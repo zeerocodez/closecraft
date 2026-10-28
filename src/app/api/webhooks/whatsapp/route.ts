@@ -1,20 +1,27 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { processLeadWithAI } from '@/lib/ai/qualificationEngine';
+import { timingSafeEqualString } from '@/lib/apiSecurity';
 
 export async function GET(request: Request) {
- const url = new URL(request.url);
- const mode = url.searchParams.get('hub.mode');
- const token = url.searchParams.get('hub.verify_token');
- const challenge = url.searchParams.get('hub.challenge');
+  const url = new URL(request.url);
+  const mode = url.searchParams.get('hub.mode');
+  const token = url.searchParams.get('hub.verify_token');
+  const challenge = url.searchParams.get('hub.challenge');
 
- // Verify the webhook with Meta
- if (mode === 'subscribe' && token === process.env.WHATSAPP_VERIFY_TOKEN) {
- console.log('WhatsApp Webhook verified!');
- return new NextResponse(challenge, { status: 200 });
- }
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
+  if (!verifyToken) {
+    console.error('[WhatsApp Webhook] WHATSAPP_VERIFY_TOKEN is unconfigured.');
+    return new NextResponse('Configuration error', { status: 500 });
+  }
 
- return new NextResponse('Forbidden', { status: 403 });
+  // Verify the webhook with Meta
+  if (mode === 'subscribe' && token && timingSafeEqualString(token, verifyToken)) {
+    console.log('WhatsApp Webhook verified!');
+    return new NextResponse(challenge, { status: 200 });
+  }
+
+  return new NextResponse('Forbidden', { status: 403 });
 }
 
 export async function POST(request: Request) {

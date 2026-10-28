@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { withApiErrors } from "@/lib/apiError";
 import { auth } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/apiSecurity";
 import { getPlatformAnalytics } from "@/lib/ecosystem/insights";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,8 @@ export const dynamic = "force-dynamic";
 export async function GET() {
  return withApiErrors(async () => {
  const session = await auth();
- if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+ const adminCheck = await requireSuperAdmin(session);
+ if (!adminCheck.authorized) return adminCheck.response;
  return NextResponse.json(await getPlatformAnalytics());
  });
 }

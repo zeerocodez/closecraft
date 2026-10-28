@@ -13,11 +13,18 @@ export async function POST(req: Request) {
 
  const roleplaySession = await db.roleplaySession.findUnique({
  where: { id: sessionId },
- include: { scenario: true }
+ include: { scenario: true, student: { select: { userId: true } } }
  });
 
  if (!roleplaySession) {
  return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+ }
+
+ // Enforce resource ownership: only session owner or platform operator can submit turns
+ const isOwner = roleplaySession.student?.userId === session.user.id;
+ const isPrivileged = (session.user as any)?.role === 'OPERATOR' || (session.user as any)?.role === 'SUPER_ADMIN';
+ if (!isOwner && !isPrivileged) {
+ return NextResponse.json({ error: 'Forbidden: You do not have permission to submit turns for this session.' }, { status: 403 });
  }
 
  // Prepare conversation history

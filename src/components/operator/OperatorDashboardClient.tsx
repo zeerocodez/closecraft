@@ -11,6 +11,7 @@ import {
   triggerActivationAction,
   recordPayoutConfirmationAction,
 } from '@/app/(saas)/operator/actions';
+import QualificationReviewQueue from '@/components/operator/QualificationReviewQueue';
 
 export default function OperatorDashboardClient({
   requests,
@@ -18,14 +19,16 @@ export default function OperatorDashboardClient({
   professionals,
   payables,
   organizations,
+  qualifications = [],
 }: {
   requests: any[];
   engagements: any[];
   professionals: any[];
   payables: any[];
   organizations: any[];
+  qualifications?: any[];
 }) {
-  const [activeTab, setActiveTab] = useState<'requests' | 'engagements' | 'professionals' | 'finance'>('requests');
+  const [activeTab, setActiveTab] = useState<'qualifications' | 'requests' | 'engagements' | 'professionals' | 'finance'>('qualifications');
 
   // Assessment modal
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
@@ -219,6 +222,21 @@ export default function OperatorDashboardClient({
       {/* Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-outline-variant/20 pb-2">
         <button
+          onClick={() => setActiveTab('qualifications')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'qualifications'
+              ? 'bg-primary-container text-primary-fixed'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
+          }`}
+        >
+          <Icon name="Sliders" size={16} />
+          <span>Qualification Queue</span>
+          <span className="text-xs px-1.5 py-0.2 rounded-full bg-surface-container-highest">
+            {qualifications.length}
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('requests')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'requests'
@@ -278,6 +296,11 @@ export default function OperatorDashboardClient({
           </span>
         </button>
       </div>
+
+      {/* Tab 0: Qualification Review Queue */}
+      {activeTab === 'qualifications' && (
+        <QualificationReviewQueue qualifications={qualifications} />
+      )}
 
       {/* Tab 1: Readiness Queue */}
       {activeTab === 'requests' && (

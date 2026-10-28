@@ -40,12 +40,19 @@ export default async function TodayPage() {
     role: m.role,
   }));
 
+  // Fetch qualification state if exists (optional profile update for established users)
+  const latestQualification = await db.workspaceQualification.findFirst({
+    where: { organizationId },
+    orderBy: { createdAt: 'desc' }
+  });
+
   return (
     <TodayViewClient
       data={todayData}
       currentUserId={session.user.id}
       userRole={userRole}
       teamMembers={formattedMembers}
+      qualification={latestQualification as any}
     />
   );
 }

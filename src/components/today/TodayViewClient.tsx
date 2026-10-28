@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { updateLeadFollowUp, recordFastEnquiry, saveClientBlocker, resolveBlockerAction } from '@/app/(saas)/actions';
+import QualificationProfileBanner from '@/components/qualification/QualificationProfileBanner';
 
 interface TodayLeadItem {
   id: string;
@@ -41,6 +42,7 @@ export default function TodayViewClient({
   currentUserId,
   userRole,
   teamMembers,
+  qualification,
 }: {
   data: {
     overdueLeads: TodayLeadItem[];
@@ -59,6 +61,7 @@ export default function TodayViewClient({
   currentUserId: string;
   userRole: string;
   teamMembers: Array<{ id: string; name: string | null; role: string }>;
+  qualification?: any | null;
 }) {
   const [activeTab, setActiveTab] = useState<'today' | 'overdue' | 'missing' | 'unassigned' | 'blockers'>('today');
   const [selectedLead, setSelectedLead] = useState<TodayLeadItem | null>(null);
@@ -239,6 +242,9 @@ export default function TodayViewClient({
 
   return (
     <div className="space-y-6">
+      {/* Optional Qualification Profile Update Banner for Established Users */}
+      <QualificationProfileBanner qualification={qualification} />
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-4 border-b border-outline-variant/30">
         <div>

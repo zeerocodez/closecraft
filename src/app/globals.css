@@ -32,15 +32,23 @@
 }
 
 @layer base {
-  html, body {
-    width: 100vw;
+  html {
+    max-width: 100%;
+    overflow-x: hidden;
     margin: 0;
     padding: 0;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
   }
-  
+
   body {
-    overscroll-behavior: none;
-    min-height: max(884px, 100dvh);
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    touch-action: manipulation;
+    overscroll-behavior-y: none;
+    min-height: 100dvh;
   }
   
   .pb-safe {

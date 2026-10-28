@@ -84,6 +84,15 @@ export default async function OperatorPage() {
     orderBy: { name: 'asc' }
   });
 
+  // Fetch workspace qualification records for operator review
+  const qualifications = await db.workspaceQualification.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      organization: { select: { id: true, name: true } },
+      user: { select: { id: true, name: true, email: true } },
+    },
+  });
+
   return (
     <div className="flex-1 overflow-y-auto">
       <OperatorDashboardClient
@@ -92,6 +101,7 @@ export default async function OperatorPage() {
         professionals={professionals as any}
         payables={payables as any}
         organizations={organizations as any}
+        qualifications={qualifications as any}
       />
     </div>
   );

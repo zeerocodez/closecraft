@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { db as prisma } from "@/lib/db";
 import { withApiErrors } from "@/lib/apiError";
 import { auth } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/apiSecurity";
 import { EntrySchema } from "@/lib/guide/adminSchemas";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +13,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   return withApiErrors(async () => {
     const session = await auth();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const adminCheck = await requireSuperAdmin(session);
+    if (!adminCheck.authorized) return adminCheck.response;
     const parsed = EntrySchema.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid answer." }, { status: 400 });
     const d = parsed.data;
@@ -30,7 +32,8 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params;
   return withApiErrors(async () => {
     const session = await auth();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const adminCheck = await requireSuperAdmin(session);
+    if (!adminCheck.authorized) return adminCheck.response;
     const res = await prisma.guideEntry.deleteMany({ where: { id } });
     if (res.count === 0) return NextResponse.json({ error: "Answer not found." }, { status: 404 });
     return NextResponse.json({ ok: true });

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db as prisma } from "@/lib/db";
 import { withApiErrors } from "@/lib/apiError";
 import { auth } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/apiSecurity";
 import { slugify } from "@/lib/ecosystem/educationPostCore";
 
 const Body = z.object({ verified: z.boolean().optional(), publicEnabled: z.boolean().optional() });
@@ -12,7 +13,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params;
   return withApiErrors(async () => {
     const session = await auth();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const adminCheck = await requireSuperAdmin(session);
+    if (!adminCheck.authorized) return adminCheck.response;
     const parsed = Body.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     const org = await prisma.trainingOrganization.findUnique({ where: { id }, select: { id: true, name: true, approvalState: true } });

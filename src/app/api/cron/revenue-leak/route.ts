@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { verifyCronAuth } from '@/lib/apiSecurity';
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('Authorization');
-  if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
-    console.warn('[RevenueLeak Cron] Unauthorized execution attempt');
-    return new NextResponse('Unauthorized', { status: 401 });
+  const cronCheck = verifyCronAuth(request);
+  if (!cronCheck.authorized) {
+    return cronCheck.response || new NextResponse('Unauthorized', { status: 401 });
   }
 
   try {

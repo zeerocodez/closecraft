@@ -16,8 +16,13 @@ export async function GET(req: Request) {
     }
 
     const session = await auth();
-    const email = url.searchParams.get('email') || session?.user?.email;
-    const code = url.searchParams.get('code');
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized: Sign in required to access affiliate data.' }, { status: 401 });
+    }
+
+    const isOperator = (session.user as any)?.role === 'OPERATOR' || (session.user as any)?.role === 'SUPER_ADMIN';
+    const email = isOperator ? (url.searchParams.get('email') || session.user.email) : session.user.email;
+    const code = isOperator ? url.searchParams.get('code') : undefined;
 
     const data = await getAffiliateDashboardData(code || email || undefined);
     return NextResponse.json(data);

@@ -1,7 +1,15 @@
 import { NextResponse } from 'next/server';
 import { recordEnquiry } from '@/lib/dss/affiliate-store';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 export async function POST(req: Request) {
+  // Rate limit: max 10 enquiry submissions per 10 minutes per IP
+  const ip = clientIp(req);
+  const limiter = await rateLimit(`dss-enquiry:${ip}`, 10, 10 * 60 * 1000);
+  if (!limiter.allowed) {
+    return NextResponse.json({ error: 'Too many submissions. Please try again later.' }, { status: 429 });
+  }
+
   try {
     const body = await req.json();
     const { name, email, phone, goal, route, referral, consent, website } = body;

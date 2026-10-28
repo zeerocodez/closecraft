@@ -64,9 +64,9 @@ const pipelineStages: PipelineStage[] = [
   {
     step: '04',
     title: 'Instant Settlement & Accounting',
-    desc: 'Contracts signed and client deposits settled immediately via Paystack with automated receipts and CRM updates.',
+    desc: 'Contracts signed and client deposits settled immediately via Bachs.io hosted checkout (instant bank transfer & cards) with automated receipts and CRM updates.',
     metric: '₦45.2M Tracked',
-    tag: 'Automated Payouts',
+    tag: 'Bachs.io Settlement',
   },
 ];
 
@@ -117,7 +117,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  {/* 1. Navigation */}
  <header className="fixed top-0 left-0 right-0 z-50 bg-surface/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]">
   {/* Announcement bar for DSS Academy */}
-  <div className="bg-[#0f1214] border-b border-[#248277]/30 px-4 py-1.5 text-center text-xs text-gray-300 flex items-center justify-center gap-2">
+  <div className="bg-[#0f1214] border-b border-[#248277]/30 px-3 py-1.5 text-center text-xs text-gray-300 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
     <span className="px-1.5 py-0.5 rounded bg-[#248277] text-white font-bold text-[10px] uppercase tracking-wider">ACADEMY</span>
     <span>Looking for Digital Sales School?</span>
     <Link href="/dss" className="text-[#45bfae] font-bold hover:underline flex items-center gap-1">
@@ -204,10 +204,10 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <span className="eyebrow-dot" /> ZEEROCODES REVENUE ENGINE
  </div>
  <h1>
- Turn More of the Leads You Already Have Into <em>Sales.</em>
+ Turn More of the Leads You Already Have Into <em>Sales:</em> Know Who Is <em>Following Up.</em>
  </h1>
  <p className="hero-lede">
- Whether your leads come from Facebook Ads, website forms, or CSV uploads, pull them in instantly. Work them in real-time and hand verified prospects off to your closers or appointment setters before they go cold.
+ Stop losing deals to forgotten follow-up. Hand verified prospects off to your closers or appointment setters before they go cold. Bring in approved remote sales closers to help close deals. Whether your leads come from Facebook Ads, website forms, or CSV uploads, pull them in instantly, no problem!
  </p>
  <div className="hero-actions">
  <Link
@@ -225,7 +225,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  </button>
  </div>
  <p className="hero-subtext" style={{ marginTop: '16px' }}>
- 100% Free during live pilot testing. Instant workspace setup, no credit card required.
+ Starter includes 3 seats (₦20,000/mo) · Pro includes 10 seats (₦45,000/mo) · 14-day free trial · Know who is following up
  </p>
  </div>
 
@@ -242,7 +242,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
      />
 
      {/* Floating Telemetry Badge 1: Top-Left Revenue Metric */}
-     <div className="absolute top-3 left-3 sm:top-5 sm:left-5 bg-[#0B1117]/90 backdrop-blur-md border border-[#6AD6A7]/30 rounded-2xl p-3 sm:p-3.5 shadow-xl animate-float-slow max-w-[220px]">
+     <div className="absolute top-3 left-3 sm:top-5 sm:left-5 bg-[#0B1117]/90 backdrop-blur-md border border-[#6AD6A7]/30 rounded-2xl p-2.5 sm:p-3.5 shadow-xl animate-float-slow max-w-[170px] sm:max-w-[220px]">
        <div className="flex items-center gap-1.5 mb-1">
          <span className="w-2 h-2 rounded-full bg-[#6AD6A7] animate-ping" />
          <span className="text-[10px] font-bold text-[#6AD6A7] uppercase tracking-wider">ENGINE ACTIVE</span>
@@ -252,7 +252,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
      </div>
 
      {/* Floating Telemetry Badge 2: Bottom-Right AI Next-Best-Action */}
-     <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 bg-[#0B1117]/90 backdrop-blur-md border border-[#45BFAE]/40 rounded-2xl p-3 sm:p-3.5 shadow-xl animate-float-reverse max-w-[240px]">
+     <div className="absolute bottom-3 right-3 sm:bottom-5 sm:right-5 bg-[#0B1117]/90 backdrop-blur-md border border-[#45BFAE]/40 rounded-2xl p-2.5 sm:p-3.5 shadow-xl animate-float-reverse max-w-[180px] sm:max-w-[240px]">
        <div className="flex items-center justify-between gap-2 mb-1">
          <div className="flex items-center gap-1.5">
            <Zap size={13} className="text-[#F5BF65]" />
@@ -264,7 +264,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
        <div className="text-[10px] text-[#A7B7C7] mt-0.5">Assigned to Closer Somtochukwu O.</div>
      </div>
 
-     {/* Floating Telemetry Badge 3: Bottom-Left Paystack Settlement */}
+     {/* Floating Telemetry Badge 3: Bottom-Left Verified Settlement */}
      <div className="hidden sm:block absolute bottom-5 left-5 bg-[#15352F]/90 backdrop-blur-md border border-[#6AD6A7]/40 rounded-2xl p-3 shadow-xl">
        <div className="flex items-center gap-2">
          <CheckCircle size={15} className="text-[#6AD6A7]" />
@@ -275,21 +275,21 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
    </div>
 
    {/* 4-Metric Command Strip Directly Below Hero Card */}
-   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
+   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mt-4">
      <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
        <div className="text-xl font-black text-white">₦45M+</div>
        <div className="text-[10px] text-[#8A9CAE] mt-0.5">Pipeline Flow</div>
      </div>
      <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
-       <div className="text-xl font-black text-[#6AD6A7]">2.4s</div>
+       <div className="text-xl font-black text-white">2.4s</div>
        <div className="text-[10px] text-[#8A9CAE] mt-0.5">Speed to Lead SLA</div>
      </div>
      <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
-       <div className="text-xl font-black text-[#45BFAE]">34.8%</div>
+       <div className="text-xl font-black text-white">34.8%</div>
        <div className="text-[10px] text-[#8A9CAE] mt-0.5">Close Rate</div>
      </div>
      <div className="bg-[#111C26] border border-white/5 rounded-2xl p-3 text-center">
-       <div className="text-xl font-black text-[#F5BF65]">100%</div>
+       <div className="text-xl font-black text-white">100%</div>
        <div className="text-[10px] text-[#8A9CAE] mt-0.5">Audit Trail</div>
      </div>
    </div>
@@ -297,31 +297,23 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  </div>
  </section>
 
-
-
-
-
-
-
-
-
  {/* STOP-SCROLL CONTINUOUS ANIMATED TICKER MARQUEE */}
  <div className="border-y border-white/5 bg-[#0D151D] py-3.5 overflow-hidden shadow-inner">
    <div className="animate-ticker text-xs font-mono text-[#A7B7C7] flex items-center gap-10">
      <span className="flex items-center gap-2">
        <span className="w-2 h-2 rounded-full bg-[#45BFAE] animate-ping" />
-       <span className="text-white font-bold">REAL-TIME LEAD-TO-SALE OPERATING SYSTEM</span>
+       <span className="text-white font-bold">CLOSECRAFT REVENUE OPERATING SYSTEM</span>
      </span>
      <span className="text-white/20">•</span>
-     <span className="text-[#6AD6A7] font-bold">₦45,280,000+ IN PIPELINE REVENUE TRACKED</span>
+     <span className="text-[#6AD6A7] font-bold">STARTER (₦20,000/MO · 3 SEATS) & PRO (₦45,000/MO · 10 SEATS)</span>
      <span className="text-white/20">•</span>
      <span>AVERAGE SPEED TO LEAD: UNDER 2.4 SECONDS</span>
      <span className="text-white/20">•</span>
      <span className="text-[#F5BF65] font-bold">AI QUALIFICATION + HUMAN CLOSER HANDOFF</span>
      <span className="text-white/20">•</span>
-     <span>POWERED BY ZEEROCODES AUTOMATION & DIGITAL SALES SCHOOL CLOSERS</span>
+     <span>ATTACH REMOTE SALES PROFESSIONALS ANYTIME WITHOUT EXTRA SOFTWARE SEAT FEES</span>
      <span className="text-white/20">•</span>
-     <span className="text-[#45BFAE] font-bold">INSTANT PAYSTACK SETTLEMENTS & DEPOSIT TRACKING</span>
+     <span className="text-[#45BFAE] font-bold">BACHS.IO HOSTED CHECKOUT · CARDS, BANK TRANSFER & MOMO</span>
      <span className="text-white/20">•</span>
      <span>ZERO LEADS FALLING THROUGH THE CRACKS</span>
    </div>
@@ -330,8 +322,8 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  {/* 4. Problem Section */}
  <section className="section-wrap problem-section">
  <div className="section-intro">
- <div className="eyebrow">THE REALITY</div>
- <h2>Your leads are not the problem.</h2>
+ <div className="eyebrow">THE REVENUE LEAK</div>
+ <h2>Your leads are not the problem. Forgotten follow-up is.</h2>
  <p>
  The money is often lost after the lead comes in. When enquiry handling relies on ad-hoc memory, opportunities slip through the cracks every single day.
  </p>
@@ -340,70 +332,70 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <div className="problem-grid">
  <div className="problem-card">
  <span className="problem-card-num">GAP 01</span>
- <h3>LEADS GOING COLD</h3>
+ <h3>UNASSIGNED ENQUIRIES</h3>
  <p>
- New leads sit in Facebook Ads or spreadsheets for hours. Nobody responds quickly enough while their buying intent is at its absolute highest.
+ Leads sitting unattended while buyer enthusiasm fades.
  </p>
  </div>
 
  <div className="problem-card">
  <span className="problem-card-num">GAP 02</span>
- <h3>LOST FOLLOW-UP</h3>
+ <h3>ABANDONED THREADS</h3>
  <p>
- The prospect showed genuine interest, but after one or two messages, the conversation goes cold.
+ Follow-up stops after a single unanswered message.
  </p>
  </div>
 
  <div className="problem-card">
  <span className="problem-card-num">GAP 03</span>
- <h3>MISSED OPPORTUNITY</h3>
+ <h3>UNCLEAR OWNERSHIP</h3>
  <p>
- A qualified prospect is sitting in the pipeline, but nobody on the sales team knows what to do next.
+ Nobody knows who was supposed to call back without visible assignment.
  </p>
  </div>
  </div>
 
  <div className="problem-closer">
- <Check size={18} /> Zeerocodes is built to close those gaps.
+ <Check size={18} /> "Closecraft gives every viable lead an owner, an SLA timer, and a deterministic Next Best Action."
  </div>
  </section>
 
- {/* 5. The Offer: One System. One Job. */}
+ {/* 5. The Offer: One System. Complete Visibility. */}
  <section className="offer-section">
  <div className="section-wrap">
- <div className="eyebrow">THE OPERATING SYSTEM</div>
- <h2>One system. One job.</h2>
- <div className="offer-lead">Turn more of your existing leads into revenue.</div>
+ <div className="eyebrow">DISCIPLINED SALES WORKFLOW</div>
+ <h2>One system. Complete follow-up visibility.</h2>
+ <div className="offer-lead">Turn more of your existing enquiries into closed sales.</div>
 
  <div className="offer-steps-grid">
  <div className="offer-step-card">
- <span>01. RESPOND</span>
- <h3>Real-Time Ingestion</h3>
- <p>Pull leads instantly from Facebook Ads or CSV and trigger automated, real-time responses before they go cold.</p>
+ <span>01. CAPTURE</span>
+ <h3>Instant Ingestion</h3>
+ <p>Ingest leads in under 800ms from Meta Ads, website forms, and CSV uploads with zero manual copying.</p>
  </div>
 
  <div className="offer-step-card">
- <span>02. QUALIFY</span>
+ <span>02. ASSIGN</span>
+ <h3>Clear Ownership</h3>
+ <p>Route leads to your internal team (up to 3 on Starter, 10 on Pro) with automated round-robin or manual assignment.</p>
+ </div>
+
+ <div className="offer-step-card">
+ <span>03. QUALIFY</span>
  <h3>Filter Serious Fit</h3>
- <p>Identify who is actually worth your sales team's time and budget requirements.</p>
+ <p>AI triages budget, timeline, and buying intent so reps know who to call first.</p>
  </div>
 
  <div className="offer-step-card">
- <span>03. FOLLOW UP</span>
- <h3>Consistent Cadence</h3>
- <p>Keep opportunities moving instead of letting them disappear into silence.</p>
- </div>
-
- <div className="offer-step-card">
- <span>04. PRIORITISE</span>
- <h3>Clear Direction</h3>
- <p>Tell your team which opportunity needs immediate attention right now.</p>
+ <span>04. CADENCE</span>
+ <h3>SLA Timers & Reminders</h3>
+ <p>Track response times and get alerted before high-intent deals go cold.</p>
  </div>
 
  <div className="offer-step-card">
  <span>05. CONVERT</span>
- <h3>Send to Closers</h3>
- <p>Seamlessly pass verified, warm leads directly to your appointment setters and closers so they can do what they do best.</p>
+ <h3>Close & Collect</h3>
+ <p>Conduct video discovery, generate WhatsApp outreach, and settle invoices directly via Bachs.io.</p>
  </div>
  </div>
  </div>
@@ -485,7 +477,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
          <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 bg-[#0B1117]/90 backdrop-blur-md border border-[#6AD6A7]/30 rounded-2xl p-3 shadow-xl">
            <div className="text-[11px] font-bold text-white flex items-center gap-1.5">
              <CheckCircle size={14} className="text-[#6AD6A7]" />
-             <span>Integrated with Paystack & Closecraft CRM</span>
+             <span>Integrated with Bachs.io & Closecraft CRM</span>
            </div>
          </div>
        </div>
@@ -912,57 +904,77 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  {/* 12. Pricing Section */}
  <section id="pricing" className="section-wrap" style={{ padding: '60px 0', borderTop: '1px solid var(--line)' }}>
  <div style={{ textAlign: 'center', marginBottom: '40px' }}>
- <div className="eyebrow">FLEXIBLE DEPLOYMENT</div>
- <h2>Affordable Revenue Scaling</h2>
- <p style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '12px', maxWidth: '600px', margin: '12px auto' }}>
- Illustrative pricing models based on tenant usage. Choose the tier that matches your current sales volume. All plans include the core AI-triage engine.
+ <div className="eyebrow">TRANSPARENT WORKSPACE TIERS</div>
+ <h2>Predictable Pricing Built for Nigerian Sales Teams</h2>
+ <p style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '12px', maxWidth: '640px', margin: '12px auto' }}>
+ Start with our 14-day free trial. Choose Starter for lean teams or Pro for high-velocity multi-rep scale. Upgrade or renew manually anytime via Bachs.io.
  </p>
  </div>
  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
- <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col">
- <h3 className="font-medium font-bold text-lg text-on-surface">Starter Engine</h3>
+ {/* Starter Plan */}
+ <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col justify-between">
+ <div>
+ <div className="flex items-center justify-between">
+ <h3 className="font-medium font-bold text-lg text-on-surface">Starter Workspace</h3>
+ <span className="text-[11px] px-2 py-0.5 rounded bg-primary/10 text-primary font-bold">14-DAY TRIAL</span>
+ </div>
  <div className="mt-4 mb-6">
  <span className="text-3xl font-bold">₦20,000</span>
  <span className="text-on-surface-variant text-sm"> / month</span>
+ <span className="text-[11px] text-on-surface-variant block mt-0.5">Renew manually · No credit card required to start</span>
  </div>
- <ul className="space-y-3 mb-8 flex-1 text-sm text-on-surface-variant">
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> <strong>3 Internal Team Seats</strong></li>
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Up to 1,000 leads/month</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Automated Follow-up Alerts</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Basic Command Centre</li>
+ <ul className="space-y-3 mb-8 text-sm text-on-surface-variant">
+ <li className="flex items-start gap-2 text-on-surface"><Check size={16} className="text-primary mt-0.5" /> <strong>3 Internal Team Seats</strong> included</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Up to 1,000 active leads/month</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Enquiry Management Inbox & Today Radar</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Follow-up SLA Tracking & Leakage Alerts</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Bachs.io Hosted Checkout (Bank Transfer, Cards)</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Attach remote sales pilots anytime without extra seat fees</li>
  </ul>
- <button onClick={openAudit} className="w-full py-2 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary-container transition-colors">Start 14-Day Trial</button>
+ </div>
+ <Link href="/signup" className="w-full py-2.5 rounded-lg border-2 border-primary text-primary text-center font-bold hover:bg-primary-container transition-colors">Start 14-Day Free Trial</Link>
  </div>
  
- <div className="bg-primary p-6 rounded-xl border border-primary text-on-primary shadow-md relative transform md:-translate-y-2 flex flex-col">
- <div className="absolute top-0 right-0 bg-accent text-ink text-[10px] font-bold px-2 py-1 rounded-bl-lg rounded-tr-lg">MOST POPULAR</div>
- <h3 className="font-medium font-bold text-lg text-on-primary">Pro Engine</h3>
+ {/* Pro Plan */}
+ <div className="bg-primary p-6 rounded-xl border border-primary text-on-primary shadow-lg relative transform md:-translate-y-2 flex flex-col justify-between">
+ <div className="absolute top-0 right-0 bg-accent text-ink text-[10px] font-bold px-3 py-1 rounded-bl-lg rounded-tr-lg">RECOMMENDED FOR TEAMS</div>
+ <div>
+ <h3 className="font-medium font-bold text-lg text-on-primary">Pro Workspace</h3>
  <div className="mt-4 mb-6">
  <span className="text-3xl font-bold">₦45,000</span>
  <span className="text-primary-container text-sm"> / month</span>
+ <span className="text-[11px] text-primary-container/80 block mt-0.5">High-velocity capacity · Renew manually</span>
  </div>
- <ul className="space-y-3 mb-8 flex-1 text-sm text-on-primary/90">
- <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> <strong>10 Internal Team Seats</strong></li>
- <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Round-Robin Auto-Routing</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Advanced AI Triage & Coaching</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> WhatsApp Gateway Integration</li>
+ <ul className="space-y-3 mb-8 text-sm text-on-primary/95">
+ <li className="flex items-start gap-2 text-white"><Check size={16} className="text-accent mt-0.5" /> <strong>10 Internal Team Seats</strong> included (7 extra seats)</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> <strong>Round-Robin Automated Lead Distribution</strong></li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Manager Call Coaching & QA Review Queues</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Executive Revenue Health & Leakage Dashboard</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Priority WhatsApp & Email Notification Dispatch</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-accent mt-0.5" /> Priority matching with certified DSS remote closers</li>
  </ul>
- <button onClick={openAudit} className="w-full py-2 rounded-lg bg-accent text-ink font-bold hover:bg-[#b5f03d] transition-colors border border-transparent">Start 14-Day Trial</button>
+ </div>
+ <Link href="/signup" className="w-full py-2.5 rounded-lg bg-accent text-ink text-center font-bold hover:bg-[#b5f03d] transition-colors border border-transparent">Start 14-Day Free Trial</Link>
  </div>
 
- <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col">
- <h3 className="font-medium font-bold text-lg text-on-surface">Enterprise Fleet</h3>
+ {/* Managed Sales Pilot */}
+ <div className="bg-surface-container-lowest p-6 rounded-xl border border-surface-container flex flex-col justify-between">
+ <div>
+ <h3 className="font-medium font-bold text-lg text-on-surface">Managed Sales Pilot</h3>
  <div className="mt-4 mb-6">
- <span className="text-3xl font-bold">₦75,000</span>
- <span className="text-on-surface-variant text-sm"> / month</span>
+ <span className="text-3xl font-bold">From ₦150,000</span>
+ <span className="text-on-surface-variant text-sm"> / 30 days</span>
+ <span className="text-[11px] text-on-surface-variant block mt-0.5">Full software + Vetted remote closers</span>
  </div>
- <ul className="space-y-3 mb-8 flex-1 text-sm text-on-surface-variant">
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Unlimited leads</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Custom AI Models & Scoring</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Dedicated SLA & Support</li>
- <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Multiple Workspaces</li>
+ <ul className="space-y-3 mb-8 text-sm text-on-surface-variant">
+ <li className="flex items-start gap-2 text-on-surface"><Check size={16} className="text-primary mt-0.5" /> <strong>Full Closecraft Workspace Included</strong> (No duplicate fees)</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Dedicated Remote Closer from Digital Sales School</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Tailored Sales Scripting & Objection Handling</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Dual-approval operator verification & weekly reviews</li>
+ <li className="flex items-start gap-2"><Check size={16} className="text-primary mt-0.5" /> Custom CRM & Meta Lead Ads Integration</li>
  </ul>
- <button onClick={openAudit} className="w-full py-2 rounded-lg border-2 border-primary text-primary font-bold hover:bg-primary-container transition-colors">Request Proposal</button>
+ </div>
+ <button onClick={openAudit} className="w-full py-2.5 rounded-lg border-2 border-outline text-on-surface font-bold hover:bg-surface-container transition-colors">Request Pilot Proposal</button>
  </div>
  </div>
  </section>
@@ -973,61 +985,78 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <div className="eyebrow">COMMON QUESTIONS</div>
  <h2>Frequently Asked Questions</h2>
  <p style={{ color: 'var(--muted)', fontSize: '15px', marginTop: '12px' }}>
- Everything you need to know about how the Revenue Engine works.
+ Everything you need to know about Closecraft plans, seats, and Bachs payments.
  </p>
  </div>
 
  <div className="faq-list">
  <details open>
- <summary>Do I need more leads?</summary>
+ <summary>How does the 14-day free trial work?</summary>
  <p>
- Not necessarily. Zeerocodes starts by helping you convert more of the leads you're already generating.
+ You get immediate access to all Starter workspace features for up to 3 team members. No credit card or upfront commitment is required. At the end of 14 days, you can renew manually for ₦20,000/month or upgrade to Pro.
  </p>
  </details>
 
  <details>
- <summary>Does it replace my CRM?</summary>
+ <summary>What is the difference between Starter (₦20,000) and Pro (₦45,000)?</summary>
  <p>
- No. Zeerocodes works around your existing lead and sales process.
+ Starter includes 3 internal team seats for ₦20,000/month—ideal for lean teams establishing structured follow-up routines. Pro expands capacity to 10 internal team seats for ₦45,000/month and unlocks automated round-robin lead routing, manager call coaching queues, and priority notification dispatch.
  </p>
  </details>
 
  <details>
- <summary>Does it replace my sales team?</summary>
+ <summary>Do remote sales professionals consume my internal team seats?</summary>
  <p>
- No. It helps your team know which opportunities need attention and what should happen next.
+ No. Approved remote sales professionals engaged through active managed pilots have dedicated external access and never count against your 3-seat or 10-seat internal quota.
  </p>
  </details>
 
  <details>
- <summary>What does the system actually do?</summary>
+ <summary>How are payments handled in Nigeria?</summary>
  <p>
- It helps respond, follow up, qualify, prioritise and recover sales opportunities.
+ We use Bachs.io, the official payment gateway for Nigerian businesses. You can renew or upgrade your workspace subscription using instant bank transfers (with a dedicated dynamic virtual account), debit cards (Mastercard, Visa, Verve), or mobile money.
  </p>
  </details>
 
  <details>
- <summary>Can you guarantee more sales?</summary>
+ <summary>Can I bring in certified remote closers if my team is busy?</summary>
  <p>
- No. Results depend on lead quality, your offer, sales execution and market conditions. The system is designed to improve the process between lead and revenue.
+ Yes! Closecraft connects directly with certified remote sales professionals trained through the Digital Sales School (DSS). You can attach a vetted closer on a 30-day managed sales pilot without paying duplicate software charges.
  </p>
  </details>
  </div>
  </section>
 
- {/* 14. Final CTA */}
+   {/* Mobile Sticky Bottom Conversion Bar (Fixed on mobile < 640px) */}
+  <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0B1117]/95 backdrop-blur-xl border-t border-white/10 p-3 flex items-center gap-2.5 shadow-2xl pb-safe">
+    <Link
+      href="/signup"
+      className="flex-1 py-3 px-4 rounded-xl bg-[#248277] text-white text-xs font-bold text-center shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5"
+    >
+      <span>START FREE PILOT</span>
+      <ArrowRight size={14} />
+    </Link>
+    <button
+      onClick={openAudit}
+      className="py-3 px-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-semibold hover:bg-white/10 transition-colors"
+    >
+      Audit
+    </button>
+  </div>
+
+  {/* 14. Final CTA */}
  <section className="final-cta">
  <div className="section-wrap">
- <h2>How many sales are sitting inside your existing leads?</h2>
+ <h2>Never wonder "who is following up" again.</h2>
  <p>
- Let's find out where your lead-to-sale process is leaking opportunities.
+ Start your 14-day free trial today. Set up in under 3 minutes, invite your team, and stop losing sales to forgotten follow-up.
  </p>
  <div className="final-cta-actions">
  <Link
  href="/signup"
  className="button"
  >
- JOIN FREE PILOT <ArrowRight size={15} />
+ START 14-DAY FREE TRIAL <ArrowRight size={15} />
  </Link>
  <button
  type="button"
@@ -1048,12 +1077,12 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <Link href="#hero" className="brand-lockup">
  <div className="brand-mark">Z</div>
  <div>
- <strong style={{ color: '#fff' }}>ZEEROCODES</strong>
- <small>REVENUE GROWTH ENGINE</small>
+ <strong style={{ color: '#fff' }}>CLOSECRAFT</strong>
+ <small>REVENUE OPERATING SYSTEM</small>
  </div>
  </Link>
  <p style={{ color: 'var(--dark-muted)', fontSize: '13px', marginTop: '14px', maxWidth: '320px' }}>
- "Turn more of the leads you already have into sales."
+ "Know who is following up. Organise enquiries, keep follow-up visible, and close more of the leads you already have."
  </p>
  </div>
 

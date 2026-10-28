@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { db as prisma } from "@/lib/db";
 import { withApiErrors } from "@/lib/apiError";
 import { auth } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/apiSecurity";
 import { UnansweredAction } from "@/lib/guide/adminSchemas";
 import { MAX_CUSTOM_ENTRIES } from "@/lib/guide/server";
 
@@ -19,7 +20,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
   return withApiErrors(async () => {
     const session = await auth();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const adminCheck = await requireSuperAdmin(session);
+    if (!adminCheck.authorized) return adminCheck.response;
     const parsed = UnansweredAction.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "Invalid request." }, { status: 400 });
     const row = await prisma.guideUnanswered.findUnique({ where: { id } });

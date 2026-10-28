@@ -10,11 +10,8 @@ export async function POST(req: Request) {
     if (secret) {
       const verification = verifyBachsWebhookSignature(rawBody, req.headers, secret);
       if (!verification.isValid) {
-        if (process.env.NODE_ENV === 'production') {
-          console.error('[Bachs Webhook] Signature verification failed:', verification.error);
-          return NextResponse.json({ error: 'Invalid Bachs signature', details: verification.error }, { status: 401 });
-        }
-        console.warn('[Bachs Webhook] Signature check warning in dev:', verification.error);
+        console.error('[Bachs Webhook] Signature verification failed:', verification.error);
+        return NextResponse.json({ error: 'Invalid Bachs signature', details: verification.error }, { status: 401 });
       }
     } else if (process.env.NODE_ENV === 'production') {
       console.error('[Bachs Webhook] Missing BACHS_WEBHOOK_SECRET in production environment');

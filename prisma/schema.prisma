@@ -32,6 +32,7 @@ model User {
   emergencySupportSessions  EmergencySupportAccess[]  @relation("EmergencyOperator")
   sentInvites               WorkspaceInvite[]         @relation("InviteSender")
   sessions                  UserSession[]
+  qualifications            WorkspaceQualification[]
 }
 
 model Organization {
@@ -75,6 +76,7 @@ model Organization {
   qualityReviews      CallQualityReview[]
   attributedOpportunities AttributedOpportunity[]
   outboxMessages      OutboxMessage[]
+  qualifications      WorkspaceQualification[]
 
   // LMS Relations
   studentProfiles StudentProfile[]
@@ -1507,3 +1509,117 @@ model OutboxMessage {
   @@index([topic])
 }
 
+
+// -------------------------------------------------------------
+// NEW-USER ONBOARDING, QUALIFICATION & SERVICE SCREENING
+// -------------------------------------------------------------
+
+model WorkspaceQualification {
+  id                               String        @id @default(cuid())
+  organizationId                   String
+  userId                           String
+  
+  // Step 1: Entry Help Chooser
+  primaryNeed                      String        @default("NOT_SURE_YET") // SOFTWARE_ORGANIZING, MANAGED_SALES_PRO, BOTH, NOT_SURE_YET
+  status                           String        @default("DRAFT") // DRAFT, IN_PROGRESS, COMPLETED, SKIPPED
+  currentStep                      Int           @default(1)
+
+  // Step 2: Software Qualification Answers
+  newEnquiries30dExact             Int?
+  newEnquiries30dRange             String?       // "0-9", "10-19", "20-49", "50-99", "100+", "NOT_SURE"
+  newEnquiries30dType              String        @default("UNKNOWN") // EXACT, ESTIMATED, UNKNOWN
+
+  olderOpportunitiesCount          Int?
+  olderOpportunitiesRange          String?       // "0-9", "10-19", "20-49", "50-99", "100+", "NOT_SURE"
+  olderOpportunitiesType           String        @default("UNKNOWN") // EXACT, ESTIMATED, UNKNOWN
+
+  whoFollowsUp                     String?       // MAINLY_ME, ONE_MEMBER, SEVERAL_PEOPLE, EXTERNAL_AGENCY, NOT_CLEARLY_ASSIGNED, OTHER
+  whoFollowsUpDetail               String?
+  howFollowUpChecked               String        @default("[]") // JSON string array
+  howFollowUpCheckedDetail         String?
+
+  forgottenEnquiryOption           String?       // DESCRIBE_EXAMPLE, DELAYS_NO_SPECIFIC, NOT_A_PROBLEM, NOT_SURE
+  forgottenEnquiryNarrative        String?
+  forgottenEnquiryAftermath        String?
+
+  difficulties                     String        @default("[]") // JSON string array
+  difficultyFrequency              String?       // OCCASIONAL, RECURRING
+
+  // Step 3: Managed Service Screening (if requested)
+  managedServiceNeed               String?       // RESPONDING_NEW, FOLLOWING_UP_EXISTING, QUALIFYING_APPOINTMENTS, CONDUCTING_CONVERSATIONS, HELP_DECIDING
+  qualifiedConversations30dExact   Int?
+  qualifiedConversations30dRange   String?       // "0-9", "10-19", "20-39", "40+", "NOT_SURE"
+  bookedConversationsNext30dExact  Int?
+  bookedConversationsNext30dRange  String?       // "0-9", "10-19", "20-39", "40+", "NOT_SURE"
+  
+  pipelineSuitableCount            Int?
+  pipelineAgreedNextCallCount      Int?
+  pipelineStagesSummary            String?
+
+  workloadTasksPerOpportunity      Int?
+  workloadChannels                 String        @default("[]") // JSON string array
+  workloadAvgTaskDurationMinutes   Int?
+  workloadCoverageHours            String?
+  workloadExpectedResponseWindow   String?
+  workloadLanguages                String        @default("[]") // JSON string array
+
+  // Step 4: Economics Assessment (Screening Formula)
+  currency                         String        @default("NGN")
+  assessmentPeriod                 String        @default("30_DAYS")
+  expectedAttributableSales        Float?
+  grossProfitPerSale               Float?
+  totalEngagementCost              Float?
+  fixedEngagementCost              Float?
+  variableFeePerSale               Float?
+  estimatedContribution            Float?
+  economicsEvidenceSource          String?
+  historicalConversations          Int?
+  historicalSales                  Int?
+  historicalMeasurementPeriod      String?
+  sameCohort                       Boolean?
+  dataLimitationNote               String?
+
+  // Bounded Pilot Recommendation (Prepared when evidence is limited)
+  boundedPilotQuestion             String?
+  boundedPilotScope                String?
+  boundedPilotCapacity             String?
+  boundedPilotPeriod               String?
+  boundedPilotFee                  Float?
+  boundedPilotReviewDate           DateTime?
+  boundedPilotStopConditions       String?
+
+  // Rules Evaluation & Transparent Results
+  rulesVersion                     String        @default("2026.1")
+  configuredEnquiryThreshold       Int           @default(20)
+  configuredCloserThreshold        Int           @default(20)
+
+  softwareFit                      String?       // PRIORITY_SOFTWARE_FIT, POTENTIAL_SOFTWARE_FIT, EXPLORE_SOFTWARE_FIT, NEEDS_MORE_CONTEXT
+  softwareFitReason                String?
+  softwareFitAction                String?
+
+  serviceRecommendation            String?       // READY_FOR_SERVICE_REVIEW, WORKLOAD_OR_ECONOMICS_NEED_REVIEW, BOUNDED_PILOT_RECOMMENDED, ALTERNATIVE_SUPPORT_MAY_FIT, PREPARATION_REQUIRED, NOT_REQUESTED
+  serviceRecommendationReason      String?
+
+  // Human Review & Auditable Overrides
+  overriddenByUserId               String?
+  originalSoftwareFit              String?
+  originalServiceRecommendation    String?
+  overrideReason                   String?
+  overrideEvidence                 String?
+  overriddenAt                     DateTime?
+  reviewerPrivateNotes             String?       // Strictly operator internal (never sent to client)
+
+  isReassessment                   Boolean       @default(false)
+  completedAt                      DateTime?
+  createdAt                        DateTime      @default(now())
+  updatedAt                        DateTime      @updatedAt
+
+  organization                     Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user                             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([userId])
+  @@index([softwareFit])
+  @@index([serviceRecommendation])
+  @@index([status])
+}

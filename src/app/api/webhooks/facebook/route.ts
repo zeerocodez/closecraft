@@ -1,20 +1,25 @@
 import { NextResponse } from 'next/server';
 import { inngest } from '@/lib/inngest/client';
-
-const VERIFY_TOKEN = process.env.FACEBOOK_VERIFY_TOKEN || 'closecraft_fb_token_123';
+import { timingSafeEqualString } from '@/lib/apiSecurity';
 
 export async function GET(req: Request) {
- const { searchParams } = new URL(req.url);
- const mode = searchParams.get('hub.mode');
- const token = searchParams.get('hub.verify_token');
- const challenge = searchParams.get('hub.challenge');
+  const { searchParams } = new URL(req.url);
+  const mode = searchParams.get('hub.mode');
+  const token = searchParams.get('hub.verify_token');
+  const challenge = searchParams.get('hub.challenge');
 
- if (mode === 'subscribe' && token === VERIFY_TOKEN) {
- console.log('WEBHOOK_VERIFIED');
- return new NextResponse(challenge, { status: 200 });
- } else {
- return new NextResponse('Forbidden', { status: 403 });
- }
+  const verifyToken = process.env.FACEBOOK_VERIFY_TOKEN;
+  if (!verifyToken) {
+    console.error('[Facebook Webhook] FACEBOOK_VERIFY_TOKEN is unconfigured.');
+    return new NextResponse('Configuration error', { status: 500 });
+  }
+
+  if (mode === 'subscribe' && token && timingSafeEqualString(token, verifyToken)) {
+    console.log('FACEBOOK_WEBHOOK_VERIFIED');
+    return new NextResponse(challenge, { status: 200 });
+  } else {
+    return new NextResponse('Forbidden', { status: 403 });
+  }
 }
 
 export async function POST(req: Request) {

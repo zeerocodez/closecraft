@@ -2,8 +2,19 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { RevenueEngine } from "@/lib/revenue-engine/engine";
+import { rateLimit, clientIp } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
+  // Rate limit registration attempts: max 10 attempts per 15 minutes per IP
+  const ip = clientIp(req);
+  const limiter = await rateLimit(`auth-register:${ip}`, 10, 15 * 60 * 1000);
+  if (!limiter.allowed) {
+    return NextResponse.json(
+      { error: "Too many registration attempts. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json().catch(() => null);
     if (!body) {

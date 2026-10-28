@@ -210,7 +210,131 @@ export default function LeadsTableClient({
       </div>
 
       {/* Leads Table */}
-      <div className="w-full bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex flex-col border border-outline-variant/30">
+            {/* Mobile Leads Card Feed (Thumb-friendly native view for screens < 768px) */}
+      <div className="md:hidden space-y-3">
+        {filteredLeads.length === 0 ? (
+          <div className="p-8 text-center bg-surface-container-low rounded-2xl border border-outline-variant/30 text-on-surface-variant text-xs">
+            No leads found matching your selected filter.
+          </div>
+        ) : (
+          filteredLeads.map((lead) => {
+            const intentSignal = lead.revenueSignals[0];
+            const intentScore = intentSignal ? intentSignal.value : (lead.buyingIntent || 50);
+            const isHot = intentScore >= 75;
+            const nextAction = lead.revenueActions[0];
+            const deal = lead.deals[0];
+            const isAssignedToMe = lead.assignedUserId === currentUserId;
+            const isUnassigned = !lead.assignedUserId;
+            const assignedName = lead.assignedUser?.name || lead.assignedUser?.email?.split('@')[0];
+
+            return (
+              <div
+                key={lead.id}
+                className={`p-4 rounded-2xl bg-surface-container-lowest border transition-all space-y-3 shadow-sm ${
+                  isAssignedToMe ? 'border-primary/40 bg-emerald-500/[0.02]' : isUnassigned ? 'border-amber-500/40 bg-amber-500/[0.02]' : 'border-outline-variant/30'
+                }`}
+              >
+                {/* Header: Name, Intent, Stage */}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <div className={`w-10 h-10 rounded-xl ${isHot ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-surface-container-high text-on-surface'} text-xs font-bold flex items-center justify-center shrink-0`}>
+                      {lead.name.slice(0, 2).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-on-surface truncate">{lead.name}</span>
+                        {isHot && (
+                          <span className="material-symbols-outlined text-[15px] text-amber-500">local_fire_department</span>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-mono text-on-surface-variant block truncate">
+                        {lead.email || (lead.phone ? 'Phone Lead' : 'No email')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col items-end shrink-0">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface border border-outline-variant/30 uppercase">
+                      {lead.status}
+                    </span>
+                    {deal?.amount ? (
+                      <span className="text-xs font-bold text-emerald-400 mt-1">₦{deal.amount.toLocaleString()}</span>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Next Best Action Pill */}
+                {nextAction ? (
+                  <div className="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-start gap-2">
+                    <span className="material-symbols-outlined text-primary text-[16px] shrink-0 mt-0.5">bolt</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1 mb-0.5">
+                        <span className="text-[10px] uppercase font-bold text-primary tracking-wider">Next Best Action</span>
+                        <span className="text-[9px] font-mono px-1 rounded bg-surface-container-high text-secondary">
+                          {nextAction.recommendedActor}
+                        </span>
+                      </div>
+                      <p className="text-xs text-on-surface font-medium line-clamp-2">{nextAction.type}</p>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Footer Controls: Assignee & Action Buttons */}
+                <div className="pt-2 border-t border-outline-variant/20 flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-xs text-on-surface-variant flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[15px]">person</span>
+                    <span>Owner: <strong className="text-on-surface">{assignedName || 'Unassigned'}</strong></span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {lead.phone && (
+                      <button
+                        onClick={() => {
+                          let cleanPhone = (lead.phone || '').replace(/[^0-9]/g, '');
+                          if (cleanPhone.startsWith('0') && cleanPhone.length === 11) cleanPhone = '234' + cleanPhone.slice(1);
+                          window.open(`https://wa.me/${cleanPhone}`, '_blank', 'noopener,noreferrer');
+                        }}
+                        className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 text-xs font-semibold"
+                        title="Chat on WhatsApp"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">chat</span>
+                      </button>
+                    )}
+
+                    {lead.aiAssessment && (
+                      <button
+                        onClick={() => setSelectedLeadForAi(lead)}
+                        className="px-2.5 py-1.5 rounded-xl bg-surface-container-high text-secondary hover:text-on-surface border border-outline-variant/30 text-xs font-medium"
+                      >
+                        Protocol
+                      </button>
+                    )}
+
+                    {isUnassigned ? (
+                      <button
+                        onClick={() => handleClaim(lead.id, lead.name)}
+                        className="px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-sm"
+                      >
+                        Claim Lead
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setSelectedLeadForAi(lead)}
+                        className="px-3 py-1.5 rounded-xl bg-surface-container-high text-on-surface text-xs font-medium border border-outline-variant/40"
+                      >
+                        View Lead
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Desktop Leads Table (Hidden on screens < 768px) */}
+      <div className="hidden md:flex w-full bg-surface-container-lowest rounded-2xl shadow-sm overflow-hidden flex-col border border-outline-variant/30">
         <div className="w-full overflow-x-auto">
           <table className="w-full text-left border-collapse select-none text-xs">
             <thead>

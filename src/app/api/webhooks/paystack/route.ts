@@ -1,26 +1,34 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import crypto from 'crypto';
+import { timingSafeEqualString } from '@/lib/apiSecurity';
 
 export async function POST(request: Request) {
- try {
- const rawBody = await request.text();
- const signature = request.headers.get('x-paystack-signature');
+  try {
+    const rawBody = await request.text();
+    const signature = request.headers.get('x-paystack-signature');
+    const secret = process.env.PAYSTACK_SECRET_KEY;
 
- // Verify Paystack signature
- const secret = process.env.PAYSTACK_SECRET_KEY || 'sk_test_mock';
- const expectedSignature = crypto
- .createHmac('sha512', secret)
- .update(rawBody)
- .digest('hex');
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Paystack Webhook] PAYSTACK_SECRET_KEY is unconfigured in production.');
+        return NextResponse.json({ error: 'Webhook secret unconfigured' }, { status: 500 });
+      }
+    }
 
- if (signature !== expectedSignature) {
- if (process.env.NODE_ENV === 'production') {
- return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
- }
- // In dev, we can let it slide or just mock it, but good practice is to warn
- console.warn('Invalid Paystack signature in dev environment');
- }
+    if (secret) {
+      const expectedSignature = crypto
+        .createHmac('sha512', secret)
+        .update(rawBody)
+        .digest('hex');
+
+      if (!signature || !timingSafeEqualString(signature, expectedSignature)) {
+        console.warn('[Paystack Webhook] Invalid Paystack signature rejected.');
+        return NextResponse.json({ error: 'Invalid webhook signature' }, { status: 401 });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
  const event = JSON.parse(rawBody);
 

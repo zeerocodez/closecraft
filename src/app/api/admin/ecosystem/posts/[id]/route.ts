@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db as prisma } from "@/lib/db";
 import { withApiErrors } from "@/lib/apiError";
 import { auth } from "@/lib/auth";
+import { requireSuperAdmin } from "@/lib/apiSecurity";
 import { statusAfterModeration } from "@/lib/ecosystem/educationPostCore";
 
 const Body = z.object({ action: z.enum(["approve", "reject", "remove"]), note: z.string().trim().max(500).optional() });
@@ -12,7 +13,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params;
   return withApiErrors(async () => {
     const session = await auth();
-    if (!session?.user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const adminCheck = await requireSuperAdmin(session);
+    if (!adminCheck.authorized) return adminCheck.response;
     const parsed = Body.safeParse(await req.json().catch(() => null));
     if (!parsed.success) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     const post = await prisma.educationPost.findUnique({ where: { id }, select: { id: true, status: true } });
