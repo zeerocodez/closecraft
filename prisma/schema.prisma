@@ -15,6 +15,7 @@ model User {
   id            String    @id @default(cuid())
   email         String    @unique
   name          String?
+  role          String    @default("USER") // USER, OPERATOR, SUPER_ADMIN
   passwordHash  String?
   emailVerified DateTime?
   image         String?
@@ -22,11 +23,12 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   // Relations
-  memberships   OrganizationMember[]
-  studentProfile StudentProfile?
-  assignedLeads Lead[]                    @relation("LeadAssignee")
-  closedDeals   Deal[]                    @relation("DealCloser")
-  appointments  Appointment[]             @relation("AppointmentCloser")
+  memberships         OrganizationMember[]
+  studentProfile      StudentProfile?
+  professionalProfile ProfessionalProfile?
+  assignedLeads       Lead[]                    @relation("LeadAssignee")
+  closedDeals         Deal[]                    @relation("DealCloser")
+  appointments        Appointment[]             @relation("AppointmentCloser")
 }
 
 model Organization {
@@ -41,18 +43,27 @@ model Organization {
   updatedAt           DateTime  @updatedAt
 
   // Relations
-  members       OrganizationMember[]
-  leads         Lead[]
-  conversations Conversation[]
-  appointments  Appointment[]
-  aiActions     AiAction[]
-  deals         Deal[]
-  auditLogs     AuditLog[]
-  followUpTasks FollowUpTask[]
-  revenueActions RevenueAction[]
-  revenueSignals RevenueSignal[]
-  revenueLeaks  RevenueLeak[]
+  members             OrganizationMember[]
+  leads               Lead[]
+  conversations       Conversation[]
+  appointments        Appointment[]
+  aiActions           AiAction[]
+  deals               Deal[]
+  auditLogs           AuditLog[]
+  followUpTasks       FollowUpTask[]
+  revenueActions      RevenueAction[]
+  revenueSignals      RevenueSignal[]
+  revenueLeaks        RevenueLeak[]
   
+  // Pilot & Billing Relations
+  subscription        WorkspaceSubscription?
+  supportRequests     SalesSupportRequest[]
+  pilotEngagements    PilotEngagement[]
+  clientReadinessList ClientOfferReadiness[]
+  blockers            ClientBlocker[]
+  operationalIssues   OperationalIssue[]
+  bachsInvoices       BachsInvoice[]
+
   // LMS Relations
   studentProfiles StudentProfile[]
   cohorts         Cohort[]
@@ -64,7 +75,7 @@ model Organization {
 
 model OrganizationMember {
   id                      String       @id @default(cuid())
-  role                    String       @default("MEMBER") // ADMIN, MANAGER, CLOSER, SETTER, MEMBER
+  role                    String       @default("MEMBER") // OWNER, ADMIN, MANAGER, CLOSER, SETTER, MEMBER, EXTERNAL_PROFESSIONAL
   isAvailable             Boolean      @default(true)     // Available to receive/claim qualified leads
   commissionRate          Float        @default(10.0)     // Commission percentage or fixed payout
   commissionType          String       @default("PERCENTAGE") // PERCENTAGE, FIXED_PER_DEAL, FIXED_PER_APPOINTMENT
@@ -97,9 +108,15 @@ model Lead {
   email          String
   phone          String?
   message        String?
-  status         String       @default("NEW") // NEW, QUALIFIED, CONTACTED, SCHEDULED, CLOSED
-  source         String?      // e.g., Website Widget, Manual Import
+  status         String       @default("NEW") // NEW, CONTACTED, QUALIFIED, PROPOSAL_SENT, WON, LOST
+  source         String?      // e.g., Website Widget, Manual Import, Referral
   buyingIntent   Int?         // 1-100 AI score
+  estimatedValue Float?       // Estimated opportunity value
+  currency       String?      @default("NGN")
+  disqualificationReason String?
+  nextAction     String?      // Scheduled next action description
+  nextActionDueAt DateTime?   // Timezone-aware due date/time for next action
+  blockerStatus  String?      @default("NONE") // NONE, WAITING_ON_CLIENT
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -107,6 +124,7 @@ model Lead {
   organizationId String?      // Optional for platform-owned marketing leads, required for SaaS leads
   assignedUserId String?      // Assigned Setter, Closer, or Team Member
   assignedRole   String?      // SETTER, CLOSER
+  pilotEngagementId String?   // Scoped active pilot engagement (if represented)
   claimedAt      DateTime?
   aiAssessment   String?      // Deep AI qualification breakdown & deal risk
   nextStepsRecommendation String? // Prescriptive coaching for setter/closer
@@ -114,6 +132,8 @@ model Lead {
   // Relations
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assignedUser   User?         @relation("LeadAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  pilotEngagement PilotEngagement? @relation(fields: [pilotEngagementId], references: [id], onDelete: SetNull)
+  blockers       ClientBlocker[]
   conversations  Conversation[]
   appointments   Appointment[]
   aiActions      AiAction[]
@@ -128,6 +148,7 @@ model Lead {
   @@index([organizationId])
   @@index([email])
   @@index([assignedUserId])
+  @@index([pilotEngagementId])
 }
 
 model Conversation {
@@ -843,3 +864,364 @@ model GuideUnanswered {
 
   @@index([status, lastAskedAt])
 }
+
+// -----------------------------------------------------------------------------
+// MANAGED SERVICE PILOT, GOVERNANCE & BACHS BILLING
+// -----------------------------------------------------------------------------
+
+model SalesSupportRequest {
+  id                      String              @id @default(cuid())
+  organizationId          String
+  requestedByUserId       String
+  status                  String              @default("SUBMITTED") // DRAFT, SUBMITTED, UNDER_REVIEW, PROPOSED, DECLINED
+  helpNeeded              String              // JSON string array of needs
+  offerSummary            String
+  recentEnquiryVolume     String              // e.g. "10-25 per week"
+  targetAudience          String?
+  typicalDealValue        String?
+  workingHoursRequired    String?
+  languageRequirements    String?
+  currentDifficulties     String?
+  authorizedDecisionMaker String?
+  additionalNotes         String?
+  createdAt               DateTime            @default(now())
+  updatedAt               DateTime            @updatedAt
+
+  organization            Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assessment              ReadinessAssessment?
+  engagements             PilotEngagement[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model ReadinessAssessment {
+  id                         String                    @id @default(cuid())
+  requestId                  String                    @unique
+  operatorUserId             String
+  outcome                    String                    @default("PREPARATION_REQUIRED") // READY_FOR_PROPOSAL, MORE_INFO_NEEDED, PREPARATION_REQUIRED, NOT_SUITABLE
+  offerLegitimacy            Boolean                   @default(true)
+  clientDeliveryAbility      Boolean                   @default(true)
+  suitableOpportunitiesExist Boolean                   @default(true)
+  salesMaterialsAvailable    Boolean                   @default(false)
+  pricingAndRefundClear      Boolean                   @default(false)
+  decisionMakerAvailable     Boolean                   @default(true)
+  workingExpectationsRealistic Boolean                 @default(true)
+  compensationViable         Boolean                   @default(true)
+  factualNotes               String?                   // Client-facing factual review
+  internalNotes              String?                   // Private operator notes (NEVER exposed to client)
+  completedAt                DateTime?
+  createdAt                  DateTime                  @default(now())
+  updatedAt                  DateTime                  @updatedAt
+
+  request                    SalesSupportRequest       @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  checklist                  PreparationChecklistItem[]
+
+  @@index([outcome])
+}
+
+model PreparationChecklistItem {
+  id           String              @id @default(cuid())
+  assessmentId String
+  title        String
+  description  String?
+  owner        String              @default("CLIENT") // CLIENT, OPERATOR
+  isCompleted  Boolean             @default(false)
+  completedAt  DateTime?
+
+  assessment   ReadinessAssessment @relation(fields: [assessmentId], references: [id], onDelete: Cascade)
+
+  @@index([assessmentId])
+}
+
+model ProfessionalProfile {
+  id                       String                 @id @default(cuid())
+  userId                   String?                @unique
+  fullName                 String
+  email                    String                 @unique
+  phone                    String?
+  bio                      String?
+  experienceSummary        String?
+  languages                String[]               @default([])
+  weeklyAvailabilityHours  Int                    @default(40)
+  isPoolApproved           Boolean                @default(false)
+  poolApprovedAt           DateTime?
+  poolApprovedByUserId     String?
+  simulatedPortfolioLabels String?
+  status                   String                 @default("ACTIVE") // ACTIVE, ENGAGED, INACTIVE
+  createdAt                DateTime               @default(now())
+  updatedAt                DateTime               @updatedAt
+
+  user                     User?                  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  clientReadiness          ClientOfferReadiness[]
+  engagements              PilotEngagement[]
+  payables                 ProfessionalPayable[]
+}
+
+model ClientOfferReadiness {
+  id                             String              @id @default(cuid())
+  professionalId                 String
+  organizationId                 String
+  salesBriefReviewed             Boolean             @default(false)
+  practiceConversationPassed     Boolean             @default(false)
+  objectionHandlingPassed         Boolean             @default(false)
+  commercialBoundariesConfirmed  Boolean             @default(false)
+  operatorAssessmentPassed        Boolean             @default(false)
+  clientApprovalGranted          Boolean             @default(false)
+  assessmentEvidence             String?
+  approvedAt                     DateTime?
+  approvedByUserId               String?
+  createdAt                      DateTime            @default(now())
+  updatedAt                      DateTime            @updatedAt
+
+  professional                   ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+  organization                   Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([professionalId, organizationId])
+  @@index([organizationId])
+}
+
+model PilotEngagement {
+  id                           String                @id @default(cuid())
+  organizationId               String
+  requestId                    String?
+  professionalId               String?
+  title                        String                @default("Closecraft Follow-up Pilot (30 Days)")
+  status                       String                @default("DRAFT") // DRAFT, AWAITING_ACCEPTANCE, AWAITING_READINESS, AWAITING_PAYMENT, SCHEDULED, ACTIVE, PAUSED, ENDING, ENDED, CANCELLED
+  offerRepresented             String                @default("")
+  activitiesIncluded           String                @default("[]") // JSON string array
+  activitiesExcluded           String                @default("[]") // JSON string array
+  capacityUnit                 String                @default("HOURS") // HOURS, OPPORTUNITIES
+  agreedCapacity               Float                 @default(40.0)
+  usedCapacity                 Float                 @default(0.0)
+  isOverCapacity               Boolean               @default(false)
+  overCapacityNotifiedAt       DateTime?
+  workingDays                  String                @default("Monday - Friday")
+  responseWindows              String                @default("Within 1 hour during 9am - 5pm WAT")
+  communicationChannels        String                @default("WhatsApp, Email, Phone")
+  accountOwners                String?
+  reviewSchedule               String                @default("Weekly review call and daily asynchronous log")
+  requiredClientInputs         String                @default("")
+  startDate                    DateTime?
+  endDate                      DateTime?
+  handoverArrangements         String?
+
+  // Quote economics worksheet
+  clientServicePrice           Float                 @default(150000.0)
+  currency                     String                @default("NGN")
+  professionalCompensation     Float                 @default(80000.0)
+  managementFee                Float                 @default(50000.0)
+  expectedOperatorEffortHours  Float                 @default(10.0)
+  operatorHourlyCostRate       Float                 @default(3000.0)
+  directDeliveryCosts          Float                 @default(5000.0)
+  estimatedPaymentFees         Float                 @default(2250.0)
+  expectedContribution         Float                 @default(32750.0)
+  negativeMarginOverrideReason String?
+  performanceFeeConfig         String?               // JSON string
+
+  // Acceptance & Terms
+  termsVersion                 Int                   @default(1)
+  termsAcceptedAt              DateTime?
+  termsAcceptedByUserId        String?
+  termsSignerIp                String?
+  termsTextSnapshot            String?
+
+  // Activation prerequisites
+  isTermsAccepted              Boolean               @default(false)
+  isProfessionalApproved       Boolean               @default(false)
+  isClientReadinessApproved    Boolean               @default(false)
+  isPaymentVerified            Boolean               @default(false)
+  isMaterialsProvided          Boolean               @default(false)
+  activatedAt                  DateTime?
+
+  createdAt                    DateTime              @default(now())
+  updatedAt                    DateTime              @updatedAt
+
+  organization                 Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  request                      SalesSupportRequest?  @relation(fields: [requestId], references: [id], onDelete: SetNull)
+  professional                 ProfessionalProfile?  @relation(fields: [professionalId], references: [id], onDelete: SetNull)
+  assignedLeads                Lead[]
+  workLogs                     PilotWorkLog[]
+  issues                       OperationalIssue[]
+  blockers                     ClientBlocker[]
+  invoices                     BachsInvoice[]
+  handovers                    PilotHandover[]
+  payables                     ProfessionalPayable[]
+
+  @@index([organizationId])
+  @@index([professionalId])
+  @@index([status])
+}
+
+model PilotWorkLog {
+  id                  String          @id @default(cuid())
+  engagementId        String
+  loggedByUserId      String
+  actorRole           String          @default("PROFESSIONAL") // PROFESSIONAL, OPERATOR
+  date                DateTime        @default(now())
+  hoursSpent          Float
+  activityDescription String
+  leadsWorkedCount    Int             @default(0)
+  createdAt           DateTime        @default(now())
+
+  engagement          PilotEngagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([date])
+}
+
+model OperationalIssue {
+  id               String          @id @default(cuid())
+  engagementId     String
+  organizationId   String
+  title            String
+  category         String          // MISSING_CLIENT_INPUT, UNCLEAR_EXPECTATIONS, PROFESSIONAL_CONDUCT, DATA_QUALITY, OTHER
+  description      String
+  reportedByUserId String
+  reportedByRole   String          // CLIENT, PROFESSIONAL, OPERATOR
+  owner            String          @default("OPERATOR") // CLIENT, OPERATOR, PROFESSIONAL
+  status           String          @default("OPEN") // OPEN, IN_PROGRESS, RESOLVED
+  resolutionNotes  String?
+  resolvedAt       DateTime?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  engagement       PilotEngagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  organization     Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([organizationId])
+  @@index([status])
+}
+
+model PilotHandover {
+  id                          String          @id @default(cuid())
+  engagementId                String
+  type                        String          @default("ENGAGEMENT_COMPLETION") // MID_PILOT_CONTINUITY, ENGAGEMENT_COMPLETION, POST_SALE_CLIENT_HANDOVER
+  leadId                      String?
+  agreedScope                 String?
+  agreedValue                 Float?
+  currency                    String          @default("NGN")
+  buyerExpectations           String?
+  approvedExceptions          String?
+  deliveryOwner               String?
+  nextDeliveryStep            String?
+  verifiedPaymentInfo         String?
+  openTasksSummary            String?
+  unassignedWorkSummary       String?
+  temporaryOwnerUserId        String?
+  clientAcknowledged          Boolean         @default(false)
+  clientAcknowledgedAt        DateTime?
+  clientAcknowledgedByUserId  String?
+  professionalAccessRevoked   Boolean         @default(false)
+  professionalAccessRevokedAt DateTime?
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime        @updatedAt
+
+  engagement                  PilotEngagement @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+}
+
+model ClientBlocker {
+  id                   String           @id @default(cuid())
+  organizationId       String
+  leadId               String?
+  engagementId         String?
+  whatIsNeeded         String
+  whoMustRespond       String           @default("Client Owner")
+  requestedAt          DateTime         @default(now())
+  requiredResponseDate DateTime
+  affectedNextAction   String?
+  status               String           @default("OPEN") // OPEN, RESOLVED
+  resolutionNotes      String?
+  resolvedAt           DateTime?
+  resolvedByUserId     String?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+
+  organization         Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  lead                 Lead?            @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  engagement           PilotEngagement? @relation(fields: [engagementId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([leadId])
+  @@index([engagementId])
+  @@index([status])
+}
+
+model WorkspaceSubscription {
+  id                      String          @id @default(cuid())
+  organizationId          String          @unique
+  status                  String          @default("TRIALING") // TRIALING, ACTIVE, GRACE, EXPIRED, PILOT_INCLUDED
+  trialStartedAt          DateTime        @default(now())
+  trialEndsAt             DateTime
+  plan                    String          @default("STARTER") // STARTER (NGN 15,000/mo)
+  pricePerMonth           Float           @default(15000.0)
+  currency                String          @default("NGN")
+  billingMode             String          @default("MANUAL_MONTHLY") // "Monthly, renew manually"
+  paidThroughDate         DateTime?
+  gracePeriodEndsAt       DateTime?       // 7-day grace period
+  maxInternalSeats        Int             @default(5)
+  activePilotEngagementId String?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  organization            Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model BachsInvoice {
+  id               String           @id @default(cuid())
+  organizationId   String
+  engagementId     String?
+  invoiceNumber    String           @unique
+  type             String           // SOFTWARE_SUBSCRIPTION, PILOT_ENGAGEMENT, PERFORMANCE_FEE
+  amount           Float
+  currency         String           @default("NGN")
+  status           String           @default("ISSUED") // ISSUED, CONFIRMED, FUNDS_AVAILABLE, PAID_OUT, REFUNDED
+  bachsCheckoutId  String?          @unique
+  bachsCheckoutUrl String?
+  bachsChargeId    String?
+  paidAt           DateTime?
+  fundsAvailableAt DateTime?
+  customerEmail    String?
+  customerName     String?
+  metadata         String?          // JSON string
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  organization     Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  engagement       PilotEngagement? @relation(fields: [engagementId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([engagementId])
+  @@index([status])
+}
+
+model ProfessionalPayable {
+  id               String              @id @default(cuid())
+  engagementId     String
+  professionalId   String
+  amount           Float
+  currency         String              @default("NGN")
+  type             String              @default("FIXED_PILOT_COMPENSATION") // FIXED_PILOT_COMPENSATION, PERFORMANCE_SHARE
+  status           String              @default("EARNED") // EARNED, OPERATOR_APPROVED, PAID_OUT, SHORTFALL_REVIEW
+  approvedAt       DateTime?
+  approvedByUserId String?
+  payoutReference  String?
+  payoutDate       DateTime?
+  notes            String?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  engagement       PilotEngagement     @relation(fields: [engagementId], references: [id], onDelete: Cascade)
+  professional     ProfessionalProfile @relation(fields: [professionalId], references: [id], onDelete: Cascade)
+
+  @@index([engagementId])
+  @@index([professionalId])
+  @@index([status])
+}
+
