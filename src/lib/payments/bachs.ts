@@ -86,9 +86,23 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
   const decimalAmount = finalAmount.toFixed(2);
   const idempotencyKey = `checkout-${invoice.id}-${Date.now()}`;
 
-  const resolvedSuccessUrl = params.successUrl.includes('?')
-    ? `${params.successUrl}&checkout_id={CHECKOUT_ID}&invoice_id=${invoice.id}`
-    : `${params.successUrl}?checkout_id={CHECKOUT_ID}&invoice_id=${invoice.id}`;
+  const publicFallback = (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('localhost'))
+    ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '')
+    : 'https://closecraft.com';
+
+  let safeSuccessUrl = params.successUrl;
+  let safeCancelUrl = params.cancelUrl;
+
+  if (safeSuccessUrl.includes('localhost') || safeSuccessUrl.includes('127.0.0.1')) {
+    safeSuccessUrl = safeSuccessUrl.replace(/https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, publicFallback);
+  }
+  if (safeCancelUrl.includes('localhost') || safeCancelUrl.includes('127.0.0.1')) {
+    safeCancelUrl = safeCancelUrl.replace(/https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/, publicFallback);
+  }
+
+  const resolvedSuccessUrl = safeSuccessUrl.includes('?')
+    ? `${safeSuccessUrl}&checkout_id={CHECKOUT_ID}&invoice_id=${invoice.id}`
+    : `${safeSuccessUrl}?checkout_id={CHECKOUT_ID}&invoice_id=${invoice.id}`;
 
   if (!apiKey) {
     // If Bachs API key is not yet configured, provide simulated sandbox checkout
@@ -138,7 +152,7 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
       phone_number: params.customerPhone || undefined,
     } : undefined,
     success_url: resolvedSuccessUrl,
-    cancel_url: params.cancelUrl,
+    cancel_url: safeCancelUrl,
     reference: invoice.invoiceNumber,
     metadata: {
       organizationId: invoice.organizationId,

@@ -83,8 +83,25 @@ export async function POST(req: Request) {
       }
     }
 
-    // Origin resolution for redirects
-    const origin = req.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // Origin resolution for redirects: Bachs strictly requires a publicly accessible HTTPS URL
+    let origin = process.env.NEXT_PUBLIC_APP_URL || process.env.PUBLIC_APP_URL;
+
+    const forwardedHost = req.headers.get('x-forwarded-host');
+    const forwardedProto = req.headers.get('x-forwarded-proto') || 'https';
+    const headerOrigin = req.headers.get('origin') || req.headers.get('referer');
+
+    if (forwardedHost && !forwardedHost.includes('localhost') && !forwardedHost.includes('127.0.0.1')) {
+      origin = `${forwardedProto}://${forwardedHost}`;
+    } else if (headerOrigin && !headerOrigin.includes('localhost') && !headerOrigin.includes('127.0.0.1')) {
+      try {
+        origin = new URL(headerOrigin).origin;
+      } catch (_) {}
+    }
+
+    if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
+      origin = 'https://closecraft.com';
+    }
+
     const successUrl = `${origin}/billing/return`;
     const cancelUrl = `${origin}/billing`;
 
