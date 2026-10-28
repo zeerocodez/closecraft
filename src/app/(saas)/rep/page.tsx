@@ -33,6 +33,58 @@ export default async function RepDashboardPage() {
     redirect('/dashboard');
   }
 
+  // If caller is an external professional, render restricted pilot working view
+  if (membership.role === 'EXTERNAL_PROFESSIONAL') {
+    const proProfile = await db.professionalProfile.findUnique({
+      where: { userId }
+    });
+
+    const activeEngagement = await db.pilotEngagement.findFirst({
+      where: {
+        organizationId,
+        ...(proProfile ? { professionalId: proProfile.id } : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        organization: { select: { name: true } },
+        workLogs: {
+          where: { loggedByUserId: userId },
+          orderBy: { date: 'desc' }
+        },
+        blockers: {
+          where: { resolvedAt: null },
+          orderBy: { createdAt: 'desc' }
+        }
+      }
+    });
+
+    const assignedLeads = activeEngagement?.status === 'ACTIVE'
+      ? await db.lead.findMany({
+          where: {
+            organizationId,
+            assignedUserId: userId,
+            pilotEngagementId: activeEngagement.id,
+          },
+          include: {
+            blockers: {
+              where: { status: 'OPEN' }
+            }
+          },
+          orderBy: { updatedAt: 'desc' }
+        })
+      : [];
+
+    const ExternalProfessionalHub = (await import('@/components/pilot/ExternalProfessionalHub')).default;
+
+    return (
+      <ExternalProfessionalHub
+        engagement={activeEngagement as any}
+        assignedLeads={assignedLeads as any}
+        repName={membership.user?.name || 'Representative'}
+      />
+    );
+  }
+
   // Fetch leads assigned to this rep
   const leads = await db.lead.findMany({
     where: { 

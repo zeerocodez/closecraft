@@ -18,9 +18,6 @@ export default async function LeadsPage() {
     redirect("/login");
   }
 
-  // Fetch leads for this tenant via DAL (includes deals, revenueActions, revenueSignals, assignedUser)
-  const leads = await getLeadsForTenant(organizationId as string);
-
   // Fetch organization team members for assignment
   const teamMembers = await db.organizationMember.findMany({
     where: { organizationId: organizationId as string },
@@ -39,10 +36,17 @@ export default async function LeadsPage() {
 
   const currentMember = teamMembers.find(m => m.user.id === session.user.id);
   const currentUserRole = currentMember?.role || (session.user as any).role || 'MEMBER';
+  const isExternalPro = currentUserRole === 'EXTERNAL_PROFESSIONAL';
+
+  // Fetch leads for this tenant via DAL (strictly quarantined for external professionals)
+  const leads = await getLeadsForTenant(organizationId as string, {
+    id: session.user.id,
+    role: currentUserRole
+  });
 
   const totalLeads = leads.length;
   const pipelineValue = leads.reduce((sum, lead) => {
-    return sum + lead.deals.reduce((dealSum, deal) => dealSum + (deal.amount || 0), 0);
+    return sum + (lead.deals || []).reduce((dealSum, deal) => dealSum + (deal.amount || 0), 0);
   }, 0);
   
   const formattedPipeline = `₦${(pipelineValue / 1000000).toFixed(1)}M`;
@@ -59,11 +63,13 @@ export default async function LeadsPage() {
             </span>
           </div>
           <p className="text-sm text-on-surface-variant mt-1">
-            Real-time ICP scoring, team distribution (Closers/Setters), and AI coaching protocols.
+            {isExternalPro
+              ? 'Assigned opportunities under authorized pilot engagement. Strictly quarantined.'
+              : 'Real-time ICP scoring, team distribution (Closers/Setters), and AI coaching protocols.'}
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <ImportLeadsModal />
+          {!isExternalPro && <ImportLeadsModal />}
           <AddLeadModal />
         </div>
       </div>
