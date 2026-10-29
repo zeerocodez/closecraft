@@ -12,6 +12,7 @@ import {
   handoffLeadToCloser
 } from '@/app/(saas)/actions';
 import { LeadAiAssessmentModal } from '@/components/revenue-engine/LeadAiAssessmentModal';
+import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
 interface RepLead {
   id: string;
@@ -601,7 +602,7 @@ export default function RepDashboardClient({
 
                             {lead.phone && (
                               <a
-                                href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}`}
+                                href={formatWhatsAppUrl(lead.phone, `Hello ${lead.name}, I am reaching out regarding your enquiry.`) || '#'}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-colors flex items-center gap-1 shadow-sm"

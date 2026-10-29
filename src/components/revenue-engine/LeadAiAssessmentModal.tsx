@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
 export interface LeadAiModalData {
   id: string;
@@ -166,9 +167,10 @@ export function LeadAiAssessmentModal({
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
             {lead.phone && (
               <a
-                href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(
+                href={formatWhatsAppUrl(
+                  lead.phone,
                   `Hi ${lead.name}, thanks for reaching out. I reviewed your notes and would love to connect.`
-                )}`}
+                ) || '#'}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 h-11 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all active:scale-[0.98]"

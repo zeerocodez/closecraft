@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { updateLeadFollowUp, recordFastEnquiry, saveClientBlocker, resolveBlockerAction } from '@/app/(saas)/actions';
 import QualificationProfileBanner from '@/components/qualification/QualificationProfileBanner';
+import { formatWhatsAppUrl, normalizeWhatsAppNumber } from '@/lib/whatsapp';
 
 interface TodayLeadItem {
   id: string;
@@ -43,6 +44,8 @@ export default function TodayViewClient({
   userRole,
   teamMembers,
   qualification,
+  organizationName,
+  organizationWhatsApp,
 }: {
   data: {
     overdueLeads: TodayLeadItem[];
@@ -62,6 +65,8 @@ export default function TodayViewClient({
   userRole: string;
   teamMembers: Array<{ id: string; name: string | null; role: string }>;
   qualification?: any | null;
+  organizationName?: string;
+  organizationWhatsApp?: string | null;
 }) {
   const [activeTab, setActiveTab] = useState<'today' | 'overdue' | 'missing' | 'unassigned' | 'blockers'>('today');
   const [selectedLead, setSelectedLead] = useState<TodayLeadItem | null>(null);
@@ -220,13 +225,23 @@ export default function TodayViewClient({
 
   // Safe WhatsApp draft generator (Section 13: does NOT mark follow up complete)
   const openWhatsAppDraft = (phone: string, contactName: string) => {
-    let cleanPhone = phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
-      cleanPhone = '234' + cleanPhone.slice(1);
+    const cleanLeadPhone = normalizeWhatsAppNumber(phone);
+    const orgDisplayName = organizationName || 'CloseCraft';
+    const opener = `Hello ${contactName}, following up regarding your enquiry with ${orgDisplayName}. Are you available for a brief call today?`;
+
+    if (cleanLeadPhone) {
+      const url = formatWhatsAppUrl(cleanLeadPhone, opener);
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+    } else if (organizationWhatsApp) {
+      // Fallback: If lead has no direct phone, trigger chat via organization desk
+      const fallbackUrl = formatWhatsAppUrl(
+        organizationWhatsApp,
+        `Follow-up regarding ${contactName}'s enquiry with ${orgDisplayName}.`
+      );
+      if (fallbackUrl) window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+    } else {
+      alert('No valid WhatsApp phone number found for this contact or workspace.');
     }
-    const opener = `Hello ${contactName}, following up regarding your enquiry with us. Are you available for a brief call today?`;
-    const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(opener)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const formatDueDate = (dateVal?: Date | string | null) => {

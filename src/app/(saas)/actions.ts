@@ -1166,4 +1166,43 @@ export async function createBachsCheckoutAction(params: {
   return checkout;
 }
 
+export async function updateOrganizationIdentity(name: string, whatsappNumber: string) {
+  const session = await auth();
+  const organizationId = (session as any)?.organizationId;
+  const userId = session?.user?.id;
+  if (!organizationId || !userId) throw new Error("Unauthorized");
+
+  // Verify user has ADMIN or OWNER privileges
+  const member = await db.organizationMember.findFirst({
+    where: { organizationId, userId }
+  });
+  if (!member || (member.role !== 'OWNER' && member.role !== 'ADMIN')) {
+    throw new Error("Only workspace owners and administrators can update workspace identity.");
+  }
+
+  const cleanName = name.trim();
+  if (!cleanName) throw new Error("Organization name cannot be empty.");
+
+  const { normalizeWhatsAppNumber } = await import('@/lib/whatsapp');
+  const cleanWhatsApp = normalizeWhatsAppNumber(whatsappNumber);
+  if (whatsappNumber.trim() && !cleanWhatsApp) {
+    throw new Error("Invalid WhatsApp phone number format.");
+  }
+
+  const updatedOrg = await db.organization.update({
+    where: { id: organizationId },
+    data: {
+      name: cleanName,
+      whatsappNumber: cleanWhatsApp,
+    }
+  });
+
+  revalidatePath('/settings');
+  revalidatePath('/today');
+  revalidatePath('/leads');
+  revalidatePath('/dashboard');
+
+  return { success: true, organization: updatedOrg };
+}
+
 

@@ -19,10 +19,11 @@ export default function SignupPage() {
     const name = (formData.get('name') as string)?.trim();
     const companyName = (formData.get('companyName') as string)?.trim();
     const email = (formData.get('email') as string)?.trim();
+    const whatsappNumber = (formData.get('whatsappNumber') as string)?.trim();
     const password = formData.get('password') as string;
 
-    if (!name || !companyName || !email || !password) {
-      setErrorMessage('Please fill in all required fields.');
+    if (!name || !companyName || !email || !whatsappNumber || !password) {
+      setErrorMessage('Please fill in all required fields, including your WhatsApp number.');
       setIsLoading(false);
       return;
     }
@@ -37,7 +38,7 @@ export default function SignupPage() {
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, companyName, email, password }),
+        body: JSON.stringify({ name, companyName, email, whatsappNumber, password }),
       });
 
       const data = await res.json();
@@ -196,6 +197,34 @@ export default function SignupPage() {
                   autoComplete="email"
                 />
               </div>
+            </div>
+
+            {/* Organization WhatsApp Number */}
+            <div className="space-y-1">
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-on-surface" htmlFor="whatsappNumber">
+                  Organization WhatsApp Number
+                </label>
+                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Outreach Channel
+                </span>
+              </div>
+              <div className="relative flex items-center">
+                <span className="material-symbols-outlined absolute left-3 text-emerald-400 text-[20px] pointer-events-none">chat</span>
+                <input
+                  className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all font-mono"
+                  id="whatsappNumber"
+                  name="whatsappNumber"
+                  placeholder="e.g. 0810 326 2248 or +234..."
+                  required
+                  type="tel"
+                  autoComplete="tel"
+                />
+              </div>
+              <p className="text-[11px] text-on-surface-variant leading-tight">
+                Used to trigger 1-click WhatsApp outreach, lead notifications, and customer conversations.
+              </p>
             </div>
 
             {/* Master Password */}

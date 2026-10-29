@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { checkDuplicateLead } from '@/lib/dal/lead';
+import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
 
 /**
  * Public Lead Capture Endpoint
@@ -32,7 +33,7 @@ export async function POST(req: NextRequest) {
 
     const org = await db.organization.findUnique({
       where: { slug: workspaceSlug },
-      select: { id: true, name: true, status: true, leadRoutingMode: true }
+      select: { id: true, name: true, status: true, leadRoutingMode: true, whatsappNumber: true }
     });
 
     if (!org || org.status === 'SUSPENDED') {
@@ -73,13 +74,8 @@ export async function POST(req: NextRequest) {
     // 3. Format international phone
     let formattedPhone = cleanPhone;
     if (cleanPhone) {
-      let num = cleanPhone.replace(/[^0-9+]/g, '');
-      if (num.startsWith('0') && num.length === 11) {
-        num = '+234' + num.slice(1);
-      } else if (!num.startsWith('+')) {
-        num = '+' + num;
-      }
-      formattedPhone = num;
+      const normalized = normalizeWhatsAppNumber(cleanPhone);
+      formattedPhone = normalized ? '+' + normalized : cleanPhone;
     }
 
     // 4. Duplicate Check (returns duplicate warning without silent merge)
@@ -138,6 +134,7 @@ export async function POST(req: NextRequest) {
       success: true,
       leadId: lead.id,
       duplicateWarning,
+      organizationWhatsApp: org.whatsappNumber,
       message: 'Enquiry received successfully.',
     });
   } catch (error: any) {

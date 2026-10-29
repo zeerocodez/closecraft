@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { updateLeadFollowUp, saveClientBlocker, logPilotEffort } from '@/app/(saas)/actions';
+import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
 interface AssignedLead {
   id: string;
@@ -334,11 +335,10 @@ export default function ExternalProfessionalHub({
             <div className="grid grid-cols-1 gap-3">
               {assignedLeads.map((lead) => {
                 const isBlocked = !!lead.blockerStatus;
-                const cleanPhone = (lead.phone || '').replace(/[^0-9]/g, '');
-                const waMessage = encodeURIComponent(
-                  `Hello ${lead.name}, this is ${repName} with ${engagement.organization?.name}. I'm following up regarding your enquiry.`
+                const waLink = formatWhatsAppUrl(
+                  lead.phone,
+                  `Hello ${lead.name}, this is ${repName} with ${engagement.organization?.name || 'our team'}. I'm following up regarding your enquiry.`
                 );
-                const waLink = cleanPhone ? `https://wa.me/${cleanPhone}?text=${waMessage}` : null;
 
                 return (
                   <div

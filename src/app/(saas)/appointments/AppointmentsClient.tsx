@@ -2,6 +2,7 @@
 
 import React, { useState, useTransition } from 'react';
 import { bookOrUpdateAppointment, updateAppointmentStatus, updateGoogleCalendarIntegration } from '@/app/(saas)/actions';
+import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
 interface AppointmentRecord {
   id: string;
@@ -324,7 +325,10 @@ export default function AppointmentsClient({
 
                     {appt.lead.phone && (
                       <a
-                        href={`https://wa.me/${appt.lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hi ${appt.lead.name}, looking forward to our scheduled demo at ${timeFormatted}. Meeting link: ${appt.meetingUrl || ''}`)}`}
+                        href={formatWhatsAppUrl(
+                          appt.lead.phone,
+                          `Hi ${appt.lead.name}, looking forward to our scheduled demo at ${timeFormatted}. Meeting link: ${appt.meetingUrl || ''}`
+                        ) || '#'}
                         target="_blank"
                         rel="noreferrer"
                         className="p-2 rounded-xl bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 border border-emerald-500/20 transition-colors"

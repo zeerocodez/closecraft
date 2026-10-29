@@ -94,19 +94,46 @@ describe('CloseCraft Free Pilot & Revenue Engine Integrity', () => {
   });
 
   it('should format WhatsApp outreach links safely with country code', () => {
-    const buildWhatsAppUrl = (phone, openerText) => {
-      let cleanPhone = phone.replace(/[^0-9]/g, '');
-      if (cleanPhone.startsWith('0') && cleanPhone.length === 11) {
-        cleanPhone = '234' + cleanPhone.slice(1);
+    const normalizeWhatsAppNumber = (rawPhone) => {
+      if (!rawPhone || typeof rawPhone !== 'string') return null;
+      let digits = rawPhone.replace(/[^0-9]/g, '');
+      if (!digits) return null;
+      if (digits.length === 11 && digits.startsWith('0')) {
+        return '234' + digits.slice(1);
       }
+      if (digits.length === 10 && /^[789]/.test(digits)) {
+        return '234' + digits;
+      }
+      if (digits.startsWith('234') && digits.length === 13) {
+        return digits;
+      }
+      if (digits.length >= 7 && digits.length <= 15) {
+        return digits;
+      }
+      return null;
+    };
+
+    const buildWhatsAppUrl = (phone, openerText) => {
+      const cleanPhone = normalizeWhatsAppNumber(phone);
+      if (!cleanPhone) return null;
       return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(openerText)}`;
     };
 
-    const rawPhone = "0803 123 4567";
-    const opener = "Hello Chinedu, following up from your inquiry!";
-    const url = buildWhatsAppUrl(rawPhone, opener);
+    // 1. 11-digit local format with leading 0
+    const rawPhone11 = "0803 123 4567";
+    const opener = "Hello Emmanuel, following up from your inquiry!";
+    const url1 = buildWhatsAppUrl(rawPhone11, opener);
+    assert.ok(url1.startsWith("https://wa.me/2348031234567"));
+    assert.ok(url1.includes("Hello%20Emmanuel"));
 
-    assert.ok(url.startsWith("https://wa.me/2348031234567"));
-    assert.ok(url.includes("Hello%20Chinedu"));
+    // 2. 10-digit local format without leading 0 (as in user screenshot 8103262248)
+    const rawPhone10 = "8103262248";
+    const url2 = buildWhatsAppUrl(rawPhone10, opener);
+    assert.ok(url2.startsWith("https://wa.me/2348103262248"));
+
+    // 3. International prefix +234
+    const rawPhone234 = "+234 810 326 2248";
+    const url3 = buildWhatsAppUrl(rawPhone234, opener);
+    assert.ok(url3.startsWith("https://wa.me/2348103262248"));
   });
 });

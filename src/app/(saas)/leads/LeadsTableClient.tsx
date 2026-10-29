@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react';
 import { claimLead, assignLeadToUser, claimRevenueAction } from '@/app/(saas)/actions';
 import { LeadAiAssessmentModal } from '@/components/revenue-engine/LeadAiAssessmentModal';
+import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
 interface AssignedUser {
   id: string;
@@ -290,9 +291,8 @@ export default function LeadsTableClient({
                     {lead.phone && (
                       <button
                         onClick={() => {
-                          let cleanPhone = (lead.phone || '').replace(/[^0-9]/g, '');
-                          if (cleanPhone.startsWith('0') && cleanPhone.length === 11) cleanPhone = '234' + cleanPhone.slice(1);
-                          window.open(`https://wa.me/${cleanPhone}`, '_blank', 'noopener,noreferrer');
+                          const url = formatWhatsAppUrl(lead.phone, `Hello ${lead.name}, following up regarding your enquiry with CloseCraft.`);
+                          if (url) window.open(url, '_blank', 'noopener,noreferrer');
                         }}
                         className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 flex items-center gap-1 text-xs font-semibold"
                         title="Chat on WhatsApp"

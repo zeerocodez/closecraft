@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
 import { SettingsForm } from './SettingsForm';
+import { WorkspaceIdentityForm } from './WorkspaceIdentityForm';
 
 export default async function SettingsPage() {
  const session = await auth();
@@ -46,37 +47,12 @@ export default async function SettingsPage() {
 
  {/* General Settings */}
  <section className="bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container p-6">
- <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">Workspace Identity</h2>
- 
- <div className="flex flex-col gap-4 max-w-lg">
- <div className="flex flex-col gap-1">
- <label className="font-medium text-on-surface-variant font-bold">Organization Name</label>
- <input 
- type="text" 
- defaultValue={org.name}
- className="h-10 px-3 bg-surface-container-low text-on-surface rounded-lg border border-surface-container focus:outline-none focus:ring-2 focus:ring-primary"
+ <h2 className="font-headline-md text-headline-md font-bold text-on-surface mb-4">Workspace Identity & WhatsApp Outreach</h2>
+ <WorkspaceIdentityForm 
+   initialName={org.name}
+   initialSlug={org.slug}
+   initialWhatsApp={org.whatsappNumber || ''}
  />
- </div>
- 
- <div className="flex flex-col gap-1">
- <label className="font-medium text-on-surface-variant font-bold">Workspace URL</label>
- <div className="flex items-center">
- <span className="h-10 px-3 bg-surface-container flex items-center text-on-surface-variant rounded-l-lg border border-surface-container border-r-0">closecraft.com/</span>
- <input 
- type="text" 
- defaultValue={org.slug}
- disabled
- className="h-10 px-3 w-full bg-surface-container-lowest text-on-surface-variant rounded-r-lg border border-surface-container opacity-70 cursor-not-allowed"
- />
- </div>
- </div>
-
- <div className="mt-2">
- <button className="px-4 py-2 bg-primary text-on-primary font-medium font-bold rounded-lg hover:bg-primary-container shadow-sm transition-colors">
- Save Changes
- </button>
- </div>
- </div>
  </section>
 
  {/* Workspace Qualification Profile */}

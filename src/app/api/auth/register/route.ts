@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { RevenueEngine } from "@/lib/revenue-engine/engine";
 import { rateLimit, clientIp } from "@/lib/rateLimit";
+import { normalizeWhatsAppNumber } from "@/lib/whatsapp";
 
 export async function POST(req: Request) {
   // Rate limit registration attempts: max 10 attempts per 15 minutes per IP
@@ -21,7 +22,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
     }
 
-    const { name, email, password, companyName } = body;
+    const { name, email, password, companyName, whatsappNumber } = body;
 
     if (!email || typeof email !== "string" || !email.includes("@")) {
       return NextResponse.json(
@@ -33,6 +34,15 @@ export async function POST(req: Request) {
     if (!password || typeof password !== "string" || password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters long." },
+        { status: 400 }
+      );
+    }
+
+    const rawWhatsApp = typeof whatsappNumber === "string" ? whatsappNumber.trim() : "";
+    const cleanWhatsApp = normalizeWhatsAppNumber(rawWhatsApp);
+    if (!cleanWhatsApp) {
+      return NextResponse.json(
+        { error: "A valid organization WhatsApp phone number is required (e.g., 0810 326 2248 or +234...)." },
         { status: 400 }
       );
     }
@@ -83,6 +93,7 @@ export async function POST(req: Request) {
         data: {
           name: cleanCompanyName,
           slug,
+          whatsappNumber: cleanWhatsApp,
           plan: "FREE_PILOT",
           status: "APPROVED", // Instant free pilot activation for real user testing
         }

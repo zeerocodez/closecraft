@@ -54,7 +54,13 @@ export default async function TodayPage() {
   }
 
   // Fetch today view data with strict tenant and role isolation
-  const todayData = await getTodayViewData(organizationId, session.user.id, userRole);
+  const [todayData, org] = await Promise.all([
+    getTodayViewData(organizationId, session.user.id, userRole),
+    db.organization.findUnique({
+      where: { id: organizationId },
+      select: { name: true, whatsappNumber: true }
+    })
+  ]);
 
   // Fetch team members for assignment
   const teamMembers = await db.organizationMember.findMany({
@@ -77,6 +83,8 @@ export default async function TodayPage() {
       userRole={userRole}
       teamMembers={formattedMembers}
       qualification={latestQualification as any}
+      organizationName={org?.name || 'CloseCraft'}
+      organizationWhatsApp={org?.whatsappNumber || null}
     />
   );
 }

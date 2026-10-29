@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
 export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
  const router = useRouter();
@@ -247,9 +248,8 @@ export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
  onClick={async () => {
  const textarea = document.getElementById('inbox-composer-input') as HTMLTextAreaElement;
  const draft = (textarea?.value || '').trim() || `Hi ${activeLead.name}, thanks for reaching out. Let's discuss your requirements.`;
- const cleanPhone = activeLead.phone.replace(/[^0-9]/g, '');
- 
- window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(draft)}`, '_blank');
+ const url = formatWhatsAppUrl(activeLead.phone, draft);
+ if (url) window.open(url, '_blank', 'noopener,noreferrer');
 
  if (activeConversation) {
  try {

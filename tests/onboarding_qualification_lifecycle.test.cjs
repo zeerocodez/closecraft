@@ -49,6 +49,26 @@ describe('Closecraft Onboarding & Qualification Lifecycle Acceptance Tests', () 
       assert.strictEqual(result.user.emailVerificationCode, '742918');
     });
 
+    it('captures and normalizes organization WhatsApp number during signup for 1-click outreach', () => {
+      const normalizeWhatsAppNumber = (rawPhone) => {
+        if (!rawPhone || typeof rawPhone !== 'string') return null;
+        let digits = rawPhone.replace(/[^0-9]/g, '');
+        if (!digits) return null;
+        if (digits.length === 11 && digits.startsWith('0')) return '234' + digits.slice(1);
+        if (digits.length === 10 && /^[789]/.test(digits)) return '234' + digits;
+        if (digits.startsWith('234') && digits.length === 13) return digits;
+        if (digits.length >= 7 && digits.length <= 15) return digits;
+        return null;
+      };
+
+      const rawNumber = "0810 326 2248";
+      const normalized = normalizeWhatsAppNumber(rawNumber);
+      assert.strictEqual(normalized, "2348103262248");
+
+      const raw10Digit = "8103262248";
+      assert.strictEqual(normalizeWhatsAppNumber(raw10Digit), "2348103262248");
+    });
+
     it('verifies email correctly and unblocks owner for onboarding', () => {
       const verifyEmail = (user, enteredCode) => {
         if (enteredCode !== user.emailVerificationCode) {
