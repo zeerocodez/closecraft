@@ -35,6 +35,15 @@ model User {
   sentInvites               WorkspaceInvite[]         @relation("InviteSender")
   sessions                  UserSession[]
   qualifications            WorkspaceQualification[]
+  learnerProfile            LearnerProfile?
+  practiceSessions          PracticeSession[]
+  coachRecommendations      CoachRecommendation[]
+  assignedPractices         PracticeAssignment[]      @relation("AssignedPracticeLearner")
+  createdPractices          PracticeAssignment[]      @relation("CreatedPracticeTrainer")
+  reviewedEvaluations       PracticeEvaluation[]      @relation("EvaluationReviewer")
+  verifiableCredentials     VerifiableCredential[]
+  issuedCredentials         VerifiableCredential[]    @relation("CredentialIssuer")
+  salesPlaybooks            SalesPlaybook[]
 }
 
 model Organization {
@@ -88,6 +97,13 @@ model Organization {
   modules         Module[]
   resources       Resource[]
   roleplayScenarios RoleplayScenario[]
+
+  // Sales Enablement & Practice Suite Relations
+  practiceScenarios    PracticeScenario[]
+  practiceSessions     PracticeSession[]
+  practiceAssignments  PracticeAssignment[]
+  salesPlaybooks       SalesPlaybook[]
+  verifiableCredentials VerifiableCredential[]
 }
 
 model OrganizationMember {
@@ -459,6 +475,7 @@ model Cohort {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   
   enrollments    Enrollment[]
+  practiceAssignments PracticeAssignment[]
 
   @@index([organizationId])
 }
@@ -1660,5 +1677,274 @@ model WorkspaceQualification {
   @@index([userId])
   @@index([softwareFit])
   @@index([serviceRecommendation])
+  @@index([status])
+}
+
+// -------------------------------------------------------------
+// SALES ENABLEMENT, PRACTICE STUDIO & COACHING SUITE
+// -------------------------------------------------------------
+
+model LearnerProfile {
+  id                      String        @id @default(cuid())
+  userId                  String        @unique
+  user                    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  onboardingPurpose       String        @default("SKILLS_DEVELOPMENT") // SKILLS_DEVELOPMENT, BUSINESS_PROCESS
+  targetRole              String?       // Appointment Setter, Closer, SDR, Founder Closer
+  currentExperience       String?       // BEGINNER, 1_TO_2_YEARS, 3_TO_5_YEARS, 5_PLUS_YEARS
+  preferredChannel        String?       // WHATSAPP, PHONE_CALL, LINKEDIN_DM, EMAIL, VIDEO_MEETING
+  mainSkillGoal           String?       // Discovery & Diagnosis, Objection Handling, Closing & Commercial Terms, Consistent Follow-up
+  availablePracticeMinutes Int          @default(15) // Daily practice time
+  timeZone                String        @default("Africa/Lagos")
+  currency                String        @default("NGN")
+  baselineCompleted       Boolean       @default(false)
+  baselineScore           Float?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([userId])
+}
+
+model PracticeScenario {
+  id                      String        @id @default(cuid())
+  slug                    String        @unique
+  title                   String
+  version                 Int           @default(1)
+  isPublished             Boolean       @default(true)
+  difficulty              String        @default("INTERMEDIATE") // FOUNDATIONAL, INTERMEDIATE, ADVANCED, CAPSTONE
+  scenarioFamily          String        // DISCOVERY, OBJECTIONS, COMMERCIAL_TERMS, COLD_OUTREACH, CAPSTONE
+  targetRole              String        @default("CLOSER") // SETTER, CLOSER, B2B_REP, FOUNDER
+  channel                 String        @default("WHATSAPP") // WHATSAPP, PHONE, EMAIL, MEETING
+  estimatedMinutes        Int           @default(10)
+  maxTurns                Int           @default(6)
+  workshopNumber          Int?          // 1 to 12 DSS sprint mapping
+  workshopTitle           String?
+  suggestedTrainer        String?       // Trainer 1, Trainer 2, Trainer 3
+  studentBrief            String        // Public brief and learning objective
+  learningObjective       String
+  initialMessage          String        // Starting turn from buyer
+  approvedOfferFacts      Json          // Price, currency, scope, exclusions, delivery prerequisites, unknown terms
+  serverBuyerFacts        Json          // STRICTLY SERVER-ONLY: private buyer facts, hidden objections, decision conditions
+  buyerPersona            Json          // Name, title, company, temperament, skepticism, boundary conditions
+  applicableRubricKeys    String[]      // e.g. ["offer_accuracy", "discovery", "objection_diagnosis", ...]
+  rubricVersion           String        @default("DSS-8CRIT-V1")
+  isCapstone              Boolean       @default(false)
+  organizationId          String?       // Tenant-specific playbook scenario if set; global if null
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  organization            Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  sessions                PracticeSession[]
+  assignments             PracticeAssignment[]
+  recommendations         CoachRecommendation[]
+
+  @@index([slug])
+  @@index([workshopNumber])
+  @@index([difficulty])
+  @@index([organizationId])
+}
+
+model PracticeSession {
+  id                      String        @id @default(cuid())
+  userId                  String
+  user                    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scenarioId              String
+  scenario                PracticeScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  organizationId          String?
+  organization            Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  scenarioVersion         Int           @default(1)
+  rubricVersion           String        @default("DSS-8CRIT-V1")
+  status                  String        @default("IN_PROGRESS") // IN_PROGRESS, PAUSED, COMPLETED, ABANDONED
+  mode                    String        @default("PRACTICE") // PRACTICE, DRILL, ASSIGNMENT, CAPSTONE
+  parentAttemptId         String?
+  changedCondition        String?       // Condition variance for retries
+  currentTurnCount        Int           @default(0)
+  isPrivate               Boolean       @default(true)
+  assignmentId            String?
+  assignment              PracticeAssignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+  completedAt             DateTime?
+
+  parentAttempt           PracticeSession? @relation("AttemptRetry", fields: [parentAttemptId], references: [id], onDelete: SetNull)
+  retries                 PracticeSession[] @relation("AttemptRetry")
+  turns                   PracticeTurn[]
+  evaluations             PracticeEvaluation[]
+
+  @@index([userId])
+  @@index([scenarioId])
+  @@index([organizationId])
+  @@index([parentAttemptId])
+  @@index([status])
+}
+
+model PracticeTurn {
+  id                      String        @id @default(cuid())
+  sessionId               String
+  session                 PracticeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  turnNumber              Int
+  senderType              String        // STUDENT, BUYER, SYSTEM
+  content                 String
+  clientRequestId         String?       // Unique client request ID for turn idempotency
+  revealedFacts           String[]      @default([])
+  createdAt               DateTime      @default(now())
+
+  @@unique([sessionId, turnNumber])
+  @@index([sessionId])
+  @@index([clientRequestId])
+}
+
+model PracticeEvaluation {
+  id                           String        @id @default(cuid())
+  sessionId                    String
+  session                      PracticeSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  evaluationVersion            Int           @default(1)
+  state                        String        @default("COMPLETED") // QUEUED, RUNNING, COMPLETED, FAILED
+  modelUsed                    String?
+  promptVersion                String        @default("EVAL-2026.1")
+  scenarioVersion              Int           @default(1)
+  rubricVersion                String        @default("DSS-8CRIT-V1")
+  totalScore                   Float         @default(0)
+  maxPossibleScore             Float         @default(16)
+  percentage                   Float         @default(0)
+  passedThreshold              Boolean       @default(false)
+  objectiveOutcome             String        // Success / Qualified Out / Incomplete
+  strongestBehaviour           String
+  prioritisedCorrection        String
+  evidenceForCorrection        String
+  improvedResponseExample      String        // Clearly labelled as an example
+  followUpExerciseSuggestion   String?
+  criticalFlags                Json          @default("[]")
+  hasUnresolvedCriticalFlag    Boolean       @default(false)
+  evaluatorRole                String        @default("AI") // AI, TRAINER, PEER
+  reviewerId                   String?
+  reviewer                     User?         @relation("EvaluationReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
+  reviewerNotes                String?
+  reviewerDecision             String?       // APPROVED, CORRECTION_REQUESTED, REASSESSMENT_REQUIRED
+  reviewedAt                   DateTime?
+  errorMessage                 String?
+  usageTokens                  Int?
+  idempotencyKey               String?       @unique
+  createdAt                    DateTime      @default(now())
+  updatedAt                    DateTime      @updatedAt
+
+  criterionScores              PracticeCriterionScore[]
+  credentials                  VerifiableCredential[]
+
+  @@index([sessionId])
+  @@index([reviewerId])
+  @@index([state])
+}
+
+model PracticeCriterionScore {
+  id                      String        @id @default(cuid())
+  evaluationId            String
+  evaluation              PracticeEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
+  criterionKey            String        // offer_accuracy, buyer_fit_qualification, discovery, listening_checked_summaries, value_explanation, objection_diagnosis, decision_commercial, records_handoff
+  criterionLabel          String
+  score                   Int           // 0, 1, 2
+  isApplicable            Boolean       @default(true)
+  observedEvidence        String
+  quotedTurnIds           String[]      @default([]) // Validated against transcript
+  reasoning               String
+  evidenceSufficiency     String        @default("DEMONSTRATED") // NOT_ASSESSED, EMERGING_EVIDENCE, DEMONSTRATED
+  createdAt               DateTime      @default(now())
+
+  @@index([evaluationId])
+  @@index([criterionKey])
+}
+
+model CoachRecommendation {
+  id                      String        @id @default(cuid())
+  userId                  String
+  user                    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  targetSkill             String
+  plainReason             String        // Plain language explanation from real evidence
+  triggeringEvidence      Json          // Real evidence quotes, session IDs
+  selectionRuleVersion    String        @default("3_OF_5_GAP_V1")
+  suggestedScenarioId     String
+  suggestedScenario       PracticeScenario @relation(fields: [suggestedScenarioId], references: [id], onDelete: Cascade)
+  status                  String        @default("ACTIVE") // ACTIVE, COMPLETED, DISMISSED, OVERRIDDEN
+  createdAt               DateTime      @default(now())
+  completedAt             DateTime?
+
+  @@index([userId])
+  @@index([status])
+}
+
+model PracticeAssignment {
+  id                      String        @id @default(cuid())
+  title                   String
+  instructions            String?
+  scenarioId              String
+  scenario                PracticeScenario @relation(fields: [scenarioId], references: [id], onDelete: Cascade)
+  assignedByUserId        String
+  assignedByUser          User          @relation("CreatedPracticeTrainer", fields: [assignedByUserId], references: [id], onDelete: Cascade)
+  assignedToUserId        String?
+  assignedToUser          User?         @relation("AssignedPracticeLearner", fields: [assignedToUserId], references: [id], onDelete: Cascade)
+  cohortId                String?
+  cohort                  Cohort?       @relation(fields: [cohortId], references: [id], onDelete: Cascade)
+  organizationId          String?
+  organization            Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  dueDate                 DateTime?
+  rubricVersion           String        @default("DSS-8CRIT-V1")
+  maxAttempts             Int           @default(3)
+  visibilityScope         String        @default("COHORT") // PERSONAL, COHORT, ORGANIZATION
+  status                  String        @default("PENDING") // PENDING, SUBMITTED, REVIEWED, OVERDUE
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  sessions                PracticeSession[]
+
+  @@index([assignedToUserId])
+  @@index([assignedByUserId])
+  @@index([cohortId])
+  @@index([organizationId])
+}
+
+model SalesPlaybook {
+  id                      String        @id @default(cuid())
+  organizationId          String
+  organization            Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdById             String
+  createdBy               User          @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  title                   String
+  version                 Int           @default(1)
+  status                  String        @default("DRAFT") // DRAFT, REVIEWED, ACTIVE, ARCHIVED
+  scope                   String        @default("ORGANIZATION")
+  offerBrief              String
+  targetIcp               String?
+  pricingTerms            Json?
+  commonObjections        Json?
+  sourceDocumentName      String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model VerifiableCredential {
+  id                      String        @id @default(cuid())
+  uniqueCode              String        @unique // e.g. DSS-2026-X8K9
+  userId                  String
+  user                    User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId          String?
+  organization            Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  trackTitle              String
+  capstoneEvaluationId    String
+  capstoneEvaluation      PracticeEvaluation @relation(fields: [capstoneEvaluationId], references: [id], onDelete: Cascade)
+  reviewerUserId          String
+  reviewer                User          @relation("CredentialIssuer", fields: [reviewerUserId], references: [id], onDelete: Cascade)
+  issuedAt                DateTime      @default(now())
+  status                  String        @default("ACTIVE") // ACTIVE, REVOKED
+  revocationReason        String?
+  isPublicOptIn           Boolean       @default(true)
+  criterionVersion        String        @default("DSS-8CRIT-V1")
+  verifiedScore           Float
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([uniqueCode])
+  @@index([userId])
   @@index([status])
 }

@@ -38,6 +38,10 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     const proNavItems = [
       { href: '/today', icon: 'Clock', label: 'Today', exact: true },
       { href: '/leads', icon: 'Users', label: 'Assigned Enquiries' },
+      { href: '/practice', icon: 'PlayCircle', label: 'Practice Studio' },
+      { href: '/practice/coach', icon: 'Target', label: 'Coach Plan' },
+      { href: '/practice/intelligence', icon: 'TrendingUp', label: 'Performance Intelligence' },
+      { href: '/practice/readiness', icon: 'Award', label: 'Readiness Review' },
       { href: '/rep', icon: 'Briefcase', label: 'Sales Brief & Logs' },
       { href: '/settings', icon: 'Settings', label: 'Settings' },
     ];
@@ -88,10 +92,14 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     );
   }
 
-  // Standard Business Navigation (Section 7: Today, Enquiries, Qualification, Sales support, Team, Billing, Settings)
+  // Standard Business Navigation
   const navItems = [
     { href: '/today', icon: 'Clock', label: 'Today', exact: true },
     { href: '/leads', icon: 'Users', label: 'Enquiries' },
+    { href: '/practice', icon: 'PlayCircle', label: 'Practice Studio' },
+    { href: '/practice/coach', icon: 'Target', label: 'Coach Plan' },
+    { href: '/practice/intelligence', icon: 'TrendingUp', label: 'Performance Intelligence' },
+    { href: '/practice/readiness', icon: 'Award', label: 'Readiness Review' },
     { href: '/onboarding', icon: 'Compass', label: 'Qualification' },
     { href: '/sales-support', icon: 'HeartHandshake', label: 'Sales Support' },
     { href: '/team', icon: 'UserCheck', label: 'Team' },
