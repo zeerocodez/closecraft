@@ -1,6 +1,6 @@
 import React from 'react';
 import { notFound, redirect } from 'next/navigation';
-import { getPracticeAttemptReview } from '@/app/(saas)/practice-actions';
+import { getPracticeAttemptReview, startPracticeSession } from '@/app/(saas)/practice-actions';
 import SessionClient from './SessionClient';
 
 export const metadata = {
@@ -10,10 +10,52 @@ export const metadata = {
 
 export default async function PracticeSessionPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{
+    scenarioId?: string;
+    parentAttemptId?: string;
+    changedCondition?: string;
+    assignmentId?: string;
+  }>;
 }) {
   const { id } = await params;
+
+  // Intercept 'new' or 'start' to create a new practice session and redirect
+  if (id === 'new' || id === 'start') {
+    const sParams = await searchParams;
+    let newSessionId: string | null = null;
+    let startError: any = null;
+
+    if (sParams?.scenarioId) {
+      try {
+        const result = await startPracticeSession({
+          scenarioId: sParams.scenarioId,
+          parentAttemptId: sParams.parentAttemptId,
+          changedCondition: sParams.changedCondition,
+          assignmentId: sParams.assignmentId,
+        });
+        newSessionId = result.sessionId;
+      } catch (err: any) {
+        startError = err;
+      }
+    }
+
+    if (newSessionId) {
+      redirect(`/practice/session/${newSessionId}`);
+    }
+
+    if (startError) {
+      console.error('Session start error:', startError);
+      if (startError.message?.includes('Unauthorized')) {
+        redirect(`/login?callbackUrl=${encodeURIComponent(`/practice/session/new?scenarioId=${sParams?.scenarioId || ''}`)}`);
+      }
+    }
+
+    redirect('/practice/scenarios');
+  }
+
   let attemptData;
   try {
     attemptData = await getPracticeAttemptReview(id);

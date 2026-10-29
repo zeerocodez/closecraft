@@ -855,3 +855,33 @@ export async function prepareForCrmOpportunity(leadId: string) {
     mode: 'PRACTICE',
   });
 }
+
+/**
+ * Submits a completed practice attempt to the DSS cohort trainer for portfolio review.
+ */
+export async function submitForTrainerReview(sessionId: string) {
+  const { userId } = await requireAuth();
+
+  const session = await prisma.practiceSession.findUnique({
+    where: { id: sessionId },
+  });
+
+  if (!session) {
+    throw new Error('Practice session not found.');
+  }
+
+  if (session.userId !== userId) {
+    throw new Error('Forbidden: cannot submit another student\'s attempt.');
+  }
+
+  const updated = await prisma.practiceSession.update({
+    where: { id: sessionId },
+    data: {
+      isPrivate: false,
+    },
+  });
+
+  revalidatePath(`/dss/roleplay/review/${sessionId}`);
+  revalidatePath('/dss/roleplay');
+  return { success: true, session: updated };
+}

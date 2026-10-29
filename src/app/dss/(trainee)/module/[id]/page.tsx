@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, BookOpen, CheckCircle, Lock, PlayCircle, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, BookOpen, CheckCircle, Lock, PlayCircle, ShieldCheck, Sparkles } from 'lucide-react';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
@@ -38,6 +38,31 @@ export default async function ModulePage({ params, searchParams }: { params: { i
  const totalLessons = moduleData.lessons.length;
  const completedCount = completedLessonIds.size;
  const progressPercent = totalLessons === 0 ? 0 : Math.round((completedCount / totalLessons) * 100);
+
+ // Map module to DSS workshop scenario (1 to 12)
+ const workshopNum = (moduleData.orderIndex % 12) + 1;
+ const matchingScenario = (await (db as any).practiceScenario.findFirst({
+   where: { workshopNumber: workshopNum },
+   select: { id: true, title: true, slug: true, workshopNumber: true, difficulty: true }
+ })) || (await (db as any).practiceScenario.findFirst({
+   select: { id: true, title: true, slug: true, workshopNumber: true, difficulty: true }
+ }));
+
+ // Track student's demonstrated competence on this skill
+ const practiceAttempt = matchingScenario ? await (db as any).practiceSession.findFirst({
+   where: {
+     userId: studentId,
+     scenarioId: matchingScenario.id,
+   },
+   include: {
+     evaluations: {
+       orderBy: { createdAt: 'desc' },
+       take: 1
+     }
+   },
+   orderBy: { createdAt: 'desc' }
+ }) : null;
+ const latestEvaluation = practiceAttempt?.evaluations?.[0];
  
  // Determine current lesson
  let activeLessonIndex = 0;
@@ -208,6 +233,29 @@ export default async function ModulePage({ params, searchParams }: { params: { i
  <h2 className="font-serif font-bold text-2xl text-white mb-2">Lesson Overview</h2>
  <p className="text-gray-400 text-sm">Instructor: Zeerocodes DSS Faculty</p>
  </div>
+ <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+ {matchingScenario && (
+   <Link
+     href={`/dss/roleplay?scenarioId=${matchingScenario.id}&lessonId=${activeLesson.id}&moduleId=${moduleData.id}`}
+     className={`px-5 py-3 font-bold rounded-xl shadow-lg flex items-center justify-center gap-2 transition-all ${
+       latestEvaluation?.passed
+         ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25'
+         : latestEvaluation
+         ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30 hover:bg-amber-500/25'
+         : 'bg-[#248277] text-white hover:bg-[#2e9c8f] shadow-[#248277]/30'
+     }`}
+     title="Practice this skill with realistic AI buyer simulation"
+   >
+     <Sparkles size={18} className="text-[#45bfae]" />
+     <span>
+       {latestEvaluation?.passed
+         ? `Demonstrated Competence (${latestEvaluation.totalScore}/16 pts)`
+         : latestEvaluation
+         ? `Retry Practice (${latestEvaluation.totalScore}/16 pts)`
+         : 'Practise this skill'}
+     </span>
+   </Link>
+ )}
  <form action={completeLesson}>
  <input type="hidden" name="lessonId" value={activeLesson.id} />
  <input type="hidden" name="moduleId" value={moduleData.id} />
@@ -224,6 +272,7 @@ export default async function ModulePage({ params, searchParams }: { params: { i
  {completedLessonIds.has(activeLesson.id) ? 'Completed' : 'Mark as Complete'}
  </button>
  </form>
+ </div>
  </div>
 
  <div className="prose prose-invert prose-lg max-w-none text-gray-300 space-y-6 font-sans leading-relaxed">

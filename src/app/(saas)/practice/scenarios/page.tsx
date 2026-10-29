@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
 import { getAuthorisedScenarios } from '@/app/(saas)/practice-actions';
+import LaunchDrillButton from '@/components/practice/LaunchDrillButton';
 
 export const metadata = {
   title: 'Scenario Library | Closecraft',
@@ -146,13 +147,11 @@ export default async function ScenariosPage({
                   ~{s.estimatedMinutes}m • {s.channel}
                 </span>
 
-                <Link
-                  href={`/practice/session/new?scenarioId=${s.id}`}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary text-primary-contrast hover:bg-primary-hover font-bold transition-all shadow-sm active:scale-95"
-                >
-                  <Icon name="Play" size={13} />
-                  {s.isCapstone ? 'Start Capstone' : 'Practise'}
-                </Link>
+                <LaunchDrillButton
+                  scenarioId={s.id}
+                  label={s.isCapstone ? 'Start Capstone' : 'Practise Drill'}
+                  className="rounded-xl font-bold active:scale-95 text-xs py-2 px-3"
+                />
               </div>
             </div>
           ))}

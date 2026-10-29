@@ -100,9 +100,10 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     { href: '/practice/coach', icon: 'Target', label: 'Coach Plan' },
     { href: '/practice/intelligence', icon: 'TrendingUp', label: 'Performance Intelligence' },
     { href: '/practice/readiness', icon: 'Award', label: 'Readiness Review' },
+    { href: '/practice/playbooks', icon: 'BookOpen', label: 'Sales Playbooks' },
     { href: '/onboarding', icon: 'Compass', label: 'Qualification' },
     { href: '/sales-support', icon: 'HeartHandshake', label: 'Sales Support' },
-    { href: '/team', icon: 'UserCheck', label: 'Team' },
+    { href: '/team', icon: 'UserCheck', label: 'Team Development' },
     { href: '/billing', icon: 'CreditCard', label: 'Billing' },
     { href: '/settings', icon: 'Settings', label: 'Settings' },
   ];
@@ -125,7 +126,26 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
           )}
         </div>
         
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        {/* Digital Sales School Portal Switcher for Dual-Role Users */}
+        <div className="px-3 pt-3">
+          <Link
+            href="/dss/dashboard"
+            className="flex items-center justify-between text-xs font-semibold text-[#45bfae] hover:text-[#5cd4c3] px-3 py-2 rounded-xl bg-[#248277]/10 hover:bg-[#248277]/20 border border-[#248277]/20 transition-all w-full group"
+            title="Switch to Digital Sales School LMS & Practice Studio"
+          >
+            <div className="flex items-center gap-2 truncate">
+              <Icon name="GraduationCap" size={16} className="text-[#45bfae] shrink-0" />
+              <span className={`truncate font-medium transition-opacity duration-120 ${(!isExpanded && !isMobile) ? 'opacity-0 w-0' : 'opacity-100'}`}>
+                DSS Training Portal
+              </span>
+            </div>
+            {(isExpanded || isMobile) && (
+              <span className="text-[10px] text-gray-400 group-hover:text-[#45bfae] group-hover:translate-x-0.5 transition-transform shrink-0">&rarr;</span>
+            )}
+          </Link>
+        </div>
+
+        <nav className="flex-1 px-3 py-3 space-y-1">
           {navItems.map((item) => {
             const isActive = item.exact ? pathname === item.href : pathname?.startsWith(item.href);
             return (

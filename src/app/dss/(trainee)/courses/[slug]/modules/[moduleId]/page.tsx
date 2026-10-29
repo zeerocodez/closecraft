@@ -1,136 +1,180 @@
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Mic, CheckCircle, Lock, MessageSquare } from 'lucide-react';
+import { BookOpen, CheckCircle, Lock, ShieldCheck, Sparkles, ArrowLeft } from 'lucide-react';
+import { db } from '@/lib/db';
+import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
+import LaunchDrillButton from '@/components/practice/LaunchDrillButton';
+import { Logo } from '@/components/ui/Logo';
 
-export default function ModuleAssessmentPage() {
- return (
- <div className="max-w-6xl mx-auto w-full p-8 md:p-12 relative">
- <div className="mb-12">
- <Link href="/dss/courses" className="text-[#45bfae] hover:text-[#5cd4c3] text-sm font-bold flex items-center gap-2 mb-6 transition-colors">
- &larr; Back to Curriculum
- </Link>
- <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#248277]/10 px-3 py-1.5 rounded-full border border-[#248277]/20 mb-4">
- <BookOpen size={14} /> Module 4 Assessment
- </div>
- <h1 className="text-4xl md:text-5xl font-serif font-bold text-white tracking-tight mb-4">
- Objection Handling Roleplay
- </h1>
- <p className="text-gray-400 text-lg max-w-2xl leading-relaxed">
- To unlock Module 5, you must successfully navigate this AI buyer roleplay. The AI will evaluate your ability to handle pricing objections using the PAS (Problem-Agitate-Solve) framework.
- </p>
- </div>
+export default async function ModuleAssessmentPage({
+  params,
+}: {
+  params: { slug?: string; moduleId: string };
+}) {
+  const session = await auth();
+  if (!session?.user) redirect('/login');
 
- <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
- 
- {/* Left Col: The Assessment Interface */}
- <div className="lg:col-span-2">
- <div className="bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-6 shadow-xl flex flex-col h-[600px]">
- 
- {/* Header */}
- <div className="flex items-center justify-between border-b border-[#248277]/20 pb-4 mb-4">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-[#45bfae]/20 flex items-center justify-center text-[#45bfae]">
- <MessageSquare size={20} />
- </div>
- <div>
- <h3 className="text-white font-bold text-lg">AI Buyer: Mr. Johnson</h3>
- <span className="text-xs text-gray-400">VP of Logistics, Acme Corp</span>
- </div>
- </div>
- <div className="px-3 py-1 bg-emerald-400/10 border border-emerald-400/20 text-emerald-400 text-xs font-bold uppercase tracking-wider rounded-md animate-pulse">
- Live Session
- </div>
- </div>
+  const studentId = session.user.id;
 
- {/* Chat Area */}
- <div className="flex-1 overflow-y-auto space-y-6 pr-2 mb-4">
- 
- <div className="flex flex-col items-center justify-center mb-6">
- <span className="text-[10px] text-gray-500 uppercase font-bold tracking-widest border-b border-gray-800 pb-1">Roleplay Started</span>
- </div>
+  const moduleData = await db.module.findUnique({
+    where: { id: params.moduleId },
+    include: {
+      lessons: { orderBy: { orderIndex: 'asc' } },
+      progress: { where: { studentId } },
+      course: true,
+    },
+  });
 
- {/* Inbound */}
- <div className="flex justify-start">
- <div className="bg-[#1a2624] border border-[#248277]/20 p-4 rounded-2xl rounded-tl-sm max-w-[85%] text-gray-300 text-sm leading-relaxed">
- "I've looked at the proposal, and honestly, your API SLA looks great. But the price is just way too high compared to what we're currently paying our legacy provider. I can't justify a 40% increase in software costs right now."
- </div>
- </div>
+  // Workshop number mapped from module
+  const workshopNum = moduleData ? (moduleData.orderIndex % 12) + 1 : 4;
+  const scenario = await (db as any).practiceScenario.findFirst({
+    where: { workshopNumber: workshopNum },
+  }) || await (db as any).practiceScenario.findFirst();
 
- {/* Outbound (Trainee) */}
- <div className="flex justify-end">
- <div className="bg-[#248277] text-[#0f1214] p-4 rounded-2xl rounded-tr-sm max-w-[85%] text-sm leading-relaxed font-medium">
- "Mr. Johnson, I completely understand that a 40% increase seems steep on paper. But let's look at the actual cost of your current legacy provider dropping payloads during peak hours. You mentioned last week that the data loss cost you two major enterprise clients last quarter, correct?"
- </div>
- </div>
+  // Find recent attempt on this scenario
+  const recentSession = scenario ? await (db as any).practiceSession.findFirst({
+    where: {
+      userId: studentId,
+      scenarioId: scenario.id,
+    },
+    include: {
+      evaluations: {
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+        include: { criterionScores: true },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  }) : null;
 
- {/* Inbound */}
- <div className="flex justify-start">
- <div className="bg-[#1a2624] border border-[#248277]/20 p-4 rounded-2xl rounded-tl-sm max-w-[85%] text-gray-300 text-sm leading-relaxed">
- "Yes... that's true. Those dropped payloads were a nightmare for our operations team."
- </div>
- </div>
+  const latestEval = recentSession?.evaluations?.[0];
 
- </div>
+  return (
+    <div className="max-w-6xl mx-auto w-full p-8 md:p-12 relative space-y-8">
+      <div>
+        <Link 
+          href={moduleData?.course?.slug ? `/dss/courses/${moduleData.course.slug}` : '/dss/courses'} 
+          className="text-[#45bfae] hover:text-[#5cd4c3] text-sm font-bold flex items-center gap-2 mb-6 transition-colors"
+        >
+          <ArrowLeft size={16} /> Back to Course Curriculum
+        </Link>
+        <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#248277]/10 px-3 py-1.5 rounded-full border border-[#248277]/20 mb-4">
+          <BookOpen size={14} /> Module Assessment • Workshop {workshopNum}
+        </div>
+        <h1 className="text-4xl md:text-5xl font-serif font-bold text-white tracking-tight mb-4">
+          {scenario?.title || 'Objection Handling Roleplay Simulation'}
+        </h1>
+        <p className="text-gray-400 text-lg max-w-2xl leading-relaxed">
+          {scenario?.studentBrief || 'Demonstrate practical competence in multi-turn sales simulation. Evaluated on the 8-criterion DSS rubric before unlocking advanced modules.'}
+        </p>
+      </div>
 
- {/* Input Area */}
- <div className="border-t border-[#248277]/20 pt-4 mt-auto">
- <div className="relative">
- <textarea 
- className="w-full bg-[#0a100f] border border-[#248277]/40 rounded-xl p-4 pr-12 text-gray-200 text-sm focus:outline-none focus:border-[#45bfae] focus:ring-1 focus:ring-[#45bfae] transition-all resize-none"
- placeholder="Type your response or use the microphone..."
- rows={3}
- ></textarea>
- <button className="absolute right-3 top-3 p-2 bg-[#45bfae] hover:bg-[#5cd4c3] text-[#0f1214] rounded-lg transition-colors">
- <Mic size={18} />
- </button>
- </div>
- <div className="flex justify-between items-center mt-3">
- <span className="text-xs text-gray-500 font-medium">Press <kbd className="bg-gray-800 px-1 py-0.5 rounded text-gray-400 font-mono">Enter</kbd> to send</span>
- <button className="px-6 py-2 bg-[#45bfae] text-[#0f1214] font-bold rounded-lg shadow-[0_0_15px_rgba(69,191,174,0.3)] hover:shadow-[0_0_25px_rgba(69,191,174,0.5)] transition-all">
- Submit Assessment
- </button>
- </div>
- </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Col: Live Simulation Launch Hub */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-4 border-b border-[#248277]/20">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-[#45bfae]/20 flex items-center justify-center text-[#45bfae]">
+                    <Sparkles size={24} />
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-lg">
+                      Buyer Persona: {scenario?.buyerPersona?.name || 'Prospect'}
+                    </h3>
+                    <span className="text-xs text-gray-400">
+                      {scenario?.buyerPersona?.title || 'Decision Maker'} • {scenario?.buyerPersona?.company || 'Enterprise'}
+                    </span>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-[#248277]/20 text-[#45bfae] border border-[#248277]/30 text-xs font-bold uppercase tracking-wider rounded-md">
+                  Active Simulation Engine
+                </div>
+              </div>
 
- </div>
- </div>
+              <div className="p-4 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                <div className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">Simulation Brief</div>
+                <p className="text-sm text-gray-300 leading-relaxed">
+                  {scenario?.studentBrief || 'Handle customer objections effectively without unapproved discounts.'}
+                </p>
+              </div>
 
- {/* Right Col: Assessment Status */}
- <div className="flex flex-col gap-6">
- <div className="bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
- <div className="absolute top-0 right-0 w-32 h-32 bg-[#45bfae]/5 rounded-bl-full -z-10"></div>
- <h3 className="text-white font-serif font-bold text-xl mb-4">Rubric & Criteria</h3>
- <ul className="space-y-3">
- <li className="flex items-start gap-3">
- <CheckCircle size={18} className="text-[#45bfae] shrink-0 mt-0.5" />
- <span className="text-gray-300 text-sm">Acknowledge the objection without being defensive.</span>
- </li>
- <li className="flex items-start gap-3">
- <CheckCircle size={18} className="text-[#45bfae] shrink-0 mt-0.5" />
- <span className="text-gray-300 text-sm">Agitate the pain of the status quo (dropped payloads).</span>
- </li>
- <li className="flex items-start gap-3">
- <div className="w-[18px] h-[18px] rounded-full border border-gray-600 shrink-0 mt-0.5"></div>
- <span className="text-gray-500 text-sm">Present the higher price as an investment to solve the pain.</span>
- </li>
- </ul>
- </div>
+              {latestEval && (
+                <div className="p-4 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between">
+                  <div>
+                    <div className="text-xs text-gray-400">Latest Demonstrated Score:</div>
+                    <div className={`text-xl font-bold font-mono ${latestEval.passed ? 'text-[#45bfae]' : 'text-amber-400'}`}>
+                      {latestEval.totalScore}/16 pts ({latestEval.passed ? 'PASSED' : 'NEEDS PRACTICE'})
+                    </div>
+                  </div>
+                  <Link
+                    href={`/dss/roleplay/review/${recentSession.id}`}
+                    className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-white font-bold transition-colors"
+                  >
+                    View Rubric Breakdown &rarr;
+                  </Link>
+                </div>
+              )}
+            </div>
 
- <div className="bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-6 shadow-xl relative overflow-hidden flex flex-col items-center text-center">
- <div className="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center mb-4">
- <Lock size={24} className="text-gray-500" />
- </div>
- <h4 className="text-white font-bold mb-2">Module 5: Closing Strategies</h4>
- <p className="text-sm text-gray-500 mb-4">
- This module is strictly locked. You must achieve a passing grade of 85% or higher on the AI roleplay to gain access.
- </p>
- <button disabled className="w-full py-2 bg-gray-800 text-gray-500 font-bold rounded-lg cursor-not-allowed">
- Locked
- </button>
- </div>
- </div>
+            <div className="pt-8 border-t border-white/5 mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                <Logo variant="icon" size="xs" />
+                <span>Powered by <strong>Closecraft Enablement Engine</strong></span>
+              </div>
 
- </div>
- </div>
- );
+              {scenario && (
+                <LaunchDrillButton
+                  scenarioId={scenario.id}
+                  assignmentId={params.moduleId}
+                  lessonId={moduleData?.lessons?.[0]?.id}
+                  moduleId={params.moduleId}
+                  variant="dss"
+                  label={latestEval ? 'Practise Drill Again' : 'Start Live Roleplay Drill'}
+                  className="px-6 py-3 text-sm font-bold w-full sm:w-auto"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Col: Rubric & Criteria */}
+        <div className="space-y-6">
+          <div className="bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+            <h3 className="text-white font-serif font-bold text-xl mb-4">Required Rubric Standards</h3>
+            <ul className="space-y-3">
+              <li className="flex items-start gap-3 text-sm text-gray-300">
+                <CheckCircle size={18} className="text-[#45bfae] shrink-0 mt-0.5" />
+                <span>Discovery & Needs Diagnosis before prescribing offer.</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-gray-300">
+                <CheckCircle size={18} className="text-[#45bfae] shrink-0 mt-0.5" />
+                <span>Follow approved PAS (Problem-Agitate-Solve) structure.</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-gray-300">
+                <CheckCircle size={18} className="text-[#45bfae] shrink-0 mt-0.5" />
+                <span>Commercial Guardrails: Never invent prices or grant unauthorized terms.</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm text-gray-300">
+                <CheckCircle size={18} className="text-[#45bfae] shrink-0 mt-0.5" />
+                <span>Next-Step Progression: Concrete commitment with clear scheduled time.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div className="bg-[#121c1a] border border-[#248277]/30 rounded-2xl p-6 shadow-xl text-center space-y-3">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
+              <ShieldCheck size={24} />
+            </div>
+            <h4 className="text-white font-bold text-sm">Evidence-Based Certification</h4>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Every turn is archived server-side. Faculty review assesses verbatim evidence quotes from your practice session.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }

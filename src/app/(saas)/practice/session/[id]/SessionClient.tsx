@@ -6,7 +6,13 @@ import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
 import { submitPracticeTurn, finishAndEvaluateSession } from '@/app/(saas)/practice-actions';
 
-export default function SessionClient({ initialData }: { initialData: any }) {
+interface SessionClientProps {
+  initialData: any;
+  variant?: 'saas' | 'dss';
+  returnUrl?: string;
+}
+
+export default function SessionClient({ initialData, variant = 'saas', returnUrl }: SessionClientProps) {
   const router = useRouter();
   const { session, scenario } = initialData;
 
@@ -99,7 +105,12 @@ export default function SessionClient({ initialData }: { initialData: any }) {
     try {
       const res = await finishAndEvaluateSession(session.id);
       if (res.success) {
-        router.push(`/practice/review/${session.id}`);
+        if (variant === 'dss') {
+          const qs = returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : '';
+          router.push(`/dss/roleplay/review/${session.id}${qs}`);
+        } else {
+          router.push(`/practice/review/${session.id}`);
+        }
       } else {
         setErrorMessage(res.error || 'Evaluation could not be completed.');
         setIsEvaluating(false);
@@ -110,13 +121,15 @@ export default function SessionClient({ initialData }: { initialData: any }) {
     }
   };
 
+  const backDestination = returnUrl || (variant === 'dss' ? '/dss/roleplay' : '/practice');
+
   return (
     <div className="space-y-4">
       {/* Top Session Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl border border-outline-variant/30 bg-surface-container-lowest shadow-sm">
         <div className="flex items-center gap-3">
           <Link
-            href="/practice"
+            href={backDestination}
             className="p-1.5 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
             title="Return to Practice Studio"
           >
