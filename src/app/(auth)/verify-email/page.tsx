@@ -10,13 +10,12 @@ export default function VerifyEmailPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Read cached signup email if available
-    const cachedEmail = sessionStorage.getItem('pendingVerificationEmail');
-    if (cachedEmail) setUserEmail(cachedEmail);
-  }, []);
+  const [userEmail, setUserEmail] = useState<string | null>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('pendingVerificationEmail');
+    }
+    return null;
+  });
 
   const handleVerify = async (e?: React.FormEvent, isQuick = false) => {
     if (e) e.preventDefault();
@@ -165,7 +164,7 @@ export default function VerifyEmailPage() {
             </button>
 
             <div className="flex items-center justify-between text-xs text-on-surface-variant pt-2">
-              <span>Didn't receive code?</span>
+              <span>Didn&apos;t receive code?</span>
               <button
                 type="button"
                 onClick={handleResend}

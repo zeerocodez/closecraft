@@ -26,7 +26,7 @@ export async function saveQualificationProgressAction(data: {
   if (!organizationId) throw new Error('Organization context missing.');
 
   // Find or create draft record
-  let existing = await db.workspaceQualification.findFirst({
+  const existing = await db.workspaceQualification.findFirst({
     where: { organizationId, isReassessment: false },
     orderBy: { createdAt: 'desc' },
   });

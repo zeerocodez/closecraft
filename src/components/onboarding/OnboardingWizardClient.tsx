@@ -225,7 +225,6 @@ export default function OnboardingWizardClient({
   // Navigation Handlers
   const handleNext = async () => {
     setFeedback(null);
-    let nextStep = step + 1;
 
     // From Step 1 (Workspace Setup) -> Step 2 (Intended Use)
     if (step === 1) {
