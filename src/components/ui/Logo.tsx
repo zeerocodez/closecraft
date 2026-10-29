@@ -71,3 +71,6 @@ export function Logo({
 }
 
 export default Logo;
+export { DSSLogo, type DSSLogoProps } from './DSSLogo';
+
+

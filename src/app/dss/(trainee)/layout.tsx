@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import { ShieldCheck, ArrowLeft, LogOut, LayoutDashboard, BookOpen, FileText, CheckSquare, Award, BarChart2, MessageSquare, HelpCircle, Settings } from 'lucide-react';
 import { redirect } from 'next/navigation';
-import { Logo } from '@/components/ui/Logo';
+import { Logo, DSSLogo } from '@/components/ui/Logo';
 
 export default async function TraineeLayout({ children }: { children: React.ReactNode }) {
  const session = await auth();
@@ -17,13 +17,7 @@ export default async function TraineeLayout({ children }: { children: React.Reac
  <aside className="w-[260px] bg-[#0f1214] border-r border-white/5 flex flex-col z-10 shrink-0 h-full overflow-y-auto">
  <div className="p-6">
  <Link href="/dss" className="flex items-center gap-3">
- <div className="w-8 h-8 rounded-lg bg-[#248277] flex items-center justify-center text-white">
- <ShieldCheck size={18} />
- </div>
- <div>
- <div className="font-bold text-white leading-tight">Zeerocodes DSS</div>
- <div className="text-[9px] uppercase tracking-widest text-gray-400">Learning Management</div>
- </div>
+   <DSSLogo variant="full" size="md" alt="Digital Sales School" />
  </Link>
  </div>
 

@@ -16,6 +16,7 @@ import {
   Flame,
 } from 'lucide-react';
 import { formatNaira } from '@/lib/dss/rules';
+import { Logo, DSSLogo } from '@/components/ui/Logo';
 
 export default function DSSAffiliateProgramPage() {
   const [referralCount, setReferralCount] = useState(10);
@@ -88,11 +89,12 @@ export default function DSSAffiliateProgramPage() {
       <header className="sticky top-0 z-50 bg-[#0B1117]/90 backdrop-blur-md border-b border-white/5 h-20 flex items-center px-6 md:px-12">
         <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/" className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#A7B7C7] hover:text-white transition-colors border border-white/10">
-              &larr; Back to Closecraft
+            <Link href="/" className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#A7B7C7] hover:text-white transition-colors border border-white/10 flex items-center gap-2">
+              <Logo variant="icon" size="xs" />
+              <span>&larr; Back to Closecraft</span>
             </Link>
-            <Link href="/dss" className="text-xs font-semibold text-[#45BFAE] hover:underline">
-              &larr; DSS Academy Home
+            <Link href="/dss" className="hover:opacity-90 transition-opacity">
+              <DSSLogo variant="full" size="md" alt="Digital Sales School" />
             </Link>
           </div>
 
@@ -503,9 +505,12 @@ export default function DSSAffiliateProgramPage() {
       {/* Footer */}
       <footer className="border-t border-white/5 py-12 px-6 bg-[#0B1117] text-xs text-[#8A9CAE]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <div className="font-bold text-white text-sm mb-1">Digital Sales School (DSS) Partner Network</div>
-            <div>Powered by Closecraft • Zeerocodes Automation Limited</div>
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+            <DSSLogo variant="full" size="md" alt="Digital Sales School" />
+            <div>
+              <div className="font-bold text-white text-sm mb-0.5">Digital Sales School (DSS) Partner Network</div>
+              <div>Powered by Closecraft • Zeerocodes Automation Limited</div>
+            </div>
           </div>
           <div className="flex items-center gap-6">
             <Link href="/" className="hover:text-white transition-colors">Closecraft Home</Link>

@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ShieldCheck, Search, ArrowLeft } from 'lucide-react';
+import { Search, ArrowLeft, ShieldCheck } from 'lucide-react';
+import { DSSLogo, Logo } from '@/components/ui/Logo';
 
 export default function CertificateVerificationPage() {
  const [code, setCode] = useState('');
@@ -20,18 +21,13 @@ export default function CertificateVerificationPage() {
  {/* Top Nav */}
  <header className="sticky top-0 z-50 bg-[#0d1117]/90 backdrop-blur-md border-b border-white/5 h-20 flex items-center px-6 md:px-12">
  <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
- <Link href="/dss" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
- <div className="w-10 h-10 rounded-xl bg-[#2ea043] flex items-center justify-center text-white font-bold">
- <ShieldCheck size={24} />
- </div>
- <div>
- <span className="font-bold text-white tracking-tight block leading-tight">Zeerocodes DSS</span>
- <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Credential Verification</span>
- </div>
+ <Link href="/dss" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+   <DSSLogo variant="full" size="md" alt="Digital Sales School" />
  </Link>
  <div className="flex items-center gap-3">
-            <Link href="/" className="text-xs font-semibold text-gray-400 hover:text-white transition-colors flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
-              &larr; Back to Home
+            <Link href="/" className="text-xs font-semibold text-gray-400 hover:text-white transition-colors flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <Logo variant="icon" size="xs" />
+              <span>&larr; Back to Home</span>
             </Link>
             <Link href="/dss" className="text-xs font-semibold text-[#2ea043] hover:underline flex items-center gap-1">
               DSS Academy

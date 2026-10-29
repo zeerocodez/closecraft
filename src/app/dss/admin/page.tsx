@@ -4,6 +4,7 @@ import { BookOpen, Users, Settings, Plus, BarChart2, CheckSquare, PlayCircle, Br
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
+import { DSSLogo } from '@/components/ui/Logo';
 
 export default async function DSSAdminPage() {
  const session = await auth();
@@ -37,11 +38,9 @@ export default async function DSSAdminPage() {
  {/* Top Nav */}
  <header className="bg-[#0d1117]/90 backdrop-blur-xl border-b border-white/5 h-16 flex items-center px-6 shrink-0 z-40 sticky top-0">
  <div className="w-full flex items-center justify-between">
- <div className="flex items-center gap-2">
- <div className="w-8 h-8 rounded-lg bg-[#248277]/20 border border-[#248277]/30 text-[#45bfae] flex items-center justify-center font-bold font-serif shadow-lg">
- Z
- </div>
- <span className="font-serif font-bold text-white ml-2 text-lg">DSS Faculty Portal</span>
+ <div className="flex items-center gap-3">
+   <DSSLogo variant="icon" size="sm" alt="Digital Sales School" />
+   <span className="font-serif font-bold text-white text-lg">DSS Faculty Portal</span>
  </div>
  <div className="flex items-center gap-4">
   <nav className="hidden md:flex gap-6 text-sm font-bold">

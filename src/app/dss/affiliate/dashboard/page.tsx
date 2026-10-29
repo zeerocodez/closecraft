@@ -19,6 +19,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { formatNaira } from '@/lib/dss/rules';
+import { Logo, DSSLogo } from '@/components/ui/Logo';
 
 type Sale = {
   id: string;
@@ -188,12 +189,14 @@ export default function DSSAffiliateDashboardPage() {
       {/* Top Banner */}
       <div className="bg-[#111C26] border-b border-white/5 px-6 py-2.5 text-xs text-[#A7B7C7] flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <Link href="/" className="hover:text-white font-medium flex items-center gap-1">
-            &larr; Back to Closecraft
+          <Link href="/" className="hover:text-white font-medium flex items-center gap-1.5">
+            <Logo variant="icon" size="xs" />
+            <span>&larr; Back to Closecraft</span>
           </Link>
           <span className="text-white/20">|</span>
-          <Link href="/dss" className="hover:text-white font-medium">
-            DSS Academy Home
+          <Link href="/dss" className="hover:opacity-90 font-medium flex items-center gap-1.5">
+            <DSSLogo variant="icon" size="xs" />
+            <span>DSS Academy Home</span>
           </Link>
           <span className="text-white/20">|</span>
           <Link href="/dss/affiliate" className="text-[#45BFAE] hover:underline font-medium">
@@ -222,9 +225,11 @@ export default function DSSAffiliateDashboardPage() {
         {/* Sidebar Nav */}
         <aside className="w-full md:w-64 shrink-0 flex flex-col gap-6">
           <div className="bg-[#111C26] border border-white/5 rounded-2xl p-5">
+            <div className="mb-3">
+              <DSSLogo variant="full" size="md" alt="Digital Sales School" />
+            </div>
             <div className="text-[10px] font-bold uppercase tracking-wider text-[#8A9CAE] mb-1">PARTNER PORTAL</div>
-            <div className="font-extrabold text-white text-lg flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full bg-[#45BFAE]" />
+            <div className="font-extrabold text-white text-base flex items-center gap-2">
               DSS Partner Hub
             </div>
             {profile && (

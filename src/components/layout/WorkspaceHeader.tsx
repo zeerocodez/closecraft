@@ -2,7 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
-import Logo from '@/components/ui/Logo';
+import { Logo, DSSLogo } from '@/components/ui/Logo';
 
 export default function WorkspaceHeader({ user, onMenuClick, isMobile }: { user: any, onMenuClick: () => void, isMobile: boolean }) {
   return (
@@ -42,7 +42,7 @@ export default function WorkspaceHeader({ user, onMenuClick, isMobile }: { user:
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#248277]/15 hover:bg-[#248277]/25 text-[#45bfae] text-xs font-bold transition-all border border-[#248277]/30"
           title="Digital Sales School Academy"
         >
-          <Icon name="GraduationCap" size={15} />
+          <DSSLogo variant="icon" size="xs" />
           <span className="hidden sm:inline">DSS Academy</span>
         </Link>
         <button className="p-2 text-on-surface-variant hover:text-on-surface transition-colors" title="Notifications">

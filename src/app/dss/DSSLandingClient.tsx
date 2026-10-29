@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import { formatNaira } from '@/lib/dss/rules';
 import { DSS_PRODUCTS } from '@/lib/dss/products';
-import { Logo } from '@/components/ui/Logo';
+import { Logo, DSSLogo } from '@/components/ui/Logo';
 
 const objectionScenarios = {
   price: {
@@ -225,14 +225,8 @@ export default function DSSLandingClient() {
               <span>&larr; Back to Closecraft Home</span>
             </Link>
 
-            <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-white/10">
-              <div className="w-7 h-7 rounded-lg bg-[#45BFAE]/10 border border-[#45BFAE]/30 flex items-center justify-center text-[#45BFAE] font-bold text-xs">
-                DSS
-              </div>
-              <div>
-                <span className="font-bold text-white text-xs block leading-tight">Digital Sales School</span>
-                <span className="text-[10px] text-[#8A9CAE] block leading-none">Closecraft Flagship Academy</span>
-              </div>
+            <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-white/10">
+              <DSSLogo variant="full" size="md" alt="Digital Sales School" />
             </div>
           </div>
 
@@ -1369,9 +1363,12 @@ export default function DSSLandingClient() {
       {/* FOOTER */}
       <footer className="border-t border-white/5 py-12 px-6 bg-[#0B1117] text-xs text-[#8A9CAE]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <div className="font-bold text-white text-sm mb-1">Digital Sales School (DSS)</div>
-            <div>The Flagship Closer Talent Engine of Closecraft • Zeerocodes Automation Limited</div>
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
+            <DSSLogo variant="full" size="md" alt="Digital Sales School" />
+            <div>
+              <div className="font-bold text-white text-sm mb-0.5">Digital Sales School (DSS)</div>
+              <div>The Flagship Closer Talent Engine of Closecraft • Zeerocodes Automation Limited</div>
+            </div>
           </div>
           <div className="flex flex-wrap items-center gap-6">
             <Link href="/" className="hover:text-white transition-colors">Closecraft Home</Link>

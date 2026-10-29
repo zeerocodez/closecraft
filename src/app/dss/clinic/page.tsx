@@ -4,6 +4,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { ArrowRight, Calendar, Download } from 'lucide-react';
 import { submitClinicRegistration } from './actions';
+import { Logo, DSSLogo } from '@/components/ui/Logo';
 
 export default function DSSClinicPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -30,11 +31,12 @@ export default function DSSClinicPage() {
       <div className="flex-1 max-w-3xl mx-auto w-full px-6 flex flex-col items-center">
         
         <div className="w-full flex items-center justify-between mb-8">
-            <Link href="/" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-gray-400 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 transition-colors">
-              &larr; Back to Closecraft Home
+            <Link href="/" className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-gray-400 hover:text-white px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 transition-colors">
+              <Logo variant="icon" size="xs" />
+              <span>&larr; Back to Closecraft Home</span>
             </Link>
-            <Link href="/dss" className="text-xs sm:text-sm font-bold text-[#2ea043] hover:underline">
-              DSS Academy Home &rarr;
+            <Link href="/dss" className="hover:opacity-90 transition-opacity">
+              <DSSLogo variant="full" size="md" alt="Digital Sales School" />
             </Link>
           </div>
           <div className="text-center mb-12">

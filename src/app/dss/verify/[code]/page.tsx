@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
-import { ShieldCheck, ArrowLeft, CheckCircle, XCircle, Calendar, User, Award, Check, Search } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, Calendar, User, Award, Check, Search } from 'lucide-react';
+import { DSSLogo } from '@/components/ui/Logo';
 
 export default async function CertificateResultPage({ params }: { params: Promise<{ code: string }> | { code: string } }) {
   const resolvedParams = await Promise.resolve(params);
@@ -14,14 +15,8 @@ export default async function CertificateResultPage({ params }: { params: Promis
  {/* Top Nav */}
  <header className="sticky top-0 z-50 bg-[#0d1117]/90 backdrop-blur-md border-b border-white/5 h-20 flex items-center px-6 md:px-12">
  <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
- <Link href="/dss" className="flex items-center gap-3 hover:opacity-80 transition-opacity">
- <div className="w-10 h-10 rounded-xl bg-[#2ea043] flex items-center justify-center text-white font-bold">
- <ShieldCheck size={24} />
- </div>
- <div>
- <span className="font-bold text-white tracking-tight block leading-tight">Zeerocodes DSS</span>
- <span className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Credential Verification</span>
- </div>
+ <Link href="/dss" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+   <DSSLogo variant="full" size="md" alt="Digital Sales School" />
  </Link>
  <Link href="/dss/verify" className="text-sm font-semibold text-gray-400 hover:text-white transition-colors flex items-center gap-2">
  <ArrowLeft size={16} /> Search Again

@@ -1,28 +1,24 @@
 import React from 'react';
 import Link from 'next/link';
-import { ArrowRight, BookOpen } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { Logo, DSSLogo } from '@/components/ui/Logo';
 
 export default function DSSRegisterPage() {
   return (
     <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-lg border border-surface-container p-8">
         <div className="flex items-center justify-between mb-6">
-          <Link href="/" className="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant hover:text-on-surface">
-            &larr; Back to Home
+          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface">
+            <Logo variant="icon" size="xs" />
+            <span>&larr; Back to Home</span>
           </Link>
           <Link href="/dss" className="text-xs font-bold text-primary hover:underline">
             DSS Academy &rarr;
           </Link>
         </div>
         <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-            <BookOpen className="text-primary" size={24} />
-          </div>
+          <DSSLogo variant="full" size="xl" alt="Digital Sales School" />
         </div>
-
-        <h1 className="text-2xl font-headline-lg font-bold text-center text-on-surface mb-2">
-          Digital Sales School
-        </h1>
         <p className="text-on-surface-variant text-center mb-8 font-body-md">
           Create your account to access the AI-powered LMS, training routes, and certifications.
         </p>
