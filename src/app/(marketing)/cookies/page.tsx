@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import ManageCookiesButton from '@/components/layout/ManageCookiesButton';
+import { Logo } from '@/components/ui/Logo';
 
 export const metadata: Metadata = {
   title: 'Cookie Notice | Closecraft',
@@ -12,12 +13,15 @@ export default function CookiePolicyPage() {
     <div className="min-h-screen bg-surface flex flex-col pt-24 px-4 pb-20">
       <div className="max-w-4xl mx-auto w-full">
         <div className="mb-8 flex items-center justify-between">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface hover:text-primary transition-colors px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 shadow-sm"
-          >
-            &larr; Back to Home
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface hover:text-primary transition-colors px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 shadow-sm"
+            >
+              &larr; Back to Home
+            </Link>
+            <Logo variant="full" size="md" alt="Closecraft" />
+          </div>
           <span className="text-xs text-on-surface-variant">Version 2026.1 · October 28, 2026</span>
         </div>
 

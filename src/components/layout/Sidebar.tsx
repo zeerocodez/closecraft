@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
+import Logo from '@/components/ui/Logo';
 
 export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: any, isOpen: boolean, setIsOpen: (v: boolean) => void, isMobile: boolean }) {
   const pathname = usePathname();
@@ -44,15 +45,10 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
       <aside className={sidebarClasses}>
         <div className="flex flex-col flex-1 overflow-y-auto scrollbar-none">
           <div className="h-16 px-4 flex items-center justify-between border-b border-outline-variant/30">
-            <Link href="/today" className="flex items-center gap-3 overflow-hidden whitespace-nowrap group hover:opacity-80 transition-opacity">
-              <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
-                <Icon name="Target" size={16} className="text-primary" />
-              </div>
+            <Link href="/today" className="flex items-center gap-2 overflow-hidden whitespace-nowrap group hover:opacity-85 transition-opacity py-1">
+              <Logo variant={isExpanded || isMobile ? "full" : "icon"} size="sm" alt="Closecraft Professional" />
               {(isExpanded || isMobile) && (
-                <div className="flex flex-col">
-                  <span className="font-heading text-sm font-semibold text-on-surface tracking-tight">Closecraft</span>
-                  <span className="text-[10px] text-primary uppercase font-bold tracking-wider">Professional Hub</span>
-                </div>
+                <span className="text-[10px] text-primary uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-primary/10 border border-primary/20 shrink-0">PRO</span>
               )}
             </Link>
             {isMobile && (
@@ -111,13 +107,8 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     <aside className={sidebarClasses}>
       <div className="flex flex-col flex-1 overflow-y-auto scrollbar-none">
         <div className="h-16 px-4 flex items-center justify-between border-b border-outline-variant/30">
-          <Link href="/" className="flex items-center gap-3 overflow-hidden whitespace-nowrap group hover:opacity-80 transition-opacity" title="Back to CloseCraft Home">
-            <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30">
-               <Icon name="Rocket" size={16} className="text-primary" />
-            </div>
-            {(isExpanded || isMobile) && (
-              <span className="font-heading text-lg font-semibold text-on-surface tracking-tight transition-opacity duration-120">Closecraft</span>
-            )}
+          <Link href="/" className="flex items-center gap-2 overflow-hidden whitespace-nowrap group hover:opacity-85 transition-opacity py-1" title="Back to CloseCraft Home">
+            <Logo variant={isExpanded || isMobile ? "full" : "icon"} size="md" alt="Closecraft" />
           </Link>
           {isMobile && (
             <button onClick={() => setIsOpen(false)} className="p-1 text-on-surface-variant shrink-0 hover:text-on-surface">

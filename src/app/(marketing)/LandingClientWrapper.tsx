@@ -10,6 +10,7 @@ import JoinChooser from "@/components/landing/JoinChooser";
 import SampleNote from "@/components/landing/SampleNote";
 import type { LandingView } from "@/lib/landing/types";
 import type { EcosystemFlags } from "@/lib/ecosystem/flags";
+import Logo from "@/components/ui/Logo";
 
 import Link from 'next/link';
 import {
@@ -126,11 +127,8 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
   </div>
   <div className="h-16 w-full px-4 sm:px-8 lg:px-12 max-w-[1440px] mx-auto flex items-center justify-between">
     <div className="flex items-center gap-6 xl:gap-8">
-      <Link className="flex items-center gap-2 group" href="/">
-        <div className="w-8 h-8 rounded-lg bg-inverse-surface flex items-center justify-center text-on-primary font-headline-lg text-headline-lg shadow-sm">
-          <span className="material-symbols-outlined text-[20px] text-primary-fixed">bolt</span>
-        </div>
-        <span className="font-headline-lg text-headline-lg text-on-surface tracking-tight">Closecraft</span>
+      <Link className="flex items-center group py-1" href="/" aria-label="Closecraft Home">
+        <Logo variant="full" size="lg" priority alt="Closecraft Revenue OS" />
       </Link>
       <nav className="hidden lg:flex items-center gap-2 xl:gap-3">
         <Link className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface text-sm font-medium transition-colors" href="/platform">Platform</Link>
@@ -1074,12 +1072,8 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <div className="section-wrap">
  <div className="footer-grid">
  <div>
- <Link href="#hero" className="brand-lockup">
- <div className="brand-mark">Z</div>
- <div>
- <strong style={{ color: '#fff' }}>CLOSECRAFT</strong>
- <small>REVENUE OPERATING SYSTEM</small>
- </div>
+ <Link href="#hero" className="inline-flex items-center group mb-4" aria-label="Return to top">
+ <Logo variant="full" size="xl" alt="Closecraft" />
  </Link>
  <p style={{ color: 'var(--dark-muted)', fontSize: '13px', marginTop: '14px', maxWidth: '320px' }}>
  "Know who is following up. Organise enquiries, keep follow-up visible, and close more of the leads you already have."

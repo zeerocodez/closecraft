@@ -25,8 +25,16 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
- title: "Closecraft | Know Who Is Following Up",
- description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+  title: "Closecraft | Know Who Is Following Up",
+  description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/images/closecraft-icon.png', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+    apple: '/images/icon-192x192.png',
+  },
 };
 
 export default function RootLayout({

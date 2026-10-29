@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import { ShieldCheck, ArrowLeft, LogOut, LayoutDashboard, BookOpen, FileText, CheckSquare, Award, BarChart2, MessageSquare, HelpCircle, Settings } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import { Logo } from '@/components/ui/Logo';
 
 export default async function TraineeLayout({ children }: { children: React.ReactNode }) {
  const session = await auth();
@@ -50,7 +51,7 @@ export default async function TraineeLayout({ children }: { children: React.Reac
             className="flex items-center gap-2 text-xs font-semibold text-gray-300 hover:text-white px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/5 transition-colors w-full"
             title="Return to CloseCraft Marketing Home"
           >
-            <ArrowLeft size={14} /> Back to Closecraft Home
+            <Logo variant="icon" size="xs" /> Back to Closecraft Home
           </Link>
         </div>
         <nav className="flex-1 px-4 space-y-1">

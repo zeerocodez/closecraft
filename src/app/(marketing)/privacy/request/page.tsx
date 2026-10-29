@@ -3,6 +3,7 @@
 import React, { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { Check, Send, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Logo } from '@/components/ui/Logo';
 
 export default function PrivacyRequestPage() {
   const [busy, setBusy] = useState(false);
@@ -43,12 +44,15 @@ export default function PrivacyRequestPage() {
       <div className="max-w-3xl mx-auto w-full">
         {/* Navigation Breadcrumb */}
         <div className="mb-8 flex items-center justify-between">
-          <Link
-            href="/privacy"
-            className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface hover:text-primary transition-colors px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 shadow-sm"
-          >
-            &larr; Back to Privacy Notice
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/privacy"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-on-surface hover:text-primary transition-colors px-3.5 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 shadow-sm"
+            >
+              &larr; Back to Privacy Notice
+            </Link>
+            <Logo variant="full" size="md" alt="Closecraft" />
+          </div>
           <span className="text-xs text-on-surface-variant">DSR Portal · NDPA 2023 Compliant</span>
         </div>
 

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { formatNaira } from '@/lib/dss/rules';
 import { DSS_PRODUCTS } from '@/lib/dss/products';
+import { Logo } from '@/components/ui/Logo';
 
 const objectionScenarios = {
   price: {
@@ -218,9 +219,10 @@ export default function DSSLandingClient() {
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#A7B7C7] hover:text-white transition-colors border border-white/10 flex items-center gap-1.5"
+              className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#A7B7C7] hover:text-white transition-colors border border-white/10 flex items-center gap-2"
             >
-              &larr; Back to Closecraft Home
+              <Logo variant="icon" size="xs" />
+              <span>&larr; Back to Closecraft Home</span>
             </Link>
 
             <div className="hidden sm:flex items-center gap-2 pl-2 border-l border-white/10">

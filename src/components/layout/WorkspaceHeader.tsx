@@ -2,6 +2,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
+import Logo from '@/components/ui/Logo';
 
 export default function WorkspaceHeader({ user, onMenuClick, isMobile }: { user: any, onMenuClick: () => void, isMobile: boolean }) {
   return (
@@ -19,8 +20,8 @@ export default function WorkspaceHeader({ user, onMenuClick, isMobile }: { user:
             title="Return to CloseCraft Home"
           >
             <Icon name="ArrowLeft" size={14} />
-            <Icon name="Home" size={14} />
-            <span className="hidden sm:inline">Back to Home</span>
+            <Logo variant="icon" size="xs" />
+            <span className="hidden sm:inline">Home</span>
           </Link>
           <div className="flex flex-col">
             <h1 className="text-sm font-semibold text-on-surface leading-tight">{user?.organization?.name || 'Workspace'}</h1>

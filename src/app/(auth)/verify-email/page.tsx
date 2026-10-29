@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import Logo from '@/components/ui/Logo';
 
 export default function VerifyEmailPage() {
   const router = useRouter();
@@ -77,6 +78,13 @@ export default function VerifyEmailPage() {
     <div className="flex flex-col w-full px-4 md:px-8 py-12 min-h-screen justify-center items-center bg-surface">
       <div className="w-full max-w-md mx-auto flex flex-col pt-4">
         
+        {/* Brand Header */}
+        <div className="flex justify-center mb-6">
+          <Link href="/" className="inline-flex items-center group transition-transform hover:scale-105" title="CloseCraft Home">
+            <Logo variant="full" size="xl" priority alt="Closecraft" />
+          </Link>
+        </div>
+
         {/* Top Navigation */}
         <div className="flex items-center justify-between mb-4">
           <Link 

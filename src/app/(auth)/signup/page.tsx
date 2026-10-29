@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
+import Logo from '@/components/ui/Logo';
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -106,13 +107,11 @@ export default function SignupPage() {
 
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-6">
-          <div className="relative w-16 h-16 rounded-xl bg-inverse-surface shadow-md flex items-center justify-center mb-3 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-tr from-primary/30 to-transparent"></div>
-            <span className="material-symbols-outlined text-[32px] text-primary-fixed z-10">rocket_launch</span>
-          </div>
+          <Link href="/" className="mb-4 inline-flex items-center group transition-transform hover:scale-105" title="CloseCraft Home">
+            <Logo variant="full" size="xl" priority alt="Closecraft" />
+          </Link>
           <div className="flex items-center gap-2 mb-1">
-            <span className="font-medium text-sm font-bold text-on-surface tracking-tight">CLOSECRAFT</span>
-            <span className="px-1.5 py-0.5 rounded bg-primary text-on-primary text-xs font-semibold uppercase tracking-widest text-[10px]">REVENUE OS</span>
+            <span className="px-2 py-0.5 rounded bg-primary text-on-primary text-xs font-semibold uppercase tracking-widest text-[10px]">REVENUE OS</span>
           </div>
           <h1 className="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight mb-2">
             Join the Free Pilot
