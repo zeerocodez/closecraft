@@ -95,15 +95,33 @@ export async function POST(req: Request) {
       slug = `${baseSlug}-${Math.random().toString(36).substring(2, 7)}`;
     }
 
-    // Atomic transaction: create Organization, User, and OrganizationMember
+    // Atomic transaction: create Organization, User, OrganizationMember, and 7-Day Starter WorkspaceSubscription
     const { user, org } = await db.$transaction(async (tx) => {
       const org = await tx.organization.create({
         data: {
           name: cleanCompanyName,
           slug,
           whatsappNumber: cleanWhatsApp,
-          plan: "FREE_PILOT",
-          status: "APPROVED", // Instant free pilot activation for real user testing
+          plan: "STARTER",
+          status: "APPROVED",
+        }
+      });
+
+      const { TRIAL_DURATION_MS } = await import('@/lib/payments/subscription');
+      const now = new Date();
+      const trialEndsAt = new Date(now.getTime() + TRIAL_DURATION_MS);
+
+      await tx.workspaceSubscription.create({
+        data: {
+          organizationId: org.id,
+          status: "TRIALING",
+          plan: "STARTER",
+          pricePerMonth: 20000.0,
+          currency: "NGN",
+          billingMode: "MANUAL_MONTHLY",
+          trialStartedAt: now,
+          trialEndsAt,
+          maxInternalSeats: 3,
         }
       });
 

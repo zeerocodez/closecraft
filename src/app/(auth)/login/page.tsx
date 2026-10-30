@@ -323,11 +323,11 @@ export default function LoginPage() {
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-medium text-sm font-semibold text-on-surface truncate">New to Closecraft?</span>
-              <span className="text-sm text-on-surface-variant truncate">14-day trial with full AI Autopilot</span>
+              <span className="text-sm text-on-surface-variant truncate">7-day Starter trial, no card required</span>
             </div>
           </div>
           <Link href="/signup" className="shrink-0 px-4 py-2 rounded bg-inverse-surface text-inverse-on-surface hover:bg-on-surface transition-colors text-sm font-medium font-semibold ml-2">
-            Start Free
+            Start 7-Day Trial
           </Link>
         </div>
 

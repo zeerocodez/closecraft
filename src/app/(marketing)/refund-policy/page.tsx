@@ -72,7 +72,7 @@ export default function RefundPolicyPage() {
             </h2>
             <ul className="space-y-3 text-on-surface-variant list-disc pl-5 text-sm">
               <li>
-                <strong className="text-on-surface">14-Day Free Trial:</strong> Because all workspaces start with an uncharged 14-day trial, customers have full opportunity to evaluate the platform before any fee is requested.
+                <strong className="text-on-surface">7-Day Free Trial:</strong> Because all workspaces start with an uncharged 7-day trial (168 hours), customers have full opportunity to evaluate the platform before any fee is requested.
               </li>
               <li>
                 <strong className="text-on-surface">Billing Errors & Technical Failures:</strong> In the event of a duplicated Bachs payment, erroneous charge, or significant prolonged service disruption attributable directly to Closecraft infrastructure, we will issue a full 100% refund of the affected billing transaction.

@@ -32,6 +32,20 @@ export async function GET(request: Request) {
  console.log(`[RevenueEngine Cron] Found ${pendingActions.length} pending actions`);
 
  for (const action of pendingActions) {
+ // Check subscription operational status per Section 6 (expired trials cannot execute automated outreach)
+ const { getOrCreateWorkspaceSubscription } = await import('@/lib/payments/subscription');
+ const sub = await getOrCreateWorkspaceSubscription(action.organizationId);
+ if (!sub.isOperational) {
+ await db.revenueAction.update({
+ where: { id: action.id },
+ data: { 
+ status: 'PAUSED',
+ result: 'Automation paused: Workspace trial expired. Choose a plan in Billing to resume.'
+ }
+ });
+ continue;
+ }
+
  // Mark as executing
  await db.revenueAction.update({
  where: { id: action.id },

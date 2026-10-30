@@ -58,10 +58,10 @@ export default function TermsOfServicePage() {
             </h2>
             <ul className="space-y-3 text-on-surface-variant list-disc pl-5">
               <li>
-                <strong className="text-on-surface">14-Day Free Trial:</strong> New workspaces receive 14 days of complimentary Starter access. No credit card or upfront commitment is required to start.
+                <strong className="text-on-surface">7-Day Free Trial:</strong> New workspaces receive 7 days (168 hours) of complimentary Starter access. No credit card or upfront commitment is required to start, and no automatic charge occurs when the trial expires.
               </li>
               <li>
-                <strong className="text-on-surface">Starter Workspace (₦20,000 / month):</strong> Includes up to 3 internal team seats, enquiry management inbox, Today radar, SLA tracking, and Bachs checkout integration.
+                <strong className="text-on-surface">Starter Workspace (₦20,000 / month):</strong> Includes up to 3 internal team seats, up to 1,000 active leads/month, enquiry management inbox, Today radar, SLA tracking, and Bachs checkout integration.
               </li>
               <li>
                 <strong className="text-on-surface">Pro Workspace (₦45,000 / month):</strong> Includes up to 10 internal team seats, automated round-robin lead routing, manager call coaching queues, and priority notification dispatch.

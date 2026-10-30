@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
 
 interface SubscriptionData {
@@ -10,12 +11,17 @@ interface SubscriptionData {
   pricePerMonth: number;
   currency: string;
   billingMode: string;
+  trialStartedAt?: Date | string | null;
+  trialEndsAt?: Date | string | null;
   trialDaysLeft: number;
+  trialHoursLeft?: number;
   paidThroughDate: Date | string | null;
   gracePeriodEndsAt: Date | string | null;
   activePilotEngagementId: string | null;
   maxInternalSeats: number;
   internalSeatsUsed: number;
+  maxActiveLeads?: number;
+  activeLeadsCount?: number;
 }
 
 interface InvoiceItem {
@@ -41,6 +47,9 @@ export default function BillingClient({
   activeInvoice?: InvoiceItem | null;
   isOwnerOrAdmin: boolean;
 }) {
+  const searchParams = useSearchParams();
+  const paymentQuery = searchParams.get('payment') || searchParams.get('status');
+
   const [isLoadingCheckout, setIsLoadingCheckout] = useState(false);
   const [checkoutTarget, setCheckoutTarget] = useState<string | null>(null);
 
@@ -48,6 +57,26 @@ export default function BillingClient({
   const seatsUsed = subscription.internalSeatsUsed ?? 1;
   const maxSeats = subscription.maxInternalSeats ?? 3;
   const seatPercentage = Math.min(100, Math.round((seatsUsed / maxSeats) * 100));
+
+  const formatTrialEnd = (dateVal?: Date | string | null) => {
+    if (!dateVal) return 'in 7 days';
+    try {
+      const d = new Date(dateVal);
+      return d.toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    } catch {
+      return String(dateVal);
+    }
+  };
+
+  const scrollToPlans = () => {
+    const el = document.getElementById('available-plans');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleCheckout = async (invoiceId?: string, targetLabel?: string) => {
     setIsLoadingCheckout(true);
@@ -95,19 +124,19 @@ export default function BillingClient({
       case 'TRIALING':
         return (
           <span className="text-xs px-2.5 py-1 rounded-md bg-primary/20 text-primary font-semibold border border-primary/30">
-            14-Day Free Trial ({subscription.trialDaysLeft} days left)
+            7-Day Free Trial ({subscription.trialDaysLeft} days left)
           </span>
         );
       case 'GRACE':
         return (
           <span className="text-xs px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 font-semibold border border-amber-500/30">
-            7-Day Grace Period
+            Grace Period
           </span>
         );
       case 'EXPIRED':
         return (
           <span className="text-xs px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-300 font-semibold border border-rose-500/30">
-            Access Expired (Manual Renewal Required)
+            Trial Expired
           </span>
         );
     }
@@ -120,7 +149,7 @@ export default function BillingClient({
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight text-on-surface">Billing & Subscriptions</h1>
           <p className="text-sm text-on-surface-variant mt-1">
-            Manage your workspace subscription, 14-day no-card trial, and official Bachs.io payments.
+            Manage your workspace subscription, 7-day Starter trial, and official Bachs.io payments.
           </p>
         </div>
         <div>
@@ -128,16 +157,71 @@ export default function BillingClient({
         </div>
       </div>
 
-      {/* 14-Day Trial Notice Banner */}
-      {subscription.status === 'TRIALING' && (
-        <div className="p-4 rounded-2xl bg-primary/10 border border-primary/30 flex items-start gap-3">
-          <Icon name="ShieldCheck" size={20} className="text-primary shrink-0 mt-0.5" />
+      {/* Payment Pending Banner */}
+      {paymentQuery === 'pending' && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-start gap-3">
+          <Icon name="Clock" size={20} className="text-amber-400 shrink-0 mt-0.5" />
           <div className="space-y-1 text-xs">
-            <h3 className="font-semibold text-primary text-sm">14-Day No-Card Free Trial Active</h3>
+            <h3 className="font-semibold text-amber-300 text-sm">Payment Verification in Progress</h3>
             <p className="text-on-surface-variant">
-              You have <strong className="text-on-surface">{subscription.trialDaysLeft} days remaining</strong> of full access with zero credit card commitment. You can settle your approved workspace invoice anytime via Bachs.io to extend access by 30 days without recurring card charges.
+              We are confirming your payment. Your paid access will update after verification.
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Payment Failed Banner */}
+      {paymentQuery === 'failed' && (
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-start gap-3">
+          <Icon name="AlertTriangle" size={20} className="text-rose-400 shrink-0 mt-0.5" />
+          <div className="space-y-1 text-xs">
+            <h3 className="font-semibold text-rose-300 text-sm">Payment Unconfirmed</h3>
+            <p className="text-on-surface-variant">
+              Your payment has not been confirmed. Check its status before trying again.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Active Trial Notice Banner (Section 4.D approved copy) */}
+      {subscription.status === 'TRIALING' && (
+        <div className="p-5 rounded-2xl bg-primary/10 border border-primary/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <Icon name="ShieldCheck" size={22} className="text-primary shrink-0 mt-0.5" />
+            <div className="space-y-1 text-xs">
+              <h3 className="font-semibold text-primary text-sm">7-Day Free Trial Active</h3>
+              <p className="text-on-surface-variant">
+                Your free trial ends on <strong className="text-on-surface font-semibold">{formatTrialEnd(subscription.trialEndsAt)}</strong>. Choose a plan to keep your follow-up running.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={scrollToPlans}
+            className="px-4 py-2 rounded-xl text-xs font-semibold bg-primary text-on-primary hover:opacity-90 shrink-0 shadow-sm"
+          >
+            Choose a Plan
+          </button>
+        </div>
+      )}
+
+      {/* Expired Trial Notice Banner (Section 4.D approved copy) */}
+      {subscription.status === 'EXPIRED' && (
+        <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <Icon name="AlertCircle" size={24} className="text-rose-400 shrink-0 mt-0.5" />
+            <div className="space-y-1 text-xs">
+              <h2 className="font-heading font-bold text-rose-300 text-base">Your free trial has ended.</h2>
+              <p className="text-on-surface-variant">
+                Choose a plan to continue using paid features. You can still access your account and billing options.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={scrollToPlans}
+            className="px-5 py-2.5 rounded-xl text-xs font-bold bg-primary text-on-primary hover:opacity-90 shrink-0 shadow-md"
+          >
+            Choose a Plan
+          </button>
         </div>
       )}
 
@@ -285,7 +369,7 @@ export default function BillingClient({
       </div>
 
       {/* Available Plans Selection */}
-      <div className="space-y-4">
+      <div className="space-y-4" id="available-plans">
         <div>
           <h2 className="font-heading text-lg font-bold text-on-surface">Available Workspace Plans</h2>
           <p className="text-xs text-on-surface-variant">
@@ -304,7 +388,7 @@ export default function BillingClient({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-heading font-bold text-lg text-on-surface">Starter Plan</h3>
-                  <p className="text-xs text-on-surface-variant mt-0.5">Ideal for lean sales teams & startups</p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Lean teams, 3 internal seats & up to 1,000 active leads/month</p>
                 </div>
                 {currentPlanId === 'STARTER' && (
                   <span className="text-[11px] px-2 py-0.5 rounded bg-primary/20 text-primary font-bold border border-primary/30">
@@ -323,9 +407,13 @@ export default function BillingClient({
                   <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
                   <span><strong>3 Internal Team Seats</strong> included</span>
                 </li>
+                <li className="flex items-start gap-2 text-on-surface">
+                  <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
+                  <span><strong>Up to 1,000 active leads/month</strong></span>
+                </li>
                 <li className="flex items-start gap-2">
                   <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
-                  <span>14-day free trial (no card required)</span>
+                  <span>7-day free trial (no card required)</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
@@ -443,7 +531,92 @@ export default function BillingClient({
               )}
             </div>
           </div>
+
+          {/* ENTERPRISE & MANAGED SALES TIERS */}
+          <div className="p-6 rounded-2xl flex flex-col justify-between border bg-surface-container-lowest border-outline-variant/30">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-heading font-bold text-lg text-on-surface">Enterprise</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Larger teams needing custom integrations & expanded capacity</p>
+                </div>
+              </div>
+
+              <div className="py-2">
+                <span className="text-3xl font-extrabold text-on-surface">₦75,000</span>
+                <span className="text-xs text-on-surface-variant"> / month</span>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-on-surface-variant">
+                <li className="flex items-start gap-2">
+                  <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
+                  <span>Custom team seat allocations & enterprise RLS</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
+                  <span>Custom CRM & ERP integrations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
+                  <span>Dedicated account manager & SLA guarantee</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-outline-variant/20">
+              <a
+                href="mailto:sales@closecrafthq.com?subject=Enterprise%20Inquiry"
+                className="w-full py-2.5 rounded-xl text-xs font-semibold bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/40 transition-all text-center block"
+              >
+                Discuss Enterprise
+              </a>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl flex flex-col justify-between border bg-surface-container-lowest border-outline-variant/30">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-heading font-bold text-lg text-on-surface">Managed Sales Engagement</h3>
+                  <p className="text-xs text-on-surface-variant mt-0.5">Remote sales support around an approved offer</p>
+                </div>
+              </div>
+
+              <div className="py-2">
+                <span className="text-3xl font-extrabold text-on-surface">From ₦150,000</span>
+                <span className="text-xs text-on-surface-variant"> for 30 days</span>
+              </div>
+
+              <ul className="space-y-2.5 text-xs text-on-surface-variant">
+                <li className="flex items-start gap-2">
+                  <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
+                  <span>Workspace access included in agreed scope</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
+                  <span>Remote sales professionals handling closing conversations</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <Icon name="Check" size={16} className="text-primary shrink-0 mt-0.5" />
+                  <span>Lead flow and offer economics review</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="pt-6 mt-6 border-t border-outline-variant/20">
+              <a
+                href="mailto:sales@closecrafthq.com?subject=Managed%20Sales%20Proposal"
+                className="w-full py-2.5 rounded-xl text-xs font-semibold bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/40 transition-all text-center block"
+              >
+                Request a Managed Sales Proposal
+              </a>
+            </div>
+          </div>
         </div>
+
+        <p className="text-[11px] text-on-surface-variant text-center pt-2">
+          The software trial includes Starter features. Managed sales support and DSS training are separate paid offers. No automatic charge at trial expiry.
+        </p>
       </div>
 
       {/* Managed Pilot Notice */}

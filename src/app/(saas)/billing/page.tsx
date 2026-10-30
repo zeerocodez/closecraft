@@ -7,7 +7,7 @@ import BillingClient from '@/components/billing/BillingClient';
 
 export const metadata = {
   title: 'Billing & Subscriptions | Closecraft',
-  description: 'Manage your workspace subscription, 14-day trial, and Bachs payments.',
+  description: 'Manage your workspace subscription, 7-day trial, and Bachs payments.',
 };
 
 export default async function BillingPage() {
@@ -23,10 +23,10 @@ export default async function BillingPage() {
 
   const isOwnerOrAdmin = member?.role === 'OWNER' || member?.role === 'ADMIN';
 
-  // Fetch or initialize 14-day trial workspace subscription
+  // Fetch or initialize 7-day trial workspace subscription
   const sub = await getOrCreateWorkspaceSubscription(organizationId);
 
-  // Ensure active approved invoice exists (base one-time NGN 15,000 workspace invoice)
+  // Ensure active approved invoice exists (base one-time NGN 20,000 workspace invoice for Starter)
   let activeInvoice = await db.bachsInvoice.findFirst({
     where: {
       organizationId,
@@ -43,13 +43,13 @@ export default async function BillingPage() {
         organizationId,
         invoiceNumber,
         type: 'WORKSPACE_INVOICE',
-        amount: 15000.0,
+        amount: 20000.0,
         currency: 'NGN',
         status: 'APPROVED',
         customerEmail: session.user.email || null,
         customerName: session.user.name || null,
         metadata: JSON.stringify({
-          description: 'One-time NGN 15,000 Workspace Invoice (30 Days)',
+          description: 'One-time NGN 20,000 Workspace Invoice (30 Days)',
           plan: 'STARTER',
         }),
       }

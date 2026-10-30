@@ -117,23 +117,31 @@ export const {
               }
             });
 
-            // Initialize 14-day trial
+            // Initialize 7-day Starter trial (idempotent: does not overwrite existing subscription)
             const org = dbUser.memberships[0]?.organization;
             if (org) {
-              const trialEndsAt = new Date();
-              trialEndsAt.setDate(trialEndsAt.getDate() + 14);
-
-              await db.workspaceSubscription.create({
-                data: {
-                  organizationId: org.id,
-                  status: "TRIALING",
-                  plan: "STARTER",
-                  pricePerMonth: 20000.0,
-                  currency: "NGN",
-                  trialEndsAt,
-                  maxInternalSeats: 3,
-                }
+              const existingSub = await db.workspaceSubscription.findUnique({
+                where: { organizationId: org.id }
               });
+
+              if (!existingSub) {
+                const { TRIAL_DURATION_MS } = await import('@/lib/payments/subscription');
+                const trialStartedAt = new Date();
+                const trialEndsAt = new Date(trialStartedAt.getTime() + TRIAL_DURATION_MS);
+
+                await db.workspaceSubscription.create({
+                  data: {
+                    organizationId: org.id,
+                    status: "TRIALING",
+                    plan: "STARTER",
+                    pricePerMonth: 20000.0,
+                    currency: "NGN",
+                    trialStartedAt,
+                    trialEndsAt,
+                    maxInternalSeats: 3,
+                  }
+                });
+              }
             }
           }
 

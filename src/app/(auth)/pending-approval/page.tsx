@@ -154,7 +154,7 @@ export default async function PendingApprovalPage() {
                   if (organizationId) {
                     await db.organization.update({
                       where: { id: organizationId },
-                      data: { status: 'APPROVED', plan: 'FREE_PILOT' }
+                      data: { status: 'APPROVED', plan: 'STARTER' }
                     });
                   }
                   redirect('/dashboard');
@@ -166,7 +166,7 @@ export default async function PendingApprovalPage() {
                   className="w-full h-11 px-4 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition-all active:scale-[0.99] cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-[18px]">rocket_launch</span>
-                  <span>Activate Free Pilot Workspace</span>
+                  <span>Activate 7-Day Starter Workspace</span>
                 </button>
               </form>
             )}

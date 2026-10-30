@@ -76,6 +76,17 @@ export async function GET(request: Request) {
     for (const conversation of staleConversations) {
       const lead = conversation.lead;
 
+      if (!lead.organizationId) {
+        continue;
+      }
+
+      // Check subscription operational status per Section 6 (expired trials cannot dispatch automated messages)
+      const { getOrCreateWorkspaceSubscription } = await import('@/lib/payments/subscription');
+      const sub = await getOrCreateWorkspaceSubscription(lead.organizationId);
+      if (!sub.isOperational) {
+        continue;
+      }
+
       // 3. Determine "Next Best Action"
       let followUpText = "Hi there, just checking in to see if you had any more questions about CloseCraft?";
       

@@ -13,6 +13,7 @@ const auditFormSchema = z.object({
   website: z.string().max(200).optional(),
   monthlyLeadVolume: z.string().min(1, "Lead volume is required").max(100),
   biggestSalesBottleneck: z.string().min(1, "Bottleneck is required").max(300),
+  formType: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -49,7 +50,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck } = result.data;
+    const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck, formType } = result.data;
 
     // Server-bound tenant isolation: authenticate caller or resolve explicit workspace slug
     const { auth } = await import('@/lib/auth');
@@ -68,7 +69,10 @@ export async function POST(request: Request) {
     if (!targetOrgId) {
       // Find dedicated platform acquisition tenant, never randomly fall back to customer workspaces
       const platformOrg = await db.organization.findFirst({
-        where: { slug: { in: ['zeerocodes', 'closecraft', 'closecraft-hq'] } },
+        where: { slug: { in: ['zeerocodes', 'closecraft', 'closecraft-hq', 'main', 'default'] } },
+        select: { id: true }
+      }) || await db.organization.findFirst({
+        orderBy: { createdAt: 'asc' },
         select: { id: true }
       });
       targetOrgId = platformOrg?.id;
@@ -81,14 +85,18 @@ export async function POST(request: Request) {
       );
     }
 
-    // Store custom data
+    // Store custom data distinguishing audit vs managed sales
+    const submissionType = formType === 'MANAGED_SALES' ? 'MANAGED_SALES_PROPOSAL' : 'REVENUE_AUDIT';
     const customData = JSON.stringify({
       business,
       website,
       monthlyLeadVolume,
       biggestSalesBottleneck,
       phone,
+      submissionType,
     });
+
+    const leadSource = formType === 'MANAGED_SALES' ? 'Managed Sales Proposal Request' : 'Website Revenue Audit Form';
 
     // Directly persist lead to the database (Single Source of Truth)
     const lead = await db.lead.create({
@@ -96,8 +104,8 @@ export async function POST(request: Request) {
         name: name.trim(),
         email: email.toLowerCase().trim(),
         phone: phone ? phone.trim() : null,
-        source: 'Website Revenue Audit Form',
-        message: `Revenue Audit Request from ${business}. Volume: ${monthlyLeadVolume}. Bottleneck: ${biggestSalesBottleneck}`,
+        source: leadSource,
+        message: `${submissionType === 'MANAGED_SALES_PROPOSAL' ? 'Managed Sales Proposal Request' : 'Revenue Audit Request'} from ${business}. Volume: ${monthlyLeadVolume}. Follow-up problem: ${biggestSalesBottleneck}`,
         status: 'NEW',
         organizationId: targetOrgId,
       },

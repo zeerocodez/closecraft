@@ -21,6 +21,10 @@ export async function addManualLead(data: {
   const organizationId = (session as any)?.organizationId;
   if (!organizationId) throw new Error("Unauthorized");
 
+  const { assertWorkspaceOperational, assertWithinLeadAllowance } = await import('@/lib/payments/subscription');
+  await assertWorkspaceOperational(organizationId);
+  await assertWithinLeadAllowance(organizationId);
+
   const cleanEmail = data.email?.trim() || "";
   const cleanPhone = data.phone?.trim() || null;
 

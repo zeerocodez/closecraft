@@ -32,6 +32,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { assertWorkspaceOperational } = await import('@/lib/payments/subscription');
+    try {
+      await assertWorkspaceOperational(organizationId);
+    } catch (expErr: any) {
+      return NextResponse.json(
+        { error: expErr.message || 'Trial expired. Please choose a paid plan in Billing to import leads.' },
+        { status: 402 }
+      );
+    }
+
     // Rate limit CSV imports: max 5 imports per 5 minutes per user
     const limiter = await rateLimit(`csv-import:${session.user.id}`, 5, 5 * 60 * 1000);
     if (!limiter.allowed) {

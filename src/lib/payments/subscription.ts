@@ -1,28 +1,35 @@
 import { db } from '@/lib/db';
 
+export const TRIAL_DURATION_HOURS = 168; // Exactly 7 days (168 hours)
+export const TRIAL_DURATION_MS = TRIAL_DURATION_HOURS * 60 * 60 * 1000;
+export const TRIAL_POLICY_VERSION = 'V2_7DAY';
+
 export interface WorkspacePlanConfig {
-  id: 'STARTER' | 'PRO';
+  id: 'STARTER' | 'PRO' | 'ENTERPRISE' | 'MANAGED_SALES';
   name: string;
   pricePerMonth: number;
   currency: string;
   maxInternalSeats: number;
+  maxActiveLeads: number;
   headline: string;
   description: string;
   features: string[];
 }
 
-export const WORKSPACE_PLANS: Record<'STARTER' | 'PRO', WorkspacePlanConfig> = {
+export const WORKSPACE_PLANS: Record<'STARTER' | 'PRO' | 'ENTERPRISE' | 'MANAGED_SALES', WorkspacePlanConfig> = {
   STARTER: {
     id: 'STARTER',
     name: 'Starter',
     pricePerMonth: 20000.0,
     currency: 'NGN',
     maxInternalSeats: 3,
-    headline: '3 Internal Seats · 14-Day Free Trial',
+    maxActiveLeads: 1000, // Discrepancy resolved: configured 1,000 active leads/month
+    headline: '3 Internal Seats · 7-Day Free Trial',
     description: 'Designed for lean service businesses looking to capture enquiries and establish structured follow-up routines.',
     features: [
       'Up to 3 internal team seats',
-      '14-day free trial (no card required)',
+      'Up to 1,000 active leads/month',
+      '7-day free trial (no card required)',
       'Enquiry inbox & lead assignment',
       'Follow-up reminders & leakage radar',
       'Bachs.io hosted checkout (cards, bank transfer, MoMo)',
@@ -35,10 +42,12 @@ export const WORKSPACE_PLANS: Record<'STARTER' | 'PRO', WorkspacePlanConfig> = {
     pricePerMonth: 45000.0,
     currency: 'NGN',
     maxInternalSeats: 10,
+    maxActiveLeads: 10000,
     headline: '10 Internal Seats · High-Velocity Operations',
     description: 'Built for growing sales organizations requiring multi-rep capacity, automated round-robin distribution, and manager coaching tools.',
     features: [
       'Up to 10 internal team seats',
+      'Expanded active lead capacity',
       'Round-robin and automated lead assignment',
       'Manager call review & coaching queue',
       'Revenue health analytics & leakage detection',
@@ -46,25 +55,65 @@ export const WORKSPACE_PLANS: Record<'STARTER' | 'PRO', WorkspacePlanConfig> = {
       'Dedicated pilot onboarding assistance',
     ],
   },
+  ENTERPRISE: {
+    id: 'ENTERPRISE',
+    name: 'Enterprise',
+    pricePerMonth: 75000.0,
+    currency: 'NGN',
+    maxInternalSeats: 25,
+    maxActiveLeads: 50000,
+    headline: 'Enterprise Operations · Expanded Capacity',
+    description: 'Larger teams needing custom integrations, expanded lead volume, and dedicated security controls.',
+    features: [
+      'Up to 25 internal team seats',
+      'Expanded active lead allowance (50,000+)',
+      'Custom CRM & ERP integrations',
+      'Dedicated onboarding & priority support',
+      'Enterprise SLA & audit export',
+    ],
+  },
+  MANAGED_SALES: {
+    id: 'MANAGED_SALES',
+    name: 'Managed Sales Engagement',
+    pricePerMonth: 150000.0,
+    currency: 'NGN',
+    maxInternalSeats: 10,
+    maxActiveLeads: 10000,
+    headline: 'Remote Sales Support · From ₦150,000 for 30 Days',
+    description: 'Suitable businesses needing remote sales support with workspace access included in agreed engagement scope.',
+    features: [
+      'Remote sales closers and appointment setters',
+      'Workspace access included in engagement scope',
+      'Offer economics & lead flow review',
+      'Daily activity & pipeline tracking',
+    ],
+  },
 };
 
 export interface SubscriptionStatusInfo {
   status: 'TRIALING' | 'ACTIVE' | 'GRACE' | 'EXPIRED' | 'PILOT_INCLUDED';
-  isOperational: boolean; // Can user perform operational CRM actions?
+  isOperational: boolean; // Can user perform operational CRM actions (add leads, automate, outreach)?
   plan: string;
   pricePerMonth: number;
   currency: string;
   billingMode: string;
+  trialStartedAt: Date;
+  trialEndsAt: Date;
+  trialPolicyVersion: string;
   trialDaysLeft: number;
+  trialHoursLeft: number;
   paidThroughDate: Date | null;
   gracePeriodEndsAt: Date | null;
   activePilotEngagementId: string | null;
   maxInternalSeats: number;
   internalSeatsUsed: number;
+  maxActiveLeads: number;
+  activeLeadsCount: number;
 }
 
 /**
- * Gets or initializes the 14-day trial workspace subscription.
+ * Gets or initializes the 7-day Starter trial workspace subscription.
+ * Idempotent: never overwrites or resets existing trial dates.
  */
 export async function getOrCreateWorkspaceSubscription(organizationId: string): Promise<SubscriptionStatusInfo> {
   const now = new Date();
@@ -82,7 +131,8 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
   });
 
   if (!sub) {
-    const trialEnd = new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000); // 14 days
+    // 7-day trial = exactly 168 hours from server creation in UTC
+    const trialEnd = new Date(now.getTime() + TRIAL_DURATION_MS);
     sub = await db.workspaceSubscription.create({
       data: {
         organizationId,
@@ -135,9 +185,11 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
         effectiveStatus = 'EXPIRED';
         isOperational = false;
       }
+    } else {
+      isOperational = true;
     }
   } else if (effectiveStatus === 'TRIALING') {
-    if (sub.trialEndsAt < now) {
+    if (sub.trialEndsAt <= now) {
       if (sub.paidThroughDate && sub.paidThroughDate > now) {
         effectiveStatus = 'ACTIVE';
         isOperational = true;
@@ -145,18 +197,41 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
         effectiveStatus = 'EXPIRED';
         isOperational = false;
       }
+    } else {
+      isOperational = true;
+    }
+  } else if (effectiveStatus === 'EXPIRED') {
+    if (sub.paidThroughDate && sub.paidThroughDate > now) {
+      effectiveStatus = 'ACTIVE';
+      isOperational = true;
+    } else {
+      isOperational = false;
     }
   }
 
-  const trialDaysLeft = Math.max(0, Math.ceil((sub.trialEndsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+  const remainingMs = Math.max(0, sub.trialEndsAt.getTime() - now.getTime());
+  const trialHoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
+  const trialDaysLeft = Math.floor(trialHoursLeft / 24);
 
-  // Count internal members (excluding external sales professionals on active pilots)
+  // Count internal members
   const internalSeatsUsed = await db.organizationMember.count({
     where: {
       organizationId,
       role: { not: 'EXTERNAL_PROFESSIONAL' },
     },
   });
+
+  // Count active leads (excluding terminal WON/LOST/DISQUALIFIED deals)
+  const activeLeadsCount = await db.lead.count({
+    where: {
+      organizationId,
+      status: { notIn: ['WON', 'LOST', 'DISQUALIFIED'] },
+    },
+  });
+
+  const planKey = (sub.plan?.toUpperCase() || 'STARTER') as keyof typeof WORKSPACE_PLANS;
+  const planConfig = WORKSPACE_PLANS[planKey] || WORKSPACE_PLANS.STARTER;
+  const maxActiveLeads = planConfig.maxActiveLeads || 1000;
 
   return {
     status: effectiveStatus,
@@ -165,13 +240,43 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
     pricePerMonth: sub.pricePerMonth,
     currency: sub.currency,
     billingMode: sub.billingMode,
+    trialStartedAt: sub.trialStartedAt,
+    trialEndsAt: sub.trialEndsAt,
+    trialPolicyVersion: TRIAL_POLICY_VERSION,
     trialDaysLeft,
+    trialHoursLeft,
     paidThroughDate: sub.paidThroughDate,
     gracePeriodEndsAt: sub.gracePeriodEndsAt,
     activePilotEngagementId: sub.activePilotEngagementId,
     maxInternalSeats: sub.maxInternalSeats || 3,
     internalSeatsUsed,
+    maxActiveLeads,
+    activeLeadsCount,
   };
+}
+
+/**
+ * Asserts that the workspace is currently operational (active trial, active subscription, or pilot included).
+ * At server time >= trialEndsAt, an unpaid workspace no longer receives trial access.
+ * Throws an explicit error without altering existing data.
+ */
+export async function assertWorkspaceOperational(organizationId: string): Promise<SubscriptionStatusInfo> {
+  const sub = await getOrCreateWorkspaceSubscription(organizationId);
+  if (!sub.isOperational) {
+    throw new Error('Your free trial has ended. Choose a plan to continue using paid features. You can still access your account and billing options.');
+  }
+  return sub;
+}
+
+/**
+ * Asserts that the workspace has not exceeded its plan active-lead allowance.
+ * Starter tier is bounded at 1,000 active leads.
+ */
+export async function assertWithinLeadAllowance(organizationId: string): Promise<void> {
+  const sub = await getOrCreateWorkspaceSubscription(organizationId);
+  if (sub.activeLeadsCount >= sub.maxActiveLeads) {
+    throw new Error(`Starter workspace active-lead allowance reached (${sub.activeLeadsCount}/${sub.maxActiveLeads} leads). Please upgrade to Pro to continue adding leads.`);
+  }
 }
 
 /**

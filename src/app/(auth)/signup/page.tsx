@@ -94,15 +94,15 @@ export default function SignupPage() {
           </Link>
         </div>
 
-        {/* Enterprise Protocol Badge */}
+        {/* 7-Day Free Trial Badge */}
         <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container mb-6 shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Free Pilot Access</span>
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+            <span className="text-xs font-semibold uppercase text-primary tracking-wider">7-DAY FREE TRIAL</span>
           </div>
-          <div className="flex items-center gap-1 text-emerald-400">
-            <span className="material-symbols-outlined text-[16px]">check_circle</span>
-            <span className="text-xs font-semibold uppercase">Instant Activation</span>
+          <div className="flex items-center gap-1 text-on-surface-variant">
+            <span className="material-symbols-outlined text-[16px] text-primary">credit_card_off</span>
+            <span className="text-xs font-semibold uppercase">No Card Required</span>
           </div>
         </div>
 
@@ -112,13 +112,15 @@ export default function SignupPage() {
             <Logo variant="full" size="xl" priority alt="Closecraft" />
           </Link>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded bg-primary text-on-primary text-xs font-semibold uppercase tracking-widest text-[10px]">REVENUE OS</span>
+            <span className="px-2 py-0.5 rounded bg-primary/20 text-primary text-xs font-bold uppercase tracking-widest text-[10px]">
+              7-DAY FREE TRIAL
+            </span>
           </div>
-          <h1 className="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight mb-2">
-            Join the Free Pilot
+          <h1 className="font-headline-xl text-2xl md:text-3xl text-on-surface font-bold tracking-tight mb-2">
+            Put your follow-up in one workspace.
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant max-w-xs leading-relaxed">
-            Test CloseCraft with real leads. Instant workspace access & complete Revenue Engine included.
+          <p className="font-body-md text-sm text-on-surface-variant max-w-sm leading-relaxed">
+            Create your Closecraft workspace and start organising the enquiries you already have. Your seven-day Starter trial begins when your workspace is ready.
           </p>
         </div>
 
@@ -127,8 +129,8 @@ export default function SignupPage() {
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-container to-tertiary"></div>
 
           <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase text-secondary tracking-wider">Operator Onboarding</span>
-            <span className="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-sm font-medium flex items-center gap-1">
+            <span className="text-xs font-semibold uppercase text-primary tracking-wider">Workspace Setup</span>
+            <span className="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-xs font-medium flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px] text-primary">credit_card_off</span> No CC Required
             </span>
           </div>
@@ -153,7 +155,7 @@ export default function SignupPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all"
                   id="name"
                   name="name"
-                  placeholder="Sarah Jenkins"
+                  placeholder="e.g. Sarah Jenkins"
                   required
                   type="text"
                   autoComplete="name"
@@ -161,10 +163,10 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Company / Workspace Name */}
+            {/* Business Name */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-on-surface" htmlFor="companyName">
-                Company / Organization
+                Business Name
               </label>
               <div className="relative flex items-center">
                 <span className="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">domain</span>
@@ -172,7 +174,7 @@ export default function SignupPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all"
                   id="companyName"
                   name="companyName"
-                  placeholder="Acme Operations Ltd"
+                  placeholder="e.g. Acme Operations"
                   required
                   type="text"
                   autoComplete="organization"
@@ -191,7 +193,7 @@ export default function SignupPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all"
                   id="email"
                   name="email"
-                  placeholder="sarah.jenkins@acmeops.com"
+                  placeholder="sarah@example.com"
                   required
                   type="email"
                   autoComplete="email"
@@ -199,19 +201,13 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Organization WhatsApp Number */}
+            {/* Phone / WhatsApp */}
             <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-on-surface" htmlFor="whatsappNumber">
-                  Organization WhatsApp Number
-                </label>
-                <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                  Outreach Channel
-                </span>
-              </div>
+              <label className="block text-sm font-medium text-on-surface" htmlFor="whatsappNumber">
+                Phone / WhatsApp
+              </label>
               <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-3 text-emerald-400 text-[20px] pointer-events-none">chat</span>
+                <span className="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">chat</span>
                 <input
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all font-mono"
                   id="whatsappNumber"
@@ -222,16 +218,13 @@ export default function SignupPage() {
                   autoComplete="tel"
                 />
               </div>
-              <p className="text-[11px] text-on-surface-variant leading-tight">
-                Used to trigger 1-click WhatsApp outreach, lead notifications, and customer conversations.
-              </p>
             </div>
 
-            {/* Master Password */}
+            {/* Password */}
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <label className="block text-sm font-medium text-on-surface" htmlFor="password">
-                  Master Password
+                  Password
                 </label>
                 <span className="font-semibold text-[10px] text-secondary tracking-normal">Min 8 chars</span>
               </div>
@@ -300,22 +293,27 @@ export default function SignupPage() {
                 </>
               ) : (
                 <>
-                  <span>Launch Free Pilot Workspace</span>
+                  <span>Create My Trial Workspace</span>
                   <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
                 </>
               )}
             </button>
+
+            {/* Supporting Line */}
+            <p className="text-xs text-center text-on-surface-variant pt-1">
+              No credit card required. No automatic charge when your trial ends.
+            </p>
           </form>
 
-          {/* SSO Separator */}
+          {/* Social Separator */}
           <div className="relative flex items-center justify-center my-6">
             <div className="w-full h-px bg-surface-container-high"></div>
             <span className="absolute px-3 bg-surface-container-lowest text-on-surface-variant text-xs font-semibold uppercase tracking-wider">
-              or continue with enterprise SSO
+              or continue with Google
             </span>
           </div>
 
-          {/* Social / SSO Providers */}
+          {/* Google Sign-in */}
           <div className="grid grid-cols-1 gap-3">
             <button
               className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm"
@@ -328,7 +326,7 @@ export default function SignupPage() {
                 <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"></path>
                 <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"></path>
               </svg>
-              <span>Sign up with Google Workspace</span>
+              <span>Sign up with Google</span>
             </button>
           </div>
         </div>
@@ -340,12 +338,12 @@ export default function SignupPage() {
               <span className="material-symbols-outlined text-[20px]">account_circle</span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-medium text-sm font-semibold text-on-surface truncate">Already have a workspace?</span>
-              <span className="text-sm text-on-surface-variant truncate">Sign in to your control plane</span>
+              <span className="font-medium text-sm font-semibold text-on-surface truncate">Already have an account?</span>
+              <span className="text-sm text-on-surface-variant truncate">Sign in to your workspace</span>
             </div>
           </div>
           <Link href="/login" className="shrink-0 px-4 py-2 rounded bg-inverse-surface text-inverse-on-primary hover:bg-on-surface transition-colors text-sm font-medium font-semibold ml-2">
-            Log In
+            Sign in
           </Link>
         </div>
 

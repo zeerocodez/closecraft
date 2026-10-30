@@ -40,8 +40,8 @@ export function RevenuePilotGuide({
   const steps = [
     {
       id: 1,
-      title: 'Free Pilot Workspace Ready',
-      desc: 'Your multi-tenant workspace is active on the Free Pilot tier with full AI Autopilot enabled.',
+      title: 'Starter Trial Workspace Ready',
+      desc: 'Your multi-tenant workspace is active on the 7-Day Starter Trial with lead routing and leakage alerts enabled.',
       completed: true,
       current: false,
       badge: 'Active & Verified',
@@ -108,14 +108,14 @@ export function RevenuePilotGuide({
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-bold text-base md:text-lg text-on-surface">
-                Pilot Flow: Lead to Closing
+                Follow-Up Flow: Lead to Closing
               </h2>
               <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono text-[11px] font-bold uppercase tracking-wider">
-                Free Pilot Tier
+                7-Day Starter Trial
               </span>
             </div>
             <p className="text-xs text-on-surface-variant mt-0.5">
-              Testing with real users for <strong className="text-on-surface font-semibold">{workspaceName}</strong>. Step-by-step guidance from onboarding to closed deal.
+              Organise enquiries and follow up consistently for <strong className="text-on-surface font-semibold">{workspaceName}</strong>. Step-by-step guidance from intake to closed deal.
             </p>
           </div>
         </div>
