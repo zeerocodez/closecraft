@@ -176,3 +176,6 @@ export function formatPrice(amount: number, currency: 'NGN' | 'USD' = 'NGN'): st
   }
   return `₦${amount.toLocaleString('en-NG')}`;
 }
+
+export { DSS_SPRINT_FACTS, DSS_FLAGSHIP_SPRINT_CONFIG } from './sprint-curriculum';
+

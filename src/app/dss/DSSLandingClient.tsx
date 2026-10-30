@@ -1,1534 +1,1501 @@
 'use client';
 
-import React, { useState, FormEvent } from 'react';
+import React, { useState, FormEvent, useId } from 'react';
 import Link from 'next/link';
 import {
   ShieldCheck,
   Calendar,
-  CheckCircle,
+  CheckCircle2,
   ArrowRight,
   ArrowUpRight,
-  Download,
-  Headphones,
-  Sparkles,
-  Wallet,
-  Award,
   HelpCircle,
   X,
-  CreditCard,
-  Building,
   Bot,
+  Sparkles,
+  ChevronDown,
+  Clock,
+  Layers,
+  BookOpen,
+  Award,
+  Users,
+  Compass,
+  AlertCircle,
+  Briefcase,
+  Check,
 } from 'lucide-react';
-import { formatNaira } from '@/lib/dss/rules';
-import { DSS_PRODUCTS } from '@/lib/dss/products';
 import { Logo, DSSLogo } from '@/components/ui/Logo';
-
-const objectionScenarios = {
-  price: {
-    label: '"Too expensive / Above budget"',
-    tag: 'Price Resistance',
-    buyerSaid: '"Honestly ₦1,250,000 is way above what we budgeted for this quarter. Can you do ₦600k or break it into 4 instalments?"',
-    closerResponse: '"I hear you. If we ignore the price for just 10 seconds—does this completely solve your customer acquisition problem, or do you still have doubts about whether it will actually work for your business?"',
-    strategy: 'Isolate Budget vs Solution Fit',
-    aiScore: '98%',
-    badge: 'Tension Controlled',
-    metric: '+₦1.25M Preserved (Zero Discounting)',
-  },
-  proposal: {
-    label: '"Just send me a proposal / pitch deck"',
-    tag: 'Delay & Avoidance',
-    buyerSaid: '"Looks interesting! Just email me your PDF deck or proposal and I will run it through my team this week."',
-    closerResponse: '"I can certainly do that. But usually when decision-makers ask for a PDF, it means either: 1. They are just being polite, or 2. We haven\'t covered what you actually care about. Which one is it for you?"',
-    strategy: 'Direct Pattern-Interrupt',
-    aiScore: '95%',
-    badge: 'Commitment Secured',
-    metric: 'Meeting Kept Alive & Closed',
-  },
-  partner: {
-    label: '"I need to speak with my partner / board"',
-    tag: 'Hidden Authority',
-    buyerSaid: '"I love this, but I need to consult with my co-founder before making any financial commitment today."',
-    closerResponse: '"Makes complete sense. When you walk in to tell them about this, what do you predict their #1 objection will be? Let\'s address that right now so you don\'t get blindsided."',
-    strategy: 'Proxy Roleplay Preparation',
-    aiScore: '96%',
-    badge: 'Authority Isolated',
-    metric: '92% Close Probability on Follow-up',
-  },
-};
-
-const curriculumModules = [
-  {
-    number: '01',
-    routeBadge: 'SETTERS ROUTE',
-    title: 'Sales Foundations & Offer Understanding',
-    duration: 'Week 1 • Lessons 1 & 2',
-    desc: 'Understand the sales job. Learn to deconstruct any high-ticket offer into its core value transformation without hype or overselling.',
-    output: 'An offer fact sheet and a calibrated 60-second value pitch.',
-  },
-  {
-    number: '02',
-    routeBadge: 'SETTERS ROUTE',
-    title: 'Buyer Research, ICP & Lead Qualification',
-    duration: 'Week 2 • Lessons 3 & 4',
-    desc: 'Find and profile the exact decision-makers your offer can help. Learn to qualify for budget authority, urgency, and need before jumping on a call.',
-    output: 'A justified buyer profile and qualification matrix for 20 researched prospects.',
-  },
-  {
-    number: '03',
-    routeBadge: 'SETTERS ROUTE',
-    title: 'Outreach & Appointment Setting',
-    duration: 'Week 3 • Lessons 5 & 6',
-    desc: 'Master pattern-interrupt messaging across WhatsApp, LinkedIn, and email. Turn casual inbound queries into confirmed discovery meetings.',
-    output: 'A scored meeting-booking roleplay recording and 5 personalized outreach scripts.',
-  },
-  {
-    number: '04',
-    routeBadge: 'CLOSERS ROUTE',
-    title: 'Discovery & The Million-Dollar Call Framework',
-    duration: 'Week 4 • Lessons 7 & 8',
-    desc: 'Ask penetrating diagnostic questions. Uncover the cost of inaction, emotional drivers, and internal roadblocks. Discovery comes before the pitch.',
-    output: 'An observed live discovery call recording scored against the DSS rubric.',
-  },
-  {
-    number: '05',
-    routeBadge: 'CLOSERS ROUTE',
-    title: 'Value Engineering & High-Ticket Proposals',
-    duration: 'Week 5 • Lessons 9 & 10',
-    desc: 'Present your solution strictly in terms of what matters to this buyer. Frame your pricing so it feels trivial compared to their problem.',
-    output: 'A bespoke high-ticket proposal matched precisely to agreed discovery notes.',
-  },
-  {
-    number: '06',
-    routeBadge: 'CLOSERS ROUTE',
-    title: 'Objection Mastery & Authorized Negotiation',
-    duration: 'Week 6 • Lessons 11 & 12',
-    desc: 'Turn a "NO" into clarity. Handle "it’s too expensive", "need to speak to my partner", and "not right now" without flinching or discounting.',
-    output: 'A complete objection response battlecard and live objection roleplay submission.',
-  },
-  {
-    number: '07',
-    routeBadge: 'CLOSERS ROUTE',
-    title: 'Sales Operations & Closecraft AI CRM Integration',
-    duration: 'Week 7 • Lessons 13 & 14',
-    desc: 'Track next actions, manage pipelines, coordinate follow-up cadences, and review AI-generated revenue recommendations in Closecraft CRM.',
-    output: 'A working Closecraft pipeline setup with active follow-up automations.',
-  },
-  {
-    number: '08',
-    routeBadge: 'LIVE ROLE PLAYS & INTERNSHIP',
-    title: 'Applied Sales Lab & Observed Certification',
-    duration: 'Week 8 • Lessons 15 & 16',
-    desc: 'Put all the pieces together in a complete, unscripted high-ticket sales simulation observed by Emmanuel Effiong and senior assessors. Direct placement into Closecraft Network.',
-    output: 'Official DSS Closer Certification and placement entry into Closecraft Network.',
-  },
-];
+import {
+  DSS_SPRINT_FACTS,
+  SPRINT_WEEKS,
+  SPRINT_WORKSHOPS,
+  SPRINT_RUBRIC_CRITERIA,
+  SPRINT_PORTFOLIO_GROUPS,
+  DSS_FLAGSHIP_SPRINT_CONFIG,
+} from '@/lib/dss/sprint-curriculum';
 
 export default function DSSLandingClient() {
-  const [route, setRoute] = useState<'business' | 'remote'>('remote');
-  const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
-  const [selectedRouteSlug, setSelectedRouteSlug] = useState<string>('dss-both-routes');
-  const [dealValue, setDealValue] = useState(1000000); // ₦1,000,000
-  const [dealsCount, setDealsCount] = useState(4);
-  const [commissionRate, setCommissionRate] = useState(15); // 15%
-  const [openModule, setOpenModule] = useState<number | null>(0);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedObjection, setSelectedObjection] = useState<'price' | 'proposal' | 'partner'>('price');
+  const [activeTab, setActiveTab] = useState<'curriculum' | 'rubric'>('curriculum');
+  const [openWeek, setOpenWeek] = useState<number>(1);
+  const [openWorkshop, setOpenWorkshop] = useState<number | null>(1);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [showPracticeModal, setShowPracticeModal] = useState(false);
+  const [selectedRoute, setSelectedRoute] = useState<'Remote Sales Starter' | 'Business Builder'>('Remote Sales Starter');
+
+  // Form State
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    timezone: 'WAT (GMT+1)',
+    salesExperience: 'Beginner / No previous sales experience',
+    learningGoal: '',
+    canProtectHours: false,
+    companySponsorship: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  // Referral tracking
   const [referral] = useState(() => {
     if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      const ref = params.get('ref');
-      if (ref && /^DSS-[A-F0-9]{12}$/.test(ref)) {
-        try { sessionStorage.setItem('dss_ref', ref); } catch {}
-        return ref;
-      }
       try {
+        const params = new URLSearchParams(window.location.search);
+        const ref = params.get('ref');
+        if (ref && /^DSS-[A-F0-9]{12}$/.test(ref)) {
+          sessionStorage.setItem('dss_ref', ref);
+          return ref;
+        }
         return sessionStorage.getItem('dss_ref') || '';
-      } catch {}
+      } catch {
+        return '';
+      }
     }
     return '';
   });
-  const [submitting, setSubmitting] = useState(false);
-  const [enquirySuccess, setEnquirySuccess] = useState(false);
-  const [formError, setFormError] = useState('');
 
-  const totalCalculatedEarnings = (dealValue * dealsCount * commissionRate) / 100;
+  const nameId = useId();
+  const emailId = useId();
+  const phoneId = useId();
+  const timezoneId = useId();
+  const routeId = useId();
+  const experienceId = useId();
+  const goalId = useId();
+  const hoursId = useId();
+  const sponsorshipId = useId();
 
-  async function handleEnquirySubmit(e: FormEvent<HTMLFormElement>) {
+  async function handleApplicationSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setSubmitting(true);
-    setFormError('');
+    setSubmitError(null);
 
-    const form = new FormData(e.currentTarget);
-    const name = form.get('name') as string;
-    const email = form.get('email') as string;
-    const phone = form.get('phone') as string;
-    const goal = form.get('goal') as string;
-    const selectedRoute = (form.get('route') as string) || selectedRouteSlug;
-    const consent = form.get('consent') === 'on';
-    const website = form.get('website') as string;
+    const form = e.currentTarget;
+    const honeypot = (form.elements.namedItem('company_website_url') as HTMLInputElement)?.value;
 
     try {
-      const res = await fetch('/api/dss/enquiry', {
+      const res = await fetch('/api/dss/apply', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name,
-          email,
-          phone,
-          goal,
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          timezone: formData.timezone,
           route: selectedRoute,
-          consent,
-          website,
+          salesExperience: formData.salesExperience,
+          learningGoal: formData.learningGoal,
+          canProtectHours: formData.canProtectHours,
+          companySponsorship: formData.companySponsorship,
           referral: referral || undefined,
+          website: honeypot,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || 'Failed to submit enquiry');
+        throw new Error(data.error || 'Failed to submit application. Please check your information and try again.');
       }
 
-      setEnquirySuccess(true);
+      setSubmitSuccess(true);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
-      setFormError(message);
+      setSubmitError(message);
     } finally {
       setSubmitting(false);
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#0B1117] text-[#F3F7FA] font-sans selection:bg-[#45BFAE]/30 selection:text-[#45BFAE]">
-      {/* Top Notification Announcement Bar */}
-      <div className="bg-gradient-to-r from-[#15352F] via-[#111C26] to-[#15352F] border-b border-[#45BFAE]/20 px-4 py-2 text-center text-xs text-[#A7B7C7] flex flex-wrap items-center justify-center gap-3">
-        <span className="flex items-center gap-1.5 font-semibold text-white">
-          <span className="h-2 w-2 rounded-full bg-[#45BFAE] animate-ping" />
-          4 PRODUCTIZED TRACKS AVAILABLE:
-        </span>
-        <span>Setters (₦100k/$100) • Closers (₦100k/$100) • Live Roleplays/Internship (₦100k/$100) • Both Routes (₦150k/$150)</span>
-        <span className="text-white/20">|</span>
-        <Link href="/dss/affiliate" className="text-[#45BFAE] font-bold hover:underline">
-          Earn 35% (₦35k - ₦52.5k) in Partner Program &rarr;
-        </Link>
-      </div>
-
-      {/* Main Sticky Header */}
-      <header className="sticky top-0 z-50 bg-[#0B1117]/90 backdrop-blur-md border-b border-white/5 h-20 flex items-center px-6 md:px-12">
-        <div className="w-full max-w-7xl mx-auto flex items-center justify-between">
-          {/* Logo & Navigation Breadcrumb */}
+    <div className="min-h-screen bg-[#071126] text-[#F3F7FA] font-sans selection:bg-[#0066FF]/30 selection:text-white">
+      {/* 4.A NAVIGATION */}
+      <header className="sticky top-0 z-50 bg-[#071126]/95 backdrop-blur-md border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+          {/* Logo & Brand Identity */}
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-xs font-semibold text-[#A7B7C7] hover:text-white transition-colors border border-white/10 flex items-center gap-2"
+              className="flex items-center gap-2 text-xs font-semibold text-[#94A3B8] hover:text-white transition-colors px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10"
+              title="Return to Closecraft Platform"
             >
               <Logo variant="icon" size="xs" />
-              <span>&larr; Back to Closecraft Home</span>
+              <span className="hidden sm:inline">Closecraft</span>
             </Link>
 
-            <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-white/10">
+            <div className="flex items-center gap-2 pl-3 border-l border-white/10">
               <DSSLogo variant="full" size="md" alt="Digital Sales School" />
             </div>
           </div>
 
-          {/* Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-semibold text-[#A7B7C7]">
-            <a href="#routes" className="text-[#45BFAE] hover:underline font-bold">Tracks & Pricing</a>
-            <a href="#why" className="hover:text-white transition-colors">Why Closing?</a>
-            <a href="#curriculum" className="hover:text-white transition-colors">Curriculum</a>
-            <a href="#calculator" className="hover:text-white transition-colors">Calculator</a>
-            <a href="#proof" className="hover:text-white transition-colors">Payment Proof</a>
-            <a href="#pipeline" className="hover:text-white transition-colors">Closecraft Pipeline</a>
-            <Link href="/dss/affiliate" className="text-[#45BFAE] hover:underline font-bold flex items-center gap-1">
-              Affiliates (35%)
-            </Link>
+          {/* Desktop Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-[#94A3B8]">
+            <a href="#curriculum" className="hover:text-white transition-colors">
+              Curriculum
+            </a>
+            <a href="#how-you-learn" className="hover:text-white transition-colors">
+              How You Learn
+            </a>
+            <a href="#ai-practice" className="hover:text-white transition-colors">
+              AI Practice
+            </a>
+            <a href="#fees-and-dates" className="hover:text-white transition-colors">
+              Fees & Dates
+            </a>
+            <a href="#faqs" className="hover:text-white transition-colors">
+              FAQs
+            </a>
           </nav>
 
-          {/* Action Buttons */}
+          {/* Right Action Area */}
           <div className="flex items-center gap-3">
             <Link
-              href="/dss/affiliate/dashboard"
-              className="hidden sm:flex px-3.5 py-1.5 rounded-lg bg-[#111C26] hover:bg-[#172431] text-xs font-bold text-[#A7B7C7] hover:text-white border border-white/10 transition-colors"
+              href="/login"
+              className="px-3.5 py-2 text-xs font-semibold text-[#94A3B8] hover:text-white transition-colors"
             >
-              Partner Portal
+              Student Login
             </Link>
-            <button
-              onClick={() => { setSelectedRouteSlug('dss-both-routes'); setModalOpen(true); }}
-              className="px-4 py-2 rounded-lg bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] text-xs font-bold transition-all shadow-md shadow-[#45BFAE]/20"
+
+            <a
+              href="#apply"
+              className="px-4 py-2 text-xs font-bold rounded-lg bg-[#0066FF] hover:bg-[#0052CC] text-white transition-colors shadow-sm shadow-[#0066FF]/20 flex items-center gap-1.5"
             >
-              Apply for Cohort &rarr;
-            </button>
+              <span>Apply for the Sprint</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </a>
           </div>
+        </div>
+
+        {/* Small ecosystem link */}
+        <div className="bg-[#0B1733] border-t border-white/5 py-1.5 px-4 text-center text-[11px] text-[#94A3B8]">
+          Looking for sales software for your business?{' '}
+          <Link href="/" className="text-[#38BDF8] font-medium hover:underline inline-flex items-center gap-1">
+            Explore Closecraft →
+          </Link>
         </div>
       </header>
 
-      {/* HERO SECTION */}
-      <section className="relative pt-24 pb-20 px-6 max-w-6xl mx-auto">
-        <div className="text-center max-w-4xl mx-auto mb-16">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#15352F] border border-[#45BFAE]/30 text-[#45BFAE] text-xs font-bold uppercase tracking-wider mb-6">
-            <Sparkles size={14} /> HIGH-TICKET CLOSING ACADEMY • POWERED BY CLOSECRAFT
+      {/* 4.B HERO */}
+      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden bg-gradient-to-b from-[#071126] via-[#0B1A3A] to-[#071126] border-b border-white/5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          {/* Eyebrow */}
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] text-xs font-bold uppercase tracking-wider mb-6">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>FOUR-WEEK REMOTE SALES SPRINT</span>
           </div>
 
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold text-white tracking-tight leading-[1.08] mb-8 font-sans">
-            Great offers need<br />
-            <span className="bg-gradient-to-r from-[#45BFAE] via-[#6AD6A7] to-[#F5BF65] bg-clip-text text-transparent">
-              great closers.
-            </span>
+          {/* Headline */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.15]">
+            Learn remote sales. <span className="text-[#38BDF8]">Build work you can show.</span>
           </h1>
 
-          <p className="text-lg md:text-xl text-[#A7B7C7] max-w-3xl mx-auto leading-relaxed mb-10">
-            You can build a brilliant product and still struggle to sell it. DSS teaches you the discovery frameworks, psychology, and objection-handling tactics that convert hesitant buyers into cleared payments.
-            <span className="block mt-2 text-[#F3F7FA] font-medium">
-              DSS certified graduates feed directly into Closecraft&apos;s Revenue Engine for placement with high-paying businesses.
-            </span>
+          {/* Body */}
+          <p className="max-w-3xl mx-auto text-base sm:text-lg text-[#CBD5E1] mb-8 leading-relaxed">
+            Develop practical appointment-setting and closing skills through live workshops and guided practice. Finish
+            with corrected work samples you can explain to a prospective employer or apply in your business.
           </p>
 
+          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <a
-              href="#routes"
-              className="w-full sm:w-auto px-8 py-4 bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] rounded-xl font-bold text-base transition-all shadow-xl shadow-[#45BFAE]/25 flex items-center justify-center gap-2"
+              href="#apply"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-sm font-bold transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2"
             >
-              Explore 4 Productized Routes &rarr;
+              <span>Apply for the Sprint</span>
+              <ArrowRight className="w-4 h-4" />
             </a>
-            <button
-              onClick={() => { setSelectedRouteSlug('dss-both-routes'); setModalOpen(true); }}
-              className="w-full sm:w-auto px-8 py-4 bg-[#111C26] hover:bg-[#172431] text-white rounded-xl font-bold text-base border border-[#45BFAE]/30 transition-all flex items-center justify-center gap-2"
-            >
-              Apply for Fit Review (From ₦100k / $100)
-            </button>
+
             <a
-              href="/DSS_Sample_Lesson.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full sm:w-auto px-6 py-4 bg-transparent hover:bg-white/5 text-[#A7B7C7] hover:text-white rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
+              href="#curriculum"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-semibold transition-colors border border-white/15 flex items-center justify-center gap-2"
             >
-              <Download size={16} className="text-[#45BFAE]" /> Sample Lesson (PDF)
+              <span>View the Curriculum</span>
             </a>
           </div>
 
-          <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-[#8A9CAE]">
-            <span className="flex items-center gap-1.5">
-              <CheckCircle size={14} className="text-[#6AD6A7]" /> 8 Weeks Live Practice
-            </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle size={14} className="text-[#6AD6A7]" /> Observed Roleplay Rubrics
-            </span>
-            <span className="flex items-center gap-1.5">
-              <CheckCircle size={14} className="text-[#6AD6A7]" /> Direct Closecraft CRM Placement
-            </span>
-          </div>
-        </div>
-
-        {/* Hero Visual Showcase: High-Definition Studio Closer with Floating Glass HUD Elements */}
-        <div className="max-w-5xl mx-auto relative">
-          <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_50px_rgba(69,191,174,0.15)] group">
-            {/* Ambient Background Glow */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0B1117] via-transparent to-transparent z-10" />
-
-            <img
-              src="/images/dss_hero_closer.jpg"
-              alt="Elite High-Ticket Sales Closer in Studio"
-              className="w-full h-auto object-cover transform group-hover:scale-[1.02] transition-transform duration-700"
-            />
-
-            {/* Floating Live Badge 1: Top-Left */}
-            <div className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 bg-[#0B1117]/85 backdrop-blur-md border border-[#45BFAE]/30 rounded-2xl p-3 sm:p-4 shadow-xl animate-float-slow max-w-[240px] sm:max-w-xs">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#45BFAE] animate-ping" />
-                <span className="text-[10px] font-bold text-[#45BFAE] uppercase tracking-wider">LIVE CLOSING ROOM</span>
-              </div>
-              <div className="text-xs sm:text-sm font-bold text-white">Deal Closed: ₦1,250,000 NGN</div>
-              <div className="text-[10px] text-[#A7B7C7] mt-0.5">High Intent B2B Lead • Verified Closed</div>
+          {/* Four Key Programme Facts */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6">
+            <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-extrabold text-white mb-1">4 weeks</div>
+              <div className="text-xs text-[#94A3B8]">Structured teaching</div>
             </div>
-
-            {/* Floating Live Badge 2: Bottom-Right */}
-            <div className="absolute bottom-6 right-4 sm:bottom-8 sm:right-6 z-20 bg-[#0B1117]/85 backdrop-blur-md border border-[#6AD6A7]/30 rounded-2xl p-3 sm:p-4 shadow-xl animate-float-reverse max-w-[240px] sm:max-w-xs">
-              <div className="flex items-center gap-2 mb-1">
-                <CheckCircle size={14} className="text-[#6AD6A7]" />
-                <span className="text-[10px] font-bold text-[#6AD6A7] uppercase tracking-wider">COMMISSION CLEARED</span>
-              </div>
-              <div className="text-xs sm:text-sm font-bold text-white">+₦187,500 NGN Payout</div>
-              <div className="text-[10px] text-[#8A9CAE] mt-0.5">15% Closer Fee Paid to Account</div>
+            <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-extrabold text-[#38BDF8] mb-1">12</div>
+              <div className="text-xs text-[#94A3B8]">Live practical workshops</div>
             </div>
-
-            {/* Floating Live Badge 3: Bottom-Left Audio Waveform Preview */}
-            <div className="hidden sm:flex absolute bottom-8 left-6 z-20 bg-[#15352F]/90 backdrop-blur-md border border-[#45BFAE]/40 rounded-2xl p-4 shadow-xl items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[#45BFAE] text-[#08231F] flex items-center justify-center font-bold shrink-0">
-                <Headphones size={20} />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-white">Week 4 Discovery Call Simulation</div>
-                <div className="flex items-center gap-1.5 h-4 mt-1.5 w-32">
-                  {[35, 80, 50, 95, 60, 40, 90, 70, 85, 45, 65, 80].map((h, i) => (
-                    <span
-                      key={i}
-                      style={{ height: `${h}%` }}
-                      className="flex-1 bg-[#45BFAE] rounded-full animate-pulse"
-                    />
-                  ))}
-                </div>
-              </div>
+            <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
+              <div className="text-2xl sm:text-3xl font-extrabold text-white mb-1">24</div>
+              <div className="text-xs text-[#94A3B8]">Lesson topics</div>
+            </div>
+            <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
+              <div className="text-xl sm:text-2xl font-extrabold text-[#60A5FA] mb-1">~21 hrs</div>
+              <div className="text-xs text-[#94A3B8]">Commitment per week</div>
             </div>
           </div>
 
-          {/* Quick Metrics Under Visual */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6">
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-black text-white">34.8%</div>
-              <div className="text-[11px] text-[#8A9CAE] mt-0.5">Avg. Closing Rate</div>
-            </div>
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-black text-[#6AD6A7]">₦42.5M+</div>
-              <div className="text-[11px] text-[#8A9CAE] mt-0.5">Volume Closed</div>
-            </div>
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-black text-[#45BFAE]">16 Lessons</div>
-              <div className="text-[11px] text-[#8A9CAE] mt-0.5">Observed Rubrics</div>
-            </div>
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-4 text-center">
-              <div className="text-2xl font-black text-[#F5BF65]">Direct Hires</div>
-              <div className="text-[11px] text-[#8A9CAE] mt-0.5">Closecraft Pipeline</div>
-            </div>
+          {/* Supporting line */}
+          <p className="text-xs sm:text-sm text-[#94A3B8] italic">
+            No previous sales experience is required. You do need time to practise.
+          </p>
+
+          {/* Cohort Notice (Honest fee/schedule state - no fake countdowns) */}
+          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-[#CBD5E1]">
+            <Calendar className="w-4 h-4 text-[#38BDF8]" />
+            <span>Next Cohort: Accepting initial applications • </span>
+            <span className="text-[#38BDF8] font-medium">
+              {DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN
+                ? `₦${DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN.toLocaleString()}`
+                : 'Request the current cohort fee and schedule.'}
+            </span>
           </div>
         </div>
       </section>
 
-      {/* STOP-SCROLL ANIMATED TICKER MARQUEE */}
-      <div className="border-y border-white/5 bg-[#0D151D] py-3.5 overflow-hidden shadow-inner">
-        <div className="animate-ticker text-xs font-mono text-[#A7B7C7] flex items-center gap-10">
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#45BFAE] animate-ping" />
-            LIVE ADMISSIONS: 11 OF 15 SEATS CLAIMED
-          </span>
-          <span className="text-white/20">•</span>
-          <span className="text-[#6AD6A7] font-bold">₦42.5M+ DEAL VOLUME CLOSED BY GRADUATES</span>
-          <span className="text-white/20">•</span>
-          <span>AVERAGE COMMISSION: ₦150,000 – ₦350,000 PER CLOSED DEAL</span>
-          <span className="text-white/20">•</span>
-          <span className="text-[#F5BF65] font-bold">GRADUATES DIRECTLY PLACED IN CLOSECRAFT B2B FIRMS</span>
-          <span className="text-white/20">•</span>
-          <span>AFFILIATES EARN 35% (₦28,000) PER ENROLLED STUDENT</span>
-          <span className="text-white/20">•</span>
-          <span className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-[#45BFAE] animate-ping" />
-            LIVE ADMISSIONS: 11 OF 15 SEATS CLAIMED
-          </span>
-          <span className="text-white/20">•</span>
-          <span className="text-[#6AD6A7] font-bold">₦42.5M+ DEAL VOLUME CLOSED BY GRADUATES</span>
-          <span className="text-white/20">•</span>
-          <span>AVERAGE COMMISSION: ₦150,000 – ₦350,000 PER CLOSED DEAL</span>
-          <span className="text-white/20">•</span>
-          <span className="text-[#F5BF65] font-bold">GRADUATES DIRECTLY PLACED IN CLOSECRAFT B2B FIRMS</span>
-        </div>
-      </div>
-
-      {/* WHY CLOSING: THE SALES GAP */}
-      <section id="why" className="py-20 px-6 bg-[#0D151D] border-t border-b border-white/5">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">THE REALITY IN NIGERIA & REMOTE SALES</div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Your Leads Are Not The Problem.</h2>
-            <p className="text-[#A7B7C7] mt-3 max-w-2xl mx-auto">
-              A prospect asks for your price. You send it. They say, “Let me get back to you.” Then they disappear forever. Here is why high-ticket deals collapse:
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-6">
-              <div className="text-xs font-mono text-[#F5BF65] font-bold mb-2">GAP 01</div>
-              <h3 className="text-lg font-bold text-white mb-2">Pitching Before Diagnosing</h3>
-              <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                When you quote price before the buyer verbalizes their pain, your offer becomes a generic expense instead of an urgent medical prescription.
-              </p>
-            </div>
-
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-6">
-              <div className="text-xs font-mono text-[#F5BF65] font-bold mb-2">GAP 02</div>
-              <h3 className="text-lg font-bold text-white mb-2">Fear of Objections</h3>
-              <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                Untrained sellers cave in and offer immediate discounts when buyers say &ldquo;expensive&rdquo;. Closers know an objection is simply an unaddressed decision criterion.
-              </p>
-            </div>
-
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-6">
-              <div className="text-xs font-mono text-[#F5BF65] font-bold mb-2">GAP 03</div>
-              <h3 className="text-lg font-bold text-white mb-2">No Clear Next Action</h3>
-              <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                Most sales calls end with vague promises instead of concrete scheduled commitments, clear onboarding criteria, or agreed payment methods.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* STOP-SCROLL INTERACTIVE AI BUYER ROLEPLAY SIMULATOR */}
-      <section id="simulator" className="py-20 px-6 bg-gradient-to-b from-[#0D151D] via-[#0B1117] to-[#0D151D] border-t border-b border-white/5 relative overflow-hidden">
-        {/* Glow ambient background effects */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#45BFAE]/10 blur-[130px] pointer-events-none rounded-full" />
-        
-        <div className="max-w-6xl mx-auto relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#45BFAE]/10 border border-[#45BFAE]/30 text-xs font-bold text-[#45BFAE] mb-3">
-              <Bot size={14} className="text-[#45BFAE] animate-pulse" />
-              <span>THE AI ADVANTAGE • ROLEPLAY UNTIL NATURAL</span>
-            </div>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">
-              Train Against Tough AI Buyers <br className="hidden sm:inline" />
-              <span className="bg-gradient-to-r from-[#45BFAE] via-[#6AD6A7] to-[#F5BF65] bg-clip-text text-transparent">
-                Before You Put Real Deals On The Line.
-              </span>
+      {/* 4.C THE LEARNING GAP */}
+      <section className="py-20 bg-[#071126] border-b border-white/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-[#0C1A38] to-[#0F234D] border border-white/10 rounded-2xl p-8 sm:p-12 shadow-xl">
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 leading-snug">
+              Watching sales lessons is useful. Being able to handle the conversation takes practice.
             </h2>
-            <p className="text-[#A7B7C7] mt-4 max-w-2xl mx-auto text-sm sm:text-base leading-relaxed">
-              Untrained sales reps crumble in the first 3 minutes of objection pressure. At DSS, you roleplay against ruthless simulated AI buyers who provide instant real-time rubric feedback on confidence, objection reframing, and discovery pacing.
-            </p>
-          </div>
-
-          {/* Interactive Objection Selector Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-2.5 mb-10">
-            <span className="text-xs font-bold text-[#8A9CAE] mr-2 uppercase tracking-wider">Test Scenario:</span>
-            {(['price', 'proposal', 'partner'] as const).map((key) => {
-              const item = objectionScenarios[key];
-              const active = selectedObjection === key;
-              return (
-                <button
-                  key={key}
-                  onClick={() => setSelectedObjection(key)}
-                  className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                    active
-                      ? 'bg-[#45BFAE] text-[#08231F] shadow-lg shadow-[#45BFAE]/20 scale-105'
-                      : 'bg-[#111C26] text-[#A7B7C7] border border-white/10 hover:border-[#45BFAE]/40 hover:text-white'
-                  }`}
-                >
-                  <span className={`w-2 h-2 rounded-full ${active ? 'bg-[#08231F]' : 'bg-[#45BFAE]'}`} />
-                  <span>{item.tag}: {item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Two-Column Dribbble-Style Interactive Stage */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Left Column: Visual 3D Mockup with Floating Telemetry (7 cols) */}
-            <div className="lg:col-span-7 relative">
-              <div className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl bg-[#090D12] group">
-                <img
-                  src="/images/dss_roleplay_ai_mockup.jpg"
-                  alt="DSS AI Buyer Roleplay Simulator"
-                  className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
-                />
-                
-                {/* Floating Telemetry Badge 1: Top-Left AI Feedback */}
-                <div className="absolute top-4 left-4 sm:top-6 sm:left-6 bg-[#0B1117]/90 backdrop-blur-md border border-[#45BFAE]/40 rounded-2xl p-3.5 shadow-xl animate-float-slow max-w-[240px]">
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-[10px] font-bold text-[#45BFAE] uppercase tracking-wider">LIVE AI ASSESSOR</span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-[#6AD6A7]/20 text-[#6AD6A7]">PASSED</span>
-                  </div>
-                  <div className="text-xs font-bold text-white">Rubric Score: {objectionScenarios[selectedObjection].aiScore}</div>
-                  <div className="text-[10px] text-[#A7B7C7] mt-0.5">{objectionScenarios[selectedObjection].badge}</div>
-                </div>
-
-                {/* Floating Telemetry Badge 2: Bottom-Right Voice Cadence */}
-                <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 bg-[#0B1117]/90 backdrop-blur-md border border-[#6AD6A7]/40 rounded-2xl p-3.5 shadow-xl animate-float-reverse max-w-[220px]">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="w-2 h-2 rounded-full bg-[#6AD6A7] animate-ping" />
-                    <span className="text-[10px] font-bold text-[#6AD6A7] uppercase tracking-wider">TONE ANALYSIS</span>
-                  </div>
-                  <div className="text-xs font-bold text-white">Calm Doctor Persona</div>
-                  <div className="text-[10px] text-[#8A9CAE] mt-0.5">Zero defensive panic detected</div>
-                </div>
-              </div>
-            </div>
-
-            {/* Right Column: Interactive Roleplay Script & Live Scoring (5 cols) */}
-            <div className="lg:col-span-5 bg-[#111C26] border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col justify-between shadow-xl">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-xs font-bold text-[#F5BF65] uppercase tracking-wider font-mono">
-                    ACTIVE SIMULATION
-                  </span>
-                  <span className="text-xs font-mono px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-white">
-                    {objectionScenarios[selectedObjection].strategy}
-                  </span>
-                </div>
-
-                {/* Buyer Dialogue Bubble */}
-                <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-4 mb-4">
-                  <div className="flex items-center gap-2 mb-2 text-xs font-bold text-[#EF4444]">
-                    <span className="w-2 h-2 rounded-full bg-[#EF4444]" />
-                    AI B2B BUYER (RESISTANCE LEVEL: 8.5/10)
-                  </div>
-                  <p className="text-xs sm:text-sm text-[#F3F7FA] italic leading-relaxed">
-                    {objectionScenarios[selectedObjection].buyerSaid}
-                  </p>
-                </div>
-
-                {/* Trained Closer Reaction */}
-                <div className="bg-[#15352F]/70 border border-[#45BFAE]/30 rounded-2xl p-4 mb-5">
-                  <div className="flex items-center gap-2 mb-2 text-xs font-bold text-[#45BFAE]">
-                    <Sparkles size={14} className="text-[#45BFAE]" />
-                    DSS VERIFIED CLOSER FRAMEWORK
-                  </div>
-                  <p className="text-xs sm:text-sm text-white font-medium leading-relaxed">
-                    {objectionScenarios[selectedObjection].closerResponse}
-                  </p>
-                </div>
-
-                {/* AI Rubric Metrics */}
-                <div className="grid grid-cols-2 gap-3 pt-3 border-t border-white/5">
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-[#8A9CAE]">CONFIDENCE SCORE</div>
-                    <div className="text-lg font-black text-[#6AD6A7] mt-0.5">{objectionScenarios[selectedObjection].aiScore}</div>
-                  </div>
-                  <div>
-                    <div className="text-[10px] uppercase tracking-wider text-[#8A9CAE]">DEAL IMPACT</div>
-                    <div className="text-xs font-bold text-white mt-1">{objectionScenarios[selectedObjection].metric}</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
-                <span className="text-xs text-[#A7B7C7]">16 Rubric Scenarios in W1-W8</span>
-                <button
-                  onClick={() => setModalOpen(true)}
-                  className="inline-flex items-center gap-1.5 text-xs font-bold text-[#45BFAE] hover:text-[#5CD4C3] transition-colors"
-                >
-                  <span>Practice In Sandbox</span>
-                  <ArrowRight size={14} />
-                </button>
-              </div>
+            <div className="space-y-4 text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+              <p>
+                You may know what an appointment setter or closer does, yet still feel unsure about the next message to send
+                or the question to ask.
+              </p>
+              <p>
+                That gap becomes obvious when a buyer hesitates. It also shows up when an employer asks you to explain
+                your process.
+              </p>
+              <p>
+                DSS gives you structured tasks and feedback, so you can practise the work and improve it before presenting
+                it as evidence of your ability.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* DUAL CAREER ROUTE SWITCHER */}
-      <section className="py-20 px-6 max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">TWO TAILORED LEARNING PATHS</div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">Choose Your High-Ticket Path</h2>
-          <p className="text-[#A7B7C7] mt-3">Whether you are growing your own company or want to close for remote clients.</p>
-        </div>
+      {/* 4.D THE PRACTICAL OUTCOMES */}
+      <section className="py-20 bg-[#0B1733] border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">
+              Build the skills behind a useful sales conversation.
+            </h2>
+            <p className="text-sm sm:text-base text-[#94A3B8]">
+              Observable capabilities developed through authentic commercial exercises, reviewed against verified rubrics.
+            </p>
+          </div>
 
-        {/* Tabs */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-[#111C26] border border-white/10 p-1.5 rounded-2xl flex gap-2">
-            <button
-              onClick={() => setRoute('remote')}
-              className={`px-6 py-3 rounded-xl text-xs font-bold transition-all ${
-                route === 'remote'
-                  ? 'bg-[#45BFAE] text-[#08231F] shadow-md shadow-[#45BFAE]/20'
-                  : 'text-[#A7B7C7] hover:text-white'
-              }`}
-            >
-              Remote Sales Closer (Earn Commissions)
-            </button>
-            <button
-              onClick={() => setRoute('business')}
-              className={`px-6 py-3 rounded-xl text-xs font-bold transition-all ${
-                route === 'business'
-                  ? 'bg-[#45BFAE] text-[#08231F] shadow-md shadow-[#45BFAE]/20'
-                  : 'text-[#A7B7C7] hover:text-white'
-              }`}
-            >
-              Business Builder (Sell My Own Offer)
-            </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+            {/* Outcome 1 */}
+            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+                01
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Research before reaching out.</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Identify a suitable buyer and use real observations to write relevant opening messages.
+              </p>
+            </div>
+
+            {/* Outcome 2 */}
+            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+                02
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Qualify and book with purpose.</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Understand whether an enquiry fits, then arrange a meeting with a clear purpose and a useful handoff.
+              </p>
+            </div>
+
+            {/* Outcome 3 */}
+            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+                03
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Lead discovery and explain value.</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Investigate the buyer's situation and connect your recommendation to what they have actually told you.
+              </p>
+            </div>
+
+            {/* Outcome 4 */}
+            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+                04
+              </div>
+              <h3 className="text-lg font-bold text-white mb-2">Handle concerns and document the decision.</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Clarify objections, stay within approved terms and keep accurate records of the next action.
+              </p>
+            </div>
+          </div>
+
+          {/* Supporting copy */}
+          <div className="bg-[#071126]/60 border border-white/10 rounded-xl p-5 text-center max-w-3xl mx-auto text-sm text-[#CBD5E1]">
+            You will also work on a sales pipeline and prepare an onboarding handover, so your portfolio shows how the
+            process connects.
           </div>
         </div>
+      </section>
 
-        {/* Selected Route Content */}
-        <div className="bg-[#111C26] border border-[#45BFAE]/20 rounded-3xl p-8 md:p-12">
-          {route === 'remote' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div>
-                <span className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider">TRACK A: REMOTE CLOSER</span>
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1 mb-4">
-                  Close High-Ticket Deals for Foreign & Local Businesses.
-                </h3>
-                <p className="text-sm text-[#A7B7C7] leading-relaxed mb-6">
-                  You don&apos;t need your own product, website, or ad budget. High-ticket businesses generate leads every day and need hungry, skilled closers to take the calls and collect payments.
-                </p>
-                <div className="space-y-3 text-xs text-[#F3F7FA]">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={16} className="text-[#6AD6A7]" /> Practice with standardized real-world offer simulations
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={16} className="text-[#6AD6A7]" /> Graduate with a verified portfolio of scored discovery calls
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={16} className="text-[#6AD6A7]" /> Fast-track placement into companies using Closecraft CRM
-                  </div>
-                </div>
-              </div>
+      {/* 4.E TWO WAYS TO APPLY THE LEARNING */}
+      <section className="py-20 bg-[#071126] border-b border-white/5">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Choose the goal you want your work to support.</h2>
+            <p className="text-sm sm:text-base text-[#94A3B8]">
+              Both application routes learn the same foundational skills through the four-week sprint. Your final project
+              records reflect your objective.
+            </p>
+          </div>
 
-              <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-6">
-                <div className="text-xs font-bold text-[#8A9CAE] uppercase mb-4">TYPICAL REMOTE CLOSER ECONOMICS</div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                    <span className="text-[#A7B7C7]">Average Deal Size:</span>
-                    <span className="font-bold text-white">₦500,000 – ₦2,500,000</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                    <span className="text-[#A7B7C7]">Commission Per Deal (10–20%):</span>
-                    <span className="font-bold text-[#45BFAE]">₦100,000 – ₦350,000</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                    <span className="text-[#A7B7C7]">Monthly Volume (3–6 closed deals):</span>
-                    <span className="font-bold text-[#6AD6A7]">₦450,000 – ₦1,800,000/mo</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs py-2">
-                    <span className="text-[#A7B7C7]">Location Requirement:</span>
-                    <span className="font-bold text-white">100% Remote (Laptop + Good Internet)</span>
-                  </div>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            {/* Route 1: Remote Sales Starter */}
+            <div
+              onClick={() => setSelectedRoute('Remote Sales Starter')}
+              className={`cursor-pointer rounded-2xl p-8 border transition-all ${
+                selectedRoute === 'Remote Sales Starter'
+                  ? 'bg-[#0E2046] border-[#0066FF] shadow-lg shadow-[#0066FF]/15'
+                  : 'bg-[#091633] border-white/10 hover:border-white/20'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#38BDF8] bg-[#0066FF]/20 px-3 py-1 rounded-full border border-[#0066FF]/30">
+                  Career Track
+                </span>
+                {selectedRoute === 'Remote Sales Starter' && (
+                  <CheckCircle2 className="w-5 h-5 text-[#38BDF8]" />
+                )}
               </div>
+              <h3 className="text-xl font-bold text-white mb-3">Remote Sales Starter</h3>
+              <p className="text-sm text-[#CBD5E1] leading-relaxed mb-6">
+                Build practical samples for suitable appointment-setting or sales roles. Prepare a tailored application and
+                learn to review the compensation terms before accepting an opportunity.
+              </p>
+              <div className="text-xs text-[#94A3B8] pt-4 border-t border-white/10 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-[#38BDF8]" />
+                <span>Focus: Demonstrable evidence for sales hiring teams & SDR/BDR managers</span>
+              </div>
+            </div>
+
+            {/* Route 2: Business Builder */}
+            <div
+              onClick={() => setSelectedRoute('Business Builder')}
+              className={`cursor-pointer rounded-2xl p-8 border transition-all ${
+                selectedRoute === 'Business Builder'
+                  ? 'bg-[#0E2046] border-[#0066FF] shadow-lg shadow-[#0066FF]/15'
+                  : 'bg-[#091633] border-white/10 hover:border-white/20'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#38BDF8] bg-[#0066FF]/20 px-3 py-1 rounded-full border border-[#0066FF]/30">
+                  Founder & Team Track
+                </span>
+                {selectedRoute === 'Business Builder' && (
+                  <CheckCircle2 className="w-5 h-5 text-[#38BDF8]" />
+                )}
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Business Builder</h3>
+              <p className="text-sm text-[#CBD5E1] leading-relaxed mb-6">
+                Use an authorised offer from your business, or begin with the DSS fictional training offer. Develop a scoped
+                plan for improving how enquiries and sales conversations are handled.
+              </p>
+              <div className="text-xs text-[#94A3B8] pt-4 border-t border-white/10 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-[#38BDF8]" />
+                <span>Focus: Immediate conversion and pipeline improvement for real business offers</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Shared line */}
+          <p className="text-center text-xs sm:text-sm text-[#94A3B8] italic max-w-2xl mx-auto">
+            Both routes use the same core curriculum. Your final application task reflects your goal. Choosing a route
+            describes your learning focus and does not purchase an unverified placement.
+          </p>
+        </div>
+      </section>
+
+      {/* 4.F CURRICULUM */}
+      <section id="curriculum" className="py-20 bg-[#0B1733] border-b border-white/5 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#94A3B8] mb-3">
+              <BookOpen className="w-3.5 h-3.5 text-[#38BDF8]" />
+              <span>Comprehensive 24-Topic Syllabus</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">
+              Four focused weeks. A connected sales process.
+            </h2>
+            <p className="text-sm sm:text-base text-[#CBD5E1]">
+              All 24 original topics are taught through 12 practical workshops. You will use the same approved offer across
+              the programme, then improve the connected work after feedback.
+            </p>
+          </div>
+
+          {/* Tab Selector: Weeks Overview vs 8-Criterion Rubric */}
+          <div className="flex justify-center mb-10">
+            <div className="inline-flex p-1 rounded-xl bg-[#071126] border border-white/10">
+              <button
+                type="button"
+                onClick={() => setActiveTab('curriculum')}
+                className={`px-5 py-2 text-xs font-bold rounded-lg transition-colors ${
+                  activeTab === 'curriculum'
+                    ? 'bg-[#0066FF] text-white shadow-sm'
+                    : 'text-[#94A3B8] hover:text-white'
+                }`}
+              >
+                12 Workshops by Week
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('rubric')}
+                className={`px-5 py-2 text-xs font-bold rounded-lg transition-colors ${
+                  activeTab === 'rubric'
+                    ? 'bg-[#0066FF] text-white shadow-sm'
+                    : 'text-[#94A3B8] hover:text-white'
+                }`}
+              >
+                Assessment Rubric (8 Criteria)
+              </button>
+            </div>
+          </div>
+
+          {activeTab === 'curriculum' ? (
+            <div className="space-y-6 max-w-5xl mx-auto">
+              {SPRINT_WEEKS.map((wk) => {
+                const isOpen = openWeek === wk.weekNumber;
+                const weekWorkshops = SPRINT_WORKSHOPS.filter((w) => w.week === wk.weekNumber);
+
+                return (
+                  <div
+                    key={wk.weekNumber}
+                    className="bg-[#071126] border border-white/10 rounded-2xl overflow-hidden transition-all shadow-sm"
+                  >
+                    {/* Week Header / Accordion trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setOpenWeek(isOpen ? 0 : wk.weekNumber)}
+                      className="w-full p-6 text-left flex items-start justify-between gap-4 hover:bg-white/[0.02] transition-colors"
+                      aria-expanded={isOpen}
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#0066FF]/20 text-[#60A5FA] border border-[#0066FF]/30">
+                            Week {wk.weekNumber}
+                          </span>
+                          <span className="text-xs text-[#94A3B8]">
+                            3 Workshops • 9 Scheduled Live Hours • 12 Guided Study Hours
+                          </span>
+                        </div>
+                        <h3 className="text-lg sm:text-xl font-bold text-white">{wk.title}</h3>
+                        <p className="text-sm text-[#94A3B8] max-w-3xl">{wk.copy}</p>
+                        <div className="text-xs text-[#38BDF8] font-medium pt-1">
+                          Evidence: {wk.evidence}
+                        </div>
+                      </div>
+                      <ChevronDown
+                        className={`w-5 h-5 text-[#94A3B8] shrink-0 mt-1 transition-transform duration-200 ${
+                          isOpen ? 'rotate-180 text-white' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {/* Expandable Workshops for this week */}
+                    {isOpen && (
+                      <div className="px-6 pb-6 pt-2 border-t border-white/10 space-y-4 bg-[#091530]/50">
+                        <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">
+                          Workshops in Week {wk.weekNumber}:
+                        </div>
+                        {weekWorkshops.map((ws) => {
+                          const isWsOpen = openWorkshop === ws.workshopNumber;
+                          return (
+                            <div
+                              key={ws.workshopNumber}
+                              className="rounded-xl border border-white/10 bg-[#071126] overflow-hidden"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setOpenWorkshop(isWsOpen ? null : ws.workshopNumber)}
+                                className="w-full p-4 text-left flex items-center justify-between gap-4 hover:bg-white/5 transition-colors"
+                              >
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <span className="font-mono text-xs font-bold text-[#38BDF8] bg-white/5 px-2 py-1 rounded">
+                                    WS {ws.workshopNumber.toString().padStart(2, '0')}
+                                  </span>
+                                  <span className="text-xs text-[#94A3B8]">Lessons {ws.lessons}</span>
+                                  <span className="text-sm font-semibold text-white">{ws.focus}</span>
+                                </div>
+                                <ChevronDown
+                                  className={`w-4 h-4 text-[#94A3B8] shrink-0 transition-transform ${
+                                    isWsOpen ? 'rotate-180 text-white' : ''
+                                  }`}
+                                />
+                              </button>
+
+                              {isWsOpen && (
+                                <div className="p-4 pt-1 border-t border-white/5 text-xs text-[#CBD5E1] space-y-3 bg-[#0B1A3A]/40">
+                                  <p className="leading-relaxed text-[#94A3B8]">{ws.overview}</p>
+
+                                  <div>
+                                    <div className="font-semibold text-white mb-1.5">Learning Outcomes:</div>
+                                    <ul className="list-disc pl-4 space-y-1 text-[#CBD5E1]">
+                                      {ws.publicOutcomes.map((out, idx) => (
+                                        <li key={idx}>{out}</li>
+                                      ))}
+                                    </ul>
+                                  </div>
+
+                                  <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-white/5 text-[11px]">
+                                    <div>
+                                      <span className="text-[#94A3B8]">Deliverable: </span>
+                                      <span className="text-white font-medium">{ws.deliverableEvidence}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-[#94A3B8]">Assessed Rubric: </span>
+                                      <span className="text-[#38BDF8] font-medium">
+                                        {ws.assessedCriteria.join(', ')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-              <div>
-                <span className="text-xs font-bold text-[#F5BF65] uppercase tracking-wider">TRACK B: BUSINESS OWNER</span>
-                <h3 className="text-2xl sm:text-3xl font-bold text-white mt-1 mb-4">
-                  Turn Your Existing Product or Agency Leads Into Cash.
-                </h3>
-                <p className="text-sm text-[#A7B7C7] leading-relaxed mb-6">
-                  Stop settling for low-ticket transactions. Learn to structure your consulting, software, or agency offer at ₦500k – ₦3M and close suitable clients with conviction.
+            /* Rubric Criteria View */
+            <div className="max-w-5xl mx-auto bg-[#071126] border border-white/10 rounded-2xl p-6 sm:p-8">
+              <div className="mb-6">
+                <h3 className="text-xl font-bold text-white mb-2">The 8-Criterion Assessment Rubric</h3>
+                <p className="text-sm text-[#94A3B8]">
+                  Every live role-play and final capstone demonstration is scored against these eight criteria (0–2 points
+                  each, 16 maximum). Passing threshold is 12/16 with no critical failure.
                 </p>
-                <div className="space-y-3 text-xs text-[#F3F7FA]">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={16} className="text-[#6AD6A7]" /> Bring your live business offer directly into classroom clinics
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={16} className="text-[#6AD6A7]" /> Receive direct line-by-line pitch corrections from Emmanuel Effiong
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle size={16} className="text-[#6AD6A7]" /> Set up a predictable closing pipeline that stops revenue leaks
-                  </div>
-                </div>
               </div>
 
-              <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-6">
-                <div className="text-xs font-bold text-[#8A9CAE] uppercase mb-4">FOUNDER OUTCOMES</div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                    <span className="text-[#A7B7C7]">Average Price Increase:</span>
-                    <span className="font-bold text-white">2.5× – 4× Deal Value</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {SPRINT_RUBRIC_CRITERIA.map((criterion, idx) => (
+                  <div key={criterion.id} className="p-4 rounded-xl bg-white/[0.02] border border-white/10">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-white text-sm">
+                        {idx + 1}. {criterion.name}
+                      </span>
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#0066FF]/20 text-[#60A5FA]">
+                        0 – 2 pts
+                      </span>
+                    </div>
+                    <div className="space-y-1 text-xs text-[#94A3B8]">
+                      <div>
+                        <strong className="text-white">Score 2 (Proficient):</strong> {criterion.scoringGuide.two}
+                      </div>
+                      <div>
+                        <strong className="text-white">Score 0 (Unacceptable):</strong> {criterion.scoringGuide.zero}
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                    <span className="text-[#A7B7C7]">Closing Rate Improvement:</span>
-                    <span className="font-bold text-[#45BFAE]">From 10% to 35%+</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs py-2 border-b border-white/5">
-                    <span className="text-[#A7B7C7]">Follow-up Cadence:</span>
-                    <span className="font-bold text-[#6AD6A7]">Closecraft CRM Auto-Cadence</span>
-                  </div>
-                  <div className="flex justify-between items-center text-xs py-2">
-                    <span className="text-[#A7B7C7]">Objection Response Kit:</span>
-                    <span className="font-bold text-white">Custom Battlecards for Your Niche</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           )}
         </div>
       </section>
 
-      {/* INTERACTIVE COMMISSION CALCULATOR */}
-      <section id="calculator" className="py-20 px-6 bg-[#0D151D] border-t border-b border-white/5">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">THE NUMBERS BEHIND HIGH-TICKET</div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">High-Ticket Closer Earnings Calculator</h2>
-            <p className="text-[#A7B7C7] mt-2">See what closing 3 to 8 deals a month produces in commission earnings.</p>
+      {/* 4.G HOW YOU LEARN */}
+      <section id="how-you-learn" className="py-20 bg-[#071126] border-b border-white/5 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Learn the skill, then put it to work.</h2>
+            <p className="text-sm sm:text-base text-[#94A3B8]">
+              A continuous loop of live demonstration, structured deliberate practice, and objective instructor feedback.
+            </p>
           </div>
 
-          <div className="bg-[#111C26] border border-white/10 rounded-3xl p-8 md:p-10 shadow-2xl">
-            <div className="space-y-8 mb-8">
-              {/* Slider 1: Average Deal Value */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-[#A7B7C7]">Average Deal Value Being Sold:</span>
-                  <span className="text-lg font-bold text-white">{formatNaira(dealValue * 100)}</span>
-                </div>
-                <input
-                  type="range"
-                  min="200000"
-                  max="5000000"
-                  step="100000"
-                  value={dealValue}
-                  onChange={(e) => setDealValue(Number(e.target.value))}
-                  className="w-full h-2 bg-[#1C2D3C] rounded-lg appearance-none cursor-pointer accent-[#45BFAE]"
-                />
-                <div className="flex justify-between text-[11px] text-[#8A9CAE] mt-1">
-                  <span>₦200k</span>
-                  <span>₦1.5M</span>
-                  <span>₦3M</span>
-                  <span>₦5M</span>
-                </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+                <BookOpen className="w-5 h-5" />
               </div>
-
-              {/* Slider 2: Deals Closed Per Month */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-[#A7B7C7]">Deals Closed Per Month:</span>
-                  <span className="text-lg font-bold text-white">{dealsCount} deals</span>
-                </div>
-                <input
-                  type="range"
-                  min="1"
-                  max="15"
-                  step="1"
-                  value={dealsCount}
-                  onChange={(e) => setDealsCount(Number(e.target.value))}
-                  className="w-full h-2 bg-[#1C2D3C] rounded-lg appearance-none cursor-pointer accent-[#45BFAE]"
-                />
-                <div className="flex justify-between text-[11px] text-[#8A9CAE] mt-1">
-                  <span>1 deal</span>
-                  <span>5 deals</span>
-                  <span>10 deals</span>
-                  <span>15 deals</span>
-                </div>
-              </div>
-
-              {/* Slider 3: Commission Percentage */}
-              <div>
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs font-semibold text-[#A7B7C7]">Commission Percentage:</span>
-                  <span className="text-lg font-bold text-[#45BFAE]">{commissionRate}%</span>
-                </div>
-                <input
-                  type="range"
-                  min="10"
-                  max="30"
-                  step="1"
-                  value={commissionRate}
-                  onChange={(e) => setCommissionRate(Number(e.target.value))}
-                  className="w-full h-2 bg-[#1C2D3C] rounded-lg appearance-none cursor-pointer accent-[#45BFAE]"
-                />
-                <div className="flex justify-between text-[11px] text-[#8A9CAE] mt-1">
-                  <span>10% (Entry)</span>
-                  <span>15% (Standard)</span>
-                  <span>20% (Senior)</span>
-                  <span>30% (High-Margin)</span>
-                </div>
-              </div>
+              <h3 className="text-base font-bold text-white mb-2">Live demonstrations</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Watch how a task is handled and inspect the decisions behind it.
+              </p>
             </div>
 
-            {/* Calculated Result Box */}
-            <div className="bg-[#15352F]/40 border border-[#45BFAE]/30 rounded-2xl p-6 text-center">
-              <div className="text-xs uppercase tracking-wider text-[#A7B7C7] font-semibold mb-1">
-                Projected Monthly Closer Commission
+            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+                <Compass className="w-5 h-5" />
               </div>
-              <div className="text-4xl sm:text-5xl font-black text-[#45BFAE] mb-2">
-                {formatNaira(totalCalculatedEarnings * 100)}
-              </div>
-              <p className="text-xs text-[#8A9CAE] max-w-md mx-auto">
-                {dealsCount} deals closed at {formatNaira(dealValue * 100)} with a {commissionRate}% commission. Illustrative math based on standard market rates.
+              <h3 className="text-base font-bold text-white mb-2">Guided practice</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Work through role-plays and practical assignments using approved offer facts.
               </p>
+            </div>
+
+            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+                <Award className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-2">Focused feedback</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Identify the part that needs correction, then save an improved attempt.
+              </p>
+            </div>
+
+            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+                <Layers className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-white mb-2">Connected project work</h3>
+              <p className="text-sm text-[#94A3B8] leading-relaxed">
+                Keep the offer and buyer information consistent across your messages and operating records.
+              </p>
+            </div>
+          </div>
+
+          {/* Workload panel & Access line */}
+          <div className="bg-gradient-to-r from-[#0C1B3B] to-[#0E224C] border border-white/10 rounded-2xl p-8 max-w-4xl mx-auto space-y-4">
+            <div className="flex items-start gap-4">
+              <Clock className="w-6 h-6 text-[#38BDF8] shrink-0 mt-0.5" />
+              <div>
+                <h4 className="text-base font-bold text-white mb-1">Time Commitment</h4>
+                <p className="text-sm text-[#CBD5E1] leading-relaxed">
+                  Plan approximately 21 hours each week: 9 scheduled live hours and 12 hours of guided preparation and
+                  practice. Each live workshop includes breaks.
+                </p>
+              </div>
+            </div>
+            <div className="pt-3 border-t border-white/10 text-xs text-[#94A3B8]">
+              A computer supports the final project records. Written practice alternatives are available where recording is
+              unsuitable.
             </div>
           </div>
         </div>
       </section>
 
-      {/* CURRICULUM ACCORDION */}
-      <section id="curriculum" className="py-20 px-6 max-w-5xl mx-auto">
-        <div className="text-center mb-16">
-          <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">8 WEEKS • 16 LESSONS • LIVE COACHING</div>
-          <h2 className="text-3xl sm:text-4xl font-bold text-white">The Founding Cohort Curriculum</h2>
-          <p className="text-[#A7B7C7] mt-3 max-w-2xl mx-auto">
-            Every single week culminates in a concrete practical submission scored against the published DSS rubric.
+      {/* 4.H AI PRACTICE */}
+      <section id="ai-practice" className="py-20 bg-[#0B1733] border-b border-white/5 scroll-mt-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#071126] border border-white/10 rounded-3xl p-8 sm:p-12 overflow-hidden relative shadow-2xl">
+            <div className="max-w-3xl space-y-6">
+              {/* Eyebrow */}
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0066FF]/20 border border-[#0066FF]/40 text-[#60A5FA] text-xs font-bold uppercase tracking-wider">
+                <Bot className="w-4 h-4 text-[#38BDF8]" />
+                <span>SALES PRACTICE POWERED BY CLOSECRAFT</span>
+              </div>
+
+              {/* Heading */}
+              <h2 className="text-2xl sm:text-4xl font-bold text-white leading-tight">
+                Practise the conversation before the next real buyer.
+              </h2>
+
+              {/* Main Copy */}
+              <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+                Use an AI buyer to rehearse a sales situation with approved offer facts. After the attempt, review feedback
+                connected to the saved conversation.
+              </p>
+              <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+                See which assessed behaviours met the standard and what needs correction. Use the next exercise to practise
+                that correction under a different buyer condition.
+              </p>
+
+              {/* Feature Explanation */}
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10 text-xs sm:text-sm text-[#94A3B8] space-y-1">
+                <p>
+                  <strong className="text-white">Performance Intelligence</strong> helps you revisit the evidence behind your
+                  results.
+                </p>
+                <p>
+                  Your <strong className="text-white">Coach Plan</strong> identifies a useful next exercise.
+                </p>
+              </div>
+
+              {/* Supporting Line */}
+              <p className="text-xs text-[#94A3B8] italic">
+                AI practice feedback supports learning. Formal DSS readiness decisions include an authorised trainer's review.
+              </p>
+
+              {/* Action Buttons based on status */}
+              <div className="flex flex-wrap items-center gap-4 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setShowPracticeModal(true)}
+                  className="px-5 py-2.5 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>See a Practice Example</span>
+                </button>
+
+                <Link
+                  href="/practice"
+                  className="px-5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold transition-colors border border-white/15 flex items-center gap-1.5"
+                >
+                  <span>Open Practice Studio</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </Link>
+
+                <a
+                  href="#apply"
+                  className="px-4 py-2.5 text-xs font-semibold text-[#94A3B8] hover:text-white transition-colors"
+                >
+                  Ask About Practice Access &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4.I PORTFOLIO */}
+      <section className="py-20 bg-[#071126] border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Finish with work you can explain.</h2>
+            <p className="text-sm sm:text-base text-[#CBD5E1]">
+              Your portfolio should show how you think and how you respond to feedback. You will build connected work
+              samples, rather than a folder of copied templates.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-8">
+            {SPRINT_PORTFOLIO_GROUPS.map((grp) => (
+              <div key={grp.groupNumber} className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="w-7 h-7 rounded-lg bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center font-bold text-xs">
+                    {grp.groupNumber}
+                  </span>
+                  <h3 className="text-base font-bold text-white">{grp.title}</h3>
+                </div>
+                <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">{grp.description}</p>
+              </div>
+            ))}
+          </div>
+
+          <p className="text-center text-xs sm:text-sm text-[#94A3B8] italic max-w-2xl mx-auto">
+            Simulation work stays labelled as simulation work. You can explain the task and your actual contribution
+            without claiming a client result you did not produce.
           </p>
         </div>
-
-        <div className="space-y-4">
-          {curriculumModules.map((m, idx) => {
-            const isOpen = openModule === idx;
-            return (
-              <div
-                key={m.number}
-                className={`border rounded-2xl transition-all overflow-hidden ${
-                  isOpen ? 'bg-[#111C26] border-[#45BFAE]/30' : 'bg-[#0B1117] border-white/5 hover:border-white/10'
-                }`}
-              >
-                <button
-                  onClick={() => setOpenModule(isOpen ? null : idx)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4"
-                >
-                  <div className="flex items-center gap-4">
-                    <span className="w-10 h-10 rounded-xl bg-[#15352F] text-[#45BFAE] font-mono font-bold flex items-center justify-center shrink-0">
-                      {m.number}
-                    </span>
-                    <div>
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#15352F] text-[#45BFAE] border border-[#45BFAE]/30">
-                          {m.routeBadge}
-                        </span>
-                        <span className="text-xs text-[#8A9CAE]">{m.duration}</span>
-                      </div>
-                      <h4 className="text-base sm:text-lg font-bold text-white">{m.title}</h4>
-                    </div>
-                  </div>
-                  <span className="text-[#45BFAE] text-xl font-bold">{isOpen ? '−' : '+'}</span>
-                </button>
-
-                {isOpen && (
-                  <div className="px-6 pb-6 pt-2 border-t border-white/5 text-sm text-[#A7B7C7] space-y-4">
-                    <p className="leading-relaxed">{m.desc}</p>
-                    <div className="p-4 rounded-xl bg-[#0B1117] border border-white/5 flex items-start gap-3">
-                      <CheckCircle size={18} className="text-[#6AD6A7] shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="text-white text-xs block mb-0.5">Your Practical Output:</strong>
-                        <span className="text-xs text-[#A7B7C7]">{m.output}</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="mt-10 text-center">
-          <a
-            href="/DSS_Sample_Lesson.pdf"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-xs font-bold text-[#45BFAE] hover:underline"
-          >
-            <Download size={15} /> Download Full Sample Lesson & Syllabus PDF &rarr;
-          </a>
-        </div>
       </section>
 
-      {/* PAYMENT PROOF & TESTIMONIALS */}
-      <section id="proof" className="py-20 px-6 bg-[#0D151D] border-t border-b border-white/5">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">VERIFIED REAL-WORLD RESULTS</div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">Proof of Closing & Commission Payouts</h2>
-            <p className="text-[#A7B7C7] mt-3">From students and closers trained under Emmanuel Effiong’s frameworks.</p>
-          </div>
-
-          {/* Testimonial Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-6 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-1 text-[#F5BF65] mb-4">
-                  {'★'.repeat(5)}
-                </div>
-                <p className="text-sm text-[#F3F7FA] italic mb-6 leading-relaxed">
-                  “After joining DSS and learning discovery calls from Emmanuel, I closed my first £3,500 consulting package for a London agency. Commission was £525 straight to my Wise account.”
-                </p>
-              </div>
-              <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                <div className="w-10 h-10 rounded-full bg-[#45BFAE]/20 text-[#45BFAE] font-bold flex items-center justify-center">
-                  RA
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-white">Ruth Adebayo</div>
-                  <div className="text-xs text-[#8A9CAE]">Remote Closer, London / Lagos</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-6 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-1 text-[#F5BF65] mb-4">
-                  {'★'.repeat(5)}
-                </div>
-                <p className="text-sm text-[#F3F7FA] italic mb-6 leading-relaxed">
-                  “I used to struggle selling ₦10,000 ebooks on WhatsApp. DSS completely broke down high-ticket closing. Last month I closed 4 high-ticket retainer clients for a B2B SaaS company.”
-                </p>
-              </div>
-              <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                <div className="w-10 h-10 rounded-full bg-[#6AD6A7]/20 text-[#6AD6A7] font-bold flex items-center justify-center">
-                  SO
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-white">Somtochukwu O.</div>
-                  <div className="text-xs text-[#8A9CAE]">B2B Closer, Lagos</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-[#111C26] border border-white/5 rounded-2xl p-6 flex flex-col justify-between">
-              <div>
-                <div className="flex items-center gap-1 text-[#F5BF65] mb-4">
-                  {'★'.repeat(5)}
-                </div>
-                <p className="text-sm text-[#F3F7FA] italic mb-6 leading-relaxed">
-                  “We raised our agency price from ₦250k to ₦1.2M. Our closing rate actually went UP because we stopped pitching features and started using the DSS discovery framework.”
-                </p>
-              </div>
-              <div className="flex items-center gap-3 pt-4 border-t border-white/5">
-                <div className="w-10 h-10 rounded-full bg-[#F5BF65]/20 text-[#F5BF65] font-bold flex items-center justify-center">
-                  DK
-                </div>
-                <div>
-                  <div className="text-sm font-bold text-white">David K.</div>
-                  <div className="text-xs text-[#8A9CAE]">Agency Founder, Abuja</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Payment Proof Badges & Receipts */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-5 rounded-2xl bg-[#0B1117] border border-[#6AD6A7]/20 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#6AD6A7]/10 text-[#6AD6A7] flex items-center justify-center font-bold">
-                <CreditCard size={22} />
-              </div>
-              <div>
-                <div className="text-xs text-[#8A9CAE]">Paystack Verified Transfer</div>
-                <div className="text-base font-bold text-[#6AD6A7]">₦480,000 Commission</div>
-                <div className="text-[10px] text-[#A7B7C7]">Ref: PAY-882194 • Cleared</div>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#0B1117] border border-[#45BFAE]/20 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#45BFAE]/10 text-[#45BFAE] flex items-center justify-center font-bold">
-                <Building size={22} />
-              </div>
-              <div>
-                <div className="text-xs text-[#8A9CAE]">Zenith Bank Client Deal</div>
-                <div className="text-base font-bold text-white">₦1,250,000 Closed</div>
-                <div className="text-[10px] text-[#A7B7C7]">B2B Retainer • W7 Pipeline</div>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#0B1117] border border-[#7AA2FF]/20 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-[#7AA2FF]/10 text-[#7AA2FF] flex items-center justify-center font-bold">
-                <Wallet size={22} />
-              </div>
-              <div>
-                <div className="text-xs text-[#8A9CAE]">Wise International Settlement</div>
-                <div className="text-base font-bold text-[#7AA2FF]">£1,400 Remote Retainer</div>
-                <div className="text-[10px] text-[#A7B7C7]">UK SaaS Placement</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CLOSECRAFT STRATEGIC ECOSYSTEM PIPELINE */}
-      <section id="pipeline" className="py-20 px-6 max-w-6xl mx-auto">
-        <div className="bg-gradient-to-br from-[#111C26] via-[#0D151D] to-[#15352F]/40 border border-[#45BFAE]/30 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden">
-          {/* Subtle background ambient pulse */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#45BFAE]/10 blur-[100px] pointer-events-none rounded-full" />
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10">
-            {/* Left Column: Mission & 3-Step Pipeline (7 cols) */}
-            <div className="lg:col-span-7">
-              <span className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider">
-                ONE PLATFORM • THE TALENT ENGINE OF CLOSECRAFT
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white mt-2 mb-6">
-                DSS feeds the entire Closecraft ecosystem with verified sales closers.
-              </h2>
-              <p className="text-sm md:text-base text-[#A7B7C7] leading-relaxed mb-8">
-                Closecraft builds the AI Revenue Operating System used by growing businesses to capture and qualify inbound leads.
-                <strong className="text-white block mt-2">
-                  When partner companies need elite, trained closers to turn those high-intent opportunities into revenue, they recruit directly from our DSS graduate directory.
-                </strong>
-              </p>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-                <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-4">
-                  <div className="text-[#45BFAE] font-bold text-sm mb-1">01. Train & Test</div>
-                  <p className="text-xs text-[#8A9CAE]">Pass W8 observed live roleplay to earn cryptographically verifiable certification.</p>
-                </div>
-                <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-4">
-                  <div className="text-[#6AD6A7] font-bold text-sm mb-1">02. Talent Match</div>
-                  <p className="text-xs text-[#8A9CAE]">Listed in Closecraft&apos;s verified closer network for SaaS and agency client hires.</p>
-                </div>
-                <div className="bg-[#0B1117] border border-white/5 rounded-2xl p-4">
-                  <div className="text-[#F5BF65] font-bold text-sm mb-1">03. Earn & Scale</div>
-                  <p className="text-xs text-[#8A9CAE]">Close deals inside Closecraft CRM and collect 10–20% commissions seamlessly.</p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-4">
-                <button
-                  onClick={() => setModalOpen(true)}
-                  className="px-6 py-3.5 bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] font-bold text-xs rounded-xl transition-all shadow-lg shadow-[#45BFAE]/20"
-                >
-                  Apply to Become a Verified Closer &rarr;
-                </button>
-                <Link
-                  href="/login"
-                  className="px-6 py-3.5 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs rounded-xl border border-white/10 transition-colors"
-                >
-                  Access Closecraft CRM
-                </Link>
-              </div>
-            </div>
-
-            {/* Right Column: Holographic Closer Certification Card (5 cols) */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative rounded-3xl overflow-hidden border border-[#45BFAE]/30 shadow-2xl bg-[#090D12] group">
-                <img
-                  src="/images/dss_closer_certification.jpg"
-                  alt="Closecraft DSS Verified Closer Holographic Credential"
-                  className="w-full h-auto object-cover transform transition-transform duration-700 group-hover:scale-105"
-                />
-
-                {/* Glassmorphic Overlay Badge */}
-                <div className="absolute bottom-4 left-4 right-4 bg-[#0B1117]/90 backdrop-blur-md border border-[#45BFAE]/30 rounded-2xl p-4 shadow-xl">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="flex items-center gap-2">
-                      <Award size={16} className="text-[#F5BF65]" />
-                      <span className="text-xs font-bold text-white">Closecraft Talent Roster</span>
-                    </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-[#6AD6A7]/20 text-[#6AD6A7] font-bold">
-                      VERIFIED PASS
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-[#A7B7C7]">
-                    Cryptographic ID #CC-8420 • Unlocks placement into active client pipelines across Nigeria, UK & US.
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* AFFILIATE PROGRAM SPOTLIGHT */}
-      <section className="py-20 px-6 bg-[#0D151D] border-t border-b border-white/5">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="max-w-xl">
-            <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">
-              DSS PARTNER & AFFILIATE PROGRAM
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
-              Know someone who needs this skill?<br />
-              <span className="text-[#45BFAE]">Earn ₦28,000 per referral.</span>
+      {/* 4.J ASSESSMENT */}
+      <section className="py-20 bg-[#0B1733] border-b border-white/5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">
+              Completion should mean you demonstrated the work.
             </h2>
-            <p className="text-sm text-[#A7B7C7] leading-relaxed mb-6">
-              Approved partners receive a dedicated referral link, 30-day tracking cookie, real-time analytics dashboard, and automated payouts.
+            <p className="text-sm sm:text-base text-[#CBD5E1]">
+              You will submit the required project evidence and complete a final demonstration. Reviewers assess observable
+              work, using a published rubric.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link
-                href="/dss/affiliate"
-                className="px-6 py-3 bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] font-bold text-xs rounded-xl transition-all shadow-md"
-              >
-                Join Affiliate Program &rarr;
-              </Link>
-              <Link
-                href="/dss/affiliate/dashboard"
-                className="px-6 py-3 bg-[#111C26] hover:bg-[#172431] text-white font-semibold text-xs rounded-xl border border-white/10 transition-colors"
-              >
-                Partner Dashboard
-              </Link>
+          </div>
+
+          {/* Standards Panel */}
+          <div className="bg-[#071126] border border-white/10 rounded-2xl p-8 mb-6 shadow-lg">
+            <h3 className="text-base font-bold uppercase tracking-wider text-[#38BDF8] mb-6">
+              Published Passing Standards
+            </h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <span className="text-sm text-white font-medium">Performance assessment: at least 12 out of 16.</span>
+              </div>
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <span className="text-sm text-white font-medium">Knowledge check: at least 8 out of 10.</span>
+              </div>
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <span className="text-sm text-white font-medium">All required evidence submitted.</span>
+              </div>
+              <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <span className="text-sm text-white font-medium">No unresolved critical failure.</span>
+              </div>
             </div>
           </div>
 
-          <div className="w-full md:w-80 bg-[#111C26] border border-[#45BFAE]/20 rounded-2xl p-6 shadow-xl">
-            <div className="text-xs font-bold text-white mb-4 flex items-center justify-between">
-              <span>PARTNER SNAPSHOT</span>
-              <span className="px-2 py-0.5 rounded bg-[#6AD6A7]/20 text-[#6AD6A7] text-[10px] font-bold">ACTIVE</span>
+          {/* Supporting copy */}
+          <div className="space-y-3 text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
+            <p>
+              If a task needs correction, you receive a focused repeat. Attendance and completed lessons are recorded
+              separately from assessed competence.
+            </p>
+            <p className="text-[#CBD5E1] font-medium">
+              A Certificate of Completion is subject to the programme's completion requirements.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 4.K FOUNDER */}
+      <section className="py-20 bg-[#071126] border-b border-white/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-8 sm:p-12">
+            <div className="flex flex-col sm:flex-row items-start gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-[#0066FF]/20 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-xl shrink-0">
+                EE
+              </div>
+              <div className="space-y-4">
+                <h2 className="text-2xl font-bold text-white">Meet Emmanuel Effiong.</h2>
+                <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+                  Emmanuel Effiong is the founder of Digital Sales School and Closecraft under Zeerocodes Automation Limited.
+                  He is an educator focused on helping learners connect technology with practical business work.
+                </p>
+                <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+                  DSS uses structured exercises and evidence-based review to make progress visible.
+                </p>
+              </div>
             </div>
-            <div className="space-y-3 text-xs mb-6">
-              <div className="flex justify-between py-1 border-b border-white/5">
-                <span className="text-[#8A9CAE]">Commission:</span>
-                <span className="font-bold text-white">35% Flat (₦28k)</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 4.L THE CLOSECRAFT CONNECTION */}
+      <section className="py-16 bg-[#0B1733] border-b border-white/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">A training pathway connected to real sales work.</h2>
+          <p className="text-sm text-[#CBD5E1] leading-relaxed max-w-3xl mx-auto">
+            Closecraft provides sales software and separately scoped sales support for businesses. DSS develops practical
+            skills through its training programme. Relevant assessed work can support an application for an available
+            opportunity. Any internship or client assignment requires a separately confirmed arrangement.
+          </p>
+          <p className="text-xs text-[#94A3B8] italic">Training does not guarantee employment, placement or income.</p>
+        </div>
+      </section>
+
+      {/* 4.M FEES AND DATES */}
+      <section id="fees-and-dates" className="py-20 bg-[#071126] border-b border-white/5 scroll-mt-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Check the commitment. Choose your next step.</h2>
+            <p className="text-sm sm:text-base text-[#94A3B8]">
+              Review the structured programme deliverables, calendar requirements, and transparent terms before applying.
+            </p>
+          </div>
+
+          {/* Dominant Enrolment Card */}
+          <div className="bg-gradient-to-b from-[#0D1C3D] to-[#071126] border-2 border-[#0066FF]/40 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+            {/* Top Badge */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#0066FF] text-white uppercase tracking-wider">
+                Flagship Offering
+              </span>
+              <span className="text-xs text-[#94A3B8]">{DSS_FLAGSHIP_SPRINT_CONFIG.timeZone}</span>
+            </div>
+
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
+              DSS Four-Week Remote Sales Sprint
+            </h3>
+
+            {/* Facts Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-6 border-y border-white/10 mb-6 text-center">
+              <div>
+                <div className="text-lg font-bold text-white">4 weeks</div>
+                <div className="text-xs text-[#94A3B8]">Teaching span</div>
               </div>
-              <div className="flex justify-between py-1 border-b border-white/5">
-                <span className="text-[#8A9CAE]">Cookie Duration:</span>
-                <span className="font-bold text-white">30 Days</span>
+              <div>
+                <div className="text-lg font-bold text-[#38BDF8]">12</div>
+                <div className="text-xs text-[#94A3B8]">Practical workshops</div>
               </div>
-              <div className="flex justify-between py-1 border-b border-white/5">
-                <span className="text-[#8A9CAE]">Clearance Hold:</span>
-                <span className="font-bold text-white">14 Days</span>
+              <div>
+                <div className="text-lg font-bold text-white">Virtual</div>
+                <div className="text-xs text-[#94A3B8]">Live delivery</div>
               </div>
-              <div className="flex justify-between py-1">
-                <span className="text-[#8A9CAE]">Minimum Transfer:</span>
-                <span className="font-bold text-[#6AD6A7]">₦20,000</span>
+              <div>
+                <div className="text-lg font-bold text-[#60A5FA]">~21 hrs</div>
+                <div className="text-xs text-[#94A3B8]">Weekly workload</div>
               </div>
             </div>
-            <Link
-              href="/dss/affiliate/dashboard?demo=1"
-              className="w-full py-2.5 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs rounded-lg border border-white/10 transition-colors flex items-center justify-center gap-1"
-            >
-              Preview Partner Portal <ArrowUpRight size={14} />
+
+            {/* Core Value Copy */}
+            <p className="text-sm text-[#CBD5E1] leading-relaxed mb-6">
+              Your programme includes the student manual and practical workbook, with guided project work and assessment
+              feedback.
+            </p>
+
+            {/* Fee & Calendar Status */}
+            <div className="p-5 rounded-2xl bg-[#071126]/80 border border-white/10 mb-8 space-y-3">
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-[#94A3B8]">Tuition Fee:</span>
+                <span className="font-semibold text-white">
+                  {DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN
+                    ? `₦${DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN.toLocaleString()}`
+                    : 'Request the current cohort fee and schedule.'}
+                </span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-[#94A3B8]">Intake Schedule:</span>
+                <span className="font-semibold text-[#38BDF8]">{DSS_FLAGSHIP_SPRINT_CONFIG.unconfiguredDateNotice}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs sm:text-sm">
+                <span className="text-[#94A3B8]">Live Calendar:</span>
+                <span className="text-right text-[#CBD5E1]">
+                  3 workshops/week (3 hours each with two 10-minute breaks)
+                </span>
+              </div>
+            </div>
+
+            {/* Enrolment Action */}
+            <div className="space-y-4 text-center">
+              <a
+                href="#apply"
+                className="w-full py-4 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold text-base transition-all shadow-lg shadow-[#0066FF]/30 flex items-center justify-center gap-2"
+              >
+                <span>Apply for the Sprint</span>
+                <ArrowRight className="w-4 h-4" />
+              </a>
+
+              <p className="text-xs text-[#94A3B8]">
+                Payment initiation is currently paused pending cohort schedule confirmation. Submit an application to
+                receive confirmed cohort dates and invoice terms.
+              </p>
+            </div>
+          </div>
+
+          {/* Legacy Catalog link preserved for previous customer commitments */}
+          <div className="mt-8 text-center">
+            <span className="text-xs text-[#94A3B8]">Looking for historical 8-week course records or legacy tracks? </span>
+            <Link href="/dss/admin" className="text-xs text-[#38BDF8] hover:underline font-medium">
+              Student Records & Support &rarr;
             </Link>
           </div>
         </div>
       </section>
 
-      {/* FOUNDER SECTION */}
-      <section className="py-20 px-6 max-w-4xl mx-auto">
-        <div className="bg-[#111C26] border border-white/5 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8">
-          <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#15352F] to-[#45BFAE] text-[#08231F] font-bold text-3xl flex items-center justify-center shrink-0 shadow-lg">
-            EE
-          </div>
-          <div>
-            <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-1">FOUNDER & LEAD INSTRUCTOR</div>
-            <h3 className="text-2xl font-bold text-white mb-2">Emmanuel Effiong</h3>
-            <p className="text-xs text-[#8A9CAE] mb-4">Founder, Zeerocodes Automation Limited & Closecraft</p>
-            <p className="text-sm text-[#A7B7C7] leading-relaxed">
-              “DSS was born because I saw too many talented Nigerian founders and professionals building incredible products that nobody bought. Selling is not an aggressive trick; it is an organized, diagnostic conversation. In DSS, we give you the exact rubric and practice environment so you never have to wing a sales call again.”
+      {/* 4.N APPLICATION */}
+      <section id="apply" className="py-20 bg-[#0B1733] border-b border-white/5 scroll-mt-24">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#94A3B8] mb-3">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#38BDF8]" />
+              <span>Direct Admissions Review</span>
+            </div>
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3">
+              Tell us what you want to use the skill for.
+            </h2>
+            <p className="text-sm text-[#CBD5E1]">
+              Share your goal and the time you can commit. We will help you check whether this sprint fits before you proceed with enrolment.
             </p>
+          </div>
+
+          <div className="bg-[#071126] border border-white/10 rounded-3xl p-6 sm:p-10 shadow-2xl">
+            {submitSuccess ? (
+              <div className="text-center py-12 space-y-4">
+                <div className="w-16 h-16 rounded-full bg-[#0066FF]/20 text-[#38BDF8] flex items-center justify-center mx-auto mb-2 border border-[#0066FF]/30">
+                  <CheckCircle2 className="w-8 h-8" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Application Received</h3>
+                <p className="text-sm sm:text-base text-[#CBD5E1] max-w-md mx-auto leading-relaxed">
+                  Your application has been received. We will contact you using the details provided with programme information and the next step.
+                </p>
+                <div className="pt-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSubmitSuccess(false);
+                      setFormData({
+                        fullName: '',
+                        email: '',
+                        phone: '',
+                        timezone: 'WAT (GMT+1)',
+                        salesExperience: 'Beginner / No previous sales experience',
+                        learningGoal: '',
+                        canProtectHours: false,
+                        companySponsorship: '',
+                      });
+                    }}
+                    className="text-xs text-[#38BDF8] hover:underline"
+                  >
+                    Submit another enquiry or update details
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <form onSubmit={handleApplicationSubmit} className="space-y-6">
+                {/* Honeypot field (hidden from humans) */}
+                <input
+                  type="text"
+                  name="company_website_url"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  className="hidden"
+                  aria-hidden="true"
+                />
+
+                {submitError && (
+                  <div className="p-4 rounded-xl bg-red-900/30 border border-red-500/40 text-red-200 text-xs sm:text-sm flex items-start gap-3">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
+
+                {/* Full name */}
+                <div>
+                  <label htmlFor={nameId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
+                    Full name <span className="text-[#38BDF8]">*</span>
+                  </label>
+                  <input
+                    id={nameId}
+                    type="text"
+                    required
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    placeholder="e.g. Adeola Johnson"
+                    className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                  />
+                </div>
+
+                {/* Email & Phone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor={emailId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
+                      Email address <span className="text-[#38BDF8]">*</span>
+                    </label>
+                    <input
+                      id={emailId}
+                      type="email"
+                      required
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="you@domain.com"
+                      className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor={phoneId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
+                      Phone or WhatsApp number <span className="text-[#38BDF8]">*</span>
+                    </label>
+                    <input
+                      id={phoneId}
+                      type="tel"
+                      required
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      placeholder="+234..."
+                      className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    />
+                  </div>
+                </div>
+
+                {/* Time zone & Application route */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor={timezoneId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
+                      Time zone <span className="text-[#38BDF8]">*</span>
+                    </label>
+                    <select
+                      id={timezoneId}
+                      required
+                      value={formData.timezone}
+                      onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
+                      className="w-full h-12 px-3 rounded-xl bg-[#0B1733] border border-white/10 text-white text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    >
+                      <option value="WAT (GMT+1)">West Africa Time (WAT / GMT+1)</option>
+                      <option value="GMT (GMT+0)">Greenwich Mean Time (GMT+0)</option>
+                      <option value="CAT (GMT+2)">Central Africa Time (CAT / GMT+2)</option>
+                      <option value="EAT (GMT+3)">East Africa Time (EAT / GMT+3)</option>
+                      <option value="EST (GMT-5)">Eastern Standard Time (EST / GMT-5)</option>
+                      <option value="Other">Other (specified during admissions review)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label htmlFor={routeId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
+                      Application route <span className="text-[#38BDF8]">*</span>
+                    </label>
+                    <select
+                      id={routeId}
+                      required
+                      value={selectedRoute}
+                      onChange={(e) =>
+                        setSelectedRoute(e.target.value as 'Remote Sales Starter' | 'Business Builder')
+                      }
+                      className="w-full h-12 px-3 rounded-xl bg-[#0B1733] border border-white/10 text-white text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    >
+                      <option value="Remote Sales Starter">Remote Sales Starter (Career Track)</option>
+                      <option value="Business Builder">Business Builder (Founder & Team Track)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Current sales experience */}
+                <div>
+                  <label htmlFor={experienceId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
+                    Current sales experience, including beginner <span className="text-[#38BDF8]">*</span>
+                  </label>
+                  <select
+                    id={experienceId}
+                    required
+                    value={formData.salesExperience}
+                    onChange={(e) => setFormData({ ...formData, salesExperience: e.target.value })}
+                    className="w-full h-12 px-3 rounded-xl bg-[#0B1733] border border-white/10 text-white text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                  >
+                    <option value="Beginner / No previous sales experience">
+                      Beginner / No previous sales experience
+                    </option>
+                    <option value="Some outbound or customer-facing experience">
+                      Some outbound or customer-facing experience
+                    </option>
+                    <option value="Practicing appointment setter or SDR">
+                      Practicing appointment setter or SDR
+                    </option>
+                    <option value="Experienced closer / account executive">
+                      Experienced closer / account executive
+                    </option>
+                    <option value="Business owner selling own offer">
+                      Business owner selling own offer
+                    </option>
+                  </select>
+                </div>
+
+                {/* Main learning goal */}
+                <div>
+                  <label htmlFor={goalId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
+                    Your main learning goal <span className="text-[#38BDF8]">*</span>
+                  </label>
+                  <textarea
+                    id={goalId}
+                    required
+                    rows={3}
+                    value={formData.learningGoal}
+                    onChange={(e) => setFormData({ ...formData, learningGoal: e.target.value })}
+                    placeholder="Describe what you want to be able to handle better after the sprint..."
+                    className="w-full p-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                  />
+                </div>
+
+                {/* Protect 21 hours confirmation */}
+                <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10">
+                  <label htmlFor={hoursId} className="flex items-start gap-3 cursor-pointer">
+                    <input
+                      id={hoursId}
+                      type="checkbox"
+                      required
+                      checked={formData.canProtectHours}
+                      onChange={(e) => setFormData({ ...formData, canProtectHours: e.target.checked })}
+                      className="mt-1 w-4 h-4 rounded text-[#0066FF] bg-[#0B1733] border-white/20 focus:ring-[#0066FF]"
+                    />
+                    <span className="text-xs sm:text-sm text-[#CBD5E1]">
+                      I confirm that I can protect approximately 21 hours each week (9 scheduled live workshop hours and
+                      12 guided study hours) for the sprint duration. <span className="text-[#38BDF8]">*</span>
+                    </span>
+                  </label>
+                </div>
+
+                {/* Company sponsorship (optional) */}
+                <div>
+                  <label htmlFor={sponsorshipId} className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">
+                    Existing company sponsorship details (only when relevant)
+                  </label>
+                  <input
+                    id={sponsorshipId}
+                    type="text"
+                    value={formData.companySponsorship}
+                    onChange={(e) => setFormData({ ...formData, companySponsorship: e.target.value })}
+                    placeholder="Company name or corporate invoice contact (optional)"
+                    className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                  />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className={`w-full py-4 rounded-xl ${
+                    submitting ? 'bg-gray-600 opacity-60 cursor-not-allowed' : 'bg-[#0066FF] hover:bg-[#0052CC]'
+                  } text-white font-bold text-sm transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2`}
+                >
+                  <span>{submitting ? 'Submitting Application...' : 'Submit My Application'}</span>
+                  {!submitting && <ArrowRight className="w-4 h-4" />}
+                </button>
+
+                {/* Microcopy */}
+                <p className="text-center text-xs text-[#94A3B8]">
+                  Submitting an application does not confirm admission or payment. You will receive the current programme details and the next step.
+                </p>
+              </form>
+            )}
           </div>
         </div>
       </section>
 
-      {/* PRODUCTIZED ROUTES & TUITION OFFER SECTION */}
-      <section id="routes" className="py-24 px-6 bg-[#0D151D] border-t border-b border-white/5 scroll-mt-20">
-        <div id="enrol" className="max-w-7xl mx-auto">
+      {/* 4.O FAQs */}
+      <section id="faqs" className="py-20 bg-[#071126] border-b border-white/5 scroll-mt-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#15352F] border border-[#45BFAE]/30 text-[#45BFAE] text-xs font-bold uppercase tracking-wider mb-4">
-              PRODUCTIZED SALES TRACKS • CHOOSE YOUR SPECIALIZATION
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#94A3B8] mb-3">
+              <HelpCircle className="w-3.5 h-3.5 text-[#38BDF8]" />
+              <span>Programme Clarity</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-4">
-              Transparent, Value-Engineered Pricing
-            </h2>
-            <p className="text-base text-[#A7B7C7] leading-relaxed">
-              Tailored curriculum tracks designed for specific deal-making milestones. Learn appointment setting, master high-ticket closing, spar in live unscripted roleplays, or bundle both routes for complete sales mastery.
+            <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+            <p className="text-sm sm:text-base text-[#94A3B8]">
+              Straightforward answers about our expectations, curriculum, tools, and certification terms.
             </p>
-
-            {/* Currency Selector Toggle */}
-            <div className="inline-flex items-center gap-2 mt-8 p-1.5 rounded-full bg-[#111C26] border border-white/10 shadow-lg">
-              <button
-                type="button"
-                onClick={() => setCurrency('NGN')}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  currency === 'NGN'
-                    ? 'bg-[#45BFAE] text-[#08231F] shadow-md shadow-[#45BFAE]/25'
-                    : 'text-[#8A9CAE] hover:text-white'
-                }`}
-              >
-                🇳🇬 Nigerian Naira (NGN ₦)
-              </button>
-              <button
-                type="button"
-                onClick={() => setCurrency('USD')}
-                className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all ${
-                  currency === 'USD'
-                    ? 'bg-[#45BFAE] text-[#08231F] shadow-md shadow-[#45BFAE]/25'
-                    : 'text-[#8A9CAE] hover:text-white'
-                }`}
-              >
-                🌐 US Dollar (USD $)
-              </button>
-            </div>
           </div>
 
-          {/* 4 Productized Routes Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {DSS_PRODUCTS.map((prod) => {
-              const priceDisplay = currency === 'NGN' ? `₦${prod.priceNGN.toLocaleString()}` : `$${prod.priceUSD}`;
-              const altPriceDisplay = currency === 'NGN' ? `$${prod.priceUSD} USD` : `₦${prod.priceNGN.toLocaleString()} NGN`;
-
+          <div className="space-y-4">
+            {[
+              {
+                q: 'Do I need previous sales experience?',
+                a: 'No. You can begin with the DSS training offer and guided exercises. You do need time to practise and improve your work.',
+              },
+              {
+                q: 'Is this only for people looking for remote jobs?',
+                a: 'No. The Business Builder route helps owners and staff apply the same process to an authorised offer.',
+              },
+              {
+                q: 'How much time should I plan each week?',
+                a: 'Approximately 21 hours: 9 scheduled live hours and 12 hours of guided preparation and practice.',
+              },
+              {
+                q: 'Will I learn appointment setting and closing?',
+                a: 'Yes. The core sprint covers the connected process, including qualification and discovery, as well as documented buying decisions.',
+              },
+              {
+                q: 'Do I need my own product or paying client?',
+                a: 'No. You can use the programme’s fictional offer and simulated records. Keep that work clearly labelled when presenting your portfolio.',
+              },
+              {
+                q: 'Can I use only a phone?',
+                a: 'A phone can support some activities, but a computer is recommended for the final records and portfolio work. Check your access requirements before enrolling.',
+              },
+              {
+                q: 'Is AI practice included?',
+                a: 'Check the published access terms for your cohort. AI tools support practice and feedback; they do not replace the final authorised assessment.',
+              },
+              {
+                q: 'Does the Closecraft seven-day trial make DSS free?',
+                a: 'No. That trial applies to Starter business software access. DSS tuition and any separately priced services have their own terms.',
+              },
+              {
+                q: 'What does the certificate confirm?',
+                a: 'It records completion against the programme’s requirements. It does not guarantee a job or income.',
+              },
+              {
+                q: 'Are internships or placements guaranteed?',
+                a: 'No. Any opportunity depends on availability and a separately confirmed selection process. Course enrolment does not purchase a placement.',
+              },
+              {
+                q: 'What happens if I need to correct my work?',
+                a: 'You will receive focused correction tasks. Completion follows review of the required evidence, rather than attendance alone.',
+              },
+              {
+                q: 'Can my business sponsor someone?',
+                a: 'Yes, where a suitable cohort is available. Request the current sponsorship and invoicing details.',
+              },
+            ].map((faq, idx) => {
+              const isOpen = openFaq === idx;
               return (
                 <div
-                  key={prod.id}
-                  className={`relative rounded-3xl p-6 md:p-8 flex flex-col h-full transition-all duration-300 hover:-translate-y-1 ${
-                    prod.isBestValue
-                      ? 'bg-gradient-to-b from-[#15352F]/90 via-[#111C26] to-[#0D151D] border-2 border-[#45BFAE] shadow-[0_0_35px_rgba(69,191,174,0.2)]'
-                      : prod.isPopular
-                      ? 'bg-[#111C26] border border-[#45BFAE]/40 shadow-xl'
-                      : 'bg-[#111C26] border border-white/10 hover:border-white/20'
-                  }`}
+                  key={idx}
+                  className="bg-[#0B1733] border border-white/10 rounded-2xl overflow-hidden transition-colors"
                 >
-                  {prod.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider whitespace-nowrap shadow-md ${
-                        prod.isBestValue
-                          ? 'bg-[#45BFAE] text-[#08231F]'
-                          : 'bg-[#15352F] text-[#45BFAE] border border-[#45BFAE]/40'
-                      }`}>
-                        {prod.badge}
-                      </span>
+                  <button
+                    type="button"
+                    onClick={() => setOpenFaq(isOpen ? null : idx)}
+                    className="w-full p-5 text-left flex items-center justify-between gap-4 hover:bg-white/[0.02]"
+                    aria-expanded={isOpen}
+                  >
+                    <span className="text-sm sm:text-base font-semibold text-white">{faq.q}</span>
+                    <ChevronDown
+                      className={`w-4 h-4 text-[#94A3B8] shrink-0 transition-transform ${
+                        isOpen ? 'rotate-180 text-white' : ''
+                      }`}
+                    />
+                  </button>
+                  {isOpen && (
+                    <div className="px-5 pb-5 pt-1 border-t border-white/5 text-xs sm:text-sm text-[#CBD5E1] leading-relaxed">
+                      {faq.a}
                     </div>
                   )}
-
-                  <div className="mb-4 mt-2">
-                    <h3 className="text-xl font-bold text-white mb-1">{prod.title}</h3>
-                    <p className="text-xs text-[#8A9CAE] min-h-[32px]">{prod.tagline}</p>
-                  </div>
-
-                  <div className="mb-6 pb-6 border-b border-white/5">
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className="text-3xl sm:text-4xl font-extrabold text-white">{priceDisplay}</span>
-                      <span className="text-xs text-[#8A9CAE]">/ {altPriceDisplay}</span>
-                    </div>
-                    {prod.savingsNGN && (
-                      <div className="inline-block mt-2 px-2.5 py-0.5 rounded-md bg-[#6AD6A7]/10 text-[#6AD6A7] text-[11px] font-bold border border-[#6AD6A7]/20">
-                        Save {currency === 'NGN' ? `₦${prod.savingsNGN.toLocaleString()}` : `$${prod.savingsUSD}`} vs separate routes
-                      </div>
-                    )}
-                    <div className="text-[11px] text-[#A7B7C7] mt-3 flex items-center gap-1.5">
-                      <Calendar size={13} className="text-[#45BFAE]" />
-                      <span>{prod.duration}</span>
-                    </div>
-                  </div>
-
-                  <div className="text-xs text-[#A7B7C7] mb-6 flex-1 space-y-2.5">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-[#8A9CAE] mb-2">What’s Included:</div>
-                    {prod.features.slice(0, 5).map((f, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <CheckCircle size={14} className="text-[#6AD6A7] shrink-0 mt-0.5" />
-                        <span className="leading-tight text-[#E0E7EC]">{f}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-auto pt-4 border-t border-white/5">
-                    <button
-                      onClick={() => {
-                        setSelectedRouteSlug(prod.slug);
-                        setModalOpen(true);
-                      }}
-                      className={`w-full py-3.5 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-lg ${
-                        prod.isBestValue
-                          ? 'bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] shadow-[#45BFAE]/20'
-                          : 'bg-[#15352F] hover:bg-[#1C473E] text-white border border-[#45BFAE]/40'
-                      }`}
-                    >
-                      {prod.isBestValue ? 'Get Both Routes (Save ₦50k / $50)' : `Select ${prod.shortTitle}`} <ArrowRight size={15} />
-                    </button>
-                    <div className="text-center text-[10px] text-[#8A9CAE] mt-2">
-                      Instant invoice • Verified Certificate
-                    </div>
-                  </div>
                 </div>
               );
             })}
           </div>
+        </div>
+      </section>
 
-          {/* Guarantee & Financing Banner */}
-          <div className="mt-12 p-6 rounded-2xl bg-[#111C26] border border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#A7B7C7]">
-            <div className="flex items-center gap-3">
-              <ShieldCheck size={28} className="text-[#45BFAE] shrink-0" />
-              <div>
-                <strong className="text-white block mb-0.5">Corporate Sponsorships & Installments Available</strong>
-                <span>Company tax invoices provided for sponsored teams. Two-part installment arrangements available upon fit review.</span>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setSelectedRouteSlug('dss-both-routes');
-                setModalOpen(true);
-              }}
-              className="px-5 py-2.5 rounded-lg bg-white/5 hover:bg-white/10 text-white font-semibold whitespace-nowrap border border-white/10 transition-colors"
+      {/* 4.P FINAL CTA */}
+      <section className="py-20 bg-gradient-to-b from-[#071126] via-[#0D1C3D] to-[#071126] border-b border-white/5 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight">
+            Give yourself practical work to show.
+          </h2>
+          <p className="text-sm sm:text-base text-[#CBD5E1] max-w-2xl mx-auto leading-relaxed">
+            Choose structured learning and make time to practise. Build a portfolio you can explain, with feedback that
+            shows what to improve.
+          </p>
+
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+            <a
+              href="#apply"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-sm font-bold transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2"
             >
-              Request Custom Invoice / Fit Review
-            </button>
+              <span>Apply for the Sprint</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+
+            <a
+              href="#curriculum"
+              className="w-full sm:w-auto px-7 py-4 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-semibold transition-colors border border-white/15"
+            >
+              View the Curriculum
+            </a>
           </div>
+
+          <p className="text-xs text-[#94A3B8] italic pt-4">
+            Four teaching weeks. A clear commitment to practical work.
+          </p>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="py-20 px-6 max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <div className="text-xs font-bold text-[#45BFAE] uppercase tracking-wider mb-2">FREQUENTLY ASKED QUESTIONS</div>
-          <h2 className="text-2xl sm:text-3xl font-bold text-white">Before You Enrol</h2>
-        </div>
-
-        <div className="space-y-4">
-          {[
-            {
-              q: 'Do I need prior sales experience to join DSS?',
-              a: 'No. The first weeks establish basic sales conduct and offer deconstruction. Beginners use our defined simulation kits to practice discovery and objection handling safely.',
-            },
-            {
-              q: 'Can my business sponsor a staff member or co-founder?',
-              a: 'Yes. You can sponsor yourself or an employee. We will issue a formal corporate invoice addressed to your company.',
-            },
-            {
-              q: 'What if I am already running a business?',
-              a: 'You can bring your live product or service directly into classroom roleplays. Emmanuel Effiong will help calibrate your pricing and objection responses for your actual buyers.',
-            },
-            {
-              q: 'Is a job or client placement guaranteed?',
-              a: 'Graduates who pass the W8 observed assessment with 80%+ rubric scores are entered into Closecraft’s active client pipeline. Client selection remains performance-based.',
-            },
-            {
-              q: 'What is the schedule and attendance requirement?',
-              a: 'Orientation is Saturday 7 November at 10 AM WAT. Live sessions are Mondays and Wednesdays from 7:00 PM to 8:30 PM WAT. 80% attendance is required for graduation.',
-            },
-            {
-              q: 'How does the affiliate program work?',
-              a: 'You receive 35% commission (₦28,000) for every student who enrolls through your referral link. Payouts are made directly to your bank account after 14 days clearance.',
-            },
-          ].map((item, i) => (
-            <div key={i} className="bg-[#111C26] border border-white/5 rounded-xl p-6">
-              <h4 className="text-base font-bold text-white mb-2 flex items-center gap-2">
-                <HelpCircle size={18} className="text-[#45BFAE]" /> {item.q}
-              </h4>
-              <p className="text-sm text-[#A7B7C7] pl-7 leading-relaxed">{item.a}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="border-t border-white/5 py-12 px-6 bg-[#0B1117] text-xs text-[#8A9CAE]">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
-            <DSSLogo variant="full" size="md" alt="Digital Sales School" />
+      {/* 4.Q FOOTER */}
+      <footer className="bg-[#050B1A] py-14 border-t border-white/10 text-xs text-[#94A3B8]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-white/10">
             <div>
-              <div className="font-bold text-white text-sm mb-0.5">Digital Sales School (DSS)</div>
-              <div>The Flagship Closer Talent Engine of Closecraft • Zeerocodes Automation Limited</div>
-              <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-[#45BFAE]">
-                <a href="mailto:dss@closecrafthq.com" className="hover:underline">Admissions: dss@closecrafthq.com</a>
-                <span>•</span>
-                <a href="mailto:info@closecrafthq.com" className="hover:underline">Support: info@closecrafthq.com</a>
-                <span>•</span>
-                <a href="https://www.closecrafthq.com" target="_blank" rel="noopener noreferrer" className="hover:underline">www.closecrafthq.com</a>
+              <div className="flex items-center gap-3 mb-2">
+                <DSSLogo variant="full" size="sm" alt="Digital Sales School" />
               </div>
+              <p className="text-[#CBD5E1] text-xs">Practical sales training powered by Closecraft.</p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-6">
+              <Link href="/" className="hover:text-white transition-colors">
+                Closecraft Home
+              </Link>
+              <Link href="/login" className="hover:text-white transition-colors">
+                Student Login
+              </Link>
+              <Link href="/dss/affiliate" className="hover:text-white transition-colors font-medium text-[#38BDF8]">
+                Affiliate Programme
+              </Link>
+              <a href="mailto:dss@closecrafthq.com" className="hover:text-white transition-colors">
+                Contact
+              </a>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-6">
-            <Link href="/" className="hover:text-white transition-colors">Closecraft Home</Link>
-            <Link href="/dss/affiliate" className="hover:text-white transition-colors">Affiliate Program</Link>
-            <Link href="/dss/affiliate/dashboard" className="hover:text-white transition-colors">Partner Dashboard</Link>
-            <Link href="/dss/clinic" className="hover:text-white transition-colors">Sales Clinic</Link>
-            <Link href="/login" className="hover:text-white transition-colors">Student Login</Link>
+
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px]">
+            <div className="flex flex-wrap items-center gap-6">
+              <Link href="/terms" className="hover:text-white transition-colors">
+                Learner Terms
+              </Link>
+              <Link href="/privacy" className="hover:text-white transition-colors">
+                Privacy Notice
+              </Link>
+              <Link href="/refund-policy" className="hover:text-white transition-colors">
+                Refund Policy
+              </Link>
+            </div>
+            <div>
+              &copy; {new Date().getFullYear()} Zeerocodes Automation Limited. All rights reserved.
+            </div>
           </div>
         </div>
       </footer>
 
-      {/* ENROLMENT & FIT REVIEW MODAL */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#111C26] border border-[#45BFAE]/30 rounded-3xl p-8 max-w-lg w-full relative shadow-2xl max-h-[90vh] overflow-y-auto">
+      {/* Practice Example Modal */}
+      {showPracticeModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        >
+          <div className="bg-[#071126] border border-white/15 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
             <button
-              onClick={() => setModalOpen(false)}
-              className="absolute top-6 right-6 text-[#8A9CAE] hover:text-white transition-colors"
+              type="button"
+              onClick={() => setShowPracticeModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-lg bg-white/5 hover:bg-white/10 text-white transition-colors"
+              aria-label="Close modal"
             >
-              <X size={20} />
+              <X className="w-4 h-4" />
             </button>
 
-            {enquirySuccess ? (
-              <div className="text-center py-6">
-                <div className="w-16 h-16 rounded-full bg-[#6AD6A7]/20 text-[#6AD6A7] flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle size={36} />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Application Received!</h3>
-                <p className="text-sm text-[#A7B7C7] mb-6 leading-relaxed">
-                  Thank you. Emmanuel Effiong and the admissions desk will review your schedule fit and contact details. We will send the orientation details and official invoice to your email.
-                </p>
-                <a
-                  href="/DSS_Sample_Lesson.pdf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block px-6 py-3 bg-[#45BFAE] hover:bg-[#5CD4C3] text-[#08231F] font-bold text-xs rounded-xl"
-                >
-                  Download Free Sample Lesson (PDF)
-                </a>
+            <div className="space-y-1">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#38BDF8] bg-[#0066FF]/20 px-2.5 py-0.5 rounded border border-[#0066FF]/30">
+                Practice Studio Walkthrough
+              </span>
+              <h3 className="text-xl font-bold text-white">AI Buyer Conversation & Feedback Example</h3>
+            </div>
+
+            <div className="space-y-3 bg-[#0B1733] border border-white/10 rounded-2xl p-5 text-xs">
+              <div className="flex items-start gap-3">
+                <span className="font-bold text-[#F87171] shrink-0">Simulated Buyer:</span>
+                <span className="text-[#CBD5E1] italic">
+                  "₦1,250,000 is way above what we budgeted for this quarter. Can you do ₦600k or break it into four instalments?"
+                </span>
               </div>
-            ) : (
-              <div>
-                <div className="mb-6">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-[#45BFAE]">
-                    DSS ADMISSIONS • FIT REVIEW APPLICATION
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mt-1">Apply for Your Track</h3>
-                  <p className="text-xs text-[#8A9CAE] mt-1">
-                    Free application. We review your background and schedule fit before issuing your official invoice.
-                  </p>
-                </div>
-
-                {formError && (
-                  <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
-                    {formError}
-                  </div>
-                )}
-
-                <form onSubmit={handleEnquirySubmit} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-[#A7B7C7] mb-1">Select Training Track *</label>
-                    <select
-                      name="route"
-                      value={selectedRouteSlug}
-                      onChange={(e) => setSelectedRouteSlug(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-[#0B1117] border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-[#45BFAE]"
-                    >
-                      {DSS_PRODUCTS.map((prod) => (
-                        <option key={prod.slug} value={prod.slug}>
-                          {prod.title} — {currency === 'NGN' ? `₦${prod.priceNGN.toLocaleString()} / $${prod.priceUSD}` : `$${prod.priceUSD} / ₦${prod.priceNGN.toLocaleString()}`}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[#A7B7C7] mb-1">Full Name *</label>
-                    <input
-                      name="name"
-                      required
-                      placeholder="e.g. Babatunde Lawal"
-                      className="w-full px-4 py-2.5 bg-[#0B1117] border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-[#45BFAE]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[#A7B7C7] mb-1">Email Address *</label>
-                    <input
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="e.g. babatunde@gmail.com"
-                      className="w-full px-4 py-2.5 bg-[#0B1117] border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-[#45BFAE]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[#A7B7C7] mb-1">Phone / WhatsApp Number</label>
-                    <input
-                      name="phone"
-                      placeholder="e.g. +234 803 123 4567"
-                      className="w-full px-4 py-2.5 bg-[#0B1117] border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-[#45BFAE]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[#A7B7C7] mb-1">Your Primary Goal *</label>
-                    <select
-                      name="goal"
-                      defaultValue={route === 'business' ? 'Business Builder (Own Offer)' : 'Remote Sales Closer'}
-                      className="w-full px-4 py-2.5 bg-[#0B1117] border border-white/10 rounded-xl text-white text-xs focus:outline-none focus:border-[#45BFAE]"
-                    >
-                      <option>Remote Sales Closer (Earn Commissions)</option>
-                      <option>Appointment Setter (Book Qualified Discovery Calls)</option>
-                      <option>Business Builder (Sell Own High-Ticket Offer)</option>
-                      <option>Deal Sparring & Live Placement Internship</option>
-                      <option>Company Sponsorship (Train Staff Member)</option>
-                    </select>
-                  </div>
-
-                  {referral && (
-                    <div className="p-2.5 rounded-lg bg-[#15352F]/40 border border-[#45BFAE]/30 text-[11px] text-[#45BFAE]">
-                      ✓ Partner Referral Applied: <strong>{referral}</strong>
-                    </div>
-                  )}
-
-                  {/* Honeypot trap */}
-                  <input name="website" tabIndex={-1} autoComplete="off" className="hidden" />
-
-                  <div className="flex items-start gap-2 pt-1">
-                    <input
-                      type="checkbox"
-                      name="consent"
-                      id="enquiry-consent"
-                      required
-                      defaultChecked
-                      className="mt-1 rounded bg-[#0B1117] border-white/20 text-[#45BFAE]"
-                    />
-                    <label htmlFor="enquiry-consent" className="text-[11px] text-[#8A9CAE] leading-relaxed">
-                      I agree that DSS can review my details and send admissions guidance and cohort schedules.
-                    </label>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full py-3.5 bg-[#45BFAE] hover:bg-[#5CD4C3] disabled:opacity-50 text-[#08231F] font-bold text-xs rounded-xl transition-all shadow-md shadow-[#45BFAE]/20 mt-2"
-                  >
-                    {submitting ? 'Submitting Application...' : 'Submit Fit Review Application'}
-                  </button>
-                </form>
+              <div className="flex items-start gap-3 pt-3 border-t border-white/5">
+                <span className="font-bold text-[#38BDF8] shrink-0">Learner Rep:</span>
+                <span className="text-white">
+                  "I understand budget constraints are real. If we pause on the price for a moment—does this recommendation
+                  fully resolve the pipeline leakage you shared earlier, or do you still have questions about implementation fit?"
+                </span>
               </div>
-            )}
+            </div>
+
+            {/* Assessed Behaviours */}
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10 space-y-2 text-xs">
+              <div className="font-bold text-white flex items-center justify-between">
+                <span>Rubric Evidence Analysis:</span>
+                <span className="text-[#38BDF8] font-mono">Score: 2 / 2</span>
+              </div>
+              <p className="text-[#94A3B8]">
+                <strong>Criterion - Objection Diagnosis:</strong> The learner isolated price resistance from solution fit without
+                reacting defensively or offering an unapproved discount.
+              </p>
+              <div className="pt-2 border-t border-white/5 text-[11px] text-[#38BDF8]">
+                <strong>Next Recommended Drill:</strong> Practise authority diagnosis when the buyer states they need board sign-off.
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowPracticeModal(false)}
+                className="px-4 py-2 rounded-lg bg-white/10 text-white text-xs font-semibold hover:bg-white/15 transition-colors"
+              >
+                Close Preview
+              </button>
+              <a
+                href="#apply"
+                onClick={() => setShowPracticeModal(false)}
+                className="px-4 py-2 rounded-lg bg-[#0066FF] text-white text-xs font-bold hover:bg-[#0052CC] transition-colors"
+              >
+                Apply for Practice Access
+              </a>
+            </div>
           </div>
         </div>
       )}

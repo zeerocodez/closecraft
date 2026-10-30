@@ -17,10 +17,10 @@ export default function DSSApplyPage() {
         <div className="bg-[#161b22] p-12 rounded-2xl border border-white/5 max-w-lg text-center">
           <ShieldCheck className="w-16 h-16 text-[#2ea043] mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-white mb-4">Application Received</h2>
-          <p className="text-gray-400 mb-8">
-            Thank you. We aim to respond within two working days while admissions are open. Please do not transfer money until you have an admission decision and official invoice.
+          <p className="text-gray-300 mb-8 leading-relaxed">
+            Your application has been received. We will contact you using the details provided with programme information and the next step.
           </p>
-          <Link href="/dss" className="text-[#2ea043] font-bold hover:underline">
+          <Link href="/dss" className="text-[#38BDF8] font-bold hover:underline">
             Return to Digital Sales School
           </Link>
         </div>
@@ -105,12 +105,18 @@ export default function DSSApplyPage() {
             <div>
               <label className="block text-sm font-bold text-white mb-2">4. Which DSS Route are you applying for? <span className="text-red-500">*</span></label>
               <p className="text-xs text-gray-500 mb-2">Select the track that matches your immediate revenue goal.</p>
-              <select name="preferredRoute" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
+              <select name="preferredRoute" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#38BDF8] focus:outline-none">
                 <option value="">Select your preferred route...</option>
+                <option value="DSS Four-Week Remote Sales Sprint (Remote Sales Starter)">
+                  DSS Four-Week Remote Sales Sprint — Remote Sales Starter
+                </option>
+                <option value="DSS Four-Week Remote Sales Sprint (Business Builder)">
+                  DSS Four-Week Remote Sales Sprint — Business Builder
+                </option>
                 <option value="Setters Route (₦100,000 / $100)">Setters Route (₦100,000 / $100) — Outbound Prospecting & Appointment Setting</option>
                 <option value="Closers Route (₦100,000 / $100)">Closers Route (₦100,000 / $100) — High-Ticket Discovery & Deal Closing</option>
                 <option value="Live Role Plays / Internship Track (₦100,000 / $100)">Live Role Plays / Internship Track (₦100,000 / $100) — Live Sparring & Deal Placement</option>
-                <option value="Both Routes Bundle (₦150,000 / $150)">Both Routes Bundle (₦150,000 / $150) — Complete Sales Mastery (Save ₦50,000 / $50)</option>
+                <option value="Both Routes Bundle (₦150,000 / $150)">Both Routes Bundle (₦150,000 / $150) — Complete Sales Mastery</option>
               </select>
             </div>
 

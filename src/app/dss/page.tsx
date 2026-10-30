@@ -3,9 +3,9 @@ import type { Metadata } from 'next';
 import DSSLandingClient from './DSSLandingClient';
 
 export const metadata: Metadata = {
-  title: 'Digital Sales School (DSS) | Productized Sales Tracks & Closing Academy',
+  title: 'Digital Sales School | Four-Week Remote Sales Sprint',
   description:
-    'Learn the skill behind the sale. 4 productized sales tracks: Setters Route (₦100k / $100), Closers Route (₦100k / $100), Live Role Plays/Internship (₦100k / $100), and Both Routes (₦150k / $150). Powered by Closecraft.',
+    'Build practical appointment-setting and closing skills through 12 live workshops. Explore the four-week DSS sprint and apply for the next confirmed cohort.',
 };
 
 export default function DSSPage() {
