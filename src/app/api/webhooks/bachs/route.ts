@@ -4,7 +4,7 @@ import { verifyBachsWebhookSignature, processBachsWebhookEvent } from '@/lib/pay
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
-    const secret = process.env.BACHS_WEBHOOK_SECRET || process.env.BILLING_WEBHOOK_SECRET;
+    const secret = [process.env.BACHS_WEBHOOK_SECRET, process.env.BILLING_WEBHOOK_SECRET].filter(Boolean).join(',');
 
     // Verify Bachs signature
     if (secret) {

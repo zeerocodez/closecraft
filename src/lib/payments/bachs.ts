@@ -249,6 +249,18 @@ export function verifyBachsWebhookSignature(
     return { isValid: false, error: 'Webhook secret is not configured' };
   }
 
+  const secrets = secret.split(',').map(s => s.trim()).filter(Boolean);
+  if (secrets.length > 1) {
+    let lastResult: { isValid: boolean; timestamp?: number; error?: string } = { isValid: false, error: 'Signature mismatch' };
+    for (const singleSecret of secrets) {
+      const res = verifyBachsWebhookSignature(rawBody, headers, singleSecret, toleranceSeconds);
+      if (res.isValid) return res;
+      lastResult = res;
+    }
+    return lastResult;
+  }
+
+
   const getHeader = (name: string): string | null => {
     if (typeof (headers as any).get === 'function') {
       return (headers as Headers).get(name) || (headers as Headers).get(name.toLowerCase());
