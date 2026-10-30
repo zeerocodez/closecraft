@@ -17,9 +17,9 @@ function AuthStatusBanner() {
       <div className="mb-5 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-left flex items-start gap-3">
         <span className="material-symbols-outlined text-amber-400 text-[20px] shrink-0 mt-0.5">info</span>
         <div className="text-xs space-y-1">
-          <p className="font-semibold text-amber-200">Local Development Note</p>
+          <p className="font-semibold text-amber-200">Authentication Configuration</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
-            Google OAuth requires Google Cloud credentials in production. In local development, please sign in using the <strong>Operator Authentication</strong> form below with the pre-filled demo account.
+            Single sign-on provider configuration error. Please sign in using your work email and password below, or contact your workspace administrator.
           </p>
         </div>
       </div>
@@ -33,7 +33,7 @@ function AuthStatusBanner() {
         <div className="text-xs space-y-1">
           <p className="font-semibold text-red-200">Database Connection Error</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
-            Google verified your account, but the server failed to reach the database to provision or load your workspace. Ensure <code className="text-red-300 font-mono text-[10px] bg-red-900/60 px-1 py-0.5 rounded">DATABASE_URL</code> is added to Vercel environment variables.
+            Unable to reach the workspace database. Please check your network connection and try again in a few moments.
           </p>
           {details && (
             <p className="text-red-300 font-mono text-[10px] bg-red-900/40 p-1.5 rounded break-all mt-1">
@@ -52,12 +52,8 @@ function AuthStatusBanner() {
         <div className="text-xs space-y-1">
           <p className="font-semibold text-amber-200">Access Denied During Sign-in</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
-            Your sign-in request could not complete. This usually happens for one of two reasons:
+            Your sign-in request could not be authorized. Please verify your workspace membership permissions or sign in with your email and password.
           </p>
-          <ul className="text-slate-300 text-[11px] list-disc list-inside space-y-0.5 pt-0.5">
-            <li><strong className="text-amber-200">Database variable:</strong> <code className="text-amber-300 font-mono text-[10px] bg-amber-900/40 px-1 py-0.5 rounded">DATABASE_URL</code> is not set in Vercel.</li>
-            <li><strong className="text-amber-200">Google OAuth mode:</strong> Your Google Cloud app is still in <em>Testing</em> mode, and your email is not in the <em>Test Users</em> list under Audience.</li>
-          </ul>
         </div>
       </div>
     );
@@ -76,7 +72,7 @@ function AuthStatusBanner() {
     return (
       <div className="mb-5 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
         <span className="material-symbols-outlined text-[18px] text-red-400">warning</span>
-        <span>Authentication failed ({error}). {details && <span className="font-mono text-[10px] ml-1">({details})</span>}</span>
+        <span>Authentication failed. Please verify your credentials or register a new workspace.</span>
       </div>
     );
   }
@@ -85,7 +81,7 @@ function AuthStatusBanner() {
     return (
       <div className="mb-5 p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-200 flex items-center gap-2">
         <span className="material-symbols-outlined text-[18px] text-emerald-400">check_circle</span>
-        <span>Workspace created successfully! Please sign in.</span>
+        <span>Workspace created successfully! Please sign in with your credentials.</span>
       </div>
     );
   }
@@ -94,17 +90,11 @@ function AuthStatusBanner() {
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('sarah.jenkins@acmeops.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
-
-  const handleFillDemo = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
-    setFormError(null);
-  };
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -198,9 +188,10 @@ export default function LoginPage() {
                   name="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="sarah.jenkins@acmeops.com" 
+                  placeholder="operator@company.com" 
                   required 
                   type="email"
+                  autoFocus
                 />
               </div>
             </div>
@@ -231,20 +222,6 @@ export default function LoginPage() {
                   <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
                 </button>
               </div>
-            </div>
-
-            {/* Quick Demo Pill */}
-            <div className="p-2.5 rounded-lg bg-surface-container border border-outline-variant/20 flex items-center justify-between text-xs">
-              <span className="text-on-surface-variant text-[11px]">
-                Demo Account: <strong className="text-on-surface">sarah.jenkins@acmeops.com</strong>
-              </span>
-              <button
-                type="button"
-                onClick={() => handleFillDemo('sarah.jenkins@acmeops.com', 'password123')}
-                className="text-primary hover:underline font-semibold text-[11px]"
-              >
-                Autofill
-              </button>
             </div>
 
             <div className="flex items-center justify-between pt-1">
@@ -286,9 +263,7 @@ export default function LoginPage() {
             <button 
               className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm" 
               type="button"
-              onClick={() => {
-                setFormError("Google Workspace SSO requires Google Cloud Client credentials. Please use the Operator Authentication form above with the pre-filled demo account.");
-              }}
+              onClick={() => signIn('google', { callbackUrl: '/today' })}
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
@@ -302,7 +277,7 @@ export default function LoginPage() {
               className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm" 
               type="button"
               onClick={() => {
-                setFormError("Microsoft Azure AD requires enterprise directory credentials. Please use the Operator Authentication form above with the pre-filled demo account.");
+                setFormError("Microsoft Azure AD SSO is an enterprise feature. Please contact enterprise support to configure your tenant directory.");
               }}
             >
               <svg className="w-5 h-5 shrink-0" viewBox="0 0 23 23">
@@ -329,16 +304,6 @@ export default function LoginPage() {
           <Link href="/signup" className="shrink-0 px-4 py-2 rounded bg-inverse-surface text-inverse-on-surface hover:bg-on-surface transition-colors text-sm font-medium font-semibold ml-2">
             Start 7-Day Trial
           </Link>
-        </div>
-
-        <div className="flex flex-col items-center justify-center gap-2 text-center px-3">
-          <div className="flex items-center gap-1.5 text-on-surface-variant">
-            <span className="material-symbols-outlined text-[16px] text-primary">security</span>
-            <span className="text-xs font-semibold uppercase tracking-wider">Enterprise Security Protocol</span>
-          </div>
-          <p className="text-sm text-secondary">
-            SOC2 Type II Certified • 256-Bit NDPR & GDPR Compliant Security
-          </p>
         </div>
       </div>
     </div>

@@ -22,6 +22,11 @@ import {
   AlertCircle,
   Briefcase,
   Check,
+  Tag,
+  Copy,
+  CheckCheck,
+  CreditCard,
+  Lock,
 } from 'lucide-react';
 import { Logo, DSSLogo } from '@/components/ui/Logo';
 import {
@@ -32,6 +37,7 @@ import {
   SPRINT_PORTFOLIO_GROUPS,
   DSS_FLAGSHIP_SPRINT_CONFIG,
 } from '@/lib/dss/sprint-curriculum';
+import { DSS_PRODUCTS, DSSProduct } from '@/lib/dss/products';
 
 export default function DSSLandingClient() {
   const [activeTab, setActiveTab] = useState<'curriculum' | 'rubric'>('curriculum');
@@ -40,6 +46,20 @@ export default function DSSLandingClient() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [showPracticeModal, setShowPracticeModal] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState<'Remote Sales Starter' | 'Business Builder'>('Remote Sales Starter');
+
+  // Early Bird Campaign & Checkout State
+  const [codeCopied, setCodeCopied] = useState(false);
+  const [checkoutProduct, setCheckoutProduct] = useState<DSSProduct | null>(null);
+  const [couponInput, setCouponInput] = useState('cohort001');
+  const [couponApplied, setCouponApplied] = useState(true);
+  const [couponChecking, setCouponChecking] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccessMessage, setCouponSuccessMessage] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState<number>(0);
+  const [learnerEmail, setLearnerEmail] = useState('');
+  const [learnerName, setLearnerName] = useState('');
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -125,10 +145,132 @@ export default function DSSLandingClient() {
     }
   }
 
+  const handleCopyCode = async () => {
+    try {
+      await navigator.clipboard.writeText('cohort001');
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 3000);
+    } catch {
+      setCodeCopied(true);
+    }
+  };
+
+  const handleOpenCheckout = (product: DSSProduct) => {
+    setCheckoutProduct(product);
+    setCouponInput('cohort001');
+    setCouponApplied(true);
+    // Initial 50% calculation for cohort001
+    setDiscountAmount(Math.round(product.priceNGN * 0.5));
+    setCouponSuccessMessage(`Early bird offer applied. You saved ₦${Math.round(product.priceNGN * 0.5).toLocaleString()}.`);
+    setCouponError(null);
+    setCheckoutError(null);
+  };
+
+  const handleApplyCoupon = async (productSlug: string, codeToApply: string) => {
+    if (!codeToApply.trim()) {
+      setCouponError('We couldn’t apply that code. Check it and try again.');
+      setCouponApplied(false);
+      setDiscountAmount(0);
+      return;
+    }
+    setCouponChecking(true);
+    setCouponError(null);
+    setCouponSuccessMessage(null);
+
+    try {
+      const res = await fetch('/api/dss/coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: codeToApply,
+          productSlug,
+          learnerEmail: learnerEmail.trim() || 'learner@closecrafthq.com',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setCouponError(data.error || 'We couldn’t apply that code. Check it and try again.');
+        setCouponApplied(false);
+        setDiscountAmount(0);
+      } else {
+        setCouponApplied(true);
+        setDiscountAmount(data.discountAmountNGN);
+        setCouponSuccessMessage(`Early bird offer applied. You saved ${data.discountAmount}.`);
+      }
+    } catch {
+      setCouponError('We couldn’t check the code right now. Please try again before paying.');
+      setCouponApplied(false);
+    } finally {
+      setCouponChecking(false);
+    }
+  };
+
+  const handlePayAndEnrol = async () => {
+    if (!checkoutProduct) return;
+    if (!learnerEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(learnerEmail.trim())) {
+      setCheckoutError('Please provide a valid email address to complete enrolment.');
+      return;
+    }
+    setCheckoutLoading(true);
+    setCheckoutError(null);
+
+    try {
+      const res = await fetch('/api/dss/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productSlug: checkoutProduct.slug,
+          learnerEmail: learnerEmail.trim(),
+          learnerName: learnerName.trim() || undefined,
+          couponCode: couponApplied ? couponInput : undefined,
+          currency: 'NGN',
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setCheckoutError(data.error || 'Checkout initialization failed. Please try again.');
+      } else if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      }
+    } catch (err: any) {
+      setCheckoutError(err.message || 'Payment system unavailable. Please try again.');
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#071126] text-[#F3F7FA] font-sans selection:bg-[#0066FF]/30 selection:text-white">
+      {/* DSS ANNOUNCEMENT BANNER */}
+      <aside
+        aria-label="Announcement"
+        className="bg-gradient-to-r from-[#0C1A38] via-[#0066FF]/25 to-[#0C1A38] border-b border-[#0066FF]/30 py-2.5 px-4 text-center sticky top-0 z-50 shadow-md"
+      >
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs">
+          <span className="font-bold text-white tracking-wide">
+            Your next step in sales starts at half the fee.
+          </span>
+          <span className="text-[#CBD5E1]">
+            Get 50% off eligible DSS enrolment fees with code{' '}
+            <span className="font-mono font-bold text-[#38BDF8] bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
+              cohort001
+            </span>
+            . A ₦100,000 fee becomes ₦50,000.
+          </span>
+          <a
+            href="#early-bird-offer"
+            className="font-bold text-[#38BDF8] hover:text-white underline underline-offset-4 transition-colors flex items-center gap-1 shrink-0"
+          >
+            <span>View Eligible Programmes</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+        </div>
+      </aside>
+
       {/* 4.A NAVIGATION */}
-      <header className="sticky top-0 z-50 bg-[#071126]/95 backdrop-blur-md border-b border-white/10">
+      <header className="sticky top-[41px] z-40 bg-[#071126]/95 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Logo & Brand Identity */}
           <div className="flex items-center gap-4">
@@ -892,6 +1034,292 @@ export default function DSSLandingClient() {
         </div>
       </section>
 
+      {/* DSS EARLY BIRD OFFER SECTION */}
+      <section id="early-bird-offer" className="py-20 bg-gradient-to-b from-[#0B1733] to-[#071126] border-b border-white/5 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto text-center mb-12">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0066FF]/15 border border-[#0066FF]/30 text-xs font-bold text-[#60A5FA] uppercase tracking-wider mb-4">
+              <Tag className="w-3.5 h-3.5" />
+              <span>DSS EARLY BIRD OFFER</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
+              Build practical sales skills. <span className="text-[#38BDF8]">Pay 50% less.</span>
+            </h2>
+            <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed mb-4">
+              Practise prospecting, discovery, follow-up and closing through the DSS programme. Use <code className="font-mono font-bold text-[#38BDF8] bg-black/40 px-2 py-0.5 rounded border border-white/10">cohort001</code> at checkout to take 50% off an eligible enrolment fee.
+            </p>
+            <p className="text-xs sm:text-sm text-[#94A3B8] mb-8">
+              Choose your eligible programme, apply the code and review your final fee before you pay.
+            </p>
+
+            {/* Code Redemption Box */}
+            <div className="bg-[#0D1C3D] border border-[#0066FF]/30 rounded-2xl p-6 sm:p-8 max-w-xl mx-auto shadow-xl">
+              <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">
+                Your early bird code
+              </div>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
+                <div className="font-mono text-2xl sm:text-3xl font-extrabold text-white bg-black/40 px-6 py-2.5 rounded-xl border border-white/10 tracking-widest">
+                  cohort001
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
+                >
+                  {codeCopied ? (
+                    <>
+                      <CheckCheck className="w-4 h-4 text-[#38BDF8]" />
+                      <span>Code copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4" />
+                      <span>Copy Code</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {/* CTAs */}
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+                <a
+                  href="#eligible-programmes"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-[#071126] hover:bg-[#F3F7FA] text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <span>Choose My Programme</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href="#curriculum"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold border border-white/10 transition-colors"
+                >
+                  <span>See the Curriculum</span>
+                </a>
+              </div>
+
+              <div className="text-[11px] text-[#94A3B8] leading-normal pt-2 border-t border-white/5">
+                Valid on selected DSS offers for the designated cohort while the campaign is active. One successful use per learner. Cannot be combined with another discount. Closecraft software plans and managed services are excluded.
+              </div>
+            </div>
+          </div>
+
+          {/* ELIGIBLE PROGRAMMES GRID */}
+          <div id="eligible-programmes" className="pt-6 scroll-mt-28">
+            <div className="text-center mb-8">
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Eligible DSS Programmes</h3>
+              <p className="text-xs sm:text-sm text-[#94A3B8]">
+                Prices reflect authoritative 50% discount when using code <code className="text-[#38BDF8]">cohort001</code> at checkout.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {DSS_PRODUCTS.map((prod) => {
+                const regularFee = prod.priceNGN;
+                const earlyBirdFee = Math.round(regularFee * 0.5);
+                const savings = regularFee - earlyBirdFee;
+
+                return (
+                  <div
+                    key={prod.id}
+                    className="bg-[#071126] border border-white/10 hover:border-[#0066FF]/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 relative group shadow-lg"
+                  >
+                    <div>
+                      {/* 50% OFF Badge */}
+                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#0066FF] text-white text-[11px] font-extrabold uppercase tracking-wider mb-4 shadow-sm">
+                        <Tag className="w-3 h-3" />
+                        <span>50% OFF WITH cohort001</span>
+                      </div>
+
+                      <h4 className="text-lg font-bold text-white mb-1.5">{prod.title}</h4>
+                      <p className="text-xs text-[#94A3B8] mb-4 leading-relaxed line-clamp-2">
+                        {prod.tagline}
+                      </p>
+
+                      {/* Pricing Comparison */}
+                      <div className="p-4 rounded-xl bg-[#0B1733] border border-white/5 mb-5 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs text-[#94A3B8]">
+                          <span>Regular fee:</span>
+                          <span className="line-through">₦{regularFee.toLocaleString()}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-sm font-bold text-white">
+                          <span className="text-[#38BDF8]">Early bird fee:</span>
+                          <span className="text-lg text-white font-extrabold">₦{earlyBirdFee.toLocaleString()}</span>
+                        </div>
+                        <div className="text-[11px] font-semibold text-[#10B981] text-right">
+                          Save ₦{savings.toLocaleString()}
+                        </div>
+                      </div>
+
+                      <ul className="space-y-2 mb-6">
+                        {prod.features.slice(0, 3).map((feat, i) => (
+                          <li key={i} className="text-xs text-[#CBD5E1] flex items-start gap-2">
+                            <Check className="w-3.5 h-3.5 text-[#38BDF8] shrink-0 mt-0.5" />
+                            <span>{feat}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCheckout(prod)}
+                      className="w-full py-3 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 group-hover:shadow-md"
+                    >
+                      <span>Enrol with Early Bird Offer</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CHECKOUT MODAL */}
+      {checkoutProduct && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-[#071126] border border-white/15 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 duration-150">
+            {/* Close Button */}
+            <button
+              type="button"
+              onClick={() => setCheckoutProduct(null)}
+              className="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            <div className="flex items-center gap-2 text-xs font-bold text-[#38BDF8] uppercase tracking-wider mb-2">
+              <Lock className="w-3.5 h-3.5" />
+              <span>DSS Secure Enrolment</span>
+            </div>
+
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">
+              Enrol in {checkoutProduct.title}
+            </h3>
+            <p className="text-xs text-[#94A3B8] mb-6">
+              Complete your enrolment details and apply code <code className="text-[#38BDF8]">cohort001</code> to claim 50% discount.
+            </p>
+
+            {checkoutError && (
+              <div className="p-3.5 rounded-xl bg-red-900/30 border border-red-500/40 text-red-200 text-xs mb-4 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                <span>{checkoutError}</span>
+              </div>
+            )}
+
+            {/* Learner Info */}
+            <div className="space-y-3 mb-6">
+              <div>
+                <label className="block text-xs font-semibold text-white mb-1">Full Name</label>
+                <input
+                  type="text"
+                  value={learnerName}
+                  onChange={(e) => setLearnerName(e.target.value)}
+                  placeholder="e.g. Adeola Johnson"
+                  className="w-full h-10 px-3.5 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-xs focus:outline-none focus:border-[#0066FF]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-white mb-1">
+                  Email Address <span className="text-[#38BDF8]">*</span>
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={learnerEmail}
+                  onChange={(e) => setLearnerEmail(e.target.value)}
+                  placeholder="you@domain.com"
+                  className="w-full h-10 px-3.5 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-xs focus:outline-none focus:border-[#0066FF]"
+                />
+              </div>
+            </div>
+
+            {/* Coupon Field */}
+            <div className="p-4 rounded-2xl bg-[#0B1733] border border-white/10 mb-6">
+              <label className="block text-xs font-bold text-white mb-2">Have an early bird code?</label>
+              <div className="flex gap-2 mb-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => {
+                    setCouponInput(e.target.value);
+                    setCouponError(null);
+                  }}
+                  placeholder="Enter code"
+                  className="flex-1 h-10 px-3 rounded-xl bg-[#071126] border border-white/10 text-white placeholder-white/30 text-xs font-mono focus:outline-none focus:border-[#0066FF]"
+                />
+                <button
+                  type="button"
+                  disabled={couponChecking}
+                  onClick={() => handleApplyCoupon(checkoutProduct.slug, couponInput)}
+                  className="px-4 h-10 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-colors disabled:opacity-50 shrink-0"
+                >
+                  {couponChecking ? 'Checking...' : 'Apply Code'}
+                </button>
+              </div>
+
+              {couponSuccessMessage && couponApplied && (
+                <div className="text-xs font-semibold text-[#10B981] flex items-center gap-1.5 mt-2">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>{couponSuccessMessage}</span>
+                </div>
+              )}
+
+              {couponError && (
+                <div className="text-xs text-red-400 flex items-start gap-1.5 mt-2">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
+                  <span>{couponError}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Order Summary */}
+            <div className="p-4 rounded-2xl bg-[#0D1C3D] border border-white/10 mb-6 space-y-2">
+              <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-3">
+                Order Summary
+              </div>
+              <div className="flex justify-between text-xs text-[#CBD5E1]">
+                <span>Programme fee</span>
+                <span>₦{checkoutProduct.priceNGN.toLocaleString()}</span>
+              </div>
+              {couponApplied && discountAmount > 0 && (
+                <div className="flex justify-between text-xs text-[#10B981] font-semibold">
+                  <span>Early bird discount — {couponInput.trim()}</span>
+                  <span>−₦{discountAmount.toLocaleString()}</span>
+                </div>
+              )}
+              <div className="border-t border-white/10 pt-2 flex justify-between text-sm font-bold text-white">
+                <span>Total payable</span>
+                <span className="text-lg font-extrabold text-[#38BDF8]">
+                  ₦{(checkoutProduct.priceNGN - (couponApplied ? discountAmount : 0)).toLocaleString()}
+                </span>
+              </div>
+            </div>
+
+            {/* Payment CTA */}
+            <button
+              type="button"
+              disabled={checkoutLoading}
+              onClick={handlePayAndEnrol}
+              className="w-full py-3.5 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold text-sm transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>
+                {checkoutLoading
+                  ? 'Preparing secure checkout...'
+                  : `Pay ₦${(checkoutProduct.priceNGN - (couponApplied ? discountAmount : 0)).toLocaleString()} and Enrol`}
+              </span>
+            </button>
+
+            <p className="text-[11px] text-[#94A3B8] text-center mt-3">
+              Payments are verified server-side. Access to learning materials is provisioned upon confirmed settlement.
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* 4.M FEES AND DATES */}
       <section id="fees-and-dates" className="py-20 bg-[#071126] border-b border-white/5 scroll-mt-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1312,6 +1740,26 @@ export default function DSSLandingClient() {
               {
                 q: 'Can my business sponsor someone?',
                 a: 'Yes, where a suitable cohort is available. Request the current sponsorship and invoicing details.',
+              },
+              {
+                q: 'How do I claim the early bird discount?',
+                a: 'Choose an eligible DSS programme and enter cohort001 at checkout. You’ll see the 50% discount and final fee before payment.',
+              },
+              {
+                q: 'How much will I pay?',
+                a: 'An eligible ₦100,000 fee becomes ₦50,000. An eligible ₦150,000 fee becomes ₦75,000. Your programme’s final total is shown at checkout.',
+              },
+              {
+                q: 'Does this code apply to Closecraft software?',
+                a: 'The code applies to eligible DSS tuition. Closecraft’s seven-day software trial is a separate offer.',
+              },
+              {
+                q: 'Can I combine it with another discount?',
+                a: 'No. Only one discount or scholarship can apply to the same purchase.',
+              },
+              {
+                q: 'Can I use it after paying?',
+                a: 'The code must be applied before payment. It does not automatically change the price of an existing purchase.',
               },
             ].map((faq, idx) => {
               const isOpen = openFaq === idx;

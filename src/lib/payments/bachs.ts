@@ -529,6 +529,44 @@ export async function processBachsWebhookEvent(event: any): Promise<{
           newState: JSON.stringify({ paidThroughDate: nextPaidThrough, amount: invoice.amount })
         }
       });
+
+      // Dispatch CC-05: Payment Received & Subscription Active (non-blocking)
+      try {
+        const { sendTransactionalEmailEvent } = await import('@/lib/email/service');
+        const orgRecord = await db.organization.findUnique({
+          where: { id: targetOrgId },
+          include: {
+            members: {
+              where: { role: 'OWNER' },
+              include: { user: true }
+            }
+          }
+        });
+        const recipientEmail = invoice.customerEmail || orgRecord?.members[0]?.user?.email;
+        if (recipientEmail) {
+          const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.closecrafthq.com';
+          await sendTransactionalEmailEvent({
+            templateId: 'CC-05',
+            recipientEmail,
+            recipientName: orgRecord?.name || 'Workspace Owner',
+            data: {
+              firstName: orgRecord?.members[0]?.user?.name?.split(' ')[0] || 'there',
+              workspaceName: orgRecord?.name || 'Your Workspace',
+              planName: targetPlan === 'PRO' ? 'Pro' : 'Starter',
+              billingPeriod: 'Monthly',
+              amountPaid: `₦${invoice.amount.toLocaleString()}`,
+              paymentReference: invoice.invoiceNumber,
+              dashboardUrl: `${baseUrl}/dashboard`,
+              billingUrl: `${baseUrl}/billing`,
+            },
+            deduplicationKey: `cc-05-${invoice.id}`,
+            sourceEvent: 'BACHS_INVOICE_PAID',
+            organizationId: targetOrgId,
+          });
+        }
+      } catch (emailErr) {
+        console.warn('[CC-05 Dispatch Notice]', emailErr);
+      }
     }
 
     // 4. Fulfill Managed Pilot Engagement (payment satisfies ONLY payment prerequisite)

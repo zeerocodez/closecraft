@@ -1959,3 +1959,79 @@ model VerifiableCredential {
   @@index([userId])
   @@index([status])
 }
+
+// -------------------------------------------------------------
+// DSS EARLY BIRD CAMPAIGN & DISCOUNT RESERVATION ENGINE
+// -------------------------------------------------------------
+
+model EarlyBirdCampaign {
+  id                    String                @id @default(cuid())
+  code                  String                @unique // normalized lowercase "cohort001"
+  name                  String                @default("DSS Early Bird Offer")
+  discountPercent       Int                   @default(50)
+  currency              String                @default("NGN")
+  isActive              Boolean               @default(true)
+  maxRedemptions        Int?
+  currentRedemptions    Int                   @default(0)
+  startsAt              DateTime?
+  expiresAt             DateTime?
+  cohortId              String?
+  cohortSlug            String?
+  eligibleProductSlugs  String                @default("[\"dss-setters-route\",\"dss-closers-route\",\"dss-live-roleplay-internship\",\"dss-both-routes\"]")
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  reservations          DiscountReservation[]
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model DiscountReservation {
+  id                    String                @id @default(cuid())
+  campaignId            String
+  campaign              EarlyBirdCampaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  learnerEmail          String
+  productSlug           String
+  status                String                @default("RESERVED") // RESERVED, REDEEMED, RELEASED, EXPIRED
+  originalAmountKobo    Int
+  discountAmountKobo    Int
+  finalAmountKobo       Int
+  currency              String                @default("NGN")
+  orderReference        String                @unique
+  paymentReference      String?
+  expiresAt             DateTime              // Bounded reservation window
+  redeemedAt            DateTime?
+  releasedAt            DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([learnerEmail, status])
+  @@index([campaignId])
+  @@index([orderReference])
+}
+
+// -------------------------------------------------------------
+// TRANSACTIONAL EMAIL DELIVERY & AUDIT ENGINE
+// -------------------------------------------------------------
+
+model TransactionalEmailLog {
+  id                    String                @id @default(cuid())
+  deduplicationKey      String                @unique
+  context               String                // CLOSECRAFT, DSS
+  templateId            String                // CC-01 to CC-10, DSS-01 to DSS-11
+  recipient             String
+  subject               String
+  status                String                @default("SENT") // PENDING, SENT, FAILED
+  providerId            String?
+  errorMessage          String?
+  metadata              String?               // JSON string of non-sensitive template variables
+  sentAt                DateTime?             @default(now())
+  createdAt             DateTime              @default(now())
+
+  @@index([recipient])
+  @@index([templateId])
+  @@index([status])
+  @@index([createdAt])
+}
+

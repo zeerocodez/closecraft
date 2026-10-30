@@ -3,30 +3,83 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { rateLimit } from '@/lib/rateLimit';
 import { timingSafeEqualString } from '@/lib/apiSecurity';
+import { sendTransactionalEmailEvent } from '@/lib/email/service';
+
+export async function GET(req: Request) {
+  try {
+    const session = await auth();
+    const url = new URL(req.url);
+    const queryEmail = url.searchParams.get('email')?.trim().toLowerCase();
+
+    let user = null;
+    if (session?.user?.id) {
+      user = await db.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          id: true,
+          email: true,
+          emailVerified: true,
+        },
+      });
+    } else if (queryEmail) {
+      user = await db.user.findUnique({
+        where: { email: queryEmail },
+        select: {
+          id: true,
+          email: true,
+          emailVerified: true,
+        },
+      });
+    }
+
+    if (!user) {
+      return NextResponse.json({ authenticated: false, verified: false });
+    }
+
+    return NextResponse.json({
+      authenticated: true,
+      email: user.email,
+      verified: !!user.emailVerified,
+    });
+  } catch (err: any) {
+    console.error('[Verify Email GET Error]:', err);
+    return NextResponse.json({ error: 'Failed to inspect verification status' }, { status: 500 });
+  }
+}
 
 export async function POST(req: Request) {
   try {
     const session = await auth();
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    const body = await req.json().catch(() => ({}));
+    const { code, quickVerify, resend, email: bodyEmail } = body;
+
+    let user = null;
+    if (session?.user?.id) {
+      user = await db.user.findUnique({
+        where: { id: session.user.id },
+        include: {
+          memberships: {
+            include: { organization: true },
+          },
+        },
+      });
+    } else if (bodyEmail && typeof bodyEmail === 'string') {
+      const cleanEmail = bodyEmail.trim().toLowerCase();
+      user = await db.user.findUnique({
+        where: { email: cleanEmail },
+        include: {
+          memberships: {
+            include: { organization: true },
+          },
+        },
+      });
     }
 
-    const body = await req.json().catch(() => ({}));
-    const { code, quickVerify, resend } = body;
-
-    const user = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        email: true,
-        emailVerified: true,
-        emailVerificationCode: true,
-        emailVerificationExpiresAt: true,
-      },
-    });
-
     if (!user) {
-      return NextResponse.json({ error: 'User not found.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Authentication required. Please sign in or provide your registered email address.' },
+        { status: 401 }
+      );
     }
 
     // If already verified
@@ -59,40 +112,40 @@ export async function POST(req: Request) {
         },
       });
 
-      console.log(`\n=========================================`);
-      console.log(`[MOCK EMAIL RESENT TO: ${user.email}]`);
-      console.log(`Subject: New Closecraft Verification Code`);
-      console.log(`Your 6-digit verification code is: ${newCode}`);
-      console.log(`=========================================\n`);
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://www.closecrafthq.com';
+      const verificationUrl = `${baseUrl}/verify-email?code=${newCode}&email=${encodeURIComponent(user.email)}`;
+      const primaryOrg = user.memberships[0]?.organization;
+
+      try {
+        await sendTransactionalEmailEvent({
+          templateId: 'CC-01',
+          recipientEmail: user.email,
+          recipientName: user.name || undefined,
+          organizationId: primaryOrg?.id,
+          sourceEvent: 'user.resend_verification',
+          data: {
+            first_name: user.name ? user.name.split(' ')[0] : undefined,
+            verification_code: newCode,
+            verification_url: verificationUrl,
+            verification_expiry_description: 'in 24 hours',
+          },
+        });
+      } catch (err) {
+        console.error('[Verify Email Resend] Failed to dispatch CC-01 email:', err);
+      }
 
       return NextResponse.json({
         success: true,
-        message: 'A fresh verification code has been dispatched.',
+        message: 'A fresh verification code has been dispatched to your email.',
       });
     }
 
-    // Handle Quick Verify (Development / Testing convenience only)
+    // Disable Quick Verify in production mode
     if (quickVerify) {
-      if (process.env.NODE_ENV === 'production') {
-        return NextResponse.json(
-          { error: 'Quick verification is disabled in production environments.' },
-          { status: 403 }
-        );
-      }
-
-      await db.user.update({
-        where: { id: user.id },
-        data: {
-          emailVerified: new Date(),
-          emailVerificationCode: null,
-          emailVerificationExpiresAt: null,
-        },
-      });
-
-      return NextResponse.json({
-        success: true,
-        message: 'Email verified successfully (Quick Verify).',
-      });
+      return NextResponse.json(
+        { error: 'Quick verification is disabled in production mode.' },
+        { status: 403 }
+      );
     }
 
     // Standard Code Verification with brute-force rate limit (max 6 attempts per 10 min)

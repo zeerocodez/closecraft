@@ -3,6 +3,7 @@ import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
 import { rateLimit, clientIp } from "@/lib/rateLimit";
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp";
+import { sendTransactionalEmailEvent } from "@/lib/email/service";
 
 export async function POST(req: Request) {
   // Rate limit registration attempts: max 10 attempts per 15 minutes per IP
@@ -96,7 +97,7 @@ export async function POST(req: Request) {
     }
 
     // Atomic transaction: create Organization, User, OrganizationMember, and 7-Day Starter WorkspaceSubscription
-    const { user, org } = await db.$transaction(async (tx) => {
+    const { user, org, verificationCode } = await db.$transaction(async (tx) => {
       const org = await tx.organization.create({
         data: {
           name: cleanCompanyName,
@@ -147,13 +148,34 @@ export async function POST(req: Request) {
       });
 
       console.log(`\n=========================================`);
-      console.log(`[MOCK EMAIL SENT TO: ${cleanEmail}]`);
-      console.log(`Subject: Verify your Closecraft Workspace Email`);
-      console.log(`Your 6-digit verification code is: ${verificationCode}`);
+      console.log(`[USER REGISTRATION] Email: ${cleanEmail}`);
+      console.log(`Verification code generated: ${verificationCode}`);
       console.log(`=========================================\n`);
 
       return { user, org, verificationCode };
     });
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://www.closecrafthq.com';
+    const verificationUrl = `${baseUrl}/verify-email?code=${verificationCode}&email=${encodeURIComponent(cleanEmail)}`;
+
+    // Dispatch transactional email (CC-01) with the 6-digit OTP
+    try {
+      await sendTransactionalEmailEvent({
+        templateId: 'CC-01',
+        recipientEmail: cleanEmail,
+        recipientName: cleanName,
+        organizationId: org.id,
+        sourceEvent: 'user.registered',
+        data: {
+          first_name: cleanName.split(' ')[0],
+          verification_code: verificationCode,
+          verification_url: verificationUrl,
+          verification_expiry_description: 'in 24 hours',
+        },
+      });
+    } catch (emailErr) {
+      console.error('[Register] Failed to dispatch CC-01 verification email:', emailErr);
+    }
 
     return NextResponse.json(
       {
@@ -162,7 +184,6 @@ export async function POST(req: Request) {
         userId: user.id,
         organizationId: org.id,
         verificationRequired: true,
-        mockCode: process.env.NODE_ENV !== 'production' ? (user.emailVerificationCode || undefined) : undefined,
       },
       { status: 201 }
     );

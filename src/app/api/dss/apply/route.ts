@@ -164,6 +164,30 @@ export async function POST(req: Request) {
       console.warn('Affiliate store record notice:', err);
     }
 
+    // Trigger DSS-01 Application Received transactional email (non-blocking)
+    try {
+      const { sendTransactionalEmailEvent } = await import('@/lib/email/service');
+      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.closecrafthq.com';
+      await sendTransactionalEmailEvent({
+        templateId: 'DSS-01',
+        recipientEmail: cleanEmail,
+        recipientName: fullName.trim(),
+        data: {
+          firstName: fullName.trim().split(' ')[0] || 'there',
+          programmeName: 'DSS Four-Week Remote Sales Sprint',
+          cohortName: 'Cohort 001',
+          reviewRequired: true,
+          applicationUrl: `${baseUrl}/dss/apply`,
+          applicationReference: `DSS-APP-${lead.id.substring(0, 8).toUpperCase()}`,
+        },
+        deduplicationKey: `dss-app-${lead.id}`,
+        sourceEvent: 'DSS_APPLICATION_SUBMITTED',
+        organizationId: org?.id,
+      });
+    } catch (emailErr) {
+      console.warn('[DSS-01 Send Notice]', emailErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Your application has been received. We will contact you using the details provided with programme information and the next step.',

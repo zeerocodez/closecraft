@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Logo from '@/components/ui/Logo';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -18,8 +20,43 @@ export default function VerifyEmailPage() {
     return null;
   });
 
-  const handleVerify = async (e?: React.FormEvent, isQuick = false) => {
+  // Read URL parameters on mount
+  useEffect(() => {
+    const urlEmail = searchParams.get('email');
+    const urlCode = searchParams.get('code');
+
+    if (urlEmail) {
+      setUserEmail(urlEmail);
+      try {
+        sessionStorage.setItem('pendingVerificationEmail', urlEmail);
+      } catch {}
+    }
+
+    if (urlCode && urlCode.length === 6) {
+      setCode(urlCode);
+    }
+
+    // Check verification status via API
+    const emailToQuery = urlEmail || (typeof window !== 'undefined' ? sessionStorage.getItem('pendingVerificationEmail') : null);
+    const query = emailToQuery ? `?email=${encodeURIComponent(emailToQuery)}` : '';
+
+    fetch(`/api/auth/verify-email${query}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.email && !userEmail) {
+          setUserEmail(data.email);
+        }
+        if (data.verified) {
+          router.push('/onboarding');
+        }
+      })
+      .catch(() => {});
+  }, [searchParams, router, userEmail]);
+
+  const handleVerify = async (e?: React.FormEvent, explicitCode?: string) => {
     if (e) e.preventDefault();
+    const codeToVerify = explicitCode || code;
+
     setIsLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -28,7 +65,7 @@ export default function VerifyEmailPage() {
       const res = await fetch('/api/auth/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(isQuick ? { quickVerify: true } : { code }),
+        body: JSON.stringify({ code: codeToVerify, email: userEmail }),
       });
 
       const data = await res.json();
@@ -39,7 +76,11 @@ export default function VerifyEmailPage() {
         return;
       }
 
-      setSuccessMessage('Email verified successfully! Redirecting to workspace onboarding...');
+      setSuccessMessage('Email verified successfully! Redirecting to your workspace...');
+      try {
+        sessionStorage.removeItem('pendingVerificationEmail');
+      } catch {}
+
       setTimeout(() => {
         window.location.href = '/onboarding';
       }, 1000);
@@ -58,14 +99,14 @@ export default function VerifyEmailPage() {
       const res = await fetch('/api/auth/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resend: true }),
+        body: JSON.stringify({ resend: true, email: userEmail }),
       });
 
       const data = await res.json();
       if (!res.ok) {
-        setErrorMessage(data.error || 'Could not resend code.');
+        setErrorMessage(data.error || 'Could not resend code. Please wait a few moments before trying again.');
       } else {
-        setSuccessMessage('A fresh 6-digit code has been sent to your email.');
+        setSuccessMessage('A fresh 6-digit verification code has been dispatched to your email.');
       }
     } catch {
       setErrorMessage('Network error while requesting a new code.');
@@ -110,7 +151,7 @@ export default function VerifyEmailPage() {
             Verify Your Email
           </h1>
           <p className="text-xs text-on-surface-variant leading-relaxed mb-6">
-            We sent a 6-digit verification code to {userEmail ? <strong>{userEmail}</strong> : 'your registered email'}. Enter the code below to activate your workspace.
+            We sent a 6-digit verification code to {userEmail ? <strong className="text-on-surface">{userEmail}</strong> : 'your registered work email'}. Enter the code below to activate your workspace.
           </p>
 
           {errorMessage && (
@@ -127,7 +168,7 @@ export default function VerifyEmailPage() {
             </div>
           )}
 
-          <form onSubmit={(e) => handleVerify(e, false)} className="space-y-4">
+          <form onSubmit={(e) => handleVerify(e)} className="space-y-4">
             <div>
               <label className="block text-xs font-semibold text-on-surface mb-1.5">
                 6-Digit Verification Code
@@ -140,6 +181,7 @@ export default function VerifyEmailPage() {
                 placeholder="123456"
                 className="w-full text-center tracking-[0.5em] text-2xl font-mono py-3 px-4 rounded-xl bg-surface-container border border-outline-variant/40 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
                 required
+                autoFocus
               />
             </div>
 
@@ -159,32 +201,31 @@ export default function VerifyEmailPage() {
             </button>
           </form>
 
-          {/* Quick Verify for Testing/Dev */}
-          <div className="mt-4 pt-4 border-t border-outline-variant/20 flex flex-col gap-2">
+          <div className="mt-4 pt-4 border-t border-outline-variant/20 flex items-center justify-between text-xs text-on-surface-variant">
+            <span>Didn&apos;t receive code?</span>
             <button
               type="button"
-              onClick={() => handleVerify(undefined, true)}
+              onClick={handleResend}
               disabled={isLoading}
-              className="w-full py-2 px-3 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-medium transition-colors border border-outline-variant/30 flex items-center justify-center gap-1.5"
+              className="text-primary hover:underline font-semibold"
             >
-              <span className="material-symbols-outlined text-[14px] text-primary">bolt</span>
-              <span>Quick Verify (Development/Testing)</span>
+              Resend Code
             </button>
-
-            <div className="flex items-center justify-between text-xs text-on-surface-variant pt-2">
-              <span>Didn&apos;t receive code?</span>
-              <button
-                type="button"
-                onClick={handleResend}
-                disabled={isLoading}
-                className="text-primary hover:underline font-semibold"
-              >
-                Resend Code
-              </button>
-            </div>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex w-full min-h-screen justify-center items-center bg-surface">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
