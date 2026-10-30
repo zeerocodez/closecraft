@@ -1728,6 +1728,9 @@ model PracticeScenario {
   applicableRubricKeys    String[]      // e.g. ["offer_accuracy", "discovery", "objection_diagnosis", ...]
   rubricVersion           String        @default("DSS-8CRIT-V1")
   isCapstone              Boolean       @default(false)
+  requiredSubmissions     String[]      @default([]) // e.g. ["HANDOFF_NOTE"]
+  sourceLessonId          String?
+  sourceModuleId          String?
   organizationId          String?       // Tenant-specific playbook scenario if set; global if null
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
@@ -1761,6 +1764,10 @@ model PracticeSession {
   isPrivate               Boolean       @default(true)
   assignmentId            String?
   assignment              PracticeAssignment? @relation(fields: [assignmentId], references: [id], onDelete: SetNull)
+  submittedNotes          String?       // Handover documentation or CRM notes submitted by learner
+  evidenceHash            String?       // Cryptographic SHA-256 hash of frozen evidence
+  hintsUsed               Int           @default(0)
+  isAssisted              Boolean       @default(false)
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
   completedAt             DateTime?
@@ -1815,6 +1822,7 @@ model PracticeEvaluation {
   followUpExerciseSuggestion   String?
   criticalFlags                Json          @default("[]")
   hasUnresolvedCriticalFlag    Boolean       @default(false)
+  evidenceSnapshotId           String?       // Content hash or frozen evidence identifier
   evaluatorRole                String        @default("AI") // AI, TRAINER, PEER
   reviewerId                   String?
   reviewer                     User?         @relation("EvaluationReviewer", fields: [reviewerId], references: [id], onDelete: SetNull)
@@ -1841,9 +1849,12 @@ model PracticeCriterionScore {
   evaluation              PracticeEvaluation @relation(fields: [evaluationId], references: [id], onDelete: Cascade)
   criterionKey            String        // offer_accuracy, buyer_fit_qualification, discovery, listening_checked_summaries, value_explanation, objection_diagnosis, decision_commercial, records_handoff
   criterionLabel          String
-  score                   Int           // 0, 1, 2
+  assessmentStatus        String        @default("SCORED") // SCORED, NOT_ASSESSED
+  score                   Int?          // 0, 1, 2, or null for NOT_ASSESSED
   isApplicable            Boolean       @default(true)
   observedEvidence        String
+  omissionReason          String?
+  notAssessedReason       String?
   quotedTurnIds           String[]      @default([]) // Validated against transcript
   reasoning               String
   evidenceSufficiency     String        @default("DEMONSTRATED") // NOT_ASSESSED, EMERGING_EVIDENCE, DEMONSTRATED

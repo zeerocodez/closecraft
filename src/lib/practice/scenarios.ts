@@ -42,18 +42,16 @@ export function projectStudentScenario(rawScenario: any): StudentScenarioProject
     applicableRubricKeys: (rawScenario.applicableRubricKeys || []) as RubricCriterionKey[],
     rubricVersion: rawScenario.rubricVersion || 'DSS-8CRIT-V1',
     isCapstone: Boolean(rawScenario.isCapstone),
+    requiredSubmissions: rawScenario.requiredSubmissions || [],
+    sourceLessonId: rawScenario.sourceLessonId || null,
+    sourceModuleId: rawScenario.sourceModuleId || null,
   };
 }
 
 /**
- * Automatically seeds the 12 DSS sprint scenarios if they don't exist yet.
+ * Automatically seeds all DSS sprint and draft scenarios if they don't exist yet.
  */
 export async function seedScenariosIfEmpty() {
-  const count = await prisma.practiceScenario.count();
-  if (count >= 12) {
-    return;
-  }
-
   for (const item of DSS_SPRINT_SCENARIOS) {
     const existing = await prisma.practiceScenario.findUnique({
       where: { slug: item.slug },
@@ -80,6 +78,7 @@ export async function seedScenariosIfEmpty() {
           serverBuyerFacts: item.serverBuyerFacts as any,
           buyerPersona: item.buyerPersona as any,
           applicableRubricKeys: item.applicableRubricKeys,
+          requiredSubmissions: item.requiredSubmissions || [],
           rubricVersion: 'DSS-8CRIT-V1',
           isCapstone: Boolean(item.isCapstone),
           organizationId: null, // Global DSS curriculum

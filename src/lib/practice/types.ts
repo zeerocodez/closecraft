@@ -161,6 +161,9 @@ export interface StudentScenarioProjection {
   applicableRubricKeys: RubricCriterionKey[];
   rubricVersion: string;
   isCapstone: boolean;
+  requiredSubmissions?: string[];
+  sourceLessonId?: string | null;
+  sourceModuleId?: string | null;
 }
 
 export interface TurnData {
@@ -188,9 +191,12 @@ export interface CriticalFlag {
 export interface CriterionScoreResult {
   criterionKey: RubricCriterionKey;
   criterionLabel: string;
-  score: 0 | 1 | 2;
+  assessmentStatus: 'SCORED' | 'NOT_ASSESSED';
+  score: 0 | 1 | 2 | null;
   isApplicable: boolean;
   observedEvidence: string;
+  omissionReason?: string | null;
+  notAssessedReason?: string | null;
   quotedTurnIds: string[];
   reasoning: string;
   evidenceSufficiency: 'NOT_ASSESSED' | 'EMERGING_EVIDENCE' | 'DEMONSTRATED';
@@ -210,6 +216,7 @@ export interface EvaluationResult {
   criticalFlags: CriticalFlag[];
   hasUnresolvedCriticalFlag: boolean;
   criterionScores: CriterionScoreResult[];
+  evidenceSnapshotId?: string | null;
 }
 
 export interface ComparableTrendSummary {

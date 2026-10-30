@@ -8,6 +8,7 @@ import { generateBuyerResponse } from '@/lib/practice/simulation';
 import { evaluatePracticeSession } from '@/lib/practice/evaluation';
 import { calculateComparableTrend, computeCoachRecommendation } from '@/lib/practice/analytics';
 import { issueVerifiableCredential } from '@/lib/practice/credentials';
+import crypto from 'crypto';
 import { ApprovedOfferFacts, ServerBuyerFacts, BuyerPersona, RubricCriterionKey } from '@/lib/practice/types';
 
 /**
@@ -109,6 +110,8 @@ export async function startPracticeSession(data: {
   changedCondition?: string;
   mode?: 'PRACTICE' | 'DRILL' | 'ASSIGNMENT' | 'CAPSTONE';
   assignmentId?: string;
+  lessonId?: string;
+  moduleId?: string;
 }) {
   const { userId, organizationId } = await requireAuth();
   await seedScenariosIfEmpty();
@@ -137,6 +140,9 @@ export async function startPracticeSession(data: {
     }
   }
 
+  // Determine effective assignment / lesson linkage
+  const effectiveAssignmentId = data.assignmentId || (data.lessonId ? `lesson-${data.lessonId}` : null);
+
   // Create session
   const session = await prisma.practiceSession.create({
     data: {
@@ -149,7 +155,7 @@ export async function startPracticeSession(data: {
       mode: data.mode || (scenario.isCapstone ? 'CAPSTONE' : 'PRACTICE'),
       parentAttemptId: data.parentAttemptId || null,
       changedCondition: data.changedCondition || null,
-      assignmentId: data.assignmentId || null,
+      assignmentId: effectiveAssignmentId,
       currentTurnCount: 1,
     },
   });
@@ -293,7 +299,11 @@ export async function submitPracticeTurn(data: {
 /**
  * Finishes the session, persists the transcript, and evaluates against the 8-criterion rubric.
  */
-export async function finishAndEvaluateSession(sessionId: string) {
+export async function finishAndEvaluateSession(
+  data: string | { sessionId: string; submittedNotes?: string }
+) {
+  const sessionId = typeof data === 'string' ? data : data.sessionId;
+  const submittedNotes = typeof data === 'string' ? undefined : data.submittedNotes?.trim();
   const { userId } = await requireAuth();
 
   const session = await prisma.practiceSession.findUnique({
@@ -312,12 +322,29 @@ export async function finishAndEvaluateSession(sessionId: string) {
     throw new Error('Forbidden: this session belongs to another user.');
   }
 
-  // Mark session as completed
+  // Freeze evidence: compute SHA-256 evidence snapshot hash
+  const rawTranscript = session.turns.map((t) => ({
+    id: t.id,
+    turnNumber: t.turnNumber,
+    sender: t.senderType,
+    content: t.content,
+  }));
+  const rawEvidence = JSON.stringify({
+    transcript: rawTranscript,
+    submittedNotes: submittedNotes || null,
+    scenarioVersion: session.scenarioVersion,
+    rubricVersion: session.rubricVersion,
+  });
+  const evidenceHash = crypto.createHash('sha256').update(rawEvidence).digest('hex');
+
+  // Mark session as completed and freeze evidence
   await prisma.practiceSession.update({
     where: { id: sessionId },
     data: {
       status: 'COMPLETED',
       completedAt: new Date(),
+      submittedNotes: submittedNotes || null,
+      evidenceHash,
     },
   });
 
@@ -342,7 +369,11 @@ export async function finishAndEvaluateSession(sessionId: string) {
       approvedOfferFacts: approvedOffer,
       serverBuyerFacts: serverBuyerFacts,
       transcript,
+      submittedNotes: submittedNotes || undefined,
+      requiredSubmissions: (session.scenario as any).requiredSubmissions || [],
       isCapstone: session.scenario.isCapstone,
+      hintsUsed: session.hintsUsed || 0,
+      isAssisted: session.isAssisted || false,
     });
 
     // Save evaluation record and criterion scores
@@ -354,6 +385,7 @@ export async function finishAndEvaluateSession(sessionId: string) {
         promptVersion: 'EVAL-2026.1',
         scenarioVersion: session.scenarioVersion,
         rubricVersion: session.rubricVersion,
+        evidenceSnapshotId: evalResult.evidenceSnapshotId,
         totalScore: evalResult.totalScore,
         maxPossibleScore: evalResult.maxPossibleScore,
         percentage: evalResult.percentage,
@@ -372,6 +404,9 @@ export async function finishAndEvaluateSession(sessionId: string) {
             criterionKey: c.criterionKey,
             criterionLabel: c.criterionLabel,
             score: c.score,
+            assessmentStatus: c.assessmentStatus,
+            omissionReason: c.omissionReason,
+            notAssessedReason: c.notAssessedReason,
             isApplicable: c.isApplicable,
             observedEvidence: c.observedEvidence,
             quotedTurnIds: c.quotedTurnIds,
@@ -386,11 +421,50 @@ export async function finishAndEvaluateSession(sessionId: string) {
     });
 
     // Check if this was an assignment and update assignment status
-    if (session.assignmentId) {
-      await prisma.practiceAssignment.update({
-        where: { id: session.assignmentId },
-        data: { status: 'SUBMITTED' },
-      });
+    if (session.assignmentId && !session.assignmentId.startsWith('lesson-')) {
+      try {
+        await prisma.practiceAssignment.update({
+          where: { id: session.assignmentId },
+          data: { status: 'SUBMITTED' },
+        });
+      } catch (assignErr) {
+        console.warn('[finishAndEvaluateSession] Assignment update non-blocking:', assignErr);
+      }
+    }
+
+    // Connect to DSS Lesson Progress if linked to a lesson
+    const effectiveLessonId = session.assignmentId?.startsWith('lesson-')
+      ? session.assignmentId.replace('lesson-', '')
+      : (session.scenario as any)?.sourceLessonId;
+
+    if (effectiveLessonId) {
+      try {
+        const studentProfile = await prisma.studentProfile.findUnique({
+          where: { userId },
+        });
+        if (studentProfile) {
+          await prisma.lessonProgress.upsert({
+            where: {
+              studentId_lessonId: {
+                studentId: studentProfile.id,
+                lessonId: effectiveLessonId,
+              },
+            },
+            create: {
+              studentId: studentProfile.id,
+              lessonId: effectiveLessonId,
+              status: 'COMPLETED',
+              completedAt: new Date(),
+            },
+            update: {
+              status: 'COMPLETED',
+              completedAt: new Date(),
+            },
+          });
+        }
+      } catch (lessonErr) {
+        console.warn('[finishAndEvaluateSession] Non-blocking lessonProgress update:', lessonErr);
+      }
     }
 
     // Update coach recommendation asynchronously
@@ -441,6 +515,65 @@ export async function finishAndEvaluateSession(sessionId: string) {
       error: 'Evaluation service temporarily unavailable. Your transcript is saved.',
     };
   }
+}
+
+/**
+ * Requests an in-practice coaching hint.
+ * Increments hintsUsed and marks the attempt as assisted.
+ * Disabled for formal capstone assessments.
+ */
+export async function recordPracticeHintAction(sessionId: string) {
+  const { userId } = await requireAuth();
+
+  const session = await prisma.practiceSession.findUnique({
+    where: { id: sessionId },
+    include: {
+      scenario: true,
+      turns: { orderBy: { turnNumber: 'desc' }, take: 1 },
+    },
+  });
+
+  if (!session) {
+    throw new Error('Practice session not found.');
+  }
+
+  if (session.userId !== userId) {
+    throw new Error('Forbidden: this session belongs to another user.');
+  }
+
+  if (session.status !== 'IN_PROGRESS') {
+    throw new Error('Practice hints can only be requested during an active practice session.');
+  }
+
+  if (session.scenario.isCapstone) {
+    throw new Error('Practice hints are disabled during formal capstone assessments.');
+  }
+
+  const newHintsUsed = (session.hintsUsed || 0) + 1;
+
+  await prisma.practiceSession.update({
+    where: { id: sessionId },
+    data: {
+      hintsUsed: newHintsUsed,
+      isAssisted: true,
+    },
+  });
+
+  // Dynamic context-aware hint grounded in scenario facts & objectives
+  let hint = `Remember your objective: "${session.scenario.learningObjective}". Clarify the buyer's actual pain and verify their decision process before proposing commercials.`;
+  const slug = session.scenario.slug || '';
+  if (slug.includes('inventory')) {
+    hint = `Review the approved scope: custom inventory software is explicitly EXCLUDED. If the prospect insists on an inventory module, diagnose whether their core need can be met with the standard 5-page site, or disqualify the scope professionally.`;
+  } else if (slug.includes('approval')) {
+    hint = `The prospect mentions decision dependencies. Clarify who needs to sign off (e.g. Chairman/Board) and what specific criteria they need. Remember payment terms remain unconfirmed—do not promise an installment plan.`;
+  }
+
+  return {
+    success: true,
+    hint,
+    hintsUsed: newHintsUsed,
+    isAssisted: true,
+  };
 }
 
 /**
@@ -501,6 +634,11 @@ export async function getPracticeAttemptReview(sessionId: string) {
       mode: session.mode,
       changedCondition: session.changedCondition,
       parentAttemptId: session.parentAttemptId,
+      assignmentId: session.assignmentId,
+      submittedNotes: session.submittedNotes,
+      evidenceHash: session.evidenceHash,
+      hintsUsed: session.hintsUsed,
+      isAssisted: session.isAssisted,
       createdAt: session.createdAt,
       completedAt: session.completedAt,
     },
@@ -695,7 +833,7 @@ export async function submitTrainerReview(data: {
     where: { evaluationId: evaluation.id },
   });
 
-  const totalScore = updatedScores.reduce((sum, c) => sum + c.score, 0);
+  const totalScore = updatedScores.reduce((sum, c) => sum + (c.score || 0), 0);
   const percentage = Math.round((totalScore / evaluation.maxPossibleScore) * 100);
 
   const updatedEval = await prisma.practiceEvaluation.update({

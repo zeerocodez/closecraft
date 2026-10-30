@@ -4,7 +4,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
-import { submitPracticeTurn, finishAndEvaluateSession } from '@/app/(saas)/practice-actions';
+import { 
+  submitPracticeTurn, 
+  finishAndEvaluateSession, 
+  recordPracticeHintAction 
+} from '@/app/(saas)/practice-actions';
 
 interface SessionClientProps {
   initialData: any;
@@ -18,6 +22,14 @@ export default function SessionClient({ initialData, variant = 'saas', returnUrl
 
   const [turns, setTurns] = useState<any[]>(initialData.turns || []);
   const [inputText, setInputText] = useState('');
+  const [submittedNotes, setSubmittedNotes] = useState<string>(session.submittedNotes || '');
+  const [showNotesPanel, setShowNotesPanel] = useState<boolean>(
+    Boolean(scenario.requiredSubmissions?.length || session.submittedNotes)
+  );
+  const [hintsUsed, setHintsUsed] = useState<number>(session.hintsUsed || 0);
+  const [isAssisted, setIsAssisted] = useState<boolean>(Boolean(session.isAssisted));
+  const [activeHint, setActiveHint] = useState<string | null>(null);
+  const [isLoadingHint, setIsLoadingHint] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEvaluating, setIsEvaluating] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -32,6 +44,25 @@ export default function SessionClient({ initialData, variant = 'saas', returnUrl
   const currentTurnCount = turns.length;
   const maxTurns = scenario.maxTurns || 6;
   const isTurnLimitReached = currentTurnCount >= maxTurns;
+
+  const handleRequestHint = async () => {
+    if (isLoadingHint || scenario.isCapstone) return;
+    setIsLoadingHint(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await recordPracticeHintAction(session.id);
+      if (res.success) {
+        setActiveHint(res.hint);
+        setHintsUsed(res.hintsUsed);
+        setIsAssisted(true);
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Could not fetch practice hint.');
+    } finally {
+      setIsLoadingHint(false);
+    }
+  };
 
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -75,10 +106,6 @@ export default function SessionClient({ initialData, variant = 'saas', returnUrl
           }
           return nextList;
         });
-
-        if (res.isEndingTurn) {
-          // Automatic prompt to evaluate when turn limit is reached
-        }
       }
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to submit response. Please check your connection.');
@@ -103,7 +130,10 @@ export default function SessionClient({ initialData, variant = 'saas', returnUrl
     setErrorMessage(null);
 
     try {
-      const res = await finishAndEvaluateSession(session.id);
+      const res = await finishAndEvaluateSession({
+        sessionId: session.id,
+        submittedNotes: submittedNotes.trim() || undefined,
+      });
       if (res.success) {
         if (variant === 'dss') {
           const qs = returnUrl ? `?returnUrl=${encodeURIComponent(returnUrl)}` : '';
@@ -143,6 +173,11 @@ export default function SessionClient({ initialData, variant = 'saas', returnUrl
               <span className="text-xs text-on-surface-variant font-mono">
                 Turn {currentTurnCount} of {maxTurns}
               </span>
+              {isAssisted && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                  Assisted ({hintsUsed} {hintsUsed === 1 ? 'hint' : 'hints'})
+                </span>
+              )}
             </div>
             <h1 className="text-base font-bold text-on-surface mt-0.5">
               {scenario.title}
@@ -151,13 +186,43 @@ export default function SessionClient({ initialData, variant = 'saas', returnUrl
         </div>
 
         <div className="flex items-center gap-2 self-end sm:self-auto">
+          {!scenario.isCapstone && (
+            <button
+              type="button"
+              onClick={handleRequestHint}
+              disabled={isLoadingHint || isEvaluating}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-surface-container-high text-amber-300 hover:bg-surface-container-highest transition-colors border border-amber-500/30"
+              title="Request a coaching hint for this turn (marks attempt as assisted)"
+            >
+              {isLoadingHint ? (
+                <Icon name="Loader2" size={14} className="animate-spin" />
+              ) : (
+                <Icon name="Lightbulb" size={14} />
+              )}
+              Ask Practice Hint
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={() => setShowNotesPanel(!showNotesPanel)}
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors border ${
+              showNotesPanel 
+                ? 'bg-primary/15 text-primary border-primary/30' 
+                : 'bg-surface-container-high text-on-surface border-outline-variant/30 hover:bg-surface-container-highest'
+            }`}
+          >
+            <Icon name="FileText" size={14} />
+            Handoff Notes
+          </button>
+
           <button
             type="button"
             onClick={() => setShowBriefPanel(!showBriefPanel)}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors border border-outline-variant/30"
           >
-            <Icon name={showBriefPanel ? 'EyeOff' : 'FileText'} size={15} />
-            {showBriefPanel ? 'Hide Brief' : 'Approved Facts & Brief'}
+            <Icon name={showBriefPanel ? 'EyeOff' : 'BookOpen'} size={14} />
+            {showBriefPanel ? 'Hide Brief' : 'Approved Facts'}
           </button>
 
           <button
@@ -174,12 +239,60 @@ export default function SessionClient({ initialData, variant = 'saas', returnUrl
             ) : (
               <>
                 <Icon name="CheckCircle2" size={15} />
-                End & Evaluate
+                End & Freeze Evidence
               </>
             )}
           </button>
         </div>
       </div>
+
+      {/* Active Practice Hint Drawer */}
+      {activeHint && (
+        <div className="p-4 rounded-xl border border-amber-500/40 bg-amber-500/10 text-amber-200 text-xs flex items-start justify-between gap-3 animate-in fade-in duration-200">
+          <div className="flex items-start gap-2.5">
+            <Icon name="Lightbulb" size={18} className="text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <strong className="font-bold text-amber-300 block mb-0.5">Practice Coach Hint (Attempt Marked Assisted):</strong>
+              <p className="leading-relaxed">{activeHint}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setActiveHint(null)}
+            className="text-amber-400 hover:text-amber-200 p-1"
+          >
+            <Icon name="X" size={16} />
+          </button>
+        </div>
+      )}
+
+      {/* Handoff Notes & CRM Summary Panel */}
+      {showNotesPanel && (
+        <div className="p-4 rounded-xl border border-outline-variant/30 bg-surface-container-lowest space-y-2 animate-in fade-in duration-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Icon name="ClipboardList" size={16} className="text-primary" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-on-surface">
+                Handoff Notes & Opportunity Record (Assessed under Criterion 8)
+              </h2>
+            </div>
+            <span className="text-[11px] text-on-surface-variant font-mono">
+              {submittedNotes.length} characters
+            </span>
+          </div>
+          <p className="text-xs text-on-surface-variant">
+            Document key qualified terms, agreed next milestones, timeline, or reasons for disqualifying. Evaluator analyzes this alongside the frozen transcript.
+          </p>
+          <textarea
+            value={submittedNotes}
+            onChange={(e) => setSubmittedNotes(e.target.value)}
+            disabled={isEvaluating}
+            rows={3}
+            placeholder="Type your handoff note or CRM summary here before clicking End & Freeze Evidence..."
+            className="w-full resize-none p-3 text-xs rounded-xl bg-surface-container-high border border-outline-variant/40 text-on-surface placeholder:text-on-surface-variant/60 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary disabled:opacity-50"
+          />
+        </div>
+      )}
 
       {/* Collapsible Student Brief & Approved Terms Drawer */}
       {showBriefPanel && (

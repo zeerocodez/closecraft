@@ -120,6 +120,29 @@ export default async function DSSPracticeReviewPage({
         </div>
       </div>
 
+      {/* AI Practice Feedback Badge & Evidence Provenance */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl bg-white/5 border border-white/10 text-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold tracking-wide uppercase text-[11px] border border-[#248277]/40 flex items-center gap-1.5">
+            <Sparkles size={13} />
+            AI Practice Feedback
+          </span>
+          <span className="text-gray-400">
+            • Evaluator Model: Server-Controlled Rubric Engine
+          </span>
+          {session.isAssisted && (
+            <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-semibold">
+              Assisted Attempt ({session.hintsUsed || 1} {session.hintsUsed === 1 ? 'hint' : 'hints'} used)
+            </span>
+          )}
+        </div>
+        {session.evidenceHash && (
+          <div className="text-[11px] text-gray-500 font-mono" title={`SHA-256 Evidence Hash: ${session.evidenceHash}`}>
+            Evidence Hash: {session.evidenceHash.substring(0, 12)}...
+          </div>
+        )}
+      </div>
+
       {/* Critical Flag Alert Banner (If Any) */}
       {criticalFlags.length > 0 && (
         <div className="p-5 rounded-2xl border border-red-500/40 bg-red-500/10 space-y-2">
@@ -148,7 +171,7 @@ export default async function DSSPracticeReviewPage({
           <div className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">Rubric Score</div>
           <div className="flex items-baseline gap-2">
             <span className="text-4xl font-serif font-bold text-white">{evalData.totalScore}</span>
-            <span className="text-sm text-gray-400 font-mono">/ 16 pts</span>
+            <span className="text-sm text-gray-400 font-mono">/ {evalData.maxPossibleScore || 16} pts ({evalData.percentage || 0}%)</span>
           </div>
           <div className="pt-2">
             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold ${
@@ -157,7 +180,7 @@ export default async function DSSPracticeReviewPage({
                 : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
             }`}>
               {evalData.passedThreshold ? <CheckCircle2 size={13} /> : <RotateCcw size={13} />}
-              {evalData.passedThreshold ? 'Demonstrated Competence' : 'Practice Target (>= 12 pts)'}
+              {evalData.passedThreshold ? 'Demonstrated Competence' : 'Target Threshold (>= 75%)'}
             </span>
           </div>
         </div>
@@ -198,6 +221,22 @@ export default async function DSSPracticeReviewPage({
         </div>
       </div>
 
+      {/* Submitted Handoff Notes (If Any) */}
+      {session.submittedNotes && (
+        <div className="p-5 rounded-2xl bg-[#121c1a] border border-[#248277]/30 space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae] flex items-center gap-2">
+              <BookOpen size={14} />
+              Submitted Handoff Note & CRM Opportunity Summary
+            </span>
+            <span className="text-[11px] text-gray-400 font-mono">Assessed Artifact</span>
+          </div>
+          <blockquote className="p-3.5 rounded-xl bg-black/40 border border-white/5 text-xs text-gray-200 whitespace-pre-wrap leading-relaxed font-mono">
+            {session.submittedNotes}
+          </blockquote>
+        </div>
+      )}
+
       {/* Executive Feedback */}
       <div className="p-6 rounded-2xl bg-[#0f1214] border border-white/5 space-y-3">
         <h3 className="text-xs font-bold uppercase tracking-wider text-[#45bfae] flex items-center gap-2">
@@ -221,7 +260,10 @@ export default async function DSSPracticeReviewPage({
 
         <div className="space-y-3">
           {latestEvaluation.criterionScores?.map((cs: any) => {
-            const scoreColor = cs.score === 2 
+            const isNotAssessed = cs.assessmentStatus === 'not_assessed' || cs.score === null;
+            const scoreColor = isNotAssessed
+              ? 'text-gray-400 border-white/10 bg-white/5'
+              : cs.score === 2 
               ? 'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
               : cs.score === 1
               ? 'text-amber-400 border-amber-500/30 bg-amber-500/10'
@@ -234,22 +276,36 @@ export default async function DSSPracticeReviewPage({
               >
                 <div className="flex items-start justify-between gap-4">
                   <div>
-                    <span className="text-sm font-bold text-white">{cs.criterionName}</span>
-                    <p className="text-xs text-gray-400 mt-1 leading-relaxed">{cs.rationale}</p>
+                    <span className="text-sm font-bold text-white">
+                      {cs.criterionLabel || cs.criterionName || cs.criterionKey}
+                    </span>
+                    <p className="text-xs text-gray-400 mt-1 leading-relaxed">
+                      {cs.reasoning || cs.rationale}
+                    </p>
+                    {cs.omissionReason && (
+                      <p className="text-xs text-amber-300/90 mt-1 italic">
+                        Omission Finding: {cs.omissionReason}
+                      </p>
+                    )}
+                    {isNotAssessed && cs.notAssessedReason && (
+                      <p className="text-xs text-gray-400 mt-1 italic">
+                        Not Assessed: {cs.notAssessedReason}
+                      </p>
+                    )}
                   </div>
                   <div className={`px-3 py-1 rounded-xl border font-mono font-bold text-xs shrink-0 ${scoreColor}`}>
-                    {cs.score} / 2
+                    {isNotAssessed ? 'NOT ASSESSED' : `${cs.score} / 2`}
                   </div>
                 </div>
 
                 {/* Evidence Quote from student */}
-                {cs.evidenceQuote && (
+                {(cs.observedEvidence || cs.evidenceQuote) && (
                   <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs text-gray-300">
                     <span className="text-[10px] font-bold uppercase tracking-wider text-[#45bfae] block mb-1">
-                      Cited Transcript Evidence:
+                      Cited Evidence:
                     </span>
                     <blockquote className="italic border-l-2 border-[#45bfae] pl-3 py-0.5 text-gray-300">
-                      "{cs.evidenceQuote}"
+                      "{cs.observedEvidence || cs.evidenceQuote}"
                     </blockquote>
                   </div>
                 )}

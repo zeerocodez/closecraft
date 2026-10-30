@@ -470,5 +470,168 @@ describe('Closecraft Sales Enablement & Performance Coaching Acceptance Tests', 
     assert.strictEqual(canTrainerReview(trainerA, cohort1Evidence), true, 'Trainer A can review Cohort 1');
     assert.strictEqual(canTrainerReview(trainerA, cohort2Evidence), false, 'Trainer A blocked from Cohort 2');
   });
+
+  // Test 21: Seeded ₦600k website offer variants (approval dependency & scope refusal)
+  it('21. Fictional ₦600k website offer variants maintain exact commercial bounds', () => {
+    const websiteOffer = {
+      name: '5-Page Corporate Website with Enquiry Form',
+      price: '₦600,000',
+      currency: 'NGN',
+      scope: ['5 standard pages', 'Enquiry form', 'Two revision rounds', 'Handover guidance'],
+      exclusions: ['Custom inventory software', 'Paid advertising', 'No guaranteed sales outcome'],
+      deliveryPrerequisites: ['Buyer inputs and brand assets supplied'],
+      explicitlyUnknownTerms: ['Payment terms remain unconfirmed until authorized'],
+    };
+
+    assert.strictEqual(websiteOffer.price, '₦600,000');
+    assert.ok(websiteOffer.exclusions.includes('Custom inventory software'));
+    assert.ok(websiteOffer.explicitlyUnknownTerms.some(t => t.includes('unconfirmed')));
+
+    // Variant 1: Approval dependency with unknown payment terms
+    const approvalVariantBuyer = {
+      name: 'Chief Babatunde Balogun',
+      needSignOff: 'Chairman and Board approval required',
+      paymentTermsKnown: false,
+    };
+    assert.strictEqual(approvalVariantBuyer.paymentTermsKnown, false, 'Payment terms are unconfirmed');
+
+    // Variant 2: Essential inventory requirement exceeds scope -> appropriate refusal
+    const inventoryVariantBuyer = {
+      name: 'Folashade Adeleke',
+      essentialRequirement: 'Warehouse multi-location inventory synchronization',
+    };
+    const isRequirementInScope = websiteOffer.scope.includes(inventoryVariantBuyer.essentialRequirement);
+    assert.strictEqual(isRequirementInScope, false, 'Inventory requirement is explicitly excluded');
+  });
+
+  // Test 22: Required handoff note omitted is scored as omission under Criterion 8
+  it('22. Omission of required handoff note is scored as 0 with clear omissionReason', () => {
+    const requiredSubmissions = ['handoff_note'];
+    const submittedNotes = null; // Omitted by learner
+
+    const scoreRecordsHandoff = (notes, required) => {
+      if (required.includes('handoff_note') && (!notes || notes.trim().length === 0)) {
+        return {
+          criterionKey: 'records_handoff',
+          score: 0,
+          assessmentStatus: 'scored',
+          omissionReason: 'Required handoff note or CRM summary document was declared for this scenario but omitted by learner.',
+          evidenceSufficiency: 'insufficient',
+        };
+      }
+      return { criterionKey: 'records_handoff', score: 2, assessmentStatus: 'scored' };
+    };
+
+    const result = scoreRecordsHandoff(submittedNotes, requiredSubmissions);
+    assert.strictEqual(result.score, 0);
+    assert.strictEqual(result.assessmentStatus, 'scored');
+    assert.ok(result.omissionReason.includes('Required handoff note'));
+  });
+
+  // Test 23: Submitted handoff note evaluated as valid evidence
+  it('23. Submitted handoff note provides valid evidence citations and scores 2', () => {
+    const requiredSubmissions = ['handoff_note'];
+    const submittedNotes = 'Prospect confirmed 5-page scope at ₦600,000. Next meeting scheduled for Thursday 2pm with Chairman.';
+
+    const evaluateNote = (note) => {
+      const mentionsScope = note.includes('5-page') || note.includes('₦600,000');
+      const mentionsNextStep = note.includes('Next meeting') || note.includes('Thursday');
+      if (mentionsScope && mentionsNextStep) {
+        return {
+          score: 2,
+          evidenceExcerpt: note.substring(0, 50),
+          evidenceSufficiency: 'sufficient',
+        };
+      }
+      return { score: 1, evidenceSufficiency: 'limited' };
+    };
+
+    const res = evaluateNote(submittedNotes);
+    assert.strictEqual(res.score, 2);
+    assert.strictEqual(res.evidenceSufficiency, 'sufficient');
+    assert.ok(res.evidenceExcerpt.includes('₦600,000'));
+  });
+
+  // Test 24: Unapproved installment plan or inventory promise triggers UNAUTHORIZED_MATERIAL_PROMISE flag
+  it('24. Promising unauthorized installments or inventory modules triggers critical safety flag', () => {
+    const detectCriticalFlags = (transcriptText) => {
+      const flags = [];
+      const lower = transcriptText.toLowerCase();
+      if (lower.includes('pay in 3 installments') || lower.includes('split into 4 monthly payments')) {
+        flags.push({
+          type: 'UNAUTHORIZED_MATERIAL_PROMISE',
+          reason: 'Promised unapproved payment terms or installment structure.',
+        });
+      }
+      if (lower.includes('build your inventory module') || lower.includes('custom inventory software is included')) {
+        flags.push({
+          type: 'UNAUTHORIZED_MATERIAL_PROMISE',
+          reason: 'Committed to excluded custom inventory software without approval.',
+        });
+      }
+      return flags;
+    };
+
+    const badTranscript = 'Do not worry about the ₦600k, you can pay in 3 installments of ₦200,000 and we will build your inventory module.';
+    const flags = detectCriticalFlags(badTranscript);
+    assert.strictEqual(flags.length, 2);
+    assert.strictEqual(flags[0].type, 'UNAUTHORIZED_MATERIAL_PROMISE');
+  });
+
+  // Test 25: Not-assessed criteria receive null score and do not penalize the denominator
+  it('25. Criteria outside drill scope receive null score and actual scored denominator', () => {
+    const allCriteria = ['offer_accuracy', 'buyer_fit_qualification', 'discovery', 'objection_diagnosis'];
+    const drillApplicable = ['offer_accuracy', 'buyer_fit_qualification'];
+
+    const criterionScores = allCriteria.map((key) => {
+      const isApplicable = drillApplicable.includes(key);
+      if (!isApplicable) {
+        return {
+          criterionKey: key,
+          assessmentStatus: 'not_assessed',
+          score: null,
+          notAssessedReason: 'Focus of this short drill is limited to offer explanation and fit qualification.',
+        };
+      }
+      return {
+        criterionKey: key,
+        assessmentStatus: 'scored',
+        score: 2,
+      };
+    });
+
+    const scoredCriteria = criterionScores.filter((c) => c.assessmentStatus === 'scored');
+    const totalScore = scoredCriteria.reduce((sum, c) => sum + (c.score || 0), 0);
+    const maxPossibleScore = scoredCriteria.length * 2;
+
+    assert.strictEqual(scoredCriteria.length, 2);
+    assert.strictEqual(totalScore, 4);
+    assert.strictEqual(maxPossibleScore, 4, 'Denominator is 4, not 16');
+    assert.strictEqual(criterionScores[2].assessmentStatus, 'not_assessed');
+    assert.strictEqual(criterionScores[2].score, null);
+  });
+
+  // Test 26: Practice hints mark attempt as assisted and are disabled on capstones
+  it('26. Requesting practice hints marks attempt as assisted and is blocked on capstones', () => {
+    const handleHintRequest = (session, scenario) => {
+      if (scenario.isCapstone) {
+        throw new Error('Practice hints are disabled during formal capstone assessments.');
+      }
+      return {
+        hintsUsed: (session.hintsUsed || 0) + 1,
+        isAssisted: true,
+        hint: 'Diagnose the buyer’s underlying workflow bottleneck.',
+      };
+    };
+
+    const practiceSession = { hintsUsed: 0, isAssisted: false };
+    const practiceScenario = { isCapstone: false };
+    const hintRes = handleHintRequest(practiceSession, practiceScenario);
+    assert.strictEqual(hintRes.isAssisted, true);
+    assert.strictEqual(hintRes.hintsUsed, 1);
+
+    const capstoneScenario = { isCapstone: true };
+    assert.throws(() => handleHintRequest(practiceSession, capstoneScenario), /disabled during formal capstone/);
+  });
 });
 

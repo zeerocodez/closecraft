@@ -79,6 +79,29 @@ export default async function PracticeAttemptReviewPage({
         </div>
       </div>
 
+      {/* AI Practice Feedback Badge & Provenance */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest text-xs">
+        <div className="flex items-center gap-2">
+          <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary font-bold tracking-wide uppercase text-[11px] border border-primary/20 flex items-center gap-1.5">
+            <Icon name="Sparkles" size={13} />
+            AI Practice Feedback
+          </span>
+          <span className="text-on-surface-variant font-mono">
+            • Provider: Server-Side Rubric Engine
+          </span>
+          {session.isAssisted && (
+            <span className="px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30 text-[10px] font-semibold">
+              Assisted Attempt ({session.hintsUsed || 1} {session.hintsUsed === 1 ? 'hint' : 'hints'} used)
+            </span>
+          )}
+        </div>
+        {session.evidenceHash && (
+          <div className="text-[11px] text-on-surface-variant font-mono" title={`SHA-256: ${session.evidenceHash}`}>
+            Evidence Hash: {session.evidenceHash.substring(0, 12)}...
+          </div>
+        )}
+      </div>
+
       {/* Critical Flag Alert Banner (If Any) */}
       {criticalFlags.length > 0 && (
         <div className="p-5 rounded-xl border border-red-500/40 bg-red-500/10 space-y-2">
@@ -97,6 +120,22 @@ export default async function PracticeAttemptReviewPage({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* Submitted Handoff Notes (If Any) */}
+      {session.submittedNotes && (
+        <div className="p-5 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-on-surface flex items-center gap-2">
+              <Icon name="FileText" size={14} className="text-primary" />
+              Submitted Handoff Note & Opportunity Record
+            </span>
+            <span className="text-[11px] text-on-surface-variant font-mono">Frozen Artifact</span>
+          </div>
+          <blockquote className="p-3.5 rounded-xl bg-surface-container-high/50 border border-outline-variant/20 text-xs text-on-surface whitespace-pre-wrap leading-relaxed font-mono">
+            {session.submittedNotes}
+          </blockquote>
         </div>
       )}
 
@@ -224,20 +263,40 @@ export default async function PracticeAttemptReviewPage({
                     {crit.criterionLabel}
                   </h3>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold px-2 py-0.5 rounded bg-surface-container-high text-on-surface">
-                      {crit.score} / 2 pts
+                    <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded ${
+                      crit.assessmentStatus === 'not_assessed' || crit.score === null
+                        ? 'bg-surface-container-high text-on-surface-variant'
+                        : crit.score === 2
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : crit.score === 1
+                        ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                        : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                    }`}>
+                      {crit.assessmentStatus === 'not_assessed' || crit.score === null 
+                        ? 'NOT ASSESSED' 
+                        : `${crit.score} / 2 pts`}
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-2 text-xs text-on-surface-variant leading-relaxed">
                   <p>{crit.reasoning}</p>
+                  {crit.omissionReason && (
+                    <p className="text-amber-400/90 mt-1 italic">
+                      Omission Finding: {crit.omissionReason}
+                    </p>
+                  )}
+                  {crit.assessmentStatus === 'not_assessed' && crit.notAssessedReason && (
+                    <p className="text-on-surface-variant/70 mt-1 italic">
+                      Not Assessed: {crit.notAssessedReason}
+                    </p>
+                  )}
                 </div>
               </div>
 
               {crit.observedEvidence && (
                 <div className="pt-2 border-t border-outline-variant/20 text-[11px] text-on-surface-variant/80 font-mono">
-                  <strong>Observed Evidence:</strong> {crit.observedEvidence}
+                  <strong>Observed Evidence:</strong> "{crit.observedEvidence}"
                 </div>
               )}
             </div>

@@ -19,6 +19,7 @@ export interface SeedScenario {
   serverBuyerFacts: ServerBuyerFacts;
   buyerPersona: BuyerPersona;
   applicableRubricKeys: RubricCriterionKey[];
+  requiredSubmissions?: string[];
   isCapstone?: boolean;
 }
 
@@ -624,5 +625,147 @@ export const DSS_SPRINT_SCENARIOS: SeedScenario[] = [
       'records_handoff',
     ],
     isCapstone: true,
+  },
+  {
+    slug: 'ws1-fictional-website-approval-dependency',
+    title: 'Draft: ₦600k 5-Page Website (Approval Dependency)',
+    difficulty: 'FOUNDATIONAL',
+    scenarioFamily: 'OFFER_ACCURACY',
+    targetRole: 'CLOSER',
+    channel: 'WHATSAPP',
+    estimatedMinutes: 7,
+    maxTurns: 5,
+    workshopNumber: 1,
+    workshopTitle: 'Professional foundations and accurate offer explanation',
+    suggestedTrainer: 'Trainer 1',
+    studentBrief: 'A prospective retail brand buyer wants our 5-page website package (₦600,000). She asks about paying in monthly installments and wants the site live in 2 weeks. Explain approved terms accurately: 4-week delivery starts strictly after required buyer assets arrive, exclusions apply, and payment terms require finance authorization—never invent an unapproved installment schedule.',
+    learningObjective: 'Explain approved deliverables, realistic delivery timelines, and hold boundaries on unauthorized payment terms while identifying stakeholder approval dependencies.',
+    initialMessage: "Hello. We need a 5-page website with an enquiry form up within 2 weeks. Can we break the ₦600,000 into 4 monthly payments of ₦150k, and will you include our warehouse inventory sync?",
+    approvedOfferFacts: {
+      name: 'Five-Page Corporate Website with Enquiry Form',
+      price: '₦600,000',
+      currency: 'NGN',
+      scope: [
+        'Five-page responsive website',
+        'Online enquiry form with email routing',
+        'Two revision rounds',
+        'Handover guidance session',
+        'Four-week delivery target after required buyer inputs arrive',
+      ],
+      exclusions: [
+        'Custom inventory software (requires separate enterprise systems)',
+        'Paid advertising management',
+        'Guaranteed sales outcomes or revenue projections',
+      ],
+      deliveryPrerequisites: [
+        'Delivery target starts strictly four weeks after required buyer copy, branding assets, and inputs arrive',
+      ],
+      explicitlyUnknownTerms: [
+        'Payment terms remain unknown until authorised by finance director (do not invent installment plans)',
+      ],
+    },
+    serverBuyerFacts: {
+      realPain: 'Current website is broken; enquiries fail to send to retail store managers.',
+      actualBudget: '₦600,000 approved budget, but disbursements require Chairman signature.',
+      decisionProcess: 'Needs a written quote and confirmed timeline to present to the Chairman on Thursday.',
+      hiddenBlockers: ['Previous web agency took 6 months because assets were delayed; fears repeat.'],
+      revealedUponQuestions: [
+        {
+          questionTopic: 'decision process or who approves payment',
+          revealedFact: 'I manage retail operations, but any commitment over ₦500,000 requires our Chairman’s formal sign-off. If you give me a clear proposal showing the 5-page scope and 4-week delivery from asset arrival, I can present it for sign-off this Thursday.',
+        },
+        {
+          questionTopic: 'payment terms or installments',
+          revealedFact: 'Our finance team handles the payment schedule. If installments are not standard, I just need to know the official terms so I can present the exact requirement to the Chairman.',
+        },
+        {
+          questionTopic: 'timeline or assets or delivery',
+          revealedFact: 'We already have our logo, brand photos, and page text drafted. We can supply all inputs on day one.',
+        },
+      ],
+    },
+    buyerPersona: {
+      name: 'Folake Davies',
+      title: 'Head of Retail Operations',
+      company: 'Zenith Retail Outlets',
+      temperament: 'BUSY_RUSHED',
+      communicationStyle: 'Fast-paced, direct, under internal pressure from Chairman.',
+      boundaryConditions: [
+        'Appreciates honest explanation of the 4-week delivery prerequisite after assets arrive.',
+        'Accepts that warehouse inventory is excluded once explained.',
+        'Requires formal board/Chairman approval before committing commercial funds.',
+      ],
+    },
+    applicableRubricKeys: ['offer_accuracy', 'buyer_fit_qualification', 'discovery', 'decision_commercial', 'records_handoff'],
+    requiredSubmissions: ['HANDOFF_NOTE'],
+  },
+  {
+    slug: 'ws4-fictional-website-inventory-exceeds-scope',
+    title: 'Draft: ₦600k 5-Page Website (Inventory Exceeds Scope)',
+    difficulty: 'INTERMEDIATE',
+    scenarioFamily: 'QUALIFICATION',
+    targetRole: 'CLOSER',
+    channel: 'WHATSAPP',
+    estimatedMinutes: 8,
+    maxTurns: 5,
+    workshopNumber: 4,
+    workshopTitle: 'Adaptive follow-up and qualification',
+    suggestedTrainer: 'Trainer 2',
+    studentBrief: 'An auto parts distributor wants the ₦600k website, but insists that real-time multi-branch warehouse inventory tracking with POS barcode scanning MUST be built into the website. Custom inventory software is strictly excluded. Qualify the prospect, hold the scope boundary, and execute an appropriate professional refusal without taking unfulfillable commitments.',
+    learningObjective: 'Accurately diagnose essential buyer requirements, recognize scope mismatch, and execute a professional refusal or referral rather than making unauthorized material promises.',
+    initialMessage: "Good morning. We are interested in your ₦600,000 website package, but it must connect directly to our 3 warehouses with real-time stock balance deduction whenever a part is sold. Can your team build that into this package?",
+    approvedOfferFacts: {
+      name: 'Five-Page Corporate Website with Enquiry Form',
+      price: '₦600,000',
+      currency: 'NGN',
+      scope: [
+        'Five-page responsive website',
+        'Online enquiry form with email routing',
+        'Two revision rounds',
+        'Handover guidance session',
+        'Four-week delivery target after required buyer inputs arrive',
+      ],
+      exclusions: [
+        'Custom inventory software (requires separate enterprise systems)',
+        'Paid advertising management',
+        'Guaranteed sales outcomes or revenue projections',
+      ],
+      deliveryPrerequisites: [
+        'Delivery target starts strictly four weeks after required buyer copy, branding assets, and inputs arrive',
+      ],
+      explicitlyUnknownTerms: [
+        'Payment terms remain unknown until authorised by finance director (do not invent installment plans)',
+      ],
+    },
+    serverBuyerFacts: {
+      realPain: 'Warehouse shrinkage and discrepancies between Lagos and Abuja branches.',
+      actualBudget: '₦600,000 budgeted for website, but expects enterprise ERP for that price.',
+      decisionProcess: 'Will not purchase any web package unless warehouse stock deduction is solved.',
+      hiddenBlockers: ['Zero technical literacy on the difference between a marketing website and an ERP inventory system.'],
+      dealBreakers: ['Custom inventory management software is an absolute non-negotiable requirement.'],
+      revealedUponQuestions: [
+        {
+          questionTopic: 'inventory requirements or warehouse',
+          revealedFact: 'We have over 4,000 individual part numbers across 3 depots. If a rep in Trade Fair sells a clutch plate, the Abuja warehouse stock must decrease in real time. That is our entire reason for calling.',
+        },
+        {
+          questionTopic: 'website marketing versus ERP',
+          revealedFact: 'I understand the difference now. If this package is only for a 5-page showcase website with an enquiry form, then it cannot solve our warehouse problem. I appreciate you telling me before we spent money.',
+        },
+      ],
+    },
+    buyerPersona: {
+      name: 'Emeka Okafor',
+      title: 'Managing Director',
+      company: 'Okafor Heavy Spares Ltd',
+      temperament: 'ANALYTICAL',
+      communicationStyle: 'Direct, demanding, focused exclusively on inventory reconciliation.',
+      boundaryConditions: [
+        'If the rep promises custom inventory tracking inside the ₦600k package, Emeka will catch the bluff and demand technical architecture proof.',
+        'Respects a rep who clearly and candidly states that custom ERP inventory software is outside the 5-page website scope and advises appropriate enterprise alternatives.',
+      ],
+    },
+    applicableRubricKeys: ['offer_accuracy', 'buyer_fit_qualification', 'discovery', 'objection_diagnosis', 'records_handoff'],
+    requiredSubmissions: ['HANDOFF_NOTE'],
   },
 ];

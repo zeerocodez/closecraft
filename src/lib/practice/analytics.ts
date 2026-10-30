@@ -85,7 +85,7 @@ export async function calculateComparableTrend(
         const evalObj = s.evaluations[0];
         if (evalObj) {
           const scoreItem = evalObj.criterionScores.find((c) => c.criterionKey === crit.key);
-          if (scoreItem) {
+          if (scoreItem && scoreItem.score !== null) {
             total += scoreItem.score;
             count++;
           }
@@ -185,7 +185,7 @@ export async function computeCoachRecommendation(userId: string) {
     const evalObj = s.evaluations[0];
     if (evalObj) {
       for (const cs of evalObj.criterionScores) {
-        if (cs.score <= 1) {
+        if (cs.score !== null && cs.score <= 1) {
           if (!gapCounts[cs.criterionKey]) {
             gapCounts[cs.criterionKey] = { count: 0, evidence: [], sessions: [] };
           }
