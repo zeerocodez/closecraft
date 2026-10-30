@@ -5,6 +5,7 @@ import {
   registerAffiliate,
   getDemoDashboardData,
 } from '@/lib/dss/affiliate-store';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 export async function GET(req: Request) {
   try {
@@ -33,12 +34,31 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  // Rate limit: max 5 registrations per 10 minutes per IP
+  const ip = clientIp(req);
+  const limiter = await rateLimit(`dss-affiliate-reg:${ip}`, 5, 10 * 60 * 1000);
+  if (!limiter.allowed) {
+    return NextResponse.json({ error: 'Too many registrations. Please try again later.' }, { status: 429 });
+  }
+
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
+
+    // Honeypot spam check
+    if (body.website || body.hpField || body.company_fax) {
+      return NextResponse.json({ success: true, message: 'Received' });
+    }
+
     const { name, email, channel, consent } = body;
 
     if (!name || !email || !channel) {
       return NextResponse.json({ error: 'Name, email, and promotion channel are required' }, { status: 400 });
+    }
+
+    const cleanEmail = String(email).trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return NextResponse.json({ error: 'Invalid email address syntax' }, { status: 400 });
     }
 
     if (!consent) {
@@ -49,9 +69,9 @@ export async function POST(req: Request) {
     const userId = session?.user?.id;
 
     const affiliate = await registerAffiliate({
-      name,
-      email,
-      channel,
+      name: String(name).trim().slice(0, 100),
+      email: cleanEmail.slice(0, 180),
+      channel: String(channel).trim().slice(0, 100),
       userId,
     });
 

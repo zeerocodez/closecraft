@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { processLeadWithAI } from '@/lib/ai/qualificationEngine';
 import { timingSafeEqualString } from '@/lib/apiSecurity';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
+import crypto from 'crypto';
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -25,12 +27,43 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
- try {
- const body = await request.json();
+  try {
+    const ip = clientIp(request);
+    const limiter = await rateLimit(`wa-webhook:${ip}`, 120, 60 * 1000);
+    if (!limiter.allowed) {
+      return new NextResponse('Too Many Requests', { status: 429 });
+    }
 
- if (body.object !== 'whatsapp_business_account') {
- return new NextResponse('Not Found', { status: 404 });
- }
+    const rawBody = await request.text();
+    const signature = request.headers.get('x-hub-signature-256');
+    const appSecret = process.env.WHATSAPP_APP_SECRET || process.env.META_APP_SECRET;
+
+    // Cryptographic signature verification per AGENTS.md
+    if (appSecret) {
+      if (!signature) {
+        console.warn('[WhatsApp Webhook] Missing x-hub-signature-256');
+        return new NextResponse('Missing signature', { status: 401 });
+      }
+      const expected = 'sha256=' + crypto.createHmac('sha256', appSecret).update(rawBody).digest('hex');
+      if (!timingSafeEqualString(signature, expected)) {
+        console.warn('[WhatsApp Webhook] Invalid signature rejected');
+        return new NextResponse('Invalid signature', { status: 401 });
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      console.error('[WhatsApp Webhook] WHATSAPP_APP_SECRET / META_APP_SECRET unconfigured in production');
+      return new NextResponse('Configuration error', { status: 500 });
+    }
+
+    let body: any;
+    try {
+      body = JSON.parse(rawBody);
+    } catch {
+      return new NextResponse('Invalid JSON', { status: 400 });
+    }
+
+    if (body.object !== 'whatsapp_business_account') {
+      return new NextResponse('Not Found', { status: 404 });
+    }
 
  // Acknowledge receipt to Meta quickly
  // In production, we would queue this processing (e.g. Inngest) to guarantee we return 200 OK fast

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { timingSafeEqualString } from '@/lib/apiSecurity';
 
 export async function GET(request: Request) {
   // Never permit open seeding in production
@@ -8,8 +9,9 @@ export async function GET(request: Request) {
   }
 
   const authHeader = request.headers.get('Authorization');
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
   const adminSecret = process.env.ADMIN_SECRET || process.env.CRON_SECRET;
-  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+  if (!adminSecret || !token || !timingSafeEqualString(token, adminSecret)) {
     return NextResponse.json({ error: 'Unauthorized: Valid admin bearer authorization required' }, { status: 401 });
   }
 

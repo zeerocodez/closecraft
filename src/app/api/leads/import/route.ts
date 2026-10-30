@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { z } from 'zod';
 import { RevenueEngine } from '@/lib/revenue-engine/engine';
+import { rateLimit } from '@/lib/rateLimit';
 
 const MAX_IMPORT_BATCH = 500;
 
@@ -27,8 +28,17 @@ export async function POST(req: Request) {
   try {
     const session = await auth();
     const organizationId = (session as any)?.organizationId;
-    if (!session?.user || !organizationId) {
+    if (!session?.user?.id || !organizationId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Rate limit CSV imports: max 5 imports per 5 minutes per user
+    const limiter = await rateLimit(`csv-import:${session.user.id}`, 5, 5 * 60 * 1000);
+    if (!limiter.allowed) {
+      return NextResponse.json(
+        { error: 'Import in progress or limit reached. Please wait a few minutes before starting another batch.' },
+        { status: 429 }
+      );
     }
 
     const body = await req.json().catch(() => null);

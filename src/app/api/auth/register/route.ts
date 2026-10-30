@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
-import { RevenueEngine } from "@/lib/revenue-engine/engine";
 import { rateLimit, clientIp } from "@/lib/rateLimit";
 import { normalizeWhatsAppNumber } from "@/lib/whatsapp";
 
@@ -22,18 +21,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid request payload." }, { status: 400 });
     }
 
+    // Honeypot spam check
+    if (body.website || body.hpField || body.company_fax) {
+      return NextResponse.json(
+        { success: true, message: "Workspace created successfully. Verification required." },
+        { status: 201 }
+      );
+    }
+
     const { name, email, password, companyName, whatsappNumber } = body;
 
-    if (!email || typeof email !== "string" || !email.includes("@")) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || typeof email !== "string" || !emailRegex.test(email.trim())) {
       return NextResponse.json(
         { error: "A valid email address is required." },
         { status: 400 }
       );
     }
 
-    if (!password || typeof password !== "string" || password.length < 8) {
+    if (!password || typeof password !== "string" || password.length < 8 || password.length > 100) {
       return NextResponse.json(
-        { error: "Password must be at least 8 characters long." },
+        { error: "Password must be between 8 and 100 characters long." },
         { status: 400 }
       );
     }

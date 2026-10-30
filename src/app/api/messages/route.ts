@@ -1,39 +1,59 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
+import { rateLimit } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
- try {
- const session = await auth();
- if (!session?.user || !session.organizationId) {
- return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
- }
+  try {
+    const session = await auth();
+    if (!session?.user?.id || !session.organizationId) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
 
- const body = await request.json();
- const { conversationId, content, senderType = 'HUMAN' } = body;
+    // Rate limit: max 60 messages per minute per user
+    const limiter = await rateLimit(`msg-send:${session.user.id}`, 60, 60 * 1000);
+    if (!limiter.allowed) {
+      return NextResponse.json({ error: 'Too many messages sent. Please slow down.' }, { status: 429 });
+    }
 
- if (!conversationId || !content) {
- return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
- }
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
+    }
 
- // Verify conversation belongs to this organization
- const conversation = await db.conversation.findUnique({
- where: { id: conversationId },
- include: { lead: true }
- });
+    const { conversationId, content, senderType = 'HUMAN' } = body;
 
- if (!conversation || conversation.organizationId !== session.organizationId) {
- return NextResponse.json({ error: 'Conversation not found or unauthorized' }, { status: 404 });
- }
+    if (!conversationId || typeof conversationId !== 'string' || !content || typeof content !== 'string') {
+      return NextResponse.json({ error: 'Missing required fields: valid conversationId and content are required' }, { status: 400 });
+    }
 
- // Insert the message into the DB
- const message = await db.message.create({
- data: {
- conversationId,
- content,
- senderType
- }
- });
+    const trimmedContent = content.trim();
+    if (trimmedContent.length === 0 || trimmedContent.length > 4000) {
+      return NextResponse.json({ error: 'Message content must be between 1 and 4000 characters.' }, { status: 400 });
+    }
+
+    // Only allow human or prospect messages from client endpoints (AI & SYSTEM messages originate server-side)
+    const validSenderTypes = ['HUMAN', 'PROSPECT'];
+    const safeSenderType = validSenderTypes.includes(senderType) ? senderType : 'HUMAN';
+
+    // Verify conversation belongs to this organization
+    const conversation = await db.conversation.findUnique({
+      where: { id: conversationId },
+      include: { lead: true }
+    });
+
+    if (!conversation || conversation.organizationId !== session.organizationId) {
+      return NextResponse.json({ error: 'Conversation not found or unauthorized' }, { status: 404 });
+    }
+
+    // Insert the message into the DB
+    const message = await db.message.create({
+      data: {
+        conversationId,
+        content: trimmedContent,
+        senderType: safeSenderType
+      }
+    });
 
  // Update conversation's updatedAt timestamp to bubble it up in the inbox
  await db.conversation.update({

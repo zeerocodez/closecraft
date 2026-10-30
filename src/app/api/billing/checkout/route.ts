@@ -3,12 +3,19 @@ import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { assertWorkspacePermission } from '@/lib/permissions/matrix';
 import { createBachsCheckoutSession } from '@/lib/payments/bachs';
+import { rateLimit } from '@/lib/rateLimit';
 
 export async function POST(req: Request) {
   try {
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized: Authentication required' }, { status: 401 });
+    }
+
+    // Rate limit checkout generation (max 10 checkout sessions per 5 min per user)
+    const limiter = await rateLimit(`billing-checkout:${session.user.id}`, 10, 5 * 60 * 1000);
+    if (!limiter.allowed) {
+      return NextResponse.json({ error: 'Too many checkout requests. Please wait a moment before trying again.' }, { status: 429 });
     }
 
     let body: any = {};

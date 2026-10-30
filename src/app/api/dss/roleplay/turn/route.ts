@@ -3,46 +3,72 @@ import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { generateText } from 'ai';
 import { openai } from '@ai-sdk/openai';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { z } from 'zod';
+
+const TurnSchema = z.object({
+  sessionId: z.string().min(1),
+  message: z.string().min(1, 'Message is required').max(1500, 'Message is too long'),
+  history: z.array(z.object({
+    role: z.enum(['user', 'assistant', 'system']),
+    content: z.string().max(1500)
+  })).max(20).optional().default([]),
+});
 
 export async function POST(req: Request) {
- try {
- const session = await auth();
- if (!session?.user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  try {
+    const session = await auth();
+    if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
- const { sessionId, message, history } = await req.json();
+    const identifier = session.user.id || clientIp(req);
+    const limiter = await rateLimit(`dss-roleplay-turn:${identifier}`, 25, 5 * 60 * 1000);
+    if (!limiter.allowed) {
+      return NextResponse.json(
+        { error: 'You are roleplaying too rapidly. Please slow down.' },
+        { status: 429 }
+      );
+    }
 
- const roleplaySession = await db.roleplaySession.findUnique({
- where: { id: sessionId },
- include: { scenario: true, student: { select: { userId: true } } }
- });
+    const rawBody = await req.json().catch(() => null);
+    const parsed = TurnSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0]?.message || 'Invalid input' }, { status: 400 });
+    }
 
- if (!roleplaySession) {
- return NextResponse.json({ error: 'Session not found' }, { status: 404 });
- }
+    const { sessionId, message, history } = parsed.data;
 
- // Enforce resource ownership: only session owner or platform operator can submit turns
- const isOwner = roleplaySession.student?.userId === session.user.id;
- const isPrivileged = (session.user as any)?.role === 'OPERATOR' || (session.user as any)?.role === 'SUPER_ADMIN';
- if (!isOwner && !isPrivileged) {
- return NextResponse.json({ error: 'Forbidden: You do not have permission to submit turns for this session.' }, { status: 403 });
- }
+    const roleplaySession = await db.roleplaySession.findUnique({
+      where: { id: sessionId },
+      include: { scenario: true, student: { select: { userId: true } } }
+    });
 
- // Prepare conversation history
- const messages = [
- {
- role: 'system',
- content: `You are participating in a sales roleplay simulation. 
- Persona: ${roleplaySession.scenario.buyerPersona}
- Context: ${roleplaySession.scenario.context}
- 
- You must act naturally as this persona. Do not break character. 
- Keep responses concise, conversational, and realistic. 
- If the salesperson handles your objections well, become more receptive. 
- If they fail to address your core concerns, remain skeptical.`
- },
- ...history,
- { role: 'user', content: message }
- ];
+    if (!roleplaySession) {
+      return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+    }
+
+    // Enforce resource ownership: only session owner or platform operator can submit turns
+    const isOwner = roleplaySession.student?.userId === session.user.id;
+    const isPrivileged = (session.user as any)?.role === 'OPERATOR' || (session.user as any)?.role === 'SUPER_ADMIN';
+    if (!isOwner && !isPrivileged) {
+      return NextResponse.json({ error: 'Forbidden: You do not have permission to submit turns for this session.' }, { status: 403 });
+    }
+
+    // Prepare conversation history
+    const messages = [
+      {
+        role: 'system',
+        content: `You are participating in a sales roleplay simulation. 
+Persona: ${roleplaySession.scenario.buyerPersona}
+Context: ${roleplaySession.scenario.context}
+
+You must act naturally as this persona. Do not break character. 
+Keep responses concise, conversational, and realistic. 
+If the salesperson handles your objections well, become more receptive. 
+If they fail to address your core concerns, remain skeptical.`
+      },
+      ...history,
+      { role: 'user', content: message }
+    ];
 
  // Get AI Persona Response
  const response = await generateText({

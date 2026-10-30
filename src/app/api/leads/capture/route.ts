@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { checkDuplicateLead } from '@/lib/dal/lead';
 import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 /**
  * Public Lead Capture Endpoint
@@ -10,8 +11,27 @@ import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
  * and detects workspace duplicates without silent merging.
  */
 export async function POST(req: NextRequest) {
+  // Rate limit: max 20 captures per 10 minutes per IP
+  const ip = clientIp(req);
+  const limiter = await rateLimit(`lead-capture:${ip}`, 20, 10 * 60 * 1000);
+  if (!limiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again shortly.' },
+      { status: 429 }
+    );
+  }
+
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
+
+    // Honeypot spam check - silent success for automated bots
+    if (body.website || body.hpField || body.company_fax) {
+      return NextResponse.json({
+        success: true,
+        message: 'Enquiry received successfully.',
+      });
+    }
+
     const {
       workspaceSlug,
       name,

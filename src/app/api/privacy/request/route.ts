@@ -1,10 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import crypto from 'node:crypto';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 export async function POST(req: NextRequest) {
+  // Rate limit: max 5 privacy requests per 15 minutes per IP
+  const ip = clientIp(req);
+  const limiter = await rateLimit(`privacy-dsr:${ip}`, 5, 15 * 60 * 1000);
+  if (!limiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many requests. Please try again later.' },
+      { status: 429 }
+    );
+  }
+
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => ({}));
+
+    // Honeypot spam check - silent success for bots
+    if (body.website || body.hpField || body.company_fax) {
+      return NextResponse.json({
+        success: true,
+        referenceId: `DSR-${Date.now().toString(36).toUpperCase()}`,
+        message: 'Your privacy request has been securely logged with our Data Protection Officer.',
+      });
+    }
+
     const { name, email, requestType, organizationName, details } = body;
 
     if (!name || !email || !requestType || !details) {
@@ -15,9 +36,18 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = String(email).trim().toLowerCase();
-    const cleanName = String(name).trim();
+    const cleanName = String(name).trim().slice(0, 120);
     const cleanType = String(requestType).trim().toUpperCase();
-    const cleanDetails = String(details).trim();
+    const cleanDetails = String(details).trim().slice(0, 4000);
+    const cleanOrgName = organizationName ? String(organizationName).trim().slice(0, 150) : null;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+      return NextResponse.json(
+        { error: 'Invalid email address format.' },
+        { status: 400 }
+      );
+    }
 
     const allowedTypes = ['ACCESS', 'CORRECTION', 'DELETION', 'OBJECTION'];
     if (!allowedTypes.includes(cleanType)) {
@@ -60,7 +90,8 @@ export async function POST(req: NextRequest) {
           metadata: JSON.stringify({
             referenceId,
             requestType: cleanType,
-            organizationName: organizationName || primaryOrg.name,
+            organizationName: cleanOrgName || primaryOrg.name,
+            details: cleanDetails,
             requiresOwnerConfirmation,
             submittedAt: new Date().toISOString()
           })

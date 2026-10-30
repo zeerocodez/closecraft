@@ -27,7 +27,15 @@ export async function POST(request: Request) {
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json().catch(() => null);
+    if (!body) {
+      return NextResponse.json({ error: 'Invalid request payload.' }, { status: 400 });
+    }
+
+    // Honeypot spam check
+    if (body.hpField || body.company_fax) {
+      return NextResponse.json({ success: true, message: 'Enquiry received successfully.' }, { status: 201 });
+    }
 
     // Validate with Zod
     const result = auditFormSchema.safeParse(body);

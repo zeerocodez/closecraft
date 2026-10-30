@@ -3,8 +3,19 @@ import { db } from '@/lib/db';
 import { acceptWorkspaceInvite } from '@/lib/auth/accessService';
 import bcrypt from 'bcryptjs';
 import { auth } from '@/lib/auth';
+import { rateLimit, clientIp } from '@/lib/rateLimit';
 
 export async function POST(req: Request) {
+  // Rate limit invite accept attempts (10 attempts per 15 min per IP)
+  const ip = clientIp(req);
+  const limiter = await rateLimit(`invite-accept:${ip}`, 10, 15 * 60 * 1000);
+  if (!limiter.allowed) {
+    return NextResponse.json(
+      { error: 'Too many attempts. Please try again later.' },
+      { status: 429 }
+    );
+  }
+
   try {
     const body = await req.json().catch(() => ({}));
     const { token, name, password } = body;
@@ -34,6 +45,13 @@ export async function POST(req: Request) {
     const session = await auth();
 
     if (session?.user?.id) {
+      // Security check: verify that the logged-in user matches the invited email address
+      if (session.user.email && session.user.email.toLowerCase() !== invite.email.toLowerCase()) {
+        return NextResponse.json(
+          { error: `This invitation was issued to ${invite.email}. Please sign in with that email address or log out to create a new account.` },
+          { status: 403 }
+        );
+      }
       userId = session.user.id;
     } else {
       // Find or create member account
