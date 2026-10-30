@@ -1,11 +1,27 @@
 import crypto from 'crypto';
 import { db } from '@/lib/db';
 
-const BACHS_API_BASE = process.env.BACHS_API_BASE || (
-  process.env.NODE_ENV === 'production' && !process.env.BACHS_FORCE_SANDBOX
-    ? 'https://api.bachs.io'
-    : 'https://sandbox-api.bachs.io'
-);
+export function getBachsApiBase(): string {
+  if (process.env.BACHS_API_BASE) {
+    return process.env.BACHS_API_BASE.replace(/\/$/, '');
+  }
+
+  const isSandboxForced = process.env.BACHS_FORCE_SANDBOX === 'true';
+  if (isSandboxForced) {
+    return 'https://sandbox-api.bachs.io';
+  }
+
+  const key = process.env.BACHS_SECRET_KEY || process.env.BACHS_API_KEY || '';
+  const isLiveKey = key.startsWith('sk_live_') || key.startsWith('sec_live_') || key.startsWith('live_');
+  const isExplicitLive = process.env.BACHS_MODE === 'live' || process.env.BACHS_FORCE_SANDBOX === 'false';
+  const isProduction = process.env.NODE_ENV === 'production';
+
+  if (isLiveKey || isExplicitLive || isProduction) {
+    return 'https://api.bachs.io';
+  }
+
+  return 'https://sandbox-api.bachs.io';
+}
 
 export interface BachsCheckoutParams {
   amount?: number; // e.g. 15000 or 150000
@@ -88,7 +104,7 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
 
   const publicFallback = (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('localhost'))
     ? process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '')
-    : 'https://closecraft.com';
+    : 'https://www.closecrafthq.com';
 
   let safeSuccessUrl = params.successUrl;
   let safeCancelUrl = params.cancelUrl;
@@ -164,7 +180,7 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
     }
   };
 
-  const response = await fetch(`${BACHS_API_BASE}/v1/checkout-sessions`, {
+  const response = await fetch(`${getBachsApiBase()}/v1/checkout-sessions`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${apiKey}`,

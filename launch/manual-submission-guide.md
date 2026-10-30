@@ -5,7 +5,7 @@
 **Operator / Legal Entity:** Zeerocodes Automation Limited  
 **Product Name:** Closecraft  
 **Verified Tagline:** “Know who is following up.”  
-**Target URL:** `https://closecraft.com` (or production canonical URL)  
+**Target URL:** `https://www.closecrafthq.com` (or production canonical URL)  
 **Budget Policy:** **Strict $0 (Zero Paid Spend)**. Always choose the standard/free review pipeline. Never enter corporate payment details for directory listings or fast-tracks.
 
 ---
@@ -31,7 +31,7 @@ This guide provides field-by-field submission instructions for the launch operat
 * **Recommended Timing:** Schedule for a Tuesday or Wednesday at 00:01 PST (8:01 AM WAT).
 * **Account Setup:** Log in with the official Closecraft / Zeerocodes maker account.
 * **Step-by-Step Form Inputs:**
-  * **Link to Product:** `https://closecraft.com`
+  * **Link to Product:** `https://www.closecrafthq.com`
   * **Name of Product:** `Closecraft`
   * **Tagline (Max 60 chars):** `Know who is following up — CRM for service businesses`
   * **Thumbnail:** Upload 240x240 PNG (`launch/screenshots/thumbnail_240.png` or `public/logo.png`)
@@ -66,7 +66,7 @@ This guide provides field-by-field submission instructions for the launch operat
 * **Important:** Select the **Standard Free Submission ($0)**. Decline the $129 paid express review.
 * **Form Inputs:**
   * **Startup Name:** `Closecraft`
-  * **Website URL:** `https://closecraft.com`
+  * **Website URL:** `https://www.closecrafthq.com`
   * **Elevator Pitch (140 characters max):**
     ```text
     Enquiry management and follow-up accountability software for service businesses. Know who is following up on every lead.
@@ -93,7 +93,7 @@ This guide provides field-by-field submission instructions for the launch operat
 * **Form Inputs:**
   * **Project Title:** `Closecraft`
   * **Tagline:** `Know who is following up — Revenue engine for service businesses`
-  * **Project URL:** `https://closecraft.com`
+  * **Project URL:** `https://www.closecrafthq.com`
   * **Description:**
     ```text
     We built Closecraft to eliminate lead drop-off in service businesses. Built with Next.js App Router, Tailwind CSS, Prisma ORM, and PostgreSQL with full Row-Level Security (RLS).
@@ -111,7 +111,7 @@ This guide provides field-by-field submission instructions for the launch operat
 * **Important:** Select **Free Standard Submission ($0)**. Decline $39 instant review.
 * **Form Inputs:**
   * **Tool Name:** `Closecraft`
-  * **URL:** `https://closecraft.com`
+  * **URL:** `https://www.closecrafthq.com`
   * **Short Tagline:** `Know who is following up on your business enquiries.`
   * **Description:**
     ```text
@@ -126,7 +126,7 @@ This guide provides field-by-field submission instructions for the launch operat
 * **Submission Link:** [fazier.com/submit](https://fazier.com/submit)
 * **Form Inputs:**
   * **Name:** `Closecraft`
-  * **Website:** `https://closecraft.com`
+  * **Website:** `https://www.closecrafthq.com`
   * **Tagline:** `Stop losing high-value enquiries to forgotten follow-ups.`
   * **Description:**
     ```text
@@ -146,7 +146,7 @@ This guide provides field-by-field submission instructions for the launch operat
 
   Nigerian service agencies, consultancies, and high-ticket service firms spend hundreds of thousands of Naira generating inbound leads via Instagram ads, web forms, and word-of-mouth. Yet, up to 60% of these enquiries slip through the cracks due to unassigned WhatsApp DMs, lack of follow-up accountability, and zero visibility for business owners.
 
-  Zeerocodes Automation Limited has officially launched Closecraft (https://closecraft.com), an unbloated revenue operating system engineered to answer one simple, decisive question: "Know who is following up."
+  Zeerocodes Automation Limited has officially launched Closecraft (https://www.closecrafthq.com), an unbloated revenue operating system engineered to answer one simple, decisive question: "Know who is following up."
 
   Closecraft provides:
   1. Clear enquiry ownership and next-action SLAs for sales teams.
@@ -159,7 +159,7 @@ This guide provides field-by-field submission instructions for the launch operat
   Warm regards,
   Launch Team
   Zeerocodes Automation Limited
-  support@closecraft.com | +234 902 636 5853
+  info@closecrafthq.com (Sales: sales@closecrafthq.com) | +234 902 636 5853
   ```
 
 ---

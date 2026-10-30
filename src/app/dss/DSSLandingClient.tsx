@@ -1368,6 +1368,13 @@ export default function DSSLandingClient() {
             <div>
               <div className="font-bold text-white text-sm mb-0.5">Digital Sales School (DSS)</div>
               <div>The Flagship Closer Talent Engine of Closecraft • Zeerocodes Automation Limited</div>
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-[#45BFAE]">
+                <a href="mailto:dss@closecrafthq.com" className="hover:underline">Admissions: dss@closecrafthq.com</a>
+                <span>•</span>
+                <a href="mailto:info@closecrafthq.com" className="hover:underline">Support: info@closecrafthq.com</a>
+                <span>•</span>
+                <a href="https://www.closecrafthq.com" target="_blank" rel="noopener noreferrer" className="hover:underline">www.closecrafthq.com</a>
+              </div>
             </div>
           </div>
           <div className="flex flex-wrap items-center gap-6">

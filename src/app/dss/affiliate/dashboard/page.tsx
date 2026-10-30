@@ -131,7 +131,7 @@ export default function DSSAffiliateDashboardPage() {
   const affiliateCode = profile?.code || 'DSS-DEMO8820A1';
   const referralLink = typeof window !== 'undefined'
     ? `${window.location.origin}/r/${affiliateCode}`
-    : `https://closecraft.ng/r/${affiliateCode}`;
+    : `https://www.closecrafthq.com/r/${affiliateCode}`;
 
   function copyText(text: string, type: 'link' | string) {
     navigator.clipboard.writeText(text);
@@ -749,7 +749,7 @@ export default function DSSAffiliateDashboardPage() {
                       </div>
                       <div className="p-4 rounded-xl bg-[#0B1117] border border-white/5">
                         <div className="text-xs text-[#8A9CAE] mb-1">Account Email</div>
-                        <div className="text-sm font-semibold text-white">{profile?.email || 'partner@closecraft.ng'}</div>
+                        <div className="text-sm font-semibold text-white">{profile?.email || 'dss@closecrafthq.com'}</div>
                       </div>
                       <div className="p-4 rounded-xl bg-[#0B1117] border border-white/5">
                         <div className="text-xs text-[#8A9CAE] mb-1">Assigned Partner Code</div>

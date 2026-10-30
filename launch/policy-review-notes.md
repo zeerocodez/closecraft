@@ -2,7 +2,8 @@
 
 **Operator Name:** Zeerocodes Automation Limited  
 **Brand / Application:** Closecraft  
-**Contact Email:** privacy@closecraft.com  
+**Contact Email:** info@closecrafthq.com  
+**Website:** https://www.closecrafthq.com  
 **Applicable Legal Frameworks:** Nigeria Data Protection Act 2023 (NDPA), Nigeria Data Protection Regulation (NDPR)  
 **Date of Record:** October 28, 2026  
 

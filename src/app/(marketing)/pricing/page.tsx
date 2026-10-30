@@ -129,7 +129,7 @@ export default function PricingPage() {
           <p className="text-sm text-on-surface-variant italic">
             * All features are unlocked for free during our initial live customer test phase. Paid tiers will only apply after the completion of the active pilot.
           </p>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
             <a
               href="https://wa.me/2349026365853?text=Hello%20CloseCraft%2C%20I%20have%20a%20question%20about%20the%20Free%20Pilot%20and%20pricing."
               target="_blank"
@@ -137,7 +137,13 @@ export default function PricingPage() {
               className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-on-surface hover:text-emerald-400 transition-colors py-2.5 px-4 rounded-xl bg-surface-container border border-outline-variant/30 shadow-sm"
             >
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>Questions? Chat directly on WhatsApp: <strong className="text-emerald-400 font-bold">+234 902 636 5853</strong></span>
+              <span>Questions? WhatsApp: <strong className="text-emerald-400 font-bold">+234 902 636 5853</strong></span>
+            </a>
+            <a
+              href="mailto:sales@closecrafthq.com"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-on-surface hover:text-primary transition-colors py-2.5 px-4 rounded-xl bg-surface-container border border-outline-variant/30 shadow-sm"
+            >
+              <span>Sales & Enterprise: <strong className="text-primary font-bold">sales@closecrafthq.com</strong></span>
             </a>
           </div>
         </div>

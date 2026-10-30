@@ -82,9 +82,10 @@ To launch today on Vercel, Railway, Render, or a VPS, configure the following en
 # 1. APPLICATION & AUTHENTICATION
 # ==============================================================================
 NODE_ENV="production"
-NEXTAUTH_URL="https://app.closecraft.com" # Replace with your production domain
+NEXTAUTH_URL="https://www.closecrafthq.com" # Production domain
 NEXTAUTH_SECRET="f4d8e9c1a2b3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9" # Generate: openssl rand -hex 32
-NEXT_PUBLIC_APP_URL="https://app.closecraft.com"
+NEXT_PUBLIC_APP_URL="https://www.closecrafthq.com"
+EMAIL_FROM="Closecraft <info@closecrafthq.com>"
 
 # ==============================================================================
 # 2. DATABASE (SUPABASE POSTGRESQL POOLING)
@@ -134,7 +135,7 @@ Bachs.io is the official payment gateway for Nigerian Naira (NGN) settlements su
 ### Step 3.2: Configure the Webhook Endpoint
 Closecraft ships with a production webhook handler featuring HMAC-SHA256 signature verification and idempotent processing:
 - **Webhook URL**: `https://[YOUR-PRODUCTION-DOMAIN]/api/webhooks/bachs`
-  *(Example: `https://app.closecraft.com/api/webhooks/bachs`)*
+  *(Example: `https://www.closecrafthq.com/api/webhooks/bachs`)*
 - **Subscribed Events**: Select the following events:
   - `collection.succeeded` *(Primary event when a customer pays)*
   - `invoice.paid`

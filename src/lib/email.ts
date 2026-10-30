@@ -8,16 +8,22 @@ export async function sendTransactionalEmail({
   to,
   subject,
   html,
+  from,
 }: {
   to: string;
   subject: string;
   html: string;
+  from?: string;
 }) {
   try {
+    const defaultSender = process.env.EMAIL_FROM || 'Closecraft <info@closecrafthq.com>';
+    const sender = from || defaultSender;
+
     // If no real API key is set, log to console instead of trying to hit the API
     if (!process.env.RESEND_API_KEY) {
       console.log('=========================================');
       console.log(`[MOCK EMAIL SENT TO: ${to}]`);
+      console.log(`From: ${sender}`);
       console.log(`Subject: ${subject}`);
       console.log(`Body: ${html}`);
       console.log('=========================================');
@@ -25,7 +31,7 @@ export async function sendTransactionalEmail({
     }
 
     const { data, error } = await resend.emails.send({
-      from: 'CloseCraft <onboarding@closecraft.app>', // Change to your verified domain
+      from: sender,
       to: [to],
       subject,
       html,

@@ -349,7 +349,7 @@ export async function overrideQualificationAction(data: {
     select: { id: true, role: true, email: true },
   });
 
-  const isOperator = operatorUser?.role === 'OPERATOR' || operatorUser?.role === 'SUPER_ADMIN' || operatorUser?.email?.endsWith('@closecraft.com');
+  const isOperator = operatorUser?.role === 'OPERATOR' || operatorUser?.role === 'SUPER_ADMIN' || operatorUser?.email?.endsWith('@closecrafthq.com') || operatorUser?.email?.endsWith('@closecraft.com');
   if (!operatorUser || !isOperator) {
     throw new Error('Access denied: Only authorised Closecraft operators can override qualification determinations.');
   }

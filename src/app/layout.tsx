@@ -25,8 +25,20 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.closecrafthq.com"),
   title: "Closecraft | Know Who Is Following Up",
   description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+  alternates: {
+    canonical: "https://www.closecrafthq.com",
+  },
+  openGraph: {
+    title: "Closecraft | Know Who Is Following Up",
+    description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+    url: "https://www.closecrafthq.com",
+    siteName: "Closecraft",
+    locale: "en_US",
+    type: "website",
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },

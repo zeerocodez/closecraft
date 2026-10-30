@@ -99,7 +99,7 @@ export async function POST(req: Request) {
     }
 
     if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1')) {
-      origin = 'https://closecraft.com';
+      origin = 'https://www.closecrafthq.com';
     }
 
     const successUrl = `${origin}/billing/return`;

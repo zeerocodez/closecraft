@@ -113,8 +113,8 @@ describe('Bachs Sandbox Checkout & Webhook Acceptance Tests', () => {
         email: 'billing@acme.com',
         name: 'Acme Admin',
       },
-      success_url: 'https://closecraft.com/billing/return?checkout_id={CHECKOUT_ID}&invoice_id=' + invoice.id,
-      cancel_url: 'https://closecraft.com/billing',
+      success_url: 'https://closecrafthq.com/billing/return?checkout_id={CHECKOUT_ID}&invoice_id=' + invoice.id,
+      cancel_url: 'https://closecrafthq.com/billing',
       reference: invoice.invoiceNumber,
       metadata: {
         organizationId: invoice.organizationId,

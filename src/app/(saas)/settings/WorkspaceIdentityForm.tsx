@@ -101,7 +101,7 @@ export function WorkspaceIdentityForm({
         </label>
         <div className="flex items-center">
           <span className="h-10 px-3 bg-surface-container flex items-center text-on-surface-variant text-xs rounded-l-lg border border-surface-container border-r-0">
-            closecraft.com/
+            closecrafthq.com/
           </span>
           <input 
             id="org-slug"

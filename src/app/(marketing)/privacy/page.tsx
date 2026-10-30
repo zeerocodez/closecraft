@@ -158,10 +158,13 @@ export default function PrivacyPolicyPage() {
             <p className="text-on-surface-variant mb-2">
               For any questions regarding this Privacy Notice or our data handling practices, please contact:
             </p>
-            <div className="text-sm font-medium space-y-1 text-on-surface">
+            <div className="text-sm font-medium space-y-1.5 text-on-surface">
               <p><strong>Zeerocodes Automation Limited (Closecraft)</strong></p>
-              <p>Privacy & Data Protection Contact: <a href="mailto:privacy@closecraft.com" className="text-primary hover:underline">privacy@closecraft.com</a></p>
-              <p>General Support: <a href="mailto:support@closecraft.com" className="text-primary hover:underline">support@closecraft.com</a></p>
+              <p>Official Website: <a href="https://www.closecrafthq.com" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">www.closecrafthq.com</a></p>
+              <p>Privacy & Data Protection Contact: <a href="mailto:info@closecrafthq.com" className="text-primary hover:underline">info@closecrafthq.com</a></p>
+              <p>General Support & Operations: <a href="mailto:info@closecrafthq.com" className="text-primary hover:underline">info@closecrafthq.com</a></p>
+              <p>Sales & Commercial Partnerships: <a href="mailto:sales@closecrafthq.com" className="text-primary hover:underline">sales@closecrafthq.com</a></p>
+              <p>Digital Sales School (DSS) Admissions: <a href="mailto:dss@closecrafthq.com" className="text-primary hover:underline">dss@closecrafthq.com</a></p>
               <p>WhatsApp Support: <a href="https://wa.me/2349026365853" className="text-primary hover:underline">+234 902 636 5853</a></p>
             </div>
           </section>

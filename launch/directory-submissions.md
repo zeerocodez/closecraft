@@ -31,9 +31,11 @@ Closecraft's launch distribution strategy focuses on high-credibility developer,
 | **Primary Category** | Category / Tag | `Sales / CRM / Productivity / Lead Management` |
 | **Secondary Category**| Category / Tag | `Revenue Operations / Small Business Tools / B2B` |
 | **Pricing Model** | Form selection | `Free Trial / Paid Subscription (from ₦20,000/mo)` |
-| **App Website URL** | Full HTTPS URL | `https://closecraft.com` (or staging/production canonical) |
-| **Support Email** | Direct email | `support@closecraft.com` |
-| **Privacy Email** | Direct email | `privacy@closecraft.com` |
+| **App Website URL** | Full HTTPS URL | `https://www.closecrafthq.com` |
+| **Sales Inquiries** | Direct email | `sales@closecrafthq.com` |
+| **General & Support**| Direct email | `info@closecrafthq.com` |
+| **DSS Admissions**  | Direct email | `dss@closecrafthq.com` |
+| **Privacy Email**   | Direct email | `info@closecrafthq.com` |
 | **Primary Logo** | 512x512 PNG / SVG | Icon: Navy shield with cyan checkmark / directional focus (`public/logo.png`) |
 | **Banner / Cover** | 1200x630 PNG / WebP | Hero banner showing Today View dashboard & Next Best Action drawer |
 | **Screenshots (4)** | 1920x1080 PNG | 1. Today View (`/today`), 2. Next Best Action & Owner (`/inbox`), 3. Activity History (`/leads/[id]`), 4. Managed Sales Support (`/sales-support`) |
@@ -136,7 +138,7 @@ Closecraft's launch distribution strategy focuses on high-credibility developer,
 * **Cost:** **$0 (Free standard queue)**. (Decline $39 express review).
 * **Submission Copy:**
   * **Tool Name:** `Closecraft`
-  * **Website:** `https://closecraft.com`
+  * **Website:** `https://www.closecrafthq.com`
   * **Tagline:** `Know who is following up on your business enquiries.`
   * **Description:** Closecraft is a focused revenue operating system for service businesses. It organizes inbound leads, tracks follow-up ownership, highlights stalled conversations, and lets businesses tap into pre-vetted remote sales closers.
   * **Category:** `Productivity / Sales & Marketing / CRM`
@@ -225,7 +227,7 @@ Closecraft's launch distribution strategy focuses on high-credibility developer,
   > 
   > Nigerian service agencies, consultancies, and high-ticket service firms spend hundreds of thousands of Naira generating inbound leads via Instagram ads, web forms, and word-of-mouth. Yet, up to 60% of these enquiries slip through the cracks due to unassigned WhatsApp DMs, lack of follow-up accountability, and zero visibility for business owners.
   > 
-  > Zeerocodes Automation Limited has officially launched **Closecraft** (https://closecraft.com), an unbloated revenue operating system engineered to answer one simple, decisive question: **"Know who is following up."**
+  > Zeerocodes Automation Limited has officially launched **Closecraft** (https://www.closecrafthq.com), an unbloated revenue operating system engineered to answer one simple, decisive question: **"Know who is following up."**
   > 
   > Closecraft provides:
   > 1. Clear enquiry ownership and next-action SLAs for sales teams.

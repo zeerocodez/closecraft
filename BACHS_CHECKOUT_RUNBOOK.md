@@ -92,9 +92,9 @@ Once verified:
 ## 5. Environment & Webhook Configuration
 
 ### Deployed Webhook URL
-Configure this URL in the Bachs Merchant Dashboard (Sandbox):
+Configure this URL in the Bachs Merchant Dashboard (Live):
 ```
-https://closecraft.com/api/webhooks/bachs
+https://www.closecrafthq.com/api/webhooks/bachs
 ```
 *(In local development with tunnels like ngrok: `https://<subdomain>.ngrok-free.app/api/webhooks/bachs`)*
 
@@ -104,12 +104,14 @@ https://closecraft.com/api/webhooks/bachs
 |---|---|---|
 | `DATABASE_URL` | **Configured** | Supabase Postgres pooler |
 | `NEXTAUTH_SECRET` | **Configured** | Session encryption |
-| `BACHS_SECRET_KEY` | **Pending Configuration** | Add `sk_sandbox_...` from Bachs Dashboard |
-| `BACHS_WEBHOOK_SECRET` | **Pending Configuration** | Add `whsec_...` from Bachs Webhook Settings |
-| `BACHS_FORCE_SANDBOX` | **Default (`true`)** | Keeps checkout locked to sandbox base URL |
+| `BACHS_API_BASE` | **Configured** | Production endpoint (`https://api.bachs.io`) |
+| `BACHS_SECRET_KEY` | **Configured (Live)** | Live Secret Key (`sk_live_...`) |
+| `BACHS_WEBHOOK_SECRET` | **Configured (Live)** | Live Webhook Signature Secret (`whsec_...`) |
+| `BACHS_FORCE_SANDBOX` | **Configured (`false`)** | Live production billing enabled |
+| `BACHS_MODE` | **Configured (`live`)** | Production live checkout routing |
 
 > [!NOTE]
-> If `BACHS_SECRET_KEY` is not present in `.env`, Closecraft automatically enters simulated sandbox mode and serves `/billing/checkout/mock` for seamless offline testing. Live payment keys should **never** be enabled in sandbox testing.
+> Live Bachs API integration is active. Outgoing checkout requests are routed to `https://api.bachs.io`. Inbound webhooks are cryptographically authenticated via HMAC-SHA256 (`whsec_...`) with 300s replay tolerance.
 
 ---
 

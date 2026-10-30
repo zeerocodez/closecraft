@@ -85,7 +85,7 @@ export default function PrivacyRequestPage() {
               )}
             </div>
             <p className="text-xs text-on-surface-variant">
-              A confirmation receipt has been generated. For follow-up queries, contact <a href="mailto:privacy@closecraft.com" className="text-primary hover:underline">privacy@closecraft.com</a> citing your reference.
+              A confirmation receipt has been generated. For follow-up queries, contact <a href="mailto:info@closecrafthq.com" className="text-primary hover:underline">info@closecrafthq.com</a> citing your reference.
             </p>
             <div className="pt-2">
               <Link href="/" className="px-5 py-2.5 rounded-lg bg-primary text-on-primary font-bold text-xs inline-block">

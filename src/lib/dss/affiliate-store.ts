@@ -87,7 +87,7 @@ function getInitialStore(): StoreData {
         userId: 'demo-partner-001',
         code: 'DSS-DEMO8820A1',
         name: 'Emmanuel Partner',
-        email: 'partner@closecraft.ng',
+        email: 'dss@closecrafthq.com',
         channel: 'WhatsApp Community & LinkedIn Network (2,400 sales professionals)',
         status: 'approved',
         created: now - 30 * 86400000,

@@ -1097,12 +1097,32 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  <Link href="/platform">Who It's For</Link>
  <Link href="/pricing">Pricing & Tiers</Link>
  <Link href="/#faq">FAQ</Link>
+ <Link href="/dss" className="footer-button" style={{ color: '#45bfae' }}>Digital Sales School (DSS) &rarr;</Link>
+ </div>
+
+ <div>
+ <small>DIRECT INQUIRIES</small>
+ <a href="https://www.closecrafthq.com" className="footer-button" style={{ color: '#45bfae', fontWeight: 600 }}>
+ www.closecrafthq.com
+ </a>
+ <a href="mailto:sales@closecrafthq.com" className="footer-button" style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+ <span style={{ fontSize: '11px', color: 'var(--dark-muted)' }}>Sales & Pilots:</span>
+ <span style={{ color: '#45bfae' }}>sales@closecrafthq.com</span>
+ </a>
+ <a href="mailto:info@closecrafthq.com" className="footer-button" style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+ <span style={{ fontSize: '11px', color: 'var(--dark-muted)' }}>General Support:</span>
+ <span style={{ color: '#45bfae' }}>info@closecrafthq.com</span>
+ </a>
+ <a href="mailto:dss@closecrafthq.com" className="footer-button" style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+ <span style={{ fontSize: '11px', color: 'var(--dark-muted)' }}>DSS Admissions:</span>
+ <span style={{ color: '#45bfae' }}>dss@closecrafthq.com</span>
+ </a>
  <a
  href="https://wa.me/2349026365853?text=Hello%20CloseCraft%20Team%2C%20I%20am%20interested%20in%20the%20Free%20Pilot."
  target="_blank"
  rel="noopener noreferrer"
  className="footer-button"
- style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#45bfae', marginTop: '6px' }}
+ style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#45bfae', marginTop: '4px' }}
  >
  WhatsApp: +234 902 636 5853
  </a>
@@ -1132,7 +1152,7 @@ export default function LandingClientWrapper({ eco, flags }: { eco: LandingView 
  </div>
 
  <div className="footer-bottom">
- <span>© {new Date().getFullYear()} Zeerocodes Revenue Growth Engine. All rights reserved.</span>
+ <span>© {new Date().getFullYear()} Zeerocodes Automation Limited • www.closecrafthq.com. All rights reserved.</span>
  <span>Turn more of the leads you already have into sales.</span>
  </div>
  </div>

@@ -52,7 +52,7 @@ export async function submitClinicRegistration(formData: FormData) {
     // Send the email with the worksheet
     // Assuming clinic Access is a fixed link or retrieved from settings
     const clinicAccessLink = "https://meet.google.com/example";
-    const auditLink = "https://closecraft.app/downloads/Ten_Enquiry_Sales_Audit.pdf";
+    const auditLink = "https://www.closecrafthq.com/downloads/Ten_Enquiry_Sales_Audit.pdf";
     const [date, time] = session.split(", ");
     
     await sendClinicRegistration(email, name, date, time, clinicAccessLink, auditLink);

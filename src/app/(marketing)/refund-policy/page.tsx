@@ -60,7 +60,7 @@ export default function RefundPolicyPage() {
             </p>
             <ul className="space-y-2 text-on-surface-variant list-disc pl-5 text-sm">
               <li><strong>Zero Action Required to Stop:</strong> Simply decline or ignore the monthly renewal invoice. No recurring charges will occur.</li>
-              <li><strong>Formal Workspace Deactivation:</strong> Workspace Owners can initiate immediate workspace closure from <em>Settings &gt; Workspace &gt; Danger Zone</em> or by notifying our support desk at <a href="mailto:support@closecraft.com" className="text-primary hover:underline">support@closecraft.com</a>.</li>
+              <li><strong>Formal Workspace Deactivation:</strong> Workspace Owners can initiate immediate workspace closure from <em>Settings &gt; Workspace &gt; Danger Zone</em> or by notifying our support desk at <a href="mailto:info@closecrafthq.com" className="text-primary hover:underline">info@closecrafthq.com</a> (or for sales contracts: <a href="mailto:sales@closecrafthq.com" className="text-primary hover:underline">sales@closecrafthq.com</a>).</li>
               <li><strong>Grace Period:</strong> Following the end of any paid-through period, you receive a <strong>7-day grace period</strong> with uninterrupted access to export customer records and follow up on pending opportunities.</li>
             </ul>
           </section>

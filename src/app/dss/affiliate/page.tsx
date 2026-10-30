@@ -64,7 +64,7 @@ export default function DSSAffiliateProgramPage() {
   }
 
   const referralLink = partnerCode
-    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://closecraft.ng'}/r/${partnerCode}`
+    ? `${typeof window !== 'undefined' ? window.location.origin : 'https://www.closecrafthq.com'}/r/${partnerCode}`
     : '';
 
   function copyLink() {
@@ -510,6 +510,11 @@ export default function DSSAffiliateProgramPage() {
             <div>
               <div className="font-bold text-white text-sm mb-0.5">Digital Sales School (DSS) Partner Network</div>
               <div>Powered by Closecraft • Zeerocodes Automation Limited</div>
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-[#45BFAE]">
+                <a href="mailto:dss@closecrafthq.com" className="hover:underline">Partner Desk: dss@closecrafthq.com</a>
+                <span>•</span>
+                <a href="https://www.closecrafthq.com" target="_blank" rel="noopener noreferrer" className="hover:underline">www.closecrafthq.com</a>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-6">

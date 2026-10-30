@@ -15,7 +15,7 @@ async function assertOperator() {
     select: { id: true, role: true, email: true }
   });
 
-  const isOperator = user?.role === 'OPERATOR' || user?.role === 'SUPER_ADMIN' || user?.email?.endsWith('@closecraft.com');
+  const isOperator = user?.role === 'OPERATOR' || user?.role === 'SUPER_ADMIN' || user?.email?.endsWith('@closecrafthq.com') || user?.email?.endsWith('@closecraft.com');
   if (!isOperator) {
     throw new Error('Access Denied: Platform Operator privileges required.');
   }

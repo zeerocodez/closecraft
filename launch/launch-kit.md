@@ -4,7 +4,10 @@
 **Tagline:** “Know who is following up.”  
 **Target Audience:** Owners, sales managers, and growth teams of service businesses  
 **Operator / Company:** Zeerocodes Automation Limited  
-**Website:** https://closecraft.com *(or configured deployment URL)*  
+**Website:** https://www.closecrafthq.com *(or configured deployment URL)*  
+**Sales Inquiries:** sales@closecrafthq.com  
+**General Support:** info@closecrafthq.com  
+**DSS Admissions:** dss@closecrafthq.com  
 
 ---
 
@@ -95,7 +98,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 > No more forgotten leads. No more unassigned threads.
 >
 > Start your 14-day free trial in under 3 minutes (no credit card required):  
-> 👉 https://closecraft.com/signup
+> 👉 https://www.closecrafthq.com/signup
 >
 > To better follow-up,  
 > The Closecraft Team
@@ -127,7 +130,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 > 🔹 On-demand remote closers from the Digital Sales School  
 >
 > Start your 14-day free trial today (no credit card required):  
-> https://closecraft.com/signup
+> https://www.closecrafthq.com/signup
 >
 > #SalesOperations #RevenueEngine #B2BSales #CustomerSuccess #Closecraft
 
@@ -138,7 +141,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 >
 > We just launched **Closecraft** to make sure no deal falls through the cracks again. It organizes your incoming leads, assigns them to your team members, and shows you who needs attention today.
 >
-> Try it free for 14 days: https://closecraft.com/signup
+> Try it free for 14 days: https://www.closecrafthq.com/signup
 
 ---
 
@@ -148,7 +151,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 * **[0:25 - 0:50] The Today Radar:** Transition into Closecraft `/today` screen. *“This is the Closecraft Today Radar. In one view, you see every enquiry that needs action right now. Overdue follow-ups are highlighted in red, tasks due today are in amber, and scheduled discovery calls are ready.”*
 * **[0:50 - 1:15] Assignment & 1-Click Outreach:** Click on an unassigned lead. Assign to Closer Somtochukwu. Click "Start WhatsApp Outreach". *“With one click, Closecraft opens a pre-formatted, personalized conversation link directly to the prospect’s WhatsApp with the correct international dialing prefix.”*
 * **[1:15 - 1:40] Managed Sales Pilot:** Show `/sales-support`. *“Stretched for closer capacity? You can attach vetted, trained remote sales professionals directly from the Digital Sales School on a 30-day managed pilot.”*
-* **[1:40 - 2:00] Call to Action:** Show `/signup`. *“Stop losing sales to forgotten follow-up. Start your 14-day free trial today at Closecraft.com.”*
+* **[1:40 - 2:00] Call to Action:** Show `/signup`. *“Stop losing sales to forgotten follow-up. Start your 14-day free trial today at closecrafthq.com.”*
 
 ---
 
@@ -164,7 +167,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 > We’d love to walk you through a personalized 15-minute walkthrough of your current lead flow, map where follow-ups might be slipping through the cracks, and set up your team's workspace for free.
 >
 > If you have 15 minutes this Thursday or Friday, let me know or pick a slot directly:  
-> https://closecraft.com/signup
+> https://www.closecrafthq.com/signup
 >
 > Best regards,  
 > The Closecraft Team
