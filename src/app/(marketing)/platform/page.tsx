@@ -1,6 +1,37 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Layers, Zap, ShieldCheck, Database, MessagesSquare } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
+import ExplainerVideoSection from '@/components/marketing/ExplainerVideoSection';
+
+export const metadata: Metadata = {
+  title: "Closecraft Platform — AI Revenue Operating System & Unified Workspace",
+  description: "Stop jumping between spreadsheets and CRMs. Closecraft unifies lead inbox, visual pipeline, AI next-best-action, and revenue attribution in one place.",
+  openGraph: {
+    title: "Closecraft Platform — AI Revenue Operating System",
+    description: "Stop jumping between spreadsheets and CRMs. Closecraft unifies lead inbox, visual pipeline, AI next-best-action, and revenue attribution in one place.",
+    url: "https://www.closecrafthq.com/platform",
+    siteName: "Closecraft",
+    locale: "en_US",
+    type: "website",
+    images: [
+      {
+        url: "/images/closecraft-og.png",
+        width: 1200,
+        height: 630,
+        alt: "Closecraft Platform Overview",
+        type: "image/png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Closecraft Platform — AI Revenue Operating System",
+    description: "Unified lead inbox, visual pipeline, and AI next-best-action.",
+    images: ["/images/closecraft-og.png"],
+    creator: "@closecrafthq",
+  },
+};
 
 export default function PlatformPage() {
  return (
@@ -84,6 +115,10 @@ export default function PlatformPage() {
  View Pricing <ArrowRight size={16} />
  </Link>
  </div>
+ </div>
+
+ <div className="mt-12">
+   <ExplainerVideoSection />
  </div>
 
  </div>

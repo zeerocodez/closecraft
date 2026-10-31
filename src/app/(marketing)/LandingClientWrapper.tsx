@@ -9,6 +9,7 @@ import {
   Clock,
   Menu,
   Phone,
+  Play,
   Send,
   ShieldCheck,
   Sparkles,
@@ -19,6 +20,8 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import Logo from "@/components/ui/Logo";
+import ExplainerVideoModal from "@/components/marketing/ExplainerVideoModal";
+import ExplainerVideoSection from "@/components/marketing/ExplainerVideoSection";
 import type { LandingView } from "@/lib/landing/types";
 import type { EcosystemFlags } from "@/lib/ecosystem/flags";
 import './landing.css';
@@ -32,6 +35,7 @@ export default function LandingClientWrapper({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showVideoModal, setShowVideoModal] = useState(false);
   const [modalFormType, setModalFormType] = useState<'AUDIT' | 'MANAGED_SALES'>('AUDIT');
   const [auditBusy, setAuditBusy] = useState(false);
   const [auditSuccess, setAuditSuccess] = useState<string | null>(null);
@@ -156,6 +160,9 @@ export default function LandingClientWrapper({
               <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="/platform">
                 Platform
               </Link>
+              <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="#explainer-video">
+                Explainer
+              </Link>
               <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="#how-it-works">
                 How It Works
               </Link>
@@ -256,6 +263,14 @@ export default function LandingClientWrapper({
                 className="px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/15 font-semibold text-sm sm:text-base transition-all text-center"
               >
                 Request a Revenue Audit
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowVideoModal(true)}
+                className="px-5 py-3.5 rounded-xl bg-[#248277]/15 hover:bg-[#248277]/30 text-[#45bfae] border border-[#248277]/40 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
+              >
+                <Play size={16} className="fill-[#45bfae]" />
+                <span>Watch Explainer</span>
               </button>
             </div>
 
@@ -480,6 +495,9 @@ export default function LandingClientWrapper({
           </div>
         </div>
       </section>
+
+      {/* Explainer Video & Product Tour Section */}
+      <ExplainerVideoSection onOpenAudit={() => openAudit('AUDIT')} />
 
       {/* 6. How It Works Section */}
       <section id="how-it-works" className="section-wrap py-16 border-t border-white/10">
@@ -1353,6 +1371,12 @@ export default function LandingClientWrapper({
           </div>
         </div>
       )}
+
+      {/* Explainer Video Modal */}
+      <ExplainerVideoModal
+        isOpen={showVideoModal}
+        onClose={() => setShowVideoModal(false)}
+      />
     </div>
   );
 }

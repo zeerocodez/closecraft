@@ -5,6 +5,30 @@ import Logo from '@/components/ui/Logo';
 export const metadata = {
   title: 'Pricing | Closecraft 7-Day Free Trial',
   description: 'Try Closecraft free for 7 days. Starter at ₦20,000/mo, Pro at ₦45,000/mo, Enterprise at ₦75,000/mo. No credit card required.',
+  openGraph: {
+    title: 'Pricing | Closecraft 7-Day Free Trial',
+    description: 'Try Closecraft free for 7 days. Starter at ₦20,000/mo, Pro at ₦45,000/mo, Enterprise at ₦75,000/mo. No credit card required.',
+    url: 'https://www.closecrafthq.com/pricing',
+    siteName: 'Closecraft',
+    locale: 'en_US',
+    type: 'website',
+    images: [
+      {
+        url: '/images/closecraft-og.png',
+        width: 1200,
+        height: 630,
+        alt: 'Closecraft Pricing & Free Trial',
+        type: 'image/png',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Pricing | Closecraft 7-Day Free Trial',
+    description: 'Try Closecraft free for 7 days. Starter at ₦20,000/mo, Pro at ₦45,000/mo, Enterprise at ₦75,000/mo.',
+    images: ['/images/closecraft-og.png'],
+    creator: '@closecrafthq',
+  },
 };
 
 export default function PricingPage() {

@@ -26,7 +26,10 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.closecrafthq.com"),
-  title: "Closecraft | Know Who Is Following Up",
+  title: {
+    default: "Closecraft | Know Who Is Following Up",
+    template: "%s | Closecraft",
+  },
   description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
   alternates: {
     canonical: "https://www.closecrafthq.com",
@@ -38,15 +41,39 @@ export const metadata: Metadata = {
     siteName: "Closecraft",
     locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/images/closecraft-og.png",
+        width: 1200,
+        height: 630,
+        alt: "Closecraft - AI Revenue Operating System & Follow-Up Command Centre",
+        type: "image/png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Closecraft | Know Who Is Following Up",
+    description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+    images: ["/images/closecraft-og.png"],
+    creator: "@closecrafthq",
+    site: "@closecrafthq",
   },
   icons: {
     icon: [
-      { url: '/favicon.ico' },
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon-32x32.png', type: 'image/png', sizes: '32x32' },
+      { url: '/favicon-16x16.png', type: 'image/png', sizes: '16x16' },
       { url: '/images/closecraft-icon.png', type: 'image/png' },
     ],
     shortcut: '/favicon.ico',
-    apple: '/images/icon-192x192.png',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/images/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
   },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
