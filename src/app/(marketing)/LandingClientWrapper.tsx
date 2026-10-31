@@ -137,7 +137,7 @@ export default function LandingClientWrapper({
   ];
 
   return (
-    <div className="landing-shell" style={{ paddingTop: '80px' }}>
+    <div className="landing-shell bg-[#0B1117] text-white min-h-screen" style={{ paddingTop: '80px' }}>
       {/* 1. Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B1117]/95 backdrop-blur-xl border-b border-white/10 shadow-md">
         {/* Academy announcement */}
