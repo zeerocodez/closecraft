@@ -89,6 +89,7 @@ model Organization {
   attributedOpportunities AttributedOpportunity[]
   outboxMessages      OutboxMessage[]
   qualifications      WorkspaceQualification[]
+  serviceRequests     ServiceRequest[]
 
   // LMS Relations
   studentProfiles StudentProfile[]
@@ -1071,6 +1072,9 @@ model PilotEngagement {
   expectedContribution         Float                 @default(32750.0)
   negativeMarginOverrideReason String?
   performanceFeeConfig         String?               // JSON string
+  serviceType                  String                @default("MANAGED_SALES") // MANAGED_LEAD_GENERATION, MANAGED_SALES, APPOINTMENT_SETTING, TEAM_TRAINING
+  campaignMetrics              String?               // JSON: adSpend, rawEnquiries, qualifiedEnquiries, costPerEnquiry, costPerQualifiedEnquiry, reportingPeriod, currency, source
+  onboardingChecklist          String?               // JSON: 8 launch milestones
 
   // Acceptance & Terms
   termsVersion                 Int                   @default(1)
@@ -2100,5 +2104,38 @@ model MarketingEvent {
   @@index([subscriberId])
   @@index([eventType])
 }
+
+// -------------------------------------------------------------
+// OPERATIONAL SERVICE REQUEST QUEUE
+// -------------------------------------------------------------
+
+model ServiceRequest {
+  id                    String                @id @default(cuid())
+  reference             String                @unique // REQ-LG-XXXX, REQ-SW-XXXX, etc.
+  organizationId        String?
+  serviceType           String                // LEAD_GENERATION, SOFTWARE_FOLLOWUP, TEAM_TRAINING, MANAGED_SALES
+  stage                 String                @default("NEW") // NEW, UNDER_REVIEW, AWAITING_INFO, DISCOVERY_SCHEDULED, PROPOSAL_SENT, ACCEPTED, NOT_SUITABLE, WITHDRAWN
+  contactName           String
+  contactEmail          String
+  contactPhone          String?
+  companyName           String?
+  answers               String                // JSON of all assessment answers
+  assignedOwnerId       String?
+  nextAction            String?
+  nextActionDueAt       DateTime?
+  internalNotes         String?
+  stageHistory          String?               // JSON history array
+  sourceAttribution     String?               // Website assessment, Campaign, etc.
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  organization          Organization?         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([serviceType])
+  @@index([stage])
+  @@index([contactEmail])
+}
+
 
 

@@ -22,11 +22,14 @@ import {
   Briefcase,
   UserCheck,
   Headphones,
+  Target,
+  AlertCircle,
 } from 'lucide-react';
 import Logo from "@/components/ui/Logo";
 import ExplainerVideoModal from "@/components/marketing/ExplainerVideoModal";
 import ExplainerVideoSection from "@/components/marketing/ExplainerVideoSection";
 import BrevoNewsletterSection from "@/components/marketing/BrevoNewsletterSection";
+import FindRightSupportModal from "@/components/marketing/FindRightSupportModal";
 import type { LandingView } from "@/lib/landing/types";
 import type { EcosystemFlags } from "@/lib/ecosystem/flags";
 import './landing.css';
@@ -46,6 +49,13 @@ export default function LandingClientWrapper({
   const [auditSuccess, setAuditSuccess] = useState<string | null>(null);
   const [auditError, setAuditError] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [diagnosticTrack, setDiagnosticTrack] = useState<'LEAD_GENERATION' | 'SOFTWARE_FOLLOWUP' | 'TEAM_TRAINING' | 'MANAGED_SALES'>('LEAD_GENERATION');
+
+  function openDiagnostic(track: 'LEAD_GENERATION' | 'SOFTWARE_FOLLOWUP' | 'TEAM_TRAINING' | 'MANAGED_SALES' = 'LEAD_GENERATION') {
+    setDiagnosticTrack(track);
+    setShowSupportModal(true);
+  }
 
   // Controlled state for service assessment form to guarantee input preservation on error
   const [serviceFormData, setServiceFormData] = useState({
@@ -234,6 +244,38 @@ export default function LandingClientWrapper({
       q: "Do you guarantee sales or employment?",
       a: "No. Results depend on relevant factors including offer viability, lead quality, market demand, and execution. We do not guarantee sales for businesses or employment/income for training students."
     },
+    {
+      q: "Do you guarantee leads or sales?",
+      a: "No. We do not guarantee a specific number of leads or closed sales. Results depend on offer appeal, pricing, audience receptivity, ad budget, and speed and quality of follow-up."
+    },
+    {
+      q: "Is ad spend included in your fee?",
+      a: "No. Advertising budget is paid directly to Meta using your own payment method and ad account. Our fee covers strategy, campaign setup, copywriting, creative preparation, technical integration, and weekly management."
+    },
+    {
+      q: "Do I have to use Closecraft software if you manage my ads?",
+      a: "No, but you do need an organised way to receive and follow up enquiries. We can connect your leads to Closecraft, or send them to your email, WhatsApp, or existing CRM."
+    },
+    {
+      q: "What if I already have leads and just need help following up?",
+      a: "You can start with Closecraft software to organise your existing enquiries, train your sales team through Digital Sales School, or engage our managed sales support. You do not need our lead generation service."
+    },
+    {
+      q: "Who handles the enquiries when they come in?",
+      a: "By default, your own team handles the enquiries. If you do not have someone available to respond promptly, we can discuss external appointment setting or managed sales support."
+    },
+    {
+      q: "Can you train our sales team to handle these leads?",
+      a: "Yes. Digital Sales School provides practical training in appointment setting, objection handling, and remote sales closing for internal teams."
+    },
+    {
+      q: "What happens if a campaign is not performing?",
+      a: "During weekly reviews, we analyse cost per enquiry, audience feedback, and lead quality. We test new copy, creative angles, or targeting adjustments. If the offer or audience is not responding, we discuss pausing or restructuring."
+    },
+    {
+      q: "How do we get started?",
+      a: "Complete our short readiness review. We will evaluate your offer, audience, and follow-up readiness, then schedule a campaign discovery call if suitable."
+    },
   ];
 
   return (
@@ -269,6 +311,13 @@ export default function LandingClientWrapper({
                   <ChevronDown size={14} className="group-hover:rotate-180 transition-transform text-[#8A9CAE]" />
                 </a>
                 <div className="absolute top-full left-0 mt-1 w-64 p-2 rounded-2xl bg-[#090D12] border border-white/10 shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-150 z-50">
+                  <Link
+                    href="/services/lead-generation"
+                    className="block p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item"
+                  >
+                    <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Lead Generation</p>
+                    <p className="text-[11px] text-[#8A9CAE]">Managed Meta ads connected to follow-up</p>
+                  </Link>
                   <Link
                     href="/dss"
                     className="block p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item"
@@ -348,6 +397,9 @@ export default function LandingClientWrapper({
           <div className="lg:hidden bg-[#090D12] border-b border-white/10 px-6 py-4 flex flex-col gap-3 shadow-2xl animate-in slide-in-from-top-2 duration-150">
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="/platform">
               Platform
+            </Link>
+            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="/services/lead-generation">
+              Lead Generation
             </Link>
             <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="#services">
               Services & Training
@@ -483,6 +535,111 @@ export default function LandingClientWrapper({
         </div>
       </section>
 
+      {/* 2.B. Illustrative Campaign Scenario: 500 Enquiries */}
+      <section className="section-wrap py-14 border-t border-white/10">
+        <div className="p-6 sm:p-10 rounded-3xl bg-[#090D12] border border-white/15 shadow-2xl space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
+                ILLUSTRATIVE CAMPAIGN SCENARIO
+              </span>
+            </div>
+            <span className="text-[11px] text-[#8A9CAE]">
+              Not a customer case study or lead count guarantee
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-7 space-y-4">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-snug">
+                Your ads brought in 500 enquiries. What happens next?
+              </h2>
+
+              <p className="text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
+                The campaign has generated attention. Now the business has to turn that attention into useful conversations.
+              </p>
+
+              <div className="space-y-2 pt-1">
+                {[
+                  'Who responds?',
+                  'Who identifies suitable buyers?',
+                  'Who follows up when someone does not reply?',
+                  'Who handles the sales conversation?',
+                  'How does the owner know which opportunities still need attention?',
+                ].map((q, idx) => (
+                  <div key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-white font-medium">
+                    <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                    <span>{q}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="space-y-3 pt-2 text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
+                <p>
+                  Without an organised process, some enquiries can sit unanswered. Others receive one reply and are forgotten. Interested prospects can lose interest while the business continues paying for advertising.
+                </p>
+                <p className="font-semibold text-white">
+                  This is where Closecraft comes in. We help businesses create and manage their advertising campaigns. We help organise the resulting leads and coordinate follow-up. We can train their existing sales team through Digital Sales School, or provide separately scoped external sales support.
+                </p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => openDiagnostic('LEAD_GENERATION')}
+                  className="px-6 py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all"
+                >
+                  <span>Get help with my leads</span>
+                  <ArrowRight size={16} />
+                </button>
+                <a
+                  href="#connected-process"
+                  className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-semibold text-xs sm:text-sm transition-all text-center"
+                >
+                  See how the process works
+                </a>
+              </div>
+            </div>
+
+            <div className="lg:col-span-5">
+              <div className="p-5 rounded-2xl bg-[#111C26] border border-[#248277]/40 space-y-4 text-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-white/10">
+                  <span className="font-bold text-[#45bfae] uppercase tracking-wider text-[11px]">
+                    ILLUSTRATIVE WORKSPACE DATA
+                  </span>
+                  <span className="text-emerald-400 font-mono text-[11px]">Active Lead Queue</span>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="p-3 rounded-xl bg-[#0B1117] border border-white/10 space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-white">Enquiry #492 — Enterprise Offer</span>
+                      <span className="text-amber-300 font-semibold">14m waiting</span>
+                    </div>
+                    <p className="text-[#8A9CAE] text-[11px]">Source: Instagram Ads · Regional Growth Campaign</p>
+                    <p className="text-[#45bfae] font-medium text-[11px]">Assigned Owner: Tunde A. · Next: WhatsApp intro</p>
+                  </div>
+
+                  <div className="p-3 rounded-xl bg-[#0B1117] border border-white/10 space-y-1">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="font-bold text-white">Enquiry #491 — Commercial B2B</span>
+                      <span className="text-emerald-400 font-semibold">In Qualification</span>
+                    </div>
+                    <p className="text-[#8A9CAE] text-[11px]">Source: Facebook Ads · Demo Request Form</p>
+                    <p className="text-white text-[11px]">Discovery Call scheduled for tomorrow at 11:00 AM</p>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-[#8A9CAE] leading-relaxed pt-2 border-t border-white/10 italic">
+                  Note: The 500-lead scenario is illustrative. It is not a customer case study, an advertising forecast or a promise that we generate 500 leads. We do not invent conversion percentages or suggest every lead should become a customer.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 3. Problem Section */}
       <section className="section-wrap py-16 border-t border-white/10">
         <div className="max-w-3xl mx-auto text-center space-y-6">
@@ -503,6 +660,244 @@ export default function LandingClientWrapper({
               Closecraft gives you a shared view of the work, so you can see where an opportunity stands and take the next useful action.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* Connected Journey Section */}
+      <section id="connected-process" className="section-wrap py-16 border-t border-white/10">
+        <div className="max-w-4xl mx-auto text-center space-y-4 mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+            <span>CONNECTED REVENUE OPERATING SYSTEM</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+            From the first enquiry to a clear sales outcome.
+          </h2>
+          <p className="text-base sm:text-lg text-[#A7B7C7] max-w-2xl mx-auto">
+            Start with the support you need today. Add more help when your business is ready.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 max-w-5xl mx-auto">
+          {/* Stage 1 */}
+          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
+            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 01</span>
+            <h3 className="font-bold text-white text-base">Attract enquiries</h3>
+            <p className="text-xs text-[#A7B7C7] leading-relaxed">
+              An approved campaign introduces the business offer to potential customers.
+            </p>
+          </div>
+
+          {/* Stage 2 */}
+          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
+            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 02</span>
+            <h3 className="font-bold text-white text-base">Organise the response</h3>
+            <p className="text-xs text-[#A7B7C7] leading-relaxed">
+              Enquiries enter the existing Closecraft workflow through a supported connection or a clearly explained manual process.
+            </p>
+          </div>
+
+          {/* Stage 3 */}
+          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
+            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 03</span>
+            <h3 className="font-bold text-white text-base">Follow up</h3>
+            <p className="text-xs text-[#A7B7C7] leading-relaxed">
+              A responsible person receives the enquiry and records the next action.
+            </p>
+          </div>
+
+          {/* Stage 4 */}
+          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
+            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 04</span>
+            <h3 className="font-bold text-white text-base">Handle the conversation</h3>
+            <p className="text-xs text-[#A7B7C7] leading-relaxed">
+              The client’s team manages the opportunity, with optional DSS training or separately scoped external sales support.
+            </p>
+          </div>
+
+          {/* Stage 5 */}
+          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
+            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 05</span>
+            <h3 className="font-bold text-white text-base">Record the outcome</h3>
+            <p className="text-xs text-[#A7B7C7] leading-relaxed">
+              Track whether the opportunity was won, lost or postponed. Hand successful sales over to the delivery team.
+            </p>
+          </div>
+        </div>
+
+        <div className="max-w-3xl mx-auto mt-8 p-4 rounded-2xl bg-[#111C26] border border-[#248277]/40 text-center text-xs sm:text-sm text-[#45bfae] font-semibold">
+          “Closecraft helps us handle what happens after someone responds to our advertising, so more suitable opportunities can progress towards a sale.”
+        </div>
+      </section>
+
+      {/* 7-Step Practical Walkthrough */}
+      <section className="section-wrap py-16 border-t border-white/10">
+        <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
+            STEP-BY-STEP REVENUE FLOW
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            How the process could work
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A7B7C7]">
+            A concrete walkthrough showing how an enquiry moves from first impression to recorded sale.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-6xl mx-auto">
+          {[
+            {
+              step: '1',
+              title: 'Ad shown to targeted audience',
+              desc: 'Ad shown to targeted audience on Facebook or Instagram with clear messaging.',
+            },
+            {
+              step: '2',
+              title: 'Prospect fills lead form',
+              desc: 'Interested prospect clicks and fills lead form answering key qualifying questions.',
+            },
+            {
+              step: '3',
+              title: 'Enters Closecraft workspace',
+              desc: 'Lead instantly enters Closecraft workspace with timestamp and source attribution.',
+            },
+            {
+              step: '4',
+              title: 'Notification alerts owner',
+              desc: 'Notification alerts assigned team member (or external SDR) with SLA timer.',
+            },
+            {
+              step: '5',
+              title: 'Fast first response',
+              desc: 'Fast first response within minutes via WhatsApp or phone while intent is high.',
+            },
+            {
+              step: '6',
+              title: 'Conversation tracked',
+              desc: 'Conversation tracked through qualification and next best action in the pipeline.',
+            },
+            {
+              step: '7',
+              title: 'Outcome recorded',
+              desc: 'Outcome recorded (Appointment booked, Proposal sent, Won, or Lost with reason).',
+            },
+          ].map((item) => (
+            <div key={item.step} className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2 relative group hover:border-[#248277]/50 transition-all">
+              <span className="text-xs font-mono font-bold text-[#45bfae] bg-[#248277]/20 px-2 py-0.5 rounded">
+                Step {item.step}
+              </span>
+              <h4 className="font-bold text-white text-sm mt-1">{item.title}</h4>
+              <p className="text-xs text-[#8A9CAE] leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Four Clear Entry Points */}
+      <section className="section-wrap py-16 border-t border-white/10">
+        <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
+          <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
+            FLEXIBLE ENGAGEMENT
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
+            Where does your business want to start?
+          </h2>
+          <p className="text-xs sm:text-sm text-[#A7B7C7]">
+            Purchase only what you need. Add more help when your business is ready.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+          {/* Option 1: Existing Leads */}
+          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">START HERE</span>
+              <h3 className="font-bold text-white text-base">We already have leads</h3>
+              <p className="text-xs text-[#A7B7C7] leading-relaxed">
+                Organise enquiries, assign follow-up responsibilities, and keep stalled deals visible using Closecraft software.
+              </p>
+            </div>
+            <Link
+              href="/signup"
+              className="w-full py-2.5 px-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center"
+            >
+              <span>Get help with my existing leads</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Option 2: Need Lead Generation */}
+          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#45bfae]">PAID ACQUISITION</span>
+              <h3 className="font-bold text-white text-base">We need help generating leads</h3>
+              <p className="text-xs text-[#A7B7C7] leading-relaxed">
+                Attract relevant enquiries through managed Facebook and Instagram campaigns, connected directly to your workspace.
+              </p>
+            </div>
+            <Link
+              href="/services/lead-generation"
+              className="w-full py-2.5 px-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center"
+            >
+              <span>Discuss my next campaign</span>
+              <ArrowRight size={14} />
+            </Link>
+          </div>
+
+          {/* Option 3: Sales Training */}
+          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">SKILLS & CAPABILITY</span>
+              <h3 className="font-bold text-white text-base">We need to improve our team’s sales skills</h3>
+              <p className="text-xs text-[#A7B7C7] leading-relaxed">
+                Train your staff in appointment setting, qualification, and closing through Digital Sales School curriculum and live drills.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => openServiceEnquiry('Team training')}
+              className="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/15 font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center cursor-pointer"
+            >
+              <span>Train my sales team</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+
+          {/* Option 4: Hands-on Sales Support */}
+          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
+            <div className="space-y-2.5">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">EXECUTION CAPACITY</span>
+              <h3 className="font-bold text-white text-base">We need hands-on sales support</h3>
+              <p className="text-xs text-[#A7B7C7] leading-relaxed">
+                Bring in external sales appointment setters or closers to work your existing opportunities with agreed oversight.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => openServiceEnquiry('Managed sales')}
+              className="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center cursor-pointer"
+            >
+              <span>Discuss external sales support</span>
+              <ArrowRight size={14} />
+            </button>
+          </div>
+        </div>
+
+        {/* Diagnostic Assessment Trigger Banner */}
+        <div className="max-w-4xl mx-auto mt-10 p-6 rounded-3xl bg-[#111C26] border border-white/15 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 className="text-base font-bold text-white">Not sure where to begin?</h4>
+            <p className="text-xs text-[#A7B7C7] mt-0.5">
+              Take our interactive 2-minute diagnostic to find the right sales support for your business.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => openDiagnostic('LEAD_GENERATION')}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center justify-center gap-2 shadow-md transition-all shrink-0 cursor-pointer"
+          >
+            <Sparkles size={14} />
+            <span>Find the right support for your business</span>
+          </button>
         </div>
       </section>
 
@@ -1984,6 +2379,13 @@ export default function LandingClientWrapper({
       <ExplainerVideoModal
         isOpen={showVideoModal}
         onClose={() => setShowVideoModal(false)}
+      />
+
+      {/* Find Right Support Diagnostic Modal */}
+      <FindRightSupportModal
+        isOpen={showSupportModal}
+        onClose={() => setShowSupportModal(false)}
+        initialTrack={diagnosticTrack}
       />
     </div>
   );

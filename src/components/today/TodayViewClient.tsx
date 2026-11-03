@@ -38,6 +38,37 @@ interface BlockerItem {
   lead?: { id: string; name: string; phone: string | null } | null;
 }
 
+interface ActiveEngagementProps {
+  id: string;
+  title: string;
+  serviceType: string;
+  stage: string;
+  nextAction: string;
+  responsibleParty: string;
+  outcomeAfterward: string;
+  status: string;
+  reference?: string;
+}
+
+interface CampaignMetricsProps {
+  adSpend?: number | null;
+  rawEnquiries?: number | null;
+  enquiries?: number | null;
+  costPerEnquiry?: number | null;
+  qualifiedEnquiries?: number | null;
+  costPerQualifiedEnquiry?: number | null;
+  currency?: string | null;
+  reportingPeriod?: string | null;
+  source?: string | null;
+}
+
+interface LaunchChecklistItem {
+  id: string;
+  title: string;
+  completed: boolean;
+  isCurrent?: boolean;
+}
+
 export default function TodayViewClient({
   data,
   currentUserId,
@@ -46,6 +77,10 @@ export default function TodayViewClient({
   qualification,
   organizationName,
   organizationWhatsApp,
+  unrespondedEnquiriesCount,
+  activeEngagement,
+  campaignMetrics,
+  launchChecklist,
 }: {
   data: {
     overdueLeads: TodayLeadItem[];
@@ -67,6 +102,10 @@ export default function TodayViewClient({
   qualification?: any | null;
   organizationName?: string;
   organizationWhatsApp?: string | null;
+  unrespondedEnquiriesCount?: number;
+  activeEngagement?: ActiveEngagementProps | null;
+  campaignMetrics?: CampaignMetricsProps | null;
+  launchChecklist?: LaunchChecklistItem[] | null;
 }) {
   const [activeTab, setActiveTab] = useState<'today' | 'overdue' | 'missing' | 'unassigned' | 'blockers'>('today');
   const [selectedLead, setSelectedLead] = useState<TodayLeadItem | null>(null);
@@ -292,6 +331,184 @@ export default function TodayViewClient({
         >
           <span>{feedbackMsg.text}</span>
           <button onClick={() => setFeedbackMsg(null)} className="text-xs opacity-75 hover:opacity-100">Dismiss</button>
+        </div>
+      )}
+
+      {/* Unresponded Enquiries Notice */}
+      {typeof unrespondedEnquiriesCount === 'number' && unrespondedEnquiriesCount > 0 && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+            <div>
+              <p className="text-sm font-bold text-amber-200">
+                {unrespondedEnquiriesCount} {unrespondedEnquiriesCount === 1 ? 'enquiry is' : 'enquiries are'} waiting for a first response
+              </p>
+              <p className="text-xs text-amber-300/80">
+                Prompt first touch within minutes prevents interested leads from turning cold.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveTab('unassigned')}
+            className="px-3.5 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 border border-amber-500/40 text-xs font-bold transition-all self-start sm:self-auto cursor-pointer"
+          >
+            View Enquiries
+          </button>
+        </div>
+      )}
+
+      {/* Active Service Engagement Card */}
+      {activeEngagement && (
+        <div className="p-5 rounded-2xl bg-surface-container border border-outline-variant/30 space-y-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-outline-variant/20">
+            <div className="flex items-center gap-2.5">
+              <span className="px-2.5 py-1 rounded-full bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/30">
+                ACTIVE SERVICE ENGAGEMENT
+              </span>
+              <span className="text-sm font-bold text-on-surface">{activeEngagement.title}</span>
+            </div>
+            {activeEngagement.reference && (
+              <span className="text-xs font-mono text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                {activeEngagement.reference}
+              </span>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            <div>
+              <span className="text-on-surface-variant font-medium">Current Stage:</span>
+              <p className="font-bold text-on-surface mt-0.5 capitalize">{activeEngagement.stage.replace(/_/g, ' ').toLowerCase()}</p>
+            </div>
+            <div>
+              <span className="text-on-surface-variant font-medium">Your Next Action:</span>
+              <p className="font-bold text-primary mt-0.5">{activeEngagement.nextAction}</p>
+            </div>
+            <div>
+              <span className="text-on-surface-variant font-medium">Who Is Responsible:</span>
+              <p className="font-semibold text-on-surface mt-0.5">{activeEngagement.responsibleParty}</p>
+            </div>
+            <div>
+              <span className="text-on-surface-variant font-medium">What Happens Afterwards:</span>
+              <p className="text-on-surface-variant mt-0.5">{activeEngagement.outcomeAfterward}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between pt-2 border-t border-outline-variant/20">
+            <span className="text-xs text-on-surface-variant">Weekly status sync with your account manager</span>
+            <button
+              onClick={() => alert(`Reviewing action: ${activeEngagement.nextAction}`)}
+              className="px-4 py-2 rounded-xl bg-primary text-on-primary font-bold text-xs hover:opacity-90 transition-all shadow-sm active:scale-95 cursor-pointer"
+            >
+              Review campaign creative
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Lead Generation Launch Checklist */}
+      {launchChecklist && launchChecklist.length > 0 && (
+        <div className="p-5 rounded-2xl bg-surface-container border border-outline-variant/30 space-y-4 shadow-sm">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-on-surface">Lead Generation Launch Checklist</h3>
+              <p className="text-xs text-on-surface-variant">8 critical milestones before and after campaign publishing</p>
+            </div>
+            <span className="text-xs text-on-surface-variant font-medium">
+              {launchChecklist.filter(m => m.completed).length} / {launchChecklist.length} completed
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {launchChecklist.map((item, idx) => (
+              <div
+                key={item.id || idx}
+                className={`p-3 rounded-xl border text-xs flex items-start gap-2.5 transition-all ${
+                  item.completed
+                    ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-200'
+                    : item.isCurrent
+                    ? 'bg-primary/10 border-primary/40 text-on-surface font-semibold ring-1 ring-primary'
+                    : 'bg-surface-container-high border-outline-variant/20 text-on-surface-variant'
+                }`}
+              >
+                <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] shrink-0 mt-0.5 ${
+                  item.completed ? 'bg-emerald-500 text-white' : 'bg-surface-container-highest text-on-surface-variant'
+                }`}>
+                  {item.completed ? '✓' : idx + 1}
+                </span>
+                <span className="leading-tight">{item.title}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Transparent Ad Metrics Card */}
+      {activeEngagement && (
+        <div className="p-5 rounded-2xl bg-surface-container border border-outline-variant/30 space-y-3 shadow-sm">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm font-bold text-on-surface">Campaign Ad Metrics</h3>
+              <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-mono">
+                Manual or integrated data
+              </span>
+            </div>
+            <span className="text-xs text-on-surface-variant">
+              {campaignMetrics?.reportingPeriod || 'Current Month'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+              <span className="text-[11px] text-on-surface-variant">Ad Spend</span>
+              <p className="text-base font-bold text-on-surface mt-1">
+                {campaignMetrics?.adSpend != null
+                  ? `${campaignMetrics.currency || '₦'}${campaignMetrics.adSpend.toLocaleString()}`
+                  : 'Not available'}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+              <span className="text-[11px] text-on-surface-variant">Enquiries</span>
+              <p className="text-base font-bold text-on-surface mt-1">
+                {campaignMetrics?.rawEnquiries != null
+                  ? campaignMetrics.rawEnquiries.toLocaleString()
+                  : campaignMetrics?.enquiries != null
+                  ? campaignMetrics.enquiries.toLocaleString()
+                  : 'Not available'}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+              <span className="text-[11px] text-on-surface-variant">Cost per Enquiry</span>
+              <p className="text-base font-bold text-on-surface mt-1">
+                {campaignMetrics?.costPerEnquiry != null
+                  ? `${campaignMetrics.currency || '₦'}${campaignMetrics.costPerEnquiry.toLocaleString()}`
+                  : 'Not available'}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+              <span className="text-[11px] text-on-surface-variant">Qualified Enquiries</span>
+              <p className="text-base font-bold text-on-surface mt-1">
+                {campaignMetrics?.qualifiedEnquiries != null
+                  ? campaignMetrics.qualifiedEnquiries.toLocaleString()
+                  : 'Not available'}
+              </p>
+            </div>
+
+            <div className="p-3 rounded-xl bg-surface-container-high border border-outline-variant/20">
+              <span className="text-[11px] text-on-surface-variant">Cost / Qualified</span>
+              <p className="text-base font-bold text-on-surface mt-1">
+                {campaignMetrics?.costPerQualifiedEnquiry != null
+                  ? `${campaignMetrics.currency || '₦'}${campaignMetrics.costPerQualifiedEnquiry.toLocaleString()}`
+                  : 'Not available'}
+              </p>
+            </div>
+          </div>
+
+          <p className="text-[11px] text-on-surface-variant italic">
+            Ad metrics are populated transparently from client ad account reporting or verified manual inputs. Values marked &ldquo;Not available&rdquo; indicate data has not yet been synced or recorded for this period.
+          </p>
         </div>
       )}
 

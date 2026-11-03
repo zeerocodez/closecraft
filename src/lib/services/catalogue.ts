@@ -25,7 +25,7 @@ export type PricingMethod =
 
 export interface CatalogueServiceItem {
   id: string;
-  key: 'INDIVIDUAL_TRAINING' | 'TEAM_TRAINING' | 'MANAGED_SALES' | 'EXTERNAL_SETTING' | 'EXTERNAL_CLOSING';
+  key: 'INDIVIDUAL_TRAINING' | 'TEAM_TRAINING' | 'MANAGED_SALES' | 'EXTERNAL_SETTING' | 'EXTERNAL_CLOSING' | 'MANAGED_LEAD_GENERATION';
   name: string;
   category: 'TRAINING' | 'SALES_SERVICES';
   description: string;
@@ -185,6 +185,36 @@ export const SERVICE_CATALOGUE: CatalogueServiceItem[] = [
       'Cold lead generation or raw enquiry filtering',
       'Customer success onboarding or post-sale technical delivery',
       'Commission release before verified cash collection'
+    ]
+  },
+  {
+    id: 'srv-managed-lead-gen',
+    key: 'MANAGED_LEAD_GENERATION',
+    name: 'Managed Facebook & Instagram Lead Generation',
+    category: 'SALES_SERVICES',
+    description: 'Targeted paid advertising campaign setup and ongoing management on Facebook and Instagram, connected directly to your Closecraft follow-up workflow to convert attention into qualified conversations.',
+    scopeSummary: '30-day pilot or ongoing management, campaign audience targeting, approved ad creative, lead form integration to Closecraft, and transparent weekly metric reviews.',
+    eligibilityRequirements: [
+      'Proven, verifiable product or service with past paying customer validation',
+      'Dedicated advertising budget paid directly to Meta via your own ad account',
+      'Assigned internal owner or Closecraft sales service to respond to leads within 1 hour',
+      'Target gross profit per sale capable of sustaining advertising unit economics'
+    ],
+    availability: 'ASSESSMENT_REQUIRED',
+    pricingMethod: 'SCOPED_PROPOSAL',
+    pricingDisplay: 'Pilot setup + monthly management fee (Advertising budget paid directly to Meta)',
+    currency: 'NGN',
+    enquiryRoute: '/services/lead-generation',
+    tasksIncluded: [
+      'Audience targeting and campaign structure on Facebook and Instagram',
+      'Ad creative drafting (copy, headlines, calls to action) for client review and approval',
+      'Direct integration of Meta lead forms to Closecraft workspace or supported webhooks',
+      'Transparent weekly performance reporting (ad spend, cost per enquiry, qualified rate)'
+    ],
+    tasksExcluded: [
+      'Paying client advertising spend (ad spend is billed directly by Meta to client ad account)',
+      'High-end custom video production or commercial photo shoots',
+      'Guaranteed conversion rates or closed sales outcomes without follow-up control'
     ]
   }
 ];
