@@ -270,17 +270,18 @@ export async function POST(request: Request) {
       });
 
       // Dispatch alert to Sales & Admin inboxes (sales@closecrafthq.com, info@closecrafthq.com)
+      const leadNotes = needDescription || biggestSalesBottleneck || 'None provided';
       await dispatchNotificationAlert({
         category: 'SALES',
-        subject: `🔔 New Lead / Audit Request: ${name} (${email})`,
-        text: `New Lead Submitted!\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || 'None'}\nMessage: ${message || 'None'}\n\nView in Closecraft: https://www.closecrafthq.com/leads`,
+        subject: `🔔 New Lead / Audit Request: ${name} (${business})`,
+        text: `New Lead Submitted!\n\nName: ${name}\nBusiness: ${business}\nEmail: ${email}\nPhone: ${phone || 'None'}\nDetails: ${leadNotes}\n\nView in Closecraft: https://www.closecrafthq.com/leads`,
         html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
           <h2 style="color: #248277;">🔔 New Lead / Revenue Audit Enquiry</h2>
           <div style="background: #f4f6f8; border-left: 4px solid #248277; padding: 12px 16px; margin: 16px 0;">
-            <p style="margin: 0; font-size: 16px; font-weight: bold; color: #111;">${name}</p>
+            <p style="margin: 0; font-size: 16px; font-weight: bold; color: #111;">${name} (${business})</p>
             <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Email: <a href="mailto:${email}">${email}</a></p>
             <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Phone: <strong>${phone || 'Not provided'}</strong></p>
-            <p style="margin: 8px 0 0 0; font-size: 13px; color: #555;">Message / Notes: ${message || 'None'}</p>
+            <p style="margin: 8px 0 0 0; font-size: 13px; color: #555;">Details / Bottleneck: ${leadNotes}</p>
           </div>
           <p><a href="https://www.closecrafthq.com/leads" style="background: #248277; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">View Leads in CRM &rarr;</a></p>
         </div>`,
