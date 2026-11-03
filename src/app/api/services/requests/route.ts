@@ -159,6 +159,30 @@ export async function POST(req: NextRequest) {
           <p style="margin-top: 24px; font-size: 13px; color: #888;">Closecraft · Sales Follow-Up Software & Connected Sales Services</p>
         </div>`,
       });
+
+      // Dispatch alert email to Operator / Administrator
+      const operatorAlertEmail = process.env.ADMIN_ALERT_EMAIL || process.env.GMAIL_USER || 'zeerocodes@gmail.com';
+      await sendTransactionalEmail({
+        to: operatorAlertEmail,
+        subject: `🔔 New Service Request: ${cleanName} (${serviceDisplay} - ${reference})`,
+        text: `New Service Request Received!\n\nReference: ${reference}\nContact: ${cleanName} (${cleanEmail})\nPhone: ${cleanPhone || 'Not provided'}\nCompany: ${cleanCompany || 'Not provided'}\nService: ${serviceDisplay}\n\nReview this in Operator Console: https://www.closecrafthq.com/operator`,
+        html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #111;">
+          <h2 style="color: #248277;">🔔 New Closecraft Service Request</h2>
+          <div style="background: #f4f6f8; border-left: 4px solid #248277; padding: 12px 16px; margin: 16px 0;">
+            <p style="margin: 0; font-size: 13px; color: #666;">Reference: <strong>${reference}</strong> | Service: <strong>${serviceDisplay}</strong></p>
+            <p style="margin: 6px 0 0 0; font-size: 18px; font-weight: bold; color: #111;">${cleanName}</p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Email: <a href="mailto:${cleanEmail}">${cleanEmail}</a></p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Phone: <strong>${cleanPhone || 'Not provided'}</strong></p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Company: <strong>${cleanCompany || 'Not provided'}</strong></p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Attribution: <strong>${cleanAttribution}</strong></p>
+          </div>
+          <p style="margin-top: 20px;">
+            <a href="https://www.closecrafthq.com/operator" style="background: #248277; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
+              Open Operator Console &rarr;
+            </a>
+          </p>
+        </div>`,
+      });
     } catch {
       // Non-blocking email send
     }
