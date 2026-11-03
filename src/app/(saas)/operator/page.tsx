@@ -93,6 +93,14 @@ export default async function OperatorPage() {
     },
   });
 
+  // Fetch inbound service requests (REQ-LG, REQ-SW, REQ-TT, REQ-MS)
+  const serviceRequests = await db.serviceRequest.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      organization: { select: { id: true, name: true } },
+    },
+  });
+
   return (
     <div className="flex-1 overflow-y-auto">
       <OperatorDashboardClient
@@ -102,6 +110,7 @@ export default async function OperatorPage() {
         payables={payables as any}
         organizations={organizations as any}
         qualifications={qualifications as any}
+        serviceRequests={serviceRequests as any}
       />
     </div>
   );

@@ -212,3 +212,4 @@ test('Closecraft Managed Lead Generation & Connected Offering Acceptance Tests',
     assert.ok(catalogueContent.includes('Advertising budget paid directly to Meta'));
   });
 });
+

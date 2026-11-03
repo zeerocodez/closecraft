@@ -19,6 +19,8 @@ function VerifyEmailContent() {
     }
     return null;
   });
+  const [emailInput, setEmailInput] = useState('');
+  const [isChangingEmail, setIsChangingEmail] = useState(false);
 
   // Read URL parameters on mount
   useEffect(() => {
@@ -56,6 +58,12 @@ function VerifyEmailContent() {
   const handleVerify = async (e?: React.FormEvent, explicitCode?: string) => {
     if (e) e.preventDefault();
     const codeToVerify = explicitCode || code;
+    const targetEmail = (userEmail || emailInput).trim().toLowerCase();
+
+    if (!targetEmail) {
+      setErrorMessage('Please provide your registered work email address.');
+      return;
+    }
 
     setIsLoading(true);
     setErrorMessage(null);
@@ -65,7 +73,7 @@ function VerifyEmailContent() {
       const res = await fetch('/api/auth/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code: codeToVerify, email: userEmail }),
+        body: JSON.stringify({ code: codeToVerify, email: targetEmail }),
       });
 
       const data = await res.json();
@@ -91,6 +99,12 @@ function VerifyEmailContent() {
   };
 
   const handleResend = async () => {
+    const targetEmail = (userEmail || emailInput).trim().toLowerCase();
+    if (!targetEmail) {
+      setErrorMessage('Please enter your work email address to receive a verification code.');
+      return;
+    }
+
     setIsLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -99,7 +113,7 @@ function VerifyEmailContent() {
       const res = await fetch('/api/auth/verify-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resend: true, email: userEmail }),
+        body: JSON.stringify({ resend: true, email: targetEmail }),
       });
 
       const data = await res.json();
@@ -169,6 +183,47 @@ function VerifyEmailContent() {
           )}
 
           <form onSubmit={(e) => handleVerify(e)} className="space-y-4">
+            {(!userEmail || isChangingEmail) ? (
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-on-surface">
+                    Registered Work Email *
+                  </label>
+                  {userEmail && (
+                    <button
+                      type="button"
+                      onClick={() => setIsChangingEmail(false)}
+                      className="text-xs text-primary hover:underline"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="email"
+                  value={emailInput}
+                  onChange={(e) => setEmailInput(e.target.value)}
+                  placeholder="alex@company.com"
+                  className="w-full text-sm py-2.5 px-3.5 rounded-xl bg-surface-container border border-outline-variant/40 text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+                  required
+                />
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-3 rounded-xl bg-surface-container border border-outline-variant/30 text-xs text-on-surface-variant">
+                <span>Code sent to: <strong className="text-on-surface">{userEmail}</strong></span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmailInput(userEmail);
+                    setIsChangingEmail(true);
+                  }}
+                  className="text-primary hover:underline font-semibold"
+                >
+                  Change
+                </button>
+              </div>
+            )}
+
             <div>
               <label className="block text-xs font-semibold text-on-surface mb-1.5">
                 6-Digit Verification Code

@@ -23,3 +23,4 @@ export const metadata: Metadata = {
 export default function LeadGenerationPage() {
   return <LeadGenClient />;
 }
+

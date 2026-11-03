@@ -10,6 +10,9 @@ import {
   updateMaterialsStatusAction,
   triggerActivationAction,
   recordPayoutConfirmationAction,
+  updateServiceRequestStageAction,
+  updateCampaignMetricsAction,
+  convertServiceRequestToPilotAction,
 } from '@/app/(saas)/operator/actions';
 import QualificationReviewQueue from '@/components/operator/QualificationReviewQueue';
 
@@ -20,6 +23,7 @@ export default function OperatorDashboardClient({
   payables,
   organizations,
   qualifications = [],
+  serviceRequests = [],
 }: {
   requests: any[];
   engagements: any[];
@@ -27,8 +31,31 @@ export default function OperatorDashboardClient({
   payables: any[];
   organizations: any[];
   qualifications?: any[];
+  serviceRequests?: any[];
 }) {
-  const [activeTab, setActiveTab] = useState<'qualifications' | 'requests' | 'engagements' | 'professionals' | 'finance'>('qualifications');
+  const [activeTab, setActiveTab] = useState<'qualifications' | 'serviceRequests' | 'requests' | 'engagements' | 'professionals' | 'finance'>('serviceRequests');
+
+  // Service Requests state
+  const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
+  const [viewingAnswersRequest, setViewingAnswersRequest] = useState<any | null>(null);
+  const [srFilterType, setSrFilterType] = useState<string>('ALL');
+  const [srFilterStage, setSrFilterStage] = useState<string>('ALL');
+  const [srStageInput, setSrStageInput] = useState<string>('NEW');
+  const [srNextActionInput, setSrNextActionInput] = useState<string>('');
+  const [srNextActionDueInput, setSrNextActionDueInput] = useState<string>('');
+  const [srInternalNotesInput, setSrInternalNotesInput] = useState<string>('');
+  const [isUpdatingSrStage, setIsUpdatingSrStage] = useState<boolean>(false);
+  const [convertingSrId, setConvertingSrId] = useState<string | null>(null);
+
+  // Ad metrics modal state
+  const [metricsTargetEng, setMetricsTargetEng] = useState<any | null>(null);
+  const [adSpendInput, setAdSpendInput] = useState<string>('');
+  const [rawEnquiriesInput, setRawEnquiriesInput] = useState<string>('');
+  const [qualifiedEnquiriesInput, setQualifiedEnquiriesInput] = useState<string>('');
+  const [reportingPeriodInput, setReportingPeriodInput] = useState<string>('Current Month');
+  const [currencyInput, setCurrencyInput] = useState<string>('₦');
+  const [sourceInput, setSourceInput] = useState<string>('Meta Ads');
+  const [isSavingMetrics, setIsSavingMetrics] = useState<boolean>(false);
 
   // Assessment modal
   const [selectedRequest, setSelectedRequest] = useState<any | null>(null);
@@ -192,6 +219,111 @@ export default function OperatorDashboardClient({
     }
   };
 
+  const handleOpenSrStageModal = (req: any) => {
+    setSelectedServiceRequest(req);
+    setSrStageInput(req.stage || 'NEW');
+    setSrNextActionInput(req.nextAction || '');
+    setSrNextActionDueInput(req.nextActionDueAt ? new Date(req.nextActionDueAt).toISOString().split('T')[0] : '');
+    setSrInternalNotesInput(req.internalNotes || '');
+  };
+
+  const handleUpdateSrStage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedServiceRequest) return;
+    setIsUpdatingSrStage(true);
+    try {
+      await updateServiceRequestStageAction({
+        id: selectedServiceRequest.id,
+        stage: srStageInput,
+        nextAction: srNextActionInput,
+        nextActionDueAt: srNextActionDueInput ? new Date(srNextActionDueInput).toISOString() : undefined,
+        internalNotes: srInternalNotesInput,
+      });
+      alert('Service request stage updated successfully.');
+      setSelectedServiceRequest(null);
+      window.location.reload();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update stage');
+    } finally {
+      setIsUpdatingSrStage(false);
+    }
+  };
+
+  const handleConvertSrToPilot = async (req: any) => {
+    if (!confirm(`Are you sure you want to convert "${req.companyName || req.contactName}" (${req.reference}) into an onboarding Pilot Engagement?`)) {
+      return;
+    }
+    setConvertingSrId(req.id);
+    try {
+      const res = await convertServiceRequestToPilotAction({
+        serviceRequestId: req.id,
+        targetOrganizationId: req.organizationId || undefined,
+      });
+      alert(`Pilot Engagement successfully created! Engagement ID: ${res.engagementId}`);
+      window.location.reload();
+    } catch (err: any) {
+      alert(err.message || 'Failed to convert to pilot');
+    } finally {
+      setConvertingSrId(null);
+    }
+  };
+
+  const handleOpenMetricsModal = (eng: any) => {
+    setMetricsTargetEng(eng);
+    let metrics: any = {};
+    try {
+      metrics = eng.campaignMetrics ? JSON.parse(eng.campaignMetrics) : {};
+    } catch {
+      metrics = {};
+    }
+    setAdSpendInput(metrics.adSpend != null ? String(metrics.adSpend) : '');
+    setRawEnquiriesInput(metrics.rawEnquiries != null ? String(metrics.rawEnquiries) : (metrics.enquiries != null ? String(metrics.enquiries) : ''));
+    setQualifiedEnquiriesInput(metrics.qualifiedEnquiries != null ? String(metrics.qualifiedEnquiries) : '');
+    setReportingPeriodInput(metrics.reportingPeriod || 'Current Month');
+    setCurrencyInput(metrics.currency || '₦');
+    setSourceInput(metrics.source || 'Meta Ads');
+  };
+
+  const handleSaveMetrics = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!metricsTargetEng) return;
+    setIsSavingMetrics(true);
+
+    try {
+      const adSpend = adSpendInput.trim() ? parseFloat(adSpendInput) : null;
+      const rawEnquiries = rawEnquiriesInput.trim() ? parseInt(rawEnquiriesInput, 10) : null;
+      const qualifiedEnquiries = qualifiedEnquiriesInput.trim() ? parseInt(qualifiedEnquiriesInput, 10) : null;
+      const costPerEnquiry = adSpend && rawEnquiries && rawEnquiries > 0 ? parseFloat((adSpend / rawEnquiries).toFixed(2)) : null;
+      const costPerQualifiedEnquiry = adSpend && qualifiedEnquiries && qualifiedEnquiries > 0 ? parseFloat((adSpend / qualifiedEnquiries).toFixed(2)) : null;
+
+      await updateCampaignMetricsAction({
+        engagementId: metricsTargetEng.id,
+        adSpend,
+        rawEnquiries,
+        qualifiedEnquiries,
+        costPerEnquiry,
+        costPerQualifiedEnquiry,
+        reportingPeriod: reportingPeriodInput.trim() || 'Current Month',
+        currency: currencyInput.trim() || '₦',
+        source: sourceInput.trim() || 'Meta Ads',
+      });
+
+      alert('Ad campaign metrics updated successfully.');
+      setMetricsTargetEng(null);
+      window.location.reload();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update ad metrics');
+    } finally {
+      setIsSavingMetrics(false);
+    }
+  };
+
+  const filteredServiceRequests = serviceRequests.filter((sr) => {
+    if (srFilterType !== 'ALL' && sr.serviceType !== srFilterType) return false;
+    if (srFilterStage !== 'ALL' && sr.stage !== srFilterStage) return false;
+    return true;
+  });
+
   return (
     <div className="space-y-6">
       {/* Top Header */}
@@ -237,6 +369,21 @@ export default function OperatorDashboardClient({
         </button>
 
         <button
+          onClick={() => setActiveTab('serviceRequests')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'serviceRequests'
+              ? 'bg-primary-container text-primary-fixed'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
+          }`}
+        >
+          <Icon name="Inbox" size={16} />
+          <span>Service Requests Queue</span>
+          <span className="text-xs px-1.5 py-0.2 rounded-full bg-surface-container-highest">
+            {serviceRequests.length}
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('requests')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'requests'
@@ -244,7 +391,7 @@ export default function OperatorDashboardClient({
               : 'text-on-surface-variant hover:bg-surface-container-high'
           }`}
         >
-          <Icon name="Inbox" size={16} />
+          <Icon name="CheckCircle" size={16} />
           <span>Readiness Queue</span>
           <span className="text-xs px-1.5 py-0.2 rounded-full bg-surface-container-highest">
             {requests.length}
@@ -300,6 +447,180 @@ export default function OperatorDashboardClient({
       {/* Tab 0: Qualification Review Queue */}
       {activeTab === 'qualifications' && (
         <QualificationReviewQueue qualifications={qualifications} />
+      )}
+
+      {/* Tab: Service Requests Queue */}
+      {activeTab === 'serviceRequests' && (
+        <div className="space-y-4">
+          {/* Filters Bar */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-xl bg-surface-container-low border border-outline-variant/30">
+            <div className="flex flex-wrap items-center gap-3">
+              <div>
+                <label className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider block mb-1">
+                  Service Type
+                </label>
+                <select
+                  value={srFilterType}
+                  onChange={(e) => setSrFilterType(e.target.value)}
+                  className="bg-surface-container-high px-3 py-1.5 rounded-lg text-xs border border-outline-variant/40 text-on-surface"
+                >
+                  <option value="ALL">All Services</option>
+                  <option value="LEAD_GENERATION">Meta Lead Generation</option>
+                  <option value="SOFTWARE_FOLLOWUP">Software Follow-up</option>
+                  <option value="TEAM_TRAINING">Digital Sales School (Training)</option>
+                  <option value="MANAGED_SALES">Managed Sales Services</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="text-[11px] font-semibold text-on-surface-variant uppercase tracking-wider block mb-1">
+                  Stage
+                </label>
+                <select
+                  value={srFilterStage}
+                  onChange={(e) => setSrFilterStage(e.target.value)}
+                  className="bg-surface-container-high px-3 py-1.5 rounded-lg text-xs border border-outline-variant/40 text-on-surface"
+                >
+                  <option value="ALL">All Stages</option>
+                  <option value="NEW">New</option>
+                  <option value="UNDER_REVIEW">Under Review</option>
+                  <option value="AWAITING_INFO">Awaiting Info</option>
+                  <option value="DISCOVERY_SCHEDULED">Discovery Scheduled</option>
+                  <option value="PROPOSAL_SENT">Proposal Sent</option>
+                  <option value="ACCEPTED">Accepted</option>
+                  <option value="NOT_SUITABLE">Not Suitable</option>
+                  <option value="WITHDRAWN">Withdrawn</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="text-xs text-on-surface-variant">
+              Showing <strong className="text-on-surface">{filteredServiceRequests.length}</strong> of {serviceRequests.length} requests
+            </div>
+          </div>
+
+          {/* List of Service Requests */}
+          {filteredServiceRequests.length === 0 ? (
+            <div className="text-center py-12 bg-surface-container-low rounded-xl border border-outline-variant/30">
+              <Icon name="Inbox" size={32} className="mx-auto text-on-surface-variant mb-2 opacity-60" />
+              <p className="text-sm font-medium text-on-surface">No service requests matching the selected filters</p>
+              <p className="text-xs text-on-surface-variant mt-1">Change filters or capture new enquiries on marketing pages.</p>
+            </div>
+          ) : (
+            filteredServiceRequests.map((req) => {
+              const isAccepted = req.stage === 'ACCEPTED';
+              const isNotSuitable = req.stage === 'NOT_SUITABLE' || req.stage === 'WITHDRAWN';
+
+              const serviceLabel =
+                req.serviceType === 'LEAD_GENERATION'
+                  ? 'Meta Lead Gen'
+                  : req.serviceType === 'SOFTWARE_FOLLOWUP'
+                  ? 'Software Follow-up'
+                  : req.serviceType === 'TEAM_TRAINING'
+                  ? 'DSS Training'
+                  : 'Managed Sales';
+
+              const stageBadgeClass =
+                req.stage === 'NEW'
+                  ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
+                  : req.stage === 'UNDER_REVIEW'
+                  ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
+                  : req.stage === 'DISCOVERY_SCHEDULED'
+                  ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
+                  : req.stage === 'PROPOSAL_SENT'
+                  ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+                  : req.stage === 'ACCEPTED'
+                  ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                  : 'bg-surface-container-highest text-on-surface-variant border-outline-variant/40';
+
+              return (
+                <div
+                  key={req.id}
+                  className="p-5 rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-3"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-primary px-2 py-0.5 rounded bg-primary/10">
+                          {req.reference}
+                        </span>
+                        <h3 className="font-heading font-semibold text-base text-on-surface">
+                          {req.companyName ? `${req.companyName} (${req.contactName})` : req.contactName}
+                        </h3>
+                        <span className="text-xs px-2 py-0.5 rounded-md bg-secondary/15 text-secondary-fixed border border-secondary/20">
+                          {serviceLabel}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded-md border font-medium ${stageBadgeClass}`}>
+                          {req.stage.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-on-surface-variant">
+                        <span>Email: <strong className="text-on-surface">{req.contactEmail}</strong></span>
+                        {req.contactPhone && (
+                          <span>Phone: <strong className="text-on-surface">{req.contactPhone}</strong></span>
+                        )}
+                        <span>Workspace: <strong className="text-on-surface">{req.organization?.name || 'Unlinked'}</strong></span>
+                        <span>Received: {new Date(req.createdAt).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 shrink-0">
+                      <button
+                        onClick={() => setViewingAnswersRequest(req)}
+                        className="px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-medium border border-outline-variant/40 transition-all flex items-center gap-1.5"
+                      >
+                        <Icon name="Eye" size={14} />
+                        <span>Inspect Brief</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleOpenSrStageModal(req)}
+                        className="px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-primary text-xs font-medium border border-primary/30 transition-all flex items-center gap-1.5"
+                      >
+                        <Icon name="Edit2" size={14} />
+                        <span>Update Stage</span>
+                      </button>
+
+                      {!isAccepted && !isNotSuitable && (
+                        <button
+                          onClick={() => handleConvertSrToPilot(req)}
+                          disabled={convertingSrId === req.id}
+                          className="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:opacity-90 shadow-sm transition-all flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <Icon name="ArrowRightCircle" size={14} />
+                          <span>{convertingSrId === req.id ? 'Converting...' : 'Convert to Pilot'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Next Action & Notes Bar */}
+                  {(req.nextAction || req.internalNotes) && (
+                    <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/20 text-xs grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {req.nextAction && (
+                        <div>
+                          <span className="text-on-surface-variant font-medium">Next Action: </span>
+                          <span className="text-on-surface font-semibold">{req.nextAction}</span>
+                          {req.nextActionDueAt && (
+                            <span className="ml-2 text-amber-300 font-medium">
+                              (Due: {new Date(req.nextActionDueAt).toLocaleDateString()})
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {req.internalNotes && (
+                        <div>
+                          <span className="text-on-surface-variant font-medium">Operator Note: </span>
+                          <span className="text-on-surface italic">{req.internalNotes}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
       )}
 
       {/* Tab 1: Readiness Queue */}
@@ -381,6 +702,13 @@ export default function OperatorDashboardClient({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleOpenMetricsModal(eng)}
+                      className="px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-primary text-xs font-medium rounded-xl border border-primary/30 shadow-sm transition-all flex items-center gap-1.5"
+                    >
+                      <Icon name="BarChart2" size={14} />
+                      <span>Edit Ad Metrics</span>
+                    </button>
                     {eng.status !== 'ACTIVE' && eng.status !== 'ENDED' && (
                       <button
                         onClick={() => handleActivation(eng.id)}
@@ -413,6 +741,73 @@ export default function OperatorDashboardClient({
                     <p className="font-bold text-on-surface mt-0.5">{eng.usedCapacity} / {eng.agreedCapacity} hrs</p>
                   </div>
                 </div>
+
+                {/* Campaign Ad Metrics summary */}
+                {(() => {
+                  let metrics: any = null;
+                  try {
+                    metrics = eng.campaignMetrics ? JSON.parse(eng.campaignMetrics) : null;
+                  } catch {
+                    metrics = null;
+                  }
+
+                  const hasMetrics = metrics && (metrics.adSpend != null || metrics.rawEnquiries != null || metrics.enquiries != null);
+
+                  return (
+                    <div className="p-3 rounded-xl bg-surface-container-high/60 border border-outline-variant/30 text-xs space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Icon name="TrendingUp" size={14} className="text-primary" />
+                          <span className="font-semibold text-on-surface">
+                            Advertising Performance ({metrics?.source || 'Meta Ads'})
+                          </span>
+                          <span className="text-[11px] px-2 py-0.2 rounded-full bg-surface-container-highest text-on-surface-variant">
+                            {metrics?.reportingPeriod || 'Current Period'}
+                          </span>
+                        </div>
+                        <button
+                          onClick={() => handleOpenMetricsModal(eng)}
+                          className="text-[11px] text-primary hover:underline font-medium"
+                        >
+                          {hasMetrics ? 'Update Metrics' : 'Log Ad Performance'}
+                        </button>
+                      </div>
+
+                      {hasMetrics ? (
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
+                          <div>
+                            <span className="text-on-surface-variant">Ad Spend:</span>
+                            <p className="font-semibold text-on-surface">
+                              {metrics.currency || '₦'}{metrics.adSpend != null ? Number(metrics.adSpend).toLocaleString() : '0'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-on-surface-variant">Enquiries:</span>
+                            <p className="font-semibold text-on-surface">
+                              {metrics.rawEnquiries != null ? metrics.rawEnquiries : (metrics.enquiries != null ? metrics.enquiries : '0')}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-on-surface-variant">Qualified:</span>
+                            <p className="font-semibold text-on-surface">
+                              {metrics.qualifiedEnquiries != null ? metrics.qualifiedEnquiries : '—'}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-on-surface-variant">Cost / Enquiry:</span>
+                            <p className="font-semibold text-on-surface">
+                              {metrics.costPerEnquiry != null ? `${metrics.currency || '₦'}${Number(metrics.costPerEnquiry).toLocaleString()}` : '—'}
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-[11px] text-on-surface-variant italic">
+                          No ad campaign metrics logged yet for this client engagement.
+                        </p>
+                      )}
+                    </div>
+                  );
+                })()}
 
                 {/* Prerequisites status */}
                 <div className="flex flex-wrap items-center gap-3 text-[11px] text-on-surface-variant pt-2 border-t border-outline-variant/20">
@@ -830,6 +1225,370 @@ export default function OperatorDashboardClient({
               <button onClick={() => setPayoutTargetId(null)} className="px-3 py-1.5 text-on-surface-variant">Cancel</button>
               <button onClick={handleConfirmPayout} className="px-4 py-2 bg-emerald-500 text-black font-semibold rounded-xl">Confirm Payout</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Service Request Stage & Action Modal */}
+      {selectedServiceRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+              <div>
+                <span className="font-mono text-xs text-primary font-bold">{selectedServiceRequest.reference}</span>
+                <h3 className="font-heading font-semibold text-base text-on-surface">Update Service Request Stage</h3>
+              </div>
+              <button
+                onClick={() => setSelectedServiceRequest(null)}
+                className="p-1 text-on-surface-variant hover:text-on-surface"
+              >
+                <Icon name="X" size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleUpdateSrStage} className="space-y-3.5">
+              <div>
+                <label className="block font-medium text-on-surface-variant mb-1">Pipeline Stage *</label>
+                <select
+                  value={srStageInput}
+                  onChange={(e) => setSrStageInput(e.target.value)}
+                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                >
+                  <option value="NEW">NEW - Newly received enquiry</option>
+                  <option value="UNDER_REVIEW">UNDER_REVIEW - Operator examining brief</option>
+                  <option value="AWAITING_INFO">AWAITING_INFO - Waiting for client answers</option>
+                  <option value="DISCOVERY_SCHEDULED">DISCOVERY_SCHEDULED - Discovery call booked</option>
+                  <option value="PROPOSAL_SENT">PROPOSAL_SENT - Scope and quote delivered</option>
+                  <option value="ACCEPTED">ACCEPTED - Approved by client</option>
+                  <option value="NOT_SUITABLE">NOT_SUITABLE - Out of ICP or unviable</option>
+                  <option value="WITHDRAWN">WITHDRAWN - Withdrawn by requester</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block font-medium text-on-surface-variant mb-1">Next Best Action</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Schedule discovery call, Review ad access"
+                  value={srNextActionInput}
+                  onChange={(e) => setSrNextActionInput(e.target.value)}
+                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                />
+              </div>
+
+              <div>
+                <label className="block font-medium text-on-surface-variant mb-1">Next Action Due Date</label>
+                <input
+                  type="date"
+                  value={srNextActionDueInput}
+                  onChange={(e) => setSrNextActionDueInput(e.target.value)}
+                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                />
+              </div>
+
+              <div>
+                <label className="block font-medium text-on-surface-variant mb-1">
+                  Operator Internal Notes (Audit Log)
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Enter context, qualification details, conversation summary..."
+                  value={srInternalNotesInput}
+                  onChange={(e) => setSrInternalNotesInput(e.target.value)}
+                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/30">
+                <button
+                  type="button"
+                  onClick={() => setSelectedServiceRequest(null)}
+                  className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUpdatingSrStage}
+                  className="px-4 py-2 bg-primary text-on-primary font-medium text-xs rounded-xl hover:opacity-90 shadow-sm disabled:opacity-50"
+                >
+                  {isUpdatingSrStage ? 'Updating...' : 'Save Stage & Action'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Brief / Assessment Answers Drawer Modal */}
+      {viewingAnswersRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-2xl bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-xl p-6 space-y-4 max-h-[90vh] overflow-y-auto text-xs">
+            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-xs text-primary font-bold">{viewingAnswersRequest.reference}</span>
+                  <span className="text-xs px-2 py-0.5 rounded-md bg-secondary/15 text-secondary-fixed">
+                    {viewingAnswersRequest.serviceType}
+                  </span>
+                </div>
+                <h3 className="font-heading font-semibold text-lg text-on-surface mt-0.5">
+                  Client Brief: {viewingAnswersRequest.companyName || viewingAnswersRequest.contactName}
+                </h3>
+              </div>
+              <button
+                onClick={() => setViewingAnswersRequest(null)}
+                className="p-1 text-on-surface-variant hover:text-on-surface"
+              >
+                <Icon name="X" size={18} />
+              </button>
+            </div>
+
+            {/* Requester Contact Overview */}
+            <div className="p-3.5 rounded-xl bg-surface-container-high grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div>
+                <span className="text-on-surface-variant block text-[11px]">Contact Name</span>
+                <span className="text-on-surface font-semibold">{viewingAnswersRequest.contactName}</span>
+              </div>
+              <div>
+                <span className="text-on-surface-variant block text-[11px]">Email Address</span>
+                <span className="text-on-surface font-semibold">{viewingAnswersRequest.contactEmail}</span>
+              </div>
+              <div>
+                <span className="text-on-surface-variant block text-[11px]">Phone / WhatsApp</span>
+                <span className="text-on-surface font-semibold">{viewingAnswersRequest.contactPhone || '—'}</span>
+              </div>
+              <div>
+                <span className="text-on-surface-variant block text-[11px]">Company / Organization</span>
+                <span className="text-on-surface font-semibold">{viewingAnswersRequest.companyName || '—'}</span>
+              </div>
+              <div>
+                <span className="text-on-surface-variant block text-[11px]">Source Attribution</span>
+                <span className="text-on-surface font-semibold">{viewingAnswersRequest.sourceAttribution || 'Website Assessment'}</span>
+              </div>
+              <div>
+                <span className="text-on-surface-variant block text-[11px]">Submission Time</span>
+                <span className="text-on-surface font-semibold">{new Date(viewingAnswersRequest.createdAt).toLocaleString()}</span>
+              </div>
+            </div>
+
+            {/* Assessment Answers Breakdown */}
+            <div>
+              <h4 className="font-semibold text-sm text-on-surface mb-2">Questionnaire & Brief Answers</h4>
+              {(() => {
+                let parsed: Record<string, any> = {};
+                try {
+                  parsed = viewingAnswersRequest.answers ? JSON.parse(viewingAnswersRequest.answers) : {};
+                } catch {
+                  parsed = { rawAnswers: viewingAnswersRequest.answers };
+                }
+
+                const entries = Object.entries(parsed).filter(([k]) => k !== 'fullName' && k !== 'email' && k !== 'phone' && k !== 'companyName');
+
+                if (entries.length === 0) {
+                  return <p className="text-on-surface-variant italic">No extra questions answered.</p>;
+                }
+
+                return (
+                  <div className="space-y-2">
+                    {entries.map(([key, value]) => {
+                      const displayKey = key
+                        .replace(/([A-Z])/g, ' $1')
+                        .replace(/^./, (str) => str.toUpperCase())
+                        .replace(/_/g, ' ');
+
+                      return (
+                        <div key={key} className="p-3 rounded-xl bg-surface-container-high border border-outline-variant/30 space-y-1">
+                          <span className="font-medium text-on-surface-variant text-[11px] block">{displayKey}</span>
+                          <p className="text-on-surface font-semibold whitespace-pre-wrap">
+                            {typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value)}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Stage History */}
+            {viewingAnswersRequest.stageHistory && (
+              <div>
+                <h4 className="font-semibold text-sm text-on-surface mb-1">Stage Progression History</h4>
+                {(() => {
+                  let history: any[] = [];
+                  try {
+                    history = JSON.parse(viewingAnswersRequest.stageHistory);
+                  } catch {
+                    history = [];
+                  }
+
+                  if (!Array.isArray(history) || history.length === 0) {
+                    return <p className="text-on-surface-variant italic">Initial creation stage.</p>;
+                  }
+
+                  return (
+                    <div className="space-y-1.5 pt-1">
+                      {history.map((h, i) => (
+                        <div key={i} className="text-[11px] text-on-surface-variant flex items-center justify-between p-2 rounded-lg bg-surface-container-high">
+                          <span>
+                            Transitioned to <strong className="text-on-surface">{h.stage}</strong> (from {h.previousStage || 'initial'})
+                          </span>
+                          <span>{new Date(h.changedAt).toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/30">
+              <button
+                onClick={() => setViewingAnswersRequest(null)}
+                className="px-4 py-2 bg-surface-container-high hover:bg-surface-container-highest text-on-surface font-medium rounded-xl"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ad Campaign Metrics Modal */}
+      {metricsTargetEng && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-xl p-6 space-y-4 text-xs">
+            <div className="flex items-center justify-between border-b border-outline-variant/30 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <Icon name="TrendingUp" size={16} className="text-primary" />
+                  <h3 className="font-heading font-semibold text-base text-on-surface">Update Ad Campaign Metrics</h3>
+                </div>
+                <p className="text-on-surface-variant text-[11px] mt-0.5">
+                  Client: <strong>{metricsTargetEng.organization?.name}</strong> • Engagement: {metricsTargetEng.title}
+                </p>
+              </div>
+              <button
+                onClick={() => setMetricsTargetEng(null)}
+                className="p-1 text-on-surface-variant hover:text-on-surface"
+              >
+                <Icon name="X" size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveMetrics} className="space-y-3.5">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-medium text-on-surface-variant mb-1">Reporting Period *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. October 2026, Current Month"
+                    value={reportingPeriodInput}
+                    onChange={(e) => setReportingPeriodInput(e.target.value)}
+                    className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-on-surface-variant mb-1">Currency Symbol</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="₦, $, £"
+                    value={currencyInput}
+                    onChange={(e) => setCurrencyInput(e.target.value)}
+                    className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-medium text-on-surface-variant mb-1">Total Ad Spend ({currencyInput})</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder="e.g. 150000"
+                    value={adSpendInput}
+                    onChange={(e) => setAdSpendInput(e.target.value)}
+                    className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-on-surface-variant mb-1">Advertising Source</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Meta Ads, Instagram Lead Form"
+                    value={sourceInput}
+                    onChange={(e) => setSourceInput(e.target.value)}
+                    className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-medium text-on-surface-variant mb-1">Raw Enquiries Generated</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 48"
+                    value={rawEnquiriesInput}
+                    onChange={(e) => setRawEnquiriesInput(e.target.value)}
+                    className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium text-on-surface-variant mb-1">Qualified Enquiries</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 21"
+                    value={qualifiedEnquiriesInput}
+                    onChange={(e) => setQualifiedEnquiriesInput(e.target.value)}
+                    className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-xs border border-outline-variant/40 text-on-surface"
+                  />
+                </div>
+              </div>
+
+              {/* Live Cost Per Calculations */}
+              {adSpendInput && (rawEnquiriesInput || qualifiedEnquiriesInput) && (
+                <div className="p-3 rounded-xl bg-surface-container-high border border-outline-variant/30 grid grid-cols-2 gap-2 text-[11px]">
+                  <div>
+                    <span className="text-on-surface-variant">Estimated Cost / Enquiry:</span>
+                    <p className="font-bold text-on-surface mt-0.5">
+                      {rawEnquiriesInput && parseFloat(rawEnquiriesInput) > 0
+                        ? `${currencyInput}${(parseFloat(adSpendInput) / parseFloat(rawEnquiriesInput)).toFixed(2)}`
+                        : '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-on-surface-variant">Cost / Qualified Enquiry:</span>
+                    <p className="font-bold text-emerald-400 mt-0.5">
+                      {qualifiedEnquiriesInput && parseFloat(qualifiedEnquiriesInput) > 0
+                        ? `${currencyInput}${(parseFloat(adSpendInput) / parseFloat(qualifiedEnquiriesInput)).toFixed(2)}`
+                        : '—'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/30">
+                <button
+                  type="button"
+                  onClick={() => setMetricsTargetEng(null)}
+                  className="px-3 py-1.5 text-on-surface-variant hover:text-on-surface"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSavingMetrics}
+                  className="px-4 py-2 bg-primary text-on-primary font-medium text-xs rounded-xl hover:opacity-90 shadow-sm disabled:opacity-50"
+                >
+                  {isSavingMetrics ? 'Saving...' : 'Save Ad Metrics'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
