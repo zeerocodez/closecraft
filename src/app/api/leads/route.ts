@@ -5,15 +5,53 @@ import { z } from 'zod';
 import { inngest } from '@/lib/inngest/client';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 
-const auditFormSchema = z.object({
+const leadFormSchema = z.object({
   name: z.string().min(2, "Name is too short").max(100),
   business: z.string().min(2, "Business name is required").max(120),
   email: z.string().email("Invalid email address").max(180),
-  phone: z.string().max(40).optional(),
-  website: z.string().max(200).optional(),
-  monthlyLeadVolume: z.string().min(1, "Lead volume is required").max(100),
-  biggestSalesBottleneck: z.string().min(1, "Bottleneck is required").max(300),
-  formType: z.string().optional(),
+  phone: z.string().max(40).optional().nullable(),
+  website: z.string().max(200).optional().nullable(),
+  formType: z.string().optional().nullable(),
+  monthlyLeadVolume: z.string().max(100).optional().nullable(),
+  biggestSalesBottleneck: z.string().max(300).optional().nullable(),
+  serviceInterest: z.string().max(100).optional().nullable(),
+  needDescription: z.string().max(1000).optional().nullable(),
+  teamSize: z.string().max(100).optional().nullable(),
+  trainingObjective: z.string().max(300).optional().nullable(),
+  whatYouSell: z.string().max(300).optional().nullable(),
+  workloadVolume: z.string().max(100).optional().nullable(),
+}).superRefine((data, ctx) => {
+  if (data.formType === 'SERVICE_ENQUIRY') {
+    if (!data.serviceInterest || data.serviceInterest.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['serviceInterest'],
+        message: 'Please select a service interest',
+      });
+    }
+    if (!data.needDescription || data.needDescription.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['needDescription'],
+        message: 'Please provide a brief description of your need',
+      });
+    }
+  } else {
+    if (!data.monthlyLeadVolume || data.monthlyLeadVolume.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['monthlyLeadVolume'],
+        message: 'Lead volume is required',
+      });
+    }
+    if (!data.biggestSalesBottleneck || data.biggestSalesBottleneck.trim().length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['biggestSalesBottleneck'],
+        message: 'Bottleneck is required',
+      });
+    }
+  }
 });
 
 export async function POST(request: Request) {
@@ -39,7 +77,7 @@ export async function POST(request: Request) {
     }
 
     // Validate with Zod
-    const result = auditFormSchema.safeParse(body);
+    const result = leadFormSchema.safeParse(body);
     if (!result.success) {
       return NextResponse.json(
         {
@@ -50,7 +88,22 @@ export async function POST(request: Request) {
       );
     }
 
-    const { name, business, email, phone, website, monthlyLeadVolume, biggestSalesBottleneck, formType } = result.data;
+    const {
+      name,
+      business,
+      email,
+      phone,
+      website,
+      monthlyLeadVolume,
+      biggestSalesBottleneck,
+      formType,
+      serviceInterest,
+      needDescription,
+      teamSize,
+      trainingObjective,
+      whatYouSell,
+      workloadVolume,
+    } = result.data;
 
     // Server-bound tenant isolation: authenticate caller or resolve explicit workspace slug
     const { auth } = await import('@/lib/auth');
@@ -85,18 +138,49 @@ export async function POST(request: Request) {
       );
     }
 
-    // Store custom data distinguishing audit vs managed sales
-    const submissionType = formType === 'MANAGED_SALES' ? 'MANAGED_SALES_PROPOSAL' : 'REVENUE_AUDIT';
-    const customData = JSON.stringify({
-      business,
-      website,
-      monthlyLeadVolume,
-      biggestSalesBottleneck,
-      phone,
-      submissionType,
-    });
+    // Determine submission type and structured metadata
+    let submissionType = 'REVENUE_AUDIT';
+    let leadSource = 'Website Revenue Audit Form';
+    let leadMessage = '';
 
-    const leadSource = formType === 'MANAGED_SALES' ? 'Managed Sales Proposal Request' : 'Website Revenue Audit Form';
+    if (formType === 'SERVICE_ENQUIRY') {
+      const sanitizedInterest = serviceInterest?.trim() || 'General';
+      submissionType = `SERVICE_ENQUIRY_${sanitizedInterest.toUpperCase().replace(/\s+/g, '_')}`;
+      leadSource = `Website Service Enquiry (${sanitizedInterest})`;
+      leadMessage = `Service Enquiry: ${sanitizedInterest} from ${business.trim()}.\nNeed: ${needDescription?.trim() || 'N/A'}${
+        teamSize ? `\nTeam Size: ${teamSize}` : ''
+      }${
+        trainingObjective ? `\nTraining Objective: ${trainingObjective}` : ''
+      }${
+        whatYouSell ? `\nBusiness Offer / Sells: ${whatYouSell}` : ''
+      }${
+        workloadVolume ? `\nEstimated Workload: ${workloadVolume}` : ''
+      }`;
+    } else if (formType === 'MANAGED_SALES') {
+      submissionType = 'MANAGED_SALES_PROPOSAL';
+      leadSource = 'Managed Sales Proposal Request';
+      leadMessage = `Managed Sales Proposal Request from ${business.trim()}. Volume: ${monthlyLeadVolume || 'N/A'}. Follow-up problem: ${biggestSalesBottleneck || 'N/A'}`;
+    } else {
+      submissionType = 'REVENUE_AUDIT';
+      leadSource = 'Website Revenue Audit Form';
+      leadMessage = `Revenue Audit Request from ${business.trim()}. Volume: ${monthlyLeadVolume || 'N/A'}. Follow-up problem: ${biggestSalesBottleneck || 'N/A'}`;
+    }
+
+    const customData = JSON.stringify({
+      business: business.trim(),
+      website: website?.trim() || null,
+      phone: phone ? phone.trim() : null,
+      submissionType,
+      formType: formType || 'REVENUE_AUDIT',
+      serviceInterest: serviceInterest || null,
+      needDescription: needDescription || null,
+      teamSize: teamSize || null,
+      trainingObjective: trainingObjective || null,
+      whatYouSell: whatYouSell || null,
+      workloadVolume: workloadVolume || null,
+      monthlyLeadVolume: monthlyLeadVolume || null,
+      biggestSalesBottleneck: biggestSalesBottleneck || null,
+    });
 
     // Directly persist lead to the database (Single Source of Truth)
     const lead = await db.lead.create({
@@ -105,7 +189,7 @@ export async function POST(request: Request) {
         email: email.toLowerCase().trim(),
         phone: phone ? phone.trim() : null,
         source: leadSource,
-        message: `${submissionType === 'MANAGED_SALES_PROPOSAL' ? 'Managed Sales Proposal Request' : 'Revenue Audit Request'} from ${business}. Volume: ${monthlyLeadVolume}. Follow-up problem: ${biggestSalesBottleneck}`,
+        message: leadMessage,
         status: 'NEW',
         organizationId: targetOrgId,
       },
@@ -139,19 +223,39 @@ export async function POST(request: Request) {
 
     // Send a transactional email welcoming the new applicant
     try {
-      await sendTransactionalEmail({
-        to: email.toLowerCase().trim(),
-        subject: 'Revenue Audit Request Received - Zeerocodes',
-        html: `
+      const isServiceEnquiry = formType === 'SERVICE_ENQUIRY';
+      const emailSubject = isServiceEnquiry
+        ? `Service Enquiry Received - Closecraft (${serviceInterest || 'Sales Support'})`
+        : 'Revenue Audit Request Received - Closecraft';
+
+      const emailHtml = isServiceEnquiry
+        ? `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-            <h2 style="color: #789d2e;">Audit Request Received</h2>
+            <h2 style="color: #248277;">Service Enquiry Received</h2>
+            <p>Hi ${name.trim().split(' ')[0]},</p>
+            <p>We've received your enquiry regarding <strong>${serviceInterest || 'Sales Support'}</strong> for <strong>${business.trim()}</strong>.</p>
+            <p>Our sales solutions team is reviewing your requirements and will reach out to discuss working arrangements, scope, and next steps.</p>
+            <p style="font-size: 12px; color: #666; margin-top: 24px; border-top: 1px solid #eee; padding-top: 12px;">
+              Submitting this enquiry does not commit you to a paid plan or managed service. Scope and commercial terms are confirmed before any engagement begins.
+            </p>
+            <p>Best regards,<br>Closecraft Team</p>
+          </div>
+        `
+        : `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+            <h2 style="color: #248277;">Audit Request Received</h2>
             <p>Hi ${name.trim().split(' ')[0]},</p>
             <p>We've received your request for a Revenue Audit for <strong>${business.trim()}</strong>.</p>
-            <p>Our team is reviewing your details regarding your current lead volume (${monthlyLeadVolume}) and the bottleneck you're experiencing (${biggestSalesBottleneck}).</p>
+            <p>Our team is reviewing your details regarding your current lead volume (${monthlyLeadVolume || 'N/A'}) and the bottleneck you're experiencing (${biggestSalesBottleneck || 'N/A'}).</p>
             <p>You will hear from us shortly to schedule your audit call.</p>
-            <p>Best,<br>Zeerocodes Revenue Engine</p>
+            <p>Best regards,<br>Closecraft Team</p>
           </div>
-        `,
+        `;
+
+      await sendTransactionalEmail({
+        to: email.toLowerCase().trim(),
+        subject: emailSubject,
+        html: emailHtml,
       });
     } catch (emailErr) {
       console.warn('[Leads API] Email dispatch failed:', emailErr);

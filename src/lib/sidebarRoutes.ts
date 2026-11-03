@@ -13,6 +13,7 @@ const SIDEBAR_PREFIXES = [
   "/operator",
   "/admin",
   "/dss",
+  "/practice",
 ];
 
 export const getSidebarRoutes = (): string[] => [...SIDEBAR_PREFIXES];

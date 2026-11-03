@@ -92,24 +92,56 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     );
   }
 
-  // Standard Business Navigation
-  const navItems = [
-    { href: '/today', icon: 'Clock', label: 'Today', exact: true },
-    { href: '/leads', icon: 'Users', label: 'Enquiries' },
-    { href: '/practice', icon: 'PlayCircle', label: 'Practice Studio' },
-    { href: '/practice/coach', icon: 'Target', label: 'Coach Plan' },
-    { href: '/practice/intelligence', icon: 'TrendingUp', label: 'Performance Intelligence' },
-    { href: '/practice/readiness', icon: 'Award', label: 'Readiness Review' },
-    { href: '/practice/playbooks', icon: 'BookOpen', label: 'Sales Playbooks' },
-    { href: '/onboarding', icon: 'Compass', label: 'Qualification' },
-    { href: '/sales-support', icon: 'HeartHandshake', label: 'Sales Support' },
-    { href: '/team', icon: 'UserCheck', label: 'Team Development' },
-    { href: '/billing', icon: 'CreditCard', label: 'Billing' },
-    { href: '/settings', icon: 'Settings', label: 'Settings' },
+  const isManagerOrOwner = userRole === 'OWNER' || userRole === 'ADMIN' || userRole === 'MANAGER' || userRole === 'SUPER_ADMIN';
+
+  interface NavSection {
+    title: string;
+    items: Array<{ href: string; icon: string; label: string; exact?: boolean; visible?: boolean }>;
+  }
+
+  const navSections: NavSection[] = [
+    {
+      title: 'Workspace',
+      items: [
+        { href: '/today', icon: 'Clock', label: 'Today', exact: true },
+        { href: '/leads', icon: 'Users', label: 'Enquiries' },
+        { href: '/pipeline', icon: 'Layers', label: 'Pipeline' },
+        { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
+        { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
+      ]
+    },
+    {
+      title: 'Training',
+      items: [
+        { href: '/practice', icon: 'PlayCircle', label: 'My Learning' },
+        { href: '/team/training', icon: 'GraduationCap', label: 'Team Training', visible: isManagerOrOwner },
+      ]
+    },
+    {
+      title: 'Sales Services',
+      items: [
+        { href: '/sales-support/request', icon: 'FilePlus', label: 'Request Support', visible: isManagerOrOwner },
+        { href: '/sales-support', icon: 'HeartHandshake', label: 'Engagements', exact: true },
+        { href: '/sales-support/professionals', icon: 'ShieldCheck', label: 'Assigned Professionals' },
+      ]
+    },
+    {
+      title: 'Workspace Admin',
+      items: [
+        { href: '/team', icon: 'UserCheck', label: 'Team Roster', exact: true },
+        { href: '/billing', icon: 'CreditCard', label: 'Billing & Plans', visible: isManagerOrOwner },
+        { href: '/settings', icon: 'Settings', label: 'Settings' },
+      ]
+    }
   ];
 
   if (isOperator) {
-    navItems.push({ href: '/operator', icon: 'Shield', label: 'Platform Operator' });
+    navSections.push({
+      title: 'Operations',
+      items: [
+        { href: '/operator', icon: 'ShieldAlert', label: 'Operator Queue' }
+      ]
+    });
   }
 
   return (
@@ -145,21 +177,38 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
           </Link>
         </div>
 
-        <nav className="flex-1 px-3 py-3 space-y-1">
-          {navItems.map((item) => {
-            const isActive = item.exact ? pathname === item.href : pathname?.startsWith(item.href);
+        <nav className="flex-1 px-3 py-3 space-y-4">
+          {navSections.map((section) => {
+            const visibleItems = section.items.filter(item => item.visible !== false);
+            if (visibleItems.length === 0) return null;
+
             return (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                title={(!isExpanded && !isMobile) ? item.label : undefined}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors group relative overflow-hidden ${isActive ? 'bg-primary-container text-primary-fixed' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'}`}
-              >
-                <Icon name={item.icon} size={20} className={`shrink-0 ${isActive ? 'text-primary-fixed' : 'text-on-surface-variant group-hover:text-on-surface'}`} />
-                <span className={`font-medium text-sm whitespace-nowrap transition-opacity duration-120 ${(!isExpanded && !isMobile) ? 'opacity-0 w-0' : 'opacity-100'}`}>
-                  {item.label}
-                </span>
-              </Link>
+              <div key={section.title} className="space-y-1">
+                {(isExpanded || isMobile) ? (
+                  <div className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/70">
+                    {section.title}
+                  </div>
+                ) : (
+                  <div className="my-1 border-t border-outline-variant/20 mx-2" />
+                )}
+
+                {visibleItems.map((item) => {
+                  const isActive = item.exact ? pathname === item.href : pathname?.startsWith(item.href);
+                  return (
+                    <Link 
+                      key={item.href} 
+                      href={item.href}
+                      title={(!isExpanded && !isMobile) ? item.label : undefined}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors group relative overflow-hidden ${isActive ? 'bg-primary-container text-primary-fixed' : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'}`}
+                    >
+                      <Icon name={item.icon} size={18} className={`shrink-0 ${isActive ? 'text-primary-fixed' : 'text-on-surface-variant group-hover:text-on-surface'}`} />
+                      <span className={`font-medium text-xs whitespace-nowrap transition-opacity duration-120 ${(!isExpanded && !isMobile) ? 'opacity-0 w-0' : 'opacity-100'}`}>
+                        {item.label}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
             );
           })}
         </nav>

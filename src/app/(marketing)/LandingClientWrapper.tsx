@@ -18,6 +18,10 @@ import {
   Zap,
   ChevronDown,
   ChevronUp,
+  GraduationCap,
+  Briefcase,
+  UserCheck,
+  Headphones,
 } from 'lucide-react';
 import Logo from "@/components/ui/Logo";
 import ExplainerVideoModal from "@/components/marketing/ExplainerVideoModal";
@@ -36,11 +40,25 @@ export default function LandingClientWrapper({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [showVideoModal, setShowVideoModal] = useState(false);
-  const [modalFormType, setModalFormType] = useState<'AUDIT' | 'MANAGED_SALES'>('AUDIT');
+  const [modalFormType, setModalFormType] = useState<'AUDIT' | 'MANAGED_SALES' | 'SERVICE_ENQUIRY'>('AUDIT');
   const [auditBusy, setAuditBusy] = useState(false);
   const [auditSuccess, setAuditSuccess] = useState<string | null>(null);
   const [auditError, setAuditError] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
+  // Controlled state for service assessment form to guarantee input preservation on error
+  const [serviceFormData, setServiceFormData] = useState({
+    name: '',
+    email: '',
+    business: '',
+    phone: '',
+    serviceInterest: 'Team training',
+    teamSize: '4–10 reps',
+    trainingObjective: 'Qualification and appointment setting',
+    whatYouSell: '',
+    workloadVolume: '20–49',
+    needDescription: '',
+  });
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
@@ -81,8 +99,65 @@ export default function LandingClientWrapper({
     }
   }
 
+  async function handleServiceSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setAuditBusy(true);
+    setAuditSuccess(null);
+    setAuditError(null);
+
+    const isTeamTraining = serviceFormData.serviceInterest === 'Team training';
+    const isExecutionService = ['Managed sales', 'External appointment setter', 'External closer'].includes(serviceFormData.serviceInterest);
+
+    const payload = {
+      name: serviceFormData.name.trim(),
+      email: serviceFormData.email.trim(),
+      business: serviceFormData.business.trim(),
+      phone: serviceFormData.phone.trim() || undefined,
+      formType: 'SERVICE_ENQUIRY',
+      serviceInterest: serviceFormData.serviceInterest,
+      needDescription: serviceFormData.needDescription.trim(),
+      teamSize: isTeamTraining ? serviceFormData.teamSize : undefined,
+      trainingObjective: isTeamTraining ? serviceFormData.trainingObjective : undefined,
+      whatYouSell: isExecutionService ? serviceFormData.whatYouSell.trim() : undefined,
+      workloadVolume: isExecutionService ? serviceFormData.workloadVolume : undefined,
+    };
+
+    try {
+      const res = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const responseJson = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(responseJson.error || 'Failed to submit enquiry. Please try again.');
+      }
+
+      setAuditSuccess("Your enquiry has been received. Our sales solutions team will review your requirements and reach out using the details provided to discuss scope, capacity, and next steps.");
+    } catch (error) {
+      // Inputs remain untouched in serviceFormData state, satisfying the preservation rule
+      setAuditError(error instanceof Error ? error.message : 'An error occurred while saving your enquiry.');
+    } finally {
+      setAuditBusy(false);
+    }
+  }
+
   const openAudit = (type: 'AUDIT' | 'MANAGED_SALES' = 'AUDIT') => {
     setModalFormType(type);
+    setMobileMenuOpen(false);
+    setAuditSuccess(null);
+    setAuditError(null);
+    setShowAuditModal(true);
+  };
+
+  const openServiceEnquiry = (interest: string = 'Team training') => {
+    setModalFormType('SERVICE_ENQUIRY');
+    setServiceFormData((prev) => ({
+      ...prev,
+      serviceInterest: interest,
+    }));
     setMobileMenuOpen(false);
     setAuditSuccess(null);
     setAuditError(null);
@@ -134,6 +209,30 @@ export default function LandingClientWrapper({
       q: "Will Closecraft guarantee more sales?",
       a: "No. Results depend on your offer and the buyers you attract, as well as the work your team does. Closecraft helps you make follow-up more visible and consistent."
     },
+    {
+      q: "Do you offer sales training?",
+      a: "Yes. We offer individual sales training through Digital Sales School, where individuals develop practical appointment setting and sales closing skills. We also offer tailored team training for businesses looking to improve how their staff work their leads and sales process."
+    },
+    {
+      q: "Can you train our team using our existing leads and offer?",
+      a: "Yes. We assess the conversations your team struggles with and agree on practical training objectives based on your offer and sales process. Customer records and sales data are handled strictly under appropriate client authorisation."
+    },
+    {
+      q: "Can an external closer work our existing leads?",
+      a: "Yes. We assess your offer and available workload before recommending an appointment-setting or closing engagement. Supervision, working hours, and clear responsibilities are agreed before work starts."
+    },
+    {
+      q: "What is the difference between managed sales and an external closer?",
+      a: "Managed sales includes coordination of an agreed workflow (such as enquiry follow-up or appointment setting) with defined responsibilities and progress reporting. An external closer performs a defined closing role under agreed supervision and commercial terms."
+    },
+    {
+      q: "Are these services included in my software subscription?",
+      a: "No. Training and managed sales services are available separately from the software. Scope and fees are agreed for the service you choose, unless an approved custom enterprise plan expressly includes them."
+    },
+    {
+      q: "Do you guarantee sales or employment?",
+      a: "No. Results depend on relevant factors including offer viability, lead quality, market demand, and execution. We do not guarantee sales for businesses or employment/income for training students."
+    },
   ];
 
   return (
@@ -160,6 +259,48 @@ export default function LandingClientWrapper({
               <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="/platform">
                 Platform
               </Link>
+              <div className="relative group">
+                <a
+                  href="#services"
+                  className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors inline-flex items-center gap-1 cursor-pointer"
+                >
+                  <span>Services</span>
+                  <ChevronDown size={14} className="group-hover:rotate-180 transition-transform text-[#8A9CAE]" />
+                </a>
+                <div className="absolute top-full left-0 mt-1 w-64 p-2 rounded-2xl bg-[#090D12] border border-white/10 shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-150 z-50">
+                  <Link
+                    href="/dss"
+                    className="block p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item"
+                  >
+                    <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Digital Sales School</p>
+                    <p className="text-[11px] text-[#8A9CAE]">Individual appointment setting & closing</p>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => openServiceEnquiry('Team training')}
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item cursor-pointer"
+                  >
+                    <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Team Training</p>
+                    <p className="text-[11px] text-[#8A9CAE]">Train your team to work your leads</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openServiceEnquiry('Managed sales')}
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item cursor-pointer"
+                  >
+                    <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Managed Sales</p>
+                    <p className="text-[11px] text-[#8A9CAE]">Get help managing follow-up</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openServiceEnquiry('External closer')}
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item cursor-pointer"
+                  >
+                    <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">External Sales Professionals</p>
+                    <p className="text-[11px] text-[#8A9CAE]">External setters & closers for your leads</p>
+                  </button>
+                </div>
+              </div>
               <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="#explainer-video">
                 Explainer
               </Link>
@@ -207,6 +348,9 @@ export default function LandingClientWrapper({
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="/platform">
               Platform
             </Link>
+            <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="#services">
+              Services & Training
+            </a>
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="#how-it-works">
               How It Works
             </Link>
@@ -596,6 +740,281 @@ export default function LandingClientWrapper({
         </div>
       </section>
 
+      {/* Sales Training and Hands-on Support (Complementary Services) */}
+      <section id="services" className="section-wrap py-16 border-t border-white/10">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-4 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+              <span className="w-2 h-2 rounded-full bg-[#45bfae]"></span>
+              COMPLEMENTARY SALES SERVICES
+            </div>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
+              Sales training and hands-on support
+            </h2>
+            <p className="text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
+              Alongside our software, we help individuals develop practical sales skills and businesses improve how they work their leads. Learn through Digital Sales School or discuss sales support tailored to your team.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+            {/* OFFER A: INDIVIDUAL SALES TRAINING */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
+                    INDIVIDUAL TRAINING · DSS
+                  </span>
+                  <GraduationCap className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white">
+                  Learn appointment setting and sales closing
+                </h3>
+                <p className="text-sm text-[#A7B7C7] leading-relaxed">
+                  Develop practical sales skills through Digital Sales School. Learn how to qualify enquiries and book suitable appointments, then guide buyers through discovery and a clear buying decision.
+                </p>
+                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
+                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
+                    Confirmed Curriculum & Practical Exercises
+                  </span>
+                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Live appointment-setting and qualification exercises</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Guided objection-handling and discovery role-play</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Verified competency score and portfolio artifacts</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-6 space-y-3">
+                <Link
+                  href="/dss"
+                  className="w-full py-3 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
+                >
+                  <span>Explore Digital Sales School</span>
+                  <ArrowRight size={15} />
+                </Link>
+                <p className="text-[11px] text-[#8A9CAE] italic text-center">
+                  Structured learning programme. DSS does not promise or guarantee employment, clients, or earnings.
+                </p>
+              </div>
+            </div>
+
+            {/* OFFER B: SALES TEAM TRAINING */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
+                    BUSINESS · SALES TEAM TRAINING
+                  </span>
+                  <Users className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white">
+                  Train your team to work your leads
+                </h3>
+                <p className="text-sm text-[#A7B7C7] leading-relaxed">
+                  Help your staff improve appointment setting and sales closing using your offer and sales process. We assess the conversations they struggle with and agree on practical training objectives.
+                </p>
+                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
+                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
+                    Training Can Address
+                  </span>
+                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Qualification and appointment setting</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Discovery and presenting value</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Investigating objections</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Follow-up and asking for a decision</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Useful handovers and sales records</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-6 space-y-3">
+                <button
+                  type="button"
+                  onClick={() => openServiceEnquiry('Team training')}
+                  className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  <span>Discuss team training</span>
+                  <ArrowRight size={15} />
+                </button>
+                <p className="text-[11px] text-[#8A9CAE] italic text-center">
+                  Delivered via scheduled remote workshops and bespoke sales drills for your active reps.
+                </p>
+              </div>
+            </div>
+
+            {/* OFFER C: MANAGED SALES SERVICES */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
+                    OPERATIONS · MANAGED SALES
+                  </span>
+                  <Briefcase className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white">
+                  Get help managing the sales process
+                </h3>
+                <p className="text-sm text-[#A7B7C7] leading-relaxed">
+                  Engage Closecraft to coordinate an agreed part of your sales work, including enquiry follow-up or appointment setting, with clear responsibilities and progress reporting.
+                </p>
+                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
+                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
+                    The Engagement Defines
+                  </span>
+                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Work included and excluded</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Available capacity and working arrangements</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Who manages the work</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Reporting and review expectations</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Fees and commercial terms</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-6 space-y-3">
+                <button
+                  type="button"
+                  onClick={() => openServiceEnquiry('Managed sales')}
+                  className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  <span>Discuss managed sales</span>
+                  <ArrowRight size={15} />
+                </button>
+                <p className="text-[11px] text-[#8A9CAE] italic text-center">
+                  Subject to lead flow and offer review. Terms confirmed before work begins.
+                </p>
+              </div>
+            </div>
+
+            {/* OFFER D: EXTERNAL SETTERS AND CLOSERS */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
+                    TALENT · EXTERNAL PROFESSIONALS
+                  </span>
+                  <UserCheck className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
+                </div>
+                <h3 className="text-xl font-bold text-white">
+                  Bring in a setter or closer to support your business
+                </h3>
+                <p className="text-sm text-[#A7B7C7] leading-relaxed">
+                  Request an external sales professional to work on your existing leads. We assess your offer and available workload before recommending an appointment-setting or closing engagement.
+                </p>
+                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
+                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
+                    Working Conditions & Responsibilities
+                  </span>
+                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Dedicated focus on your existing enquiries and pipeline</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Supervision and responsibilities agreed before work starts</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
+                      <span>Transparent qualification and pipeline activity tracking</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="pt-6 space-y-3">
+                <button
+                  type="button"
+                  onClick={() => openServiceEnquiry('External closer')}
+                  className="w-full py-3 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+                >
+                  <span>Request a sales professional</span>
+                  <ArrowRight size={15} />
+                </button>
+                <p className="text-[11px] text-[#8A9CAE] italic text-center">
+                  Professional availability subject to vetting and capacity. No instant matching or sales guarantees.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Commercial Boundaries Callout Box */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#090D12] border border-[#248277]/30 space-y-4 shadow-lg">
+            <div className="flex items-center gap-2 text-[#45bfae]">
+              <ShieldCheck size={20} />
+              <h4 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
+                Commercial Boundaries & Clear Scope
+              </h4>
+            </div>
+            <div className="space-y-3 text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
+              <p className="font-semibold text-white">
+                Training and managed sales services are available separately from the software. Scope and fees are agreed for the service you choose.
+              </p>
+              <p>
+                Sales support can work with your existing enquiries and opportunities. Lead generation is included only when explicitly agreed.
+              </p>
+              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2 text-xs border-t border-white/5 text-[#8A9CAE]">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#45bfae] font-bold">•</span>
+                  <span>Software subscriptions do not automatically include an external closer or setter.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#45bfae] font-bold">•</span>
+                  <span>Training is not required to use Closecraft software.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#45bfae] font-bold">•</span>
+                  <span>External professionals do not guarantee sales, and training does not guarantee employment.</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#45bfae] font-bold">•</span>
+                  <span>You remain free to choose any single service or combine them as your business needs dictate.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* 8. Managed Sales Section */}
       <section className="section-wrap py-16 border-t border-white/10">
         <div className="max-w-4xl mx-auto p-8 rounded-3xl bg-gradient-to-r from-[#0B1117] to-[#111C26] border border-[#248277]/40 shadow-xl space-y-6">
@@ -628,8 +1047,8 @@ export default function LandingClientWrapper({
             </div>
             <button
               type="button"
-              onClick={() => openAudit('MANAGED_SALES')}
-              className="px-6 py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm shrink-0 transition-all shadow-md"
+              onClick={() => openServiceEnquiry('Managed sales')}
+              className="px-6 py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm shrink-0 transition-all shadow-md cursor-pointer"
             >
               Request a Managed Sales Proposal
             </button>
@@ -1241,6 +1660,184 @@ export default function LandingClientWrapper({
                   Done
                 </button>
               </div>
+            ) : modalFormType === 'SERVICE_ENQUIRY' ? (
+              <>
+                <div className="space-y-1">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
+                    BUSINESS SALES SERVICE ASSESSMENT
+                  </span>
+                  <h3 className="text-xl font-bold text-white">
+                    Discuss sales training or hands-on support
+                  </h3>
+                  <p className="text-xs text-[#A7B7C7]">
+                    Tell us about your team, current enquiries, and the sales support you need. We review fit and working arrangements before agreeing on any scope.
+                  </p>
+                </div>
+
+                {auditError && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+                    {auditError}
+                  </div>
+                )}
+
+                <form onSubmit={handleServiceSubmit} className="space-y-3 pt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#A7B7C7]">Your name *</label>
+                      <input
+                        name="name"
+                        required
+                        value={serviceFormData.name}
+                        onChange={(e) => setServiceFormData({ ...serviceFormData, name: e.target.value })}
+                        placeholder="e.g. Alex Rivera"
+                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#A7B7C7]">Business email *</label>
+                      <input
+                        name="email"
+                        type="email"
+                        required
+                        value={serviceFormData.email}
+                        onChange={(e) => setServiceFormData({ ...serviceFormData, email: e.target.value })}
+                        placeholder="alex@company.com"
+                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#A7B7C7]">Company name *</label>
+                      <input
+                        name="business"
+                        required
+                        value={serviceFormData.business}
+                        onChange={(e) => setServiceFormData({ ...serviceFormData, business: e.target.value })}
+                        placeholder="e.g. Apex Operations"
+                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold text-[#A7B7C7]">Phone / WhatsApp (optional)</label>
+                      <input
+                        name="phone"
+                        value={serviceFormData.phone}
+                        onChange={(e) => setServiceFormData({ ...serviceFormData, phone: e.target.value })}
+                        placeholder="+234 800 000 0000"
+                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#A7B7C7]">Service interest *</label>
+                    <select
+                      name="serviceInterest"
+                      required
+                      value={serviceFormData.serviceInterest}
+                      onChange={(e) => setServiceFormData({ ...serviceFormData, serviceInterest: e.target.value })}
+                      className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                    >
+                      <option value="Team training">Team training</option>
+                      <option value="Managed sales">Managed sales</option>
+                      <option value="External appointment setter">External appointment setter</option>
+                      <option value="External closer">External closer</option>
+                      <option value="Help choosing">Help choosing</option>
+                    </select>
+                  </div>
+
+                  {/* Conditional fields for Team training */}
+                  {serviceFormData.serviceInterest === 'Team training' && (
+                    <div className="p-3.5 rounded-2xl bg-[#090D12] border border-[#248277]/30 space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-[#A7B7C7]">Approximate team size *</label>
+                        <select
+                          name="teamSize"
+                          value={serviceFormData.teamSize}
+                          onChange={(e) => setServiceFormData({ ...serviceFormData, teamSize: e.target.value })}
+                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                        >
+                          <option value="1–3 reps">1–3 reps</option>
+                          <option value="4–10 reps">4–10 reps</option>
+                          <option value="11–25 reps">11–25 reps</option>
+                          <option value="26+ reps">26+ reps</option>
+                          <option value="Not sure">Not sure</option>
+                        </select>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-[#A7B7C7]">Main training objective *</label>
+                        <input
+                          name="trainingObjective"
+                          required
+                          value={serviceFormData.trainingObjective}
+                          onChange={(e) => setServiceFormData({ ...serviceFormData, trainingObjective: e.target.value })}
+                          placeholder="e.g. Qualification & appointment setting, investigating objections, or closing"
+                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Conditional fields for Sales execution (Managed sales, External setter, External closer) */}
+                  {['Managed sales', 'External appointment setter', 'External closer'].includes(serviceFormData.serviceInterest) && (
+                    <div className="p-3.5 rounded-2xl bg-[#090D12] border border-[#248277]/30 space-y-3">
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-[#A7B7C7]">What does your business sell? *</label>
+                        <input
+                          name="whatYouSell"
+                          required
+                          value={serviceFormData.whatYouSell}
+                          onChange={(e) => setServiceFormData({ ...serviceFormData, whatYouSell: e.target.value })}
+                          placeholder="e.g. High-ticket B2B software, logistics services, or corporate consulting"
+                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-xs font-semibold text-[#A7B7C7]">Approximate workload / monthly enquiries *</label>
+                        <select
+                          name="workloadVolume"
+                          value={serviceFormData.workloadVolume}
+                          onChange={(e) => setServiceFormData({ ...serviceFormData, workloadVolume: e.target.value })}
+                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                        >
+                          <option value="Fewer than 20">Fewer than 20</option>
+                          <option value="20–49">20–49</option>
+                          <option value="50–199">50–199</option>
+                          <option value="200 or more">200 or more</option>
+                          <option value="Not sure">Not sure</option>
+                        </select>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-[#A7B7C7]">Brief description of your need *</label>
+                    <textarea
+                      name="needDescription"
+                      required
+                      rows={3}
+                      value={serviceFormData.needDescription}
+                      onChange={(e) => setServiceFormData({ ...serviceFormData, needDescription: e.target.value })}
+                      placeholder="Tell us about your offer, current follow-up situation, or the specific sales support you are looking for. Do not include confidential customer records."
+                      className="w-full p-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae] resize-none"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={auditBusy}
+                    className="w-full py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm transition-all shadow-md active:scale-95 disabled:opacity-50 mt-2 cursor-pointer"
+                  >
+                    {auditBusy ? 'Submitting Enquiry...' : 'Submit Service Enquiry'}
+                  </button>
+
+                  <p className="text-[10px] text-[#8A9CAE] leading-relaxed pt-1">
+                    Tell us how to reach you about this request. Submitting this enquiry does not commit you to a contract, paid plan, or managed service.
+                  </p>
+                </form>
+              </>
             ) : (
               <>
                 <div className="space-y-1">

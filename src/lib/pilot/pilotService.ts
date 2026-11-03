@@ -525,3 +525,206 @@ export async function acknowledgeHandover(handoverId: string, clientUserId: stri
 
   return updated;
 }
+
+// -----------------------------------------------------------------------------
+// COMMERCIAL SUITABILITY ASSESSMENT & PIPELINE VOLUME SCREENING
+// -----------------------------------------------------------------------------
+
+export interface CommercialSuitabilityInput {
+  approxMonthlyEnquiries: number;
+  approxMonthlyQualifiedConversations: number;
+  approxOpenOpportunities: number;
+  typicalDealValue: number;
+  grossProfitMarginPercent: number; // e.g. 50 for 50%
+  expectedAttributableSalesCount?: number;
+  serviceType: 'ENQUIRY_TRIAGE' | 'APPOINTMENT_SETTING' | 'SALES_CLOSING' | 'FULL_MANAGED_PILOT';
+  proposedTotalCost: number;
+}
+
+export interface CommercialSuitabilityResult {
+  isSuitableForDedicatedClosing: boolean;
+  qualifiedConversationsGuidelineMet: boolean;
+  recommendedServiceScope: 'DEDICATED_CLOSING' | 'BOUNDED_PART_TIME' | 'APPOINTMENT_SETTING_FIRST' | 'HUMAN_OPERATOR_REVIEW';
+  projectedGrossProfit: number;
+  netAttributableReturn: number;
+  isCommerciallyPositive: boolean;
+  screeningRationale: string;
+  volumeDiscrepancies: {
+    rawEnquiries: number;
+    qualifiedConversations: number;
+    openOpportunities: number;
+  };
+}
+
+/**
+ * Reviews commercial suitability using client evidence (Section 7):
+ * Formula: (Expected attributable sales * gross profit per sale) - total engagement cost.
+ * Screen: ~20 qualified conversations/month for dedicated closing.
+ * Lower volume routes to bounded/part-time support or human review rather than automatic rejection.
+ */
+export function calculateCommercialSuitability(input: CommercialSuitabilityInput): CommercialSuitabilityResult {
+  const enquiries = Number(input.approxMonthlyEnquiries) || 0;
+  const qualifiedConversations = Number(input.approxMonthlyQualifiedConversations) || 0;
+  const opportunities = Number(input.approxOpenOpportunities) || 0;
+  const dealValue = Number(input.typicalDealValue) || 0;
+  const marginPct = (Number(input.grossProfitMarginPercent) || 50) / 100;
+  const grossProfitPerSale = dealValue * marginPct;
+
+  // Screening guideline: ~20 qualified conversations per month for dedicated closing
+  const qualifiedConversationsGuidelineMet = qualifiedConversations >= 20;
+
+  // Expected attributable sales (conservative benchmark: 10% - 20% conversion from qualified conversations if not explicitly supplied)
+  const estimatedSales = input.expectedAttributableSalesCount !== undefined
+    ? Number(input.expectedAttributableSalesCount)
+    : Math.max(1, Math.round(qualifiedConversations * 0.15));
+
+  const projectedGrossProfit = Math.round(estimatedSales * grossProfitPerSale);
+  const totalCost = Number(input.proposedTotalCost) || 150000;
+  const netAttributableReturn = projectedGrossProfit - totalCost;
+  const isCommerciallyPositive = netAttributableReturn > 0;
+
+  let recommendedServiceScope: CommercialSuitabilityResult['recommendedServiceScope'] = 'HUMAN_OPERATOR_REVIEW';
+  let screeningRationale = '';
+
+  if (qualifiedConversationsGuidelineMet && isCommerciallyPositive) {
+    recommendedServiceScope = 'DEDICATED_CLOSING';
+    screeningRationale = `Volume of ${qualifiedConversations} qualified conversations/mo exceeds the 20/mo guideline. Economics project positive net return (₦${netAttributableReturn.toLocaleString()}).`;
+  } else if (qualifiedConversations < 20 && enquiries >= 20) {
+    recommendedServiceScope = 'APPOINTMENT_SETTING_FIRST';
+    screeningRationale = `Inbound raw enquiry volume is solid (${enquiries}/mo), but qualified conversations (${qualifiedConversations}/mo) are below the 20/mo threshold. Dedicated SDR appointment setting recommended to build qualified deal flow before assigning a dedicated closer.`;
+  } else if (qualifiedConversations > 0 && qualifiedConversations < 20) {
+    recommendedServiceScope = 'BOUNDED_PART_TIME';
+    screeningRationale = `Pipeline volume is below 20 qualified conversations/mo (${qualifiedConversations}/mo). Bounded part-time follow-up support is commercially appropriate instead of a dedicated full-time closing commitment.`;
+  } else {
+    recommendedServiceScope = 'HUMAN_OPERATOR_REVIEW';
+    screeningRationale = 'Insufficient historical conversion evidence. Routing to Closecraft operator review for discovery consultation.';
+  }
+
+  return {
+    isSuitableForDedicatedClosing: qualifiedConversationsGuidelineMet && input.serviceType === 'SALES_CLOSING',
+    qualifiedConversationsGuidelineMet,
+    recommendedServiceScope,
+    projectedGrossProfit,
+    netAttributableReturn,
+    isCommerciallyPositive,
+    screeningRationale,
+    volumeDiscrepancies: {
+      rawEnquiries: enquiries,
+      qualifiedConversations,
+      openOpportunities: opportunities,
+    }
+  };
+}
+
+// -----------------------------------------------------------------------------
+// STRICT LIFECYCLE STATE MACHINE (Section 8)
+// -----------------------------------------------------------------------------
+
+export const ALLOWED_ENGAGEMENT_TRANSITIONS: Record<string, string[]> = {
+  DRAFT: ['AWAITING_ACCEPTANCE', 'CANCELLED'],
+  AWAITING_ACCEPTANCE: ['AWAITING_PAYMENT', 'AWAITING_READINESS', 'DRAFT', 'CANCELLED'],
+  AWAITING_PAYMENT: ['AWAITING_READINESS', 'SCHEDULED', 'ACTIVE', 'CANCELLED'],
+  AWAITING_READINESS: ['SCHEDULED', 'ACTIVE', 'CANCELLED'],
+  SCHEDULED: ['ACTIVE', 'PAUSED', 'CANCELLED'],
+  ACTIVE: ['PAUSED', 'ENDING', 'ENDED', 'CANCELLED'],
+  PAUSED: ['ACTIVE', 'ENDING', 'ENDED', 'CANCELLED'],
+  ENDING: ['ENDED', 'CANCELLED'],
+  ENDED: [], // Terminal
+  CANCELLED: [], // Terminal
+};
+
+/**
+ * Server-authoritative transition function.
+ * Validates allowed transitions, prerequisites, and logs audits.
+ */
+export async function transitionEngagementState(params: {
+  engagementId: string;
+  nextStatus: string;
+  actorUserId: string;
+  reason?: string;
+}) {
+  const engagement = await db.pilotEngagement.findUnique({
+    where: { id: params.engagementId },
+    include: {
+      professional: true,
+      assignedLeads: true,
+    }
+  });
+
+  if (!engagement) {
+    throw new Error(`Engagement with ID ${params.engagementId} not found.`);
+  }
+
+  const currentStatus = engagement.status;
+  const allowed = ALLOWED_ENGAGEMENT_TRANSITIONS[currentStatus] || [];
+
+  if (!allowed.includes(params.nextStatus)) {
+    throw new Error(
+      `Invalid state transition: Cannot transition engagement from '${currentStatus}' to '${params.nextStatus}'. Allowed transitions from '${currentStatus}' are: [${allowed.join(', ')}].`
+    );
+  }
+
+  // If transitioning to ACTIVE or SCHEDULED, verify all 6 activation prerequisites
+  if (params.nextStatus === 'ACTIVE' || params.nextStatus === 'SCHEDULED') {
+    const prereqs = await checkActivationPrerequisites(params.engagementId);
+    if (!prereqs.canActivate) {
+      throw new Error(
+        `Activation prerequisites not met: ${prereqs.unmetPrerequisites.join('; ')}`
+      );
+    }
+  }
+
+  const now = new Date();
+  const updateData: any = {
+    status: params.nextStatus,
+  };
+
+  if (params.nextStatus === 'ACTIVE' && !engagement.activatedAt) {
+    updateData.activatedAt = now;
+    if (!engagement.startDate) updateData.startDate = now;
+    if (!engagement.endDate) updateData.endDate = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  }
+
+  // When pausing an engagement, flag unfinished leads for supervisor review
+  let pausedAffectedLeadsCount = 0;
+  if (params.nextStatus === 'PAUSED') {
+    const openLeads = await db.lead.findMany({
+      where: {
+        pilotEngagementId: params.engagementId,
+        status: { in: ['NEW', 'ENGAGED', 'QUALIFYING', 'FOLLOW_UP'] }
+      }
+    });
+    pausedAffectedLeadsCount = openLeads.length;
+  }
+
+  const updated = await db.pilotEngagement.update({
+    where: { id: params.engagementId },
+    data: updateData,
+  });
+
+  await db.auditLog.create({
+    data: {
+      organizationId: engagement.organizationId,
+      actorId: params.actorUserId,
+      actorType: 'USER',
+      action: 'ENGAGEMENT_STATE_TRANSITION',
+      resourceType: 'PILOT_ENGAGEMENT',
+      resourceId: params.engagementId,
+      oldState: currentStatus,
+      newState: params.nextStatus,
+      reason: params.reason || null,
+      metadata: JSON.stringify({
+        pausedAffectedLeadsCount,
+        transitionedAt: now.toISOString(),
+      })
+    }
+  });
+
+  return {
+    engagement: updated,
+    previousStatus: currentStatus,
+    newStatus: params.nextStatus,
+    pausedAffectedLeadsCount,
+  };
+}
+
