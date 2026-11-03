@@ -203,6 +203,16 @@ export async function POST(request: Request) {
       console.warn('[Leads API] RevenueEngine evaluation notice:', engineErr);
     }
 
+    // If this is an active service enquiry, pause conflicting marketing promotional messages
+    if (formType === 'SERVICE_ENQUIRY') {
+      try {
+        const { pauseForServiceEnquiry } = await import('@/lib/marketing/welcomeSequence');
+        await pauseForServiceEnquiry(email.toLowerCase().trim(), 'Service Enquiry Submitted');
+      } catch {
+        // Non-blocking
+      }
+    }
+
     // Fire event to Inngest background bus if available
     try {
       await inngest.send({

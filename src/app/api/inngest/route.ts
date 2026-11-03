@@ -5,14 +5,16 @@ import { detectRevenueLeaks } from '@/lib/inngest/cron';
 import { gradeSubmission } from '@/lib/inngest/dss';
 import { processBillingEvent } from '@/lib/inngest/billing';
 import { executeAutomations } from '@/lib/automations/engine';
+import { closecraftWelcomeSequence } from '@/lib/inngest/marketing';
 
 export const { GET, POST, PUT } = serve({
- client: inngest,
- functions: [
- processNewLead,
- detectRevenueLeaks,
- gradeSubmission,
- processBillingEvent,
- executeAutomations
- ],
+  client: inngest,
+  functions: [
+    processNewLead,
+    detectRevenueLeaks,
+    gradeSubmission,
+    processBillingEvent,
+    executeAutomations,
+    closecraftWelcomeSequence,
+  ],
 });

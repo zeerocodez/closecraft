@@ -2035,3 +2035,70 @@ model TransactionalEmailLog {
   @@index([createdAt])
 }
 
+// -------------------------------------------------------------
+// MARKETING & NEWSLETTER WELCOME SEQUENCE ENGINE
+// -------------------------------------------------------------
+
+model MarketingSubscriber {
+  id                    String                @id @default(cuid())
+  email                 String                @unique
+  name                  String?
+  source                String                @default("BREVO_EMBED") // BREVO_EMBED, DSS_PAGE, etc.
+  status                String                @default("ACTIVE") // PENDING_CONFIRMATION, ACTIVE, UNSUBSCRIBED, BOUNCED, COMPLAINED, PAUSED_SERVICE_ENQUIRY
+  trackPreference       String                @default("UNSPECIFIED") // BUSINESS, LEARNING, BOTH, UNSPECIFIED
+  activeTrack           String                @default("NONE") // BUSINESS, LEARNING, NONE
+  timezone              String                @default("Africa/Lagos")
+  confirmedAt           DateTime?
+  unsubscribedAt        DateTime?
+  unsubscribeReason     String?
+  isSuppressed          Boolean               @default(false)
+  suppressionReason     String?
+  convertedAt           DateTime?
+  conversionType        String?               // DSS_ENROLMENT, SOFTWARE_ACTIVATION
+  metadata              String?               // JSON
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  sequenceLogs          MarketingSequenceLog[]
+  marketingEvents       MarketingEvent[]
+
+  @@index([status])
+  @@index([trackPreference])
+  @@index([activeTrack])
+  @@index([isSuppressed])
+}
+
+model MarketingSequenceLog {
+  id                    String                @id @default(cuid())
+  subscriberId          String
+  subscriber            MarketingSubscriber   @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  sequenceId            String                @default("CLOSECRAFT_WELCOME_V1")
+  stepNumber            Int                   // 1, 2, 3, 4, 5
+  messageKey            String                // SHARED_WELCOME, BIZ_02, DSS_02, etc.
+  idempotencyKey        String                @unique // subscriberId_sequenceId_messageKey
+  scheduledFor          DateTime
+  sentAt                DateTime?
+  status                String                @default("PENDING") // PENDING, SENT, SKIPPED_CONVERTED, SKIPPED_SUPPRESSED, SKIPPED_PAUSED, FAILED
+  providerMessageId     String?
+  errorMessage          String?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  @@index([subscriberId])
+  @@index([status])
+  @@index([scheduledFor])
+}
+
+model MarketingEvent {
+  id                    String                @id @default(cuid())
+  subscriberId          String
+  subscriber            MarketingSubscriber   @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  eventType             String                // SUBSCRIPTION_CONFIRMED, EMAIL_DELIVERED, LINK_CLICKED, UNSUBSCRIBED, COMPLAINT, CONVERSION
+  details               String?               // JSON
+  createdAt             DateTime              @default(now())
+
+  @@index([subscriberId])
+  @@index([eventType])
+}
+
+

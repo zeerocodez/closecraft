@@ -177,6 +177,14 @@ export async function POST(req: Request) {
       console.error('[Register] Failed to dispatch CC-01 verification email:', emailErr);
     }
 
+    // Record software conversion to exit generic marketing welcome sequences
+    try {
+      const { recordConversion } = await import('@/lib/marketing/welcomeSequence');
+      await recordConversion(cleanEmail, 'SOFTWARE_ACTIVATION');
+    } catch {
+      // Non-blocking
+    }
+
     return NextResponse.json(
       {
         success: true,

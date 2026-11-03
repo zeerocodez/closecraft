@@ -39,6 +39,20 @@ export const processBillingEvent = inngest.createFunction(
             }
           });
         }
+
+        // Record DSS conversion to exit marketing acquisition sequence
+        try {
+          const student = await db.studentProfile.findUnique({
+            where: { id: studentId },
+            include: { user: true },
+          });
+          if (student?.user?.email) {
+            const { recordConversion } = await import('@/lib/marketing/welcomeSequence');
+            await recordConversion(student.user.email, 'DSS_ENROLMENT');
+          }
+        } catch {
+          // Non-blocking
+        }
       }
     });
 
