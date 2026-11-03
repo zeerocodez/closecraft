@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { sendTransactionalEmail } from '@/lib/email';
+import { dispatchNotificationAlert, getCategoryForServiceType } from '@/lib/notifications/router';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import crypto from 'node:crypto';
 
@@ -160,12 +161,12 @@ export async function POST(req: NextRequest) {
         </div>`,
       });
 
-      // Dispatch alert email to Operator / Administrator
-      const operatorAlertEmail = process.env.ADMIN_ALERT_EMAIL || process.env.GMAIL_USER || 'zeerocodes@gmail.com';
-      await sendTransactionalEmail({
-        to: operatorAlertEmail,
+      // Dispatch alert email to relevant department inboxes (sales@closecrafthq.com, dss@closecrafthq.com, info@closecrafthq.com)
+      const category = getCategoryForServiceType(cleanServiceType);
+      await dispatchNotificationAlert({
+        category,
         subject: `🔔 New Service Request: ${cleanName} (${serviceDisplay} - ${reference})`,
-        text: `New Service Request Received!\n\nReference: ${reference}\nContact: ${cleanName} (${cleanEmail})\nPhone: ${cleanPhone || 'Not provided'}\nCompany: ${cleanCompany || 'Not provided'}\nService: ${serviceDisplay}\n\nReview this in Operator Console: https://www.closecrafthq.com/operator`,
+        text: `New Service Request Received!\n\nReference: ${reference}\nContact: ${cleanName} (${cleanEmail})\nPhone: ${cleanPhone || 'Not provided'}\nCompany: ${cleanCompany || 'Not provided'}\nService: ${serviceDisplay}\nAttribution: ${cleanAttribution}\n\nReview this in Operator Console: https://www.closecrafthq.com/operator`,
         html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #111;">
           <h2 style="color: #248277;">🔔 New Closecraft Service Request</h2>
           <div style="background: #f4f6f8; border-left: 4px solid #248277; padding: 12px 16px; margin: 16px 0;">

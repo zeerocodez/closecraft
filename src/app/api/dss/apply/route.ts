@@ -188,6 +188,29 @@ export async function POST(req: Request) {
       console.warn('[DSS-01 Send Notice]', emailErr);
     }
 
+    // Dispatch alert to DSS team (dss@closecrafthq.com, info@closecrafthq.com)
+    try {
+      const { dispatchNotificationAlert } = await import('@/lib/notifications/router');
+      await dispatchNotificationAlert({
+        category: 'DSS',
+        subject: `🎓 New DSS Sprint Application: ${fullName.trim()} (${route})`,
+        text: `New Digital Sales School Application Received!\n\nApplicant: ${fullName.trim()} (${cleanEmail})\nPhone: ${phone.trim()}\nRoute: ${route}\nExperience: ${salesExperience}\nTimezone: ${timezone}\nGoal: ${learningGoal.trim()}\nSponsorship: ${companySponsorship?.trim() || 'Self-funded'}\n\nReview Admissions: https://www.closecrafthq.com/dss/admin/students`,
+        html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #248277;">🎓 New DSS 4-Week Sprint Application</h2>
+          <div style="background: #f4f6f8; border-left: 4px solid #248277; padding: 12px 16px; margin: 16px 0;">
+            <p style="margin: 0; font-size: 16px; font-weight: bold; color: #111;">${fullName.trim()}</p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Email: <a href="mailto:${cleanEmail}">${cleanEmail}</a> | Phone: ${phone.trim()}</p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Route: <strong>${route}</strong> | Experience: <strong>${salesExperience}</strong></p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Goal: <em>${learningGoal.trim()}</em></p>
+            <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Sponsorship: ${companySponsorship?.trim() || 'Self-funded'}</p>
+          </div>
+          <p><a href="https://www.closecrafthq.com/dss/admin/students" style="background: #248277; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Open Admissions Queue &rarr;</a></p>
+        </div>`,
+      });
+    } catch (alertErr) {
+      console.warn('[DSS Application Alert Notice]', alertErr);
+    }
+
     return NextResponse.json({
       success: true,
       message: 'Your application has been received. We will contact you using the details provided with programme information and the next step.',

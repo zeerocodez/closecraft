@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { sendTransactionalEmail } from '@/lib/email';
+import { dispatchNotificationAlert } from '@/lib/notifications/router';
 import { z } from 'zod';
 import { inngest } from '@/lib/inngest/client';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
@@ -268,10 +269,9 @@ export async function POST(request: Request) {
         html: emailHtml,
       });
 
-      // Dispatch alert to Admin / Operator
-      const adminAlertEmail = process.env.ADMIN_ALERT_EMAIL || process.env.GMAIL_USER || 'zeerocodes@gmail.com';
-      await sendTransactionalEmail({
-        to: adminAlertEmail,
+      // Dispatch alert to Sales & Admin inboxes (sales@closecrafthq.com, info@closecrafthq.com)
+      await dispatchNotificationAlert({
+        category: 'SALES',
         subject: `🔔 New Lead / Audit Request: ${name} (${email})`,
         text: `New Lead Submitted!\n\nName: ${name}\nEmail: ${email}\nPhone: ${phone || 'None'}\nMessage: ${message || 'None'}\n\nView in Closecraft: https://www.closecrafthq.com/leads`,
         html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">

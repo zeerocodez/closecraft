@@ -236,6 +236,28 @@ export async function POST(req: Request) {
             },
           });
 
+          // Dispatch notification alert to Sales team (sales@closecrafthq.com, info@closecrafthq.com)
+          try {
+            const { dispatchNotificationAlert } = await import('@/lib/notifications/router');
+            await dispatchNotificationAlert({
+              category: 'SALES',
+              subject: `🎯 New Meta Ad Lead: ${lead.name} (${org.name})`,
+              text: `New Lead from Facebook/Instagram Campaign!\n\nName: ${lead.name}\nEmail: ${lead.email}\nPhone: ${lead.phone || 'None'}\nWorkspace: ${org.name}\n\nDetails:\n${notes}\n\nFirst Touch Due Within 1 Hour: https://www.closecrafthq.com/leads`,
+              html: `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #248277;">🎯 New Meta Ad Lead Captured</h2>
+                <div style="background: #f4f6f8; border-left: 4px solid #248277; padding: 12px 16px; margin: 16px 0;">
+                  <p style="margin: 0; font-size: 16px; font-weight: bold; color: #111;">${lead.name}</p>
+                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Email: <a href="mailto:${lead.email}">${lead.email}</a> | Phone: <strong>${lead.phone || 'Not provided'}</strong></p>
+                  <p style="margin: 4px 0 0 0; font-size: 14px; color: #444;">Workspace: <strong>${org.name}</strong></p>
+                  <div style="margin-top: 8px; font-size: 12px; color: #555; white-space: pre-wrap;">${notes}</div>
+                </div>
+                <p><a href="https://www.closecrafthq.com/leads" style="background: #248277; color: white; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">Open Lead in CRM &rarr;</a></p>
+              </div>`,
+            });
+          } catch (notifErr) {
+            console.warn('[Facebook Webhook Alert Notice]', notifErr);
+          }
+
           console.log(`[Facebook Webhook] Created lead ${lead.id} (${lead.name}) for organization ${org.name}`);
         }
       }
