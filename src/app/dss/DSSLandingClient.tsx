@@ -29,6 +29,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { Logo, DSSLogo } from '@/components/ui/Logo';
+import BrevoNewsletterSection from '@/components/marketing/BrevoNewsletterSection';
 import {
   DSS_SPRINT_FACTS,
   SPRINT_WEEKS,
@@ -1826,6 +1827,16 @@ export default function DSSLandingClient() {
           </p>
         </div>
       </section>
+
+      {/* Newsletter Signup (Brevo) */}
+      <BrevoNewsletterSection
+        id="dss-newsletter"
+        badge="REMOTE SALES LESSONS"
+        headline="Start building your remote sales skills."
+        description="Get practical appointment-setting lessons and updates about upcoming DSS training."
+        accessibleTitle="Subscribe to Digital Sales School lessons"
+        theme="dss"
+      />
 
       {/* 4.Q FOOTER */}
       <footer className="bg-[#050B1A] py-14 border-t border-white/10 text-xs text-[#94A3B8]">

@@ -26,6 +26,7 @@ import {
 import Logo from "@/components/ui/Logo";
 import ExplainerVideoModal from "@/components/marketing/ExplainerVideoModal";
 import ExplainerVideoSection from "@/components/marketing/ExplainerVideoSection";
+import BrevoNewsletterSection from "@/components/marketing/BrevoNewsletterSection";
 import type { LandingView } from "@/lib/landing/types";
 import type { EcosystemFlags } from "@/lib/ecosystem/flags";
 import './landing.css';
@@ -1564,6 +1565,16 @@ export default function LandingClientWrapper({
           </p>
         </div>
       </section>
+
+      {/* Newsletter Signup (Brevo) */}
+      <BrevoNewsletterSection
+        id="newsletter"
+        badge="WEEKLY SALES DISPATCH"
+        headline="Make your next sales conversation count."
+        description="Get a practical sales lesson each week, with follow-up examples you can use in your business."
+        accessibleTitle="Subscribe to Closecraft weekly sales lessons"
+        theme="dark"
+      />
 
       {/* 15. Footer */}
       <footer className="border-t border-white/10 bg-[#070A0E] py-12 text-xs text-[#8A9CAE]">

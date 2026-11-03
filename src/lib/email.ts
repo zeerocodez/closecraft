@@ -54,31 +54,55 @@ export async function sendTransactionalEmail({
   html,
   text,
   from,
+  replyTo,
 }: {
   to: string;
   subject: string;
   html: string;
   text?: string;
   from?: string;
+  replyTo?: string;
 }) {
   const smtpConfig = getSmtpConfig();
   let defaultSender = process.env.EMAIL_FROM || 'Closecraft <info@closecrafthq.com>';
   if (smtpConfig?.isGmail && smtpConfig.fromEmail) {
     defaultSender = `Closecraft <${smtpConfig.fromEmail}>`;
   }
-  const sender = from || defaultSender;
+  let sender = from || defaultSender;
+  let replyToAddress = replyTo;
+
+  if (smtpConfig?.isGmail && smtpConfig.fromEmail) {
+    // Gmail SMTP strictly enforces that the From address matches the authenticated Gmail account.
+    // If an external/unverified domain like @closecrafthq.com is passed in `from`, Google SMTP either rewrites
+    // or downstream servers reject it for failing SPF/DKIM/DMARC alignment.
+    // We preserve the display name and route the authenticated Gmail address into From, with replyTo pointing to the business email.
+    const displayNameMatch = from?.match(/^([^<]+)/);
+    const displayName = displayNameMatch ? displayNameMatch[1].trim() : 'Closecraft';
+    const emailMatch = from?.match(/<([^>]+)>/);
+    const extractedEmail = emailMatch ? emailMatch[1].trim() : from;
+
+    sender = `${displayName || 'Closecraft'} <${smtpConfig.fromEmail}>`;
+    if (!replyToAddress && extractedEmail && extractedEmail.toLowerCase() !== smtpConfig.fromEmail.toLowerCase()) {
+      replyToAddress = extractedEmail;
+    }
+  }
 
   try {
     // 1. Try Gmail / Custom SMTP if configured
     if (smtpConfig) {
       try {
-        const info = await smtpConfig.transporter.sendMail({
+        const mailOptions: any = {
           from: sender,
           to,
           subject,
           html,
           text: text || html.replace(/<[^>]+>/g, ' '),
-        });
+        };
+        if (replyToAddress) {
+          mailOptions.replyTo = replyToAddress;
+        }
+
+        const info = await smtpConfig.transporter.sendMail(mailOptions);
         console.log(`[SMTP/Gmail Email Dispatched] To: ${to}, MessageId: ${info.messageId}`);
         return { success: true, data: { id: info.messageId }, provider: 'SMTP' };
       } catch (smtpErr: any) {

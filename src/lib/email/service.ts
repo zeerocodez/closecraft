@@ -124,8 +124,10 @@ export async function sendTransactionalEmailEvent(options: SendEmailOptions): Pr
 
     // 4. Sender Resolution based on Brand Context
     const senderDisplay = isDSS ? 'DSS by Closecraft' : 'Closecraft';
-    const senderAddress = process.env.EMAIL_FROM_ADDRESS || 'info@closecrafthq.com';
+    const gmailFallback = process.env.GMAIL_USER || process.env.GMAIL_ADDRESS;
+    const senderAddress = process.env.EMAIL_FROM_ADDRESS || (process.env.GMAIL_USER ? gmailFallback : undefined) || 'info@closecrafthq.com';
     const from = `${senderDisplay} <${senderAddress}>`;
+    const replyTo = process.env.EMAIL_REPLY_TO || (isDSS ? 'dss@closecrafthq.com' : 'info@closecrafthq.com');
 
     // 5. Send Email via Resend / Gmail SMTP / Configured Transport
     const delivery = await sendTransactionalEmail({
@@ -134,6 +136,7 @@ export async function sendTransactionalEmailEvent(options: SendEmailOptions): Pr
       html: rendered.html,
       text: rendered.text,
       from,
+      replyTo,
     });
 
     const isSuccess = delivery.success;
