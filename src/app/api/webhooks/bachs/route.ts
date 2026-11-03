@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { verifyBachsWebhookSignature, processBachsWebhookEvent } from '@/lib/payments/bachs';
 
+export async function GET() {
+  return NextResponse.json({
+    status: 'ready',
+    service: 'closecraft-bachs-webhook',
+    timestamp: new Date().toISOString()
+  }, { status: 200 });
+}
+
 export async function POST(req: Request) {
   try {
     const rawBody = await req.text();
