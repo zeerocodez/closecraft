@@ -192,3 +192,20 @@ export async function updateClientServiceStatusAction(serviceId: string, status:
   return { success: true, service: updated };
 }
 
+export async function updateServiceRequestStageAction(requestId: string, stage: string, internalNotes?: string) {
+  await requireAdmin();
+
+  const updated = await db.serviceRequest.update({
+    where: { id: requestId },
+    data: {
+      stage,
+      ...(internalNotes !== undefined ? { internalNotes } : {}),
+      updatedAt: new Date(),
+    }
+  });
+
+  revalidatePath('/admin');
+  return { success: true, request: updated };
+}
+
+

@@ -11,6 +11,7 @@ const VALID_SERVICE_TYPES = [
   'SOFTWARE_FOLLOWUP',
   'TEAM_TRAINING',
   'MANAGED_SALES',
+  'EARLY_ACCESS',
 ] as const;
 
 type ValidServiceType = typeof VALID_SERVICE_TYPES[number];
@@ -25,6 +26,8 @@ function getServicePrefix(serviceType: ValidServiceType): string {
       return 'REQ-TT';
     case 'MANAGED_SALES':
       return 'REQ-MS';
+    case 'EARLY_ACCESS':
+      return 'REQ-EA';
     default:
       return 'REQ-SR';
   }

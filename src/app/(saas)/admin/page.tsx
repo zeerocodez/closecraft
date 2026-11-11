@@ -174,14 +174,18 @@ export default async function AdminPage() {
     }
   };
 
-  // Fetch service marketplace packages & active client services
-  const [servicePackages, clientServices] = await Promise.all([
+  // Fetch service marketplace packages, active client services & early access/service requests
+  const [servicePackages, clientServices, serviceRequests] = await Promise.all([
     db.servicePackage.findMany({ orderBy: { defaultBasePrice: 'asc' } }),
     db.clientService.findMany({
       orderBy: { createdAt: 'desc' },
       include: {
         organization: { select: { id: true, name: true, slug: true } }
       }
+    }),
+    db.serviceRequest.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 100,
     })
   ]);
 
@@ -193,6 +197,7 @@ export default async function AdminPage() {
       affiliateData={affiliateData}
       servicePackages={servicePackages}
       clientServices={clientServices}
+      serviceRequests={serviceRequests}
       stats={{
         totalOrgs,
         approvedOrgs,

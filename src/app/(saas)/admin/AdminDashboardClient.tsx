@@ -10,7 +10,8 @@ import {
   updateUserRole,
   triggerAffiliatePayout,
   updateServicePackageAction,
-  updateClientServiceStatusAction
+  updateClientServiceStatusAction,
+  updateServiceRequestStageAction
 } from './actions';
 
 export type OrgWithDetails = {
@@ -137,6 +138,7 @@ interface AdminDashboardClientProps {
   finances: FinancialMetrics;
   servicePackages?: any[];
   clientServices?: any[];
+  serviceRequests?: any[];
 }
 
 export default function AdminDashboardClient({ 
@@ -146,12 +148,15 @@ export default function AdminDashboardClient({
   affiliateData, 
   servicePackages = [],
   clientServices = [],
+  serviceRequests = [],
   stats, 
   finances 
 }: AdminDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<'finance' | 'orgs' | 'services' | 'affiliates' | 'users' | 'create'>('finance');
   const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'SUSPENDED'>('ALL');
+  const [requestFilter, setRequestFilter] = useState<'ALL' | 'EARLY_ACCESS' | 'LEAD_GENERATION' | 'MANAGED_SALES' | 'TEAM_TRAINING'>('ALL');
+  const [selectedRequestDetails, setSelectedRequestDetails] = useState<any | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [affiliateSearchQuery, setAffiliateSearchQuery] = useState('');
@@ -1060,6 +1065,119 @@ export default function AdminDashboardClient({
               ))}
             </div>
           </div>
+
+          {/* Early Access & Service Applications Section */}
+          <div className="space-y-4 pt-6 border-t border-outline-variant/30">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div>
+                <h3 className="text-base font-bold text-on-surface">Early Access & Intake Applications</h3>
+                <p className="text-xs text-on-surface-variant">
+                  Diagnostic assessments submitted from the Early Access Funnel and service inquiry pages.
+                </p>
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                {(['ALL', 'EARLY_ACCESS', 'LEAD_GENERATION', 'MANAGED_SALES', 'TEAM_TRAINING'] as const).map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setRequestFilter(cat)}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all ${
+                      requestFilter === cat
+                        ? 'bg-primary text-on-primary shadow-sm'
+                        : 'bg-surface-container hover:bg-surface-container-high text-on-surface-variant'
+                    }`}
+                  >
+                    {cat.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(() => {
+              const filteredRequests = serviceRequests.filter((r: any) => {
+                if (requestFilter === 'ALL') return true;
+                return r.serviceType === requestFilter;
+              });
+
+              if (filteredRequests.length === 0) {
+                return (
+                  <div className="p-8 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center text-xs text-on-surface-variant">
+                    No intake applications match the selected filter.
+                  </div>
+                );
+              }
+
+              return (
+                <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-surface-container-low border-b border-outline-variant/30 text-on-surface-variant uppercase text-[10px] tracking-wider">
+                        <tr>
+                          <th className="py-3 px-4 font-bold">Reference</th>
+                          <th className="py-3 px-4 font-bold">Contact & Company</th>
+                          <th className="py-3 px-4 font-bold">Service Type</th>
+                          <th className="py-3 px-4 font-bold">Stage</th>
+                          <th className="py-3 px-4 font-bold">Submitted</th>
+                          <th className="py-3 px-4 font-bold text-right">Review Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/20">
+                        {filteredRequests.map((req: any) => (
+                          <tr key={req.id} className="hover:bg-surface-container-high/30 transition-colors">
+                            <td className="py-3 px-4 font-mono font-bold text-primary">
+                              {req.reference}
+                            </td>
+                            <td className="py-3 px-4">
+                              <div className="font-semibold text-on-surface">{req.contactName}</div>
+                              <div className="text-[11px] text-on-surface-variant">{req.contactEmail}</div>
+                              {req.companyName && (
+                                <div className="text-[10px] text-secondary font-medium">{req.companyName}</div>
+                              )}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-secondary-container/40 text-secondary">
+                                {req.serviceType}
+                              </span>
+                            </td>
+                            <td className="py-3 px-4">
+                              <select
+                                value={req.stage}
+                                onChange={(e) => {
+                                  const nextStage = e.target.value;
+                                  startTransition(async () => {
+                                    await updateServiceRequestStageAction(req.id, nextStage);
+                                    showNotification(`Updated ${req.reference} stage to ${nextStage}`);
+                                  });
+                                }}
+                                className="bg-surface-container border border-outline-variant/40 rounded-lg px-2 py-1 text-[11px] text-on-surface font-semibold focus:outline-none"
+                              >
+                                <option value="NEW">NEW</option>
+                                <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+                                <option value="DISCOVERY_SCHEDULED">DISCOVERY_SCHEDULED</option>
+                                <option value="PROPOSAL_SENT">PROPOSAL_SENT</option>
+                                <option value="ACCEPTED">ACCEPTED</option>
+                                <option value="NOT_SUITABLE">NOT_SUITABLE</option>
+                              </select>
+                            </td>
+                            <td className="py-3 px-4 text-on-surface-variant text-[11px]">
+                              {new Date(req.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              <button
+                                onClick={() => setSelectedRequestDetails(req)}
+                                className="px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/40 text-[11px] font-semibold text-on-surface transition-colors"
+                              >
+                                View Diagnostic
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
         </div>
       )}
 
@@ -1471,6 +1589,73 @@ export default function AdminDashboardClient({
             <div className="flex justify-end">
               <button
                 onClick={() => setSelectedOrgPolicy(null)}
+                className="px-4 py-2 rounded-xl bg-surface-container-high text-xs font-semibold text-on-surface hover:bg-surface-container-highest"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Intake / Early Access Diagnostic Modal */}
+      {selectedRequestDetails && (
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-4">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[20px]">assignment</span>
+                <span className="font-bold text-sm text-on-surface">
+                  Diagnostic: {selectedRequestDetails.reference} ({selectedRequestDetails.contactName})
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedRequestDetails(null)}
+                className="p-1 text-on-surface-variant hover:text-on-surface rounded-lg"
+              >
+                <span className="material-symbols-outlined text-[20px]">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-4 mb-6">
+              <div className="grid grid-cols-2 gap-3 p-3 bg-surface-container-low rounded-xl border border-outline-variant/20 text-xs">
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-on-surface-variant">Email</div>
+                  <div className="font-semibold text-on-surface">{selectedRequestDetails.contactEmail}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-on-surface-variant">Phone / WhatsApp</div>
+                  <div className="font-semibold text-on-surface">{selectedRequestDetails.contactPhone || 'Not provided'}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-on-surface-variant">Company</div>
+                  <div className="font-semibold text-on-surface">{selectedRequestDetails.companyName || 'Not provided'}</div>
+                </div>
+                <div>
+                  <div className="text-[10px] uppercase font-bold text-on-surface-variant">Source</div>
+                  <div className="font-semibold text-secondary">{selectedRequestDetails.sourceAttribution || 'Website'}</div>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xs font-bold text-on-surface mb-1">Assessment Answers & Diagnostic Details:</div>
+                <div className="bg-surface-container-low rounded-xl p-4 border border-outline-variant/20">
+                  <pre className="font-mono text-xs text-on-surface whitespace-pre-wrap leading-relaxed">
+                    {(() => {
+                      try {
+                        return JSON.stringify(JSON.parse(selectedRequestDetails.answers), null, 2);
+                      } catch {
+                        return selectedRequestDetails.answers;
+                      }
+                    })()}
+                  </pre>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                onClick={() => setSelectedRequestDetails(null)}
                 className="px-4 py-2 rounded-xl bg-surface-container-high text-xs font-semibold text-on-surface hover:bg-surface-container-highest"
               >
                 Close
