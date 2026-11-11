@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
 
 interface ServicePackageItem {
@@ -52,12 +53,23 @@ export default function ServicesClient({
   clientServices,
   organizationName,
 }: ServicesClientProps) {
+  const searchParams = useSearchParams();
+  const purchased = searchParams?.get('purchased') === 'true';
+  const canceled = searchParams?.get('canceled') === 'true';
+
   const [activeTab, setActiveTab] = useState<'MARKETPLACE' | 'MY_SERVICES'>(
-    clientServices.length > 0 ? 'MY_SERVICES' : 'MARKETPLACE'
+    purchased || clientServices.length > 0 ? 'MY_SERVICES' : 'MARKETPLACE'
   );
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [purchasingSlug, setPurchasingSlug] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
+
+  useEffect(() => {
+    if (purchased) {
+      setActiveTab('MY_SERVICES');
+    }
+  }, [purchased]);
 
   const categories = [
     { id: 'ALL', label: 'All Services', icon: 'Grid' },
@@ -187,6 +199,43 @@ export default function ServicesClient({
           </button>
         </div>
       </div>
+
+      {purchased && !bannerDismissed && (
+        <div className="p-4 md:p-5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-xs md:text-sm flex items-start justify-between gap-3 shadow-lg">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 shrink-0">
+              <Icon name="CheckCircle" size={20} />
+            </div>
+            <div>
+              <p className="font-bold text-emerald-300 text-sm md:text-base">
+                Payment Confirmed & Service Package Activated!
+              </p>
+              <p className="text-emerald-200/80 text-xs mt-0.5 leading-relaxed">
+                Your service package is now active. Your deliverables checklist and assigned team specialist are listed below. Our operations team has received your onboarding profile and is currently preparing your setup.
+              </p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setBannerDismissed(true)} 
+            className="text-emerald-400 hover:text-emerald-200 text-base font-bold px-2 py-1"
+            aria-label="Dismiss banner"
+          >
+            &times;
+          </button>
+        </div>
+      )}
+
+      {canceled && !bannerDismissed && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Icon name="AlertCircle" size={18} className="shrink-0 text-amber-400" />
+            <span>Checkout was cancelled. Feel free to browse and activate any service package whenever you are ready.</span>
+          </div>
+          <button onClick={() => setBannerDismissed(true)} className="text-amber-400 hover:text-amber-200 px-2">
+            &times;
+          </button>
+        </div>
+      )}
 
       {errorMessage && (
         <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">

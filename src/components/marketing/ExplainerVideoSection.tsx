@@ -17,7 +17,9 @@ import {
   Layers,
   ChevronRight,
   RefreshCw,
+  Target,
 } from 'lucide-react';
+import Image from 'next/image';
 
 interface ExplainerVideoSectionProps {
   onOpenAudit?: () => void;
@@ -48,10 +50,11 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
   };
 
   const chapters = [
-    { title: "1. Revenue Leakage", time: 0, label: "0:00" },
-    { title: "2. Ingestion & Priority", time: 15, label: "0:15" },
+    { title: "1. Lead Generation", time: 0, label: "0:00" },
+    { title: "2. Instant Routing", time: 15, label: "0:15" },
     { title: "3. Next-Best-Action", time: 30, label: "0:30" },
-    { title: "4. Closing the Deal", time: 45, label: "0:45" },
+    { title: "4. Revenue Leakage", time: 45, label: "0:45" },
+    { title: "5. Closing Deals", time: 55, label: "0:55" },
   ];
 
   const jumpTo = (time: number) => {
@@ -63,17 +66,27 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
 
   const simulationSteps = [
     {
-      stage: "1. INCOMING ENQUIRY",
+      stage: "1. SPONSORED ADS & ACQUISITION",
+      badge: "Targeted Meta Ads",
+      badgeColor: "bg-[#248277]/25 text-[#45bfae] border-[#248277]/40",
+      title: "Growth Package · ₦3,000/day ad spend included",
+      details: "High-converting Facebook & Instagram sponsored campaign with active targeting",
+      dealSize: "Ad Spend Included",
+      stateDesc: "Buyer clicks sponsored WhatsApp ad or submits lead form. Captured into Closecraft in <2 seconds.",
+      actionIcon: Target,
+    },
+    {
+      stage: "2. INCOMING ENQUIRY",
       badge: "Lead Ingestion",
       badgeColor: "bg-blue-500/20 text-blue-300 border-blue-500/30",
       title: "Sarah Davies · FinTech Africa",
-      details: "Enquiry submitted via Website Form · Requested 15-seat deployment",
+      details: "Enquiry submitted via Meta Lead Form · Requested 15-seat deployment",
       dealSize: "₦2,500,000 NGN",
-      stateDesc: "Enquiry lands in Closecraft instantly. Zero spreadsheet delay.",
+      stateDesc: "Enquiry lands in Closecraft instantly with campaign attribution. Zero spreadsheet delay.",
       actionIcon: Layers,
     },
     {
-      stage: "2. QUALIFICATION & SLA",
+      stage: "3. QUALIFICATION & SLA",
       badge: "SLA Activated",
       badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
       title: "Assigned to Closer: Somtochukwu O.",
@@ -83,7 +96,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
       actionIcon: Clock,
     },
     {
-      stage: "3. AI NEXT-BEST-ACTION",
+      stage: "4. AI NEXT-BEST-ACTION",
       badge: "AI Recommended",
       badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
       title: "Action: Schedule Commercial Discovery Call",
@@ -93,11 +106,11 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
       actionIcon: Sparkles,
     },
     {
-      stage: "4. DEAL CLOSED & WON",
+      stage: "5. DEAL CLOSED & WON",
       badge: "Revenue Secured",
       badgeColor: "bg-[#248277]/25 text-[#45bfae] border-[#248277]/40",
       title: "Closed Won · ₦2,500,000 NGN",
-      details: "Attribution: Website Form · Sales Cycle: 48 hours · 0 leaked follow-ups",
+      details: "Attribution: Sponsored Meta Ad · Sales Cycle: 48 hours · 0 leaked follow-ups",
       dealSize: "₦2.5M Added to Pipeline",
       stateDesc: "Payment verified, CRM updated, full audit trail preserved for manager review.",
       actionIcon: CheckCircle2,
@@ -160,11 +173,12 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
               <video
                 ref={videoRef}
                 src="/videos/closecraft-onboarding.mp4"
+                poster="/images/closecraft_hero_dashboard.jpg"
                 playsInline
                 muted={isMuted}
                 onPlay={() => setIsPlaying(true)}
                 onPause={() => setIsPlaying(false)}
-                className="w-full aspect-video object-contain"
+                className="w-full aspect-video object-cover"
               />
 
               {/* Big Center Play Overlay when paused */}
@@ -219,7 +233,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
             </div>
 
             {/* Video Chapters bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 pt-2">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 pt-2">
               {chapters.map((ch) => (
                 <button
                   key={ch.title}
@@ -243,7 +257,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
         {activeTab === 'interactive' && (
           <div className="p-6 sm:p-8 rounded-3xl bg-[#090D12] border border-[#248277]/40 shadow-2xl space-y-6 animate-in fade-in duration-300">
             {/* Step Indicators */}
-            <div className="grid grid-cols-4 gap-2 pb-4 border-b border-white/10">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pb-4 border-b border-white/10">
               {simulationSteps.map((s, idx) => (
                 <button
                   key={s.stage}
@@ -301,7 +315,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                       onClick={() => setSimStep((prev) => (prev + 1) % simulationSteps.length)}
                       className="px-4 py-2 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold inline-flex items-center gap-2 shadow-md transition-all active:scale-95"
                     >
-                      <span>Next Step ({simStep < 3 ? `0${simStep + 2}` : 'Replay'})</span>
+                      <span>Next Step ({simStep < 4 ? `0${simStep + 2}` : 'Replay'})</span>
                       <ArrowRight size={14} />
                     </button>
 

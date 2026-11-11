@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense } from 'react';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { redirect } from 'next/navigation';
@@ -37,18 +37,20 @@ export default async function ServicesPage() {
 
   return (
     <div className="w-full h-full pb-12">
-      <ServicesClient 
-        packages={packages}
-        clientServices={clientServices.map((s: any) => ({
-          ...s,
-          deliverables: typeof s.deliverables === 'string' ? JSON.parse(s.deliverables || '[]') : (s.deliverables || []),
-          createdAt: s.createdAt.toISOString(),
-          updatedAt: s.updatedAt.toISOString(),
-          startDate: s.startDate ? s.startDate.toISOString() : null,
-          paidThroughDate: s.paidThroughDate ? s.paidThroughDate.toISOString() : null,
-        }))}
-        organizationName={org?.name || 'Your Workspace'}
-      />
+      <Suspense fallback={<div className="p-8 text-center text-on-surface-variant text-sm">Loading services marketplace...</div>}>
+        <ServicesClient 
+          packages={packages}
+          clientServices={clientServices.map((s: any) => ({
+            ...s,
+            deliverables: typeof s.deliverables === 'string' ? JSON.parse(s.deliverables || '[]') : (s.deliverables || []),
+            createdAt: s.createdAt.toISOString(),
+            updatedAt: s.updatedAt.toISOString(),
+            startDate: s.startDate ? s.startDate.toISOString() : null,
+            paidThroughDate: s.paidThroughDate ? s.paidThroughDate.toISOString() : null,
+          }))}
+          organizationName={org?.name || 'Your Workspace'}
+        />
+      </Suspense>
     </div>
   );
 }

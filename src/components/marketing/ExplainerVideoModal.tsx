@@ -23,10 +23,11 @@ export default function ExplainerVideoModal({
   if (!isOpen) return null;
 
   const chapters = [
-    { title: "Revenue Leakage", time: 0, label: "0:00" },
-    { title: "Command Centre", time: 15, label: "0:15" },
-    { title: "Next-Best-Action", time: 30, label: "0:30" },
-    { title: "Closing Deals", time: 45, label: "0:45" },
+    { title: "Lead Gen & Ads", time: 0, label: "0:00", description: "Meta sponsored ads with ad spend included & targeted reach" },
+    { title: "Instant Ingestion", time: 15, label: "0:15", description: "Instant WhatsApp & CRM routing without spreadsheet chaos" },
+    { title: "Next-Best-Action", time: 30, label: "0:30", description: "AI qualification & 15-minute response SLA timers" },
+    { title: "Revenue Leakage", time: 45, label: "0:45", description: "Radar prevents stalled deals and forgotten opportunities" },
+    { title: "Closing Deals", time: 55, label: "0:55", description: "Appointment setting & remote sales closing to win" },
   ];
 
   const togglePlay = () => {
@@ -78,10 +79,10 @@ export default function ExplainerVideoModal({
           <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 rounded-full bg-[#45bfae] animate-pulse" />
             <span id="explainer-video-title" className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
-              Closecraft Product Explainer & Walkthrough
+              Lead Generation to Sales Closing Walkthrough
             </span>
             <span className="hidden sm:inline-block text-[11px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] border border-[#248277]/40">
-              60s Overview
+              60s Growth Engine
             </span>
           </div>
           <button

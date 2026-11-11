@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Check } from 'lucide-react';
+import { Check, Target, Sparkles, Phone } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
 
 export const metadata = {
@@ -260,6 +260,251 @@ export default function PricingPage() {
             >
               Request a Managed Sales Proposal
             </a>
+          </div>
+        </div>
+
+        {/* Sponsored Ads & Lead Generation Packages (Official Rate Cards) */}
+        <div className="mt-16 pt-12 border-t border-outline-variant/30">
+          <div className="text-center mb-10">
+            <div className="eyebrow mb-2 text-[#45bfae] text-xs font-bold uppercase tracking-widest flex items-center justify-center gap-1.5">
+              <Target size={14} />
+              <span>Sponsored Ads &amp; Lead Generation Packages</span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface mb-3">
+              Targeted Meta Advertising With Ad Spend Included
+            </h2>
+            <p className="text-sm text-on-surface-variant max-w-2xl mx-auto leading-relaxed">
+              Full-service campaign management on Facebook, Instagram &amp; WhatsApp. All prices include both daily ad spend and Closecraft management fees.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-4 gap-6 items-stretch">
+            {/* Starter Package */}
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-6 flex flex-col justify-between hover:border-primary/50 transition-all shadow-sm">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/20 text-primary font-bold">
+                    POPULAR CHOICE
+                  </span>
+                  <span className="text-[11px] font-mono text-on-surface-variant">₦2,000/day</span>
+                </div>
+                <h3 className="font-bold text-base text-on-surface mb-1">Starter Package</h3>
+                <p className="text-xs text-on-surface-variant mb-4">
+                  For businesses testing demand with guaranteed daily ad spend.
+                </p>
+                <div className="mb-4">
+                  <span className="text-2xl font-extrabold text-on-surface">₦70,000</span>
+                  <span className="text-xs text-on-surface-variant"> / 4 weeks</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container mb-4 text-[11px] space-y-1">
+                  <div className="flex justify-between"><span>1 week:</span><span className="font-semibold text-on-surface">₦19,000</span></div>
+                  <div className="flex justify-between"><span>2 weeks:</span><span className="font-semibold text-on-surface">₦36,000</span></div>
+                  <div className="flex justify-between"><span>3 weeks:</span><span className="font-semibold text-on-surface">₦54,000</span></div>
+                  <div className="flex justify-between text-primary font-bold"><span>4 weeks:</span><span>₦70,000</span></div>
+                </div>
+                <ul className="space-y-2 text-xs text-on-surface-variant mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>₦2,000 daily Meta ad spend included</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>WhatsApp sponsored direct routing</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Ad setup, targeting &amp; monitoring</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-2 pt-2">
+                <a
+                  href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20get%20started%20with%20the%20Starter%20Sponsored%20Ads%20Package."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] text-center text-xs font-bold transition-all block"
+                >
+                  WhatsApp Sponsored
+                </a>
+                <Link
+                  href="/services/lead-generation"
+                  className="w-full py-2.5 rounded-xl bg-primary text-on-primary text-center text-xs font-bold hover:opacity-90 transition-opacity block"
+                >
+                  View Details &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* Growth Package */}
+            <div className="rounded-2xl border-2 border-primary bg-surface-container-low p-6 flex flex-col justify-between shadow-lg relative">
+              <div className="absolute -top-3 right-4 bg-primary text-on-primary text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                Most Recommended
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                    STEADY PIPELINE
+                  </span>
+                  <span className="text-[11px] font-mono text-on-surface-variant">₦3,000/day</span>
+                </div>
+                <h3 className="font-bold text-base text-on-surface mb-1">Growth Package</h3>
+                <p className="text-xs text-on-surface-variant mb-4">
+                  Consistent lead generation with creative rotation and optimization.
+                </p>
+                <div className="mb-4">
+                  <span className="text-2xl font-extrabold text-primary">₦100,000</span>
+                  <span className="text-xs text-on-surface-variant"> / 4 weeks</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container mb-4 text-[11px] space-y-1">
+                  <div className="flex justify-between"><span>1 week:</span><span className="font-semibold text-on-surface">₦27,000</span></div>
+                  <div className="flex justify-between"><span>2 weeks:</span><span className="font-semibold text-on-surface">₦51,000</span></div>
+                  <div className="flex justify-between"><span>3 weeks:</span><span className="font-semibold text-on-surface">₦77,000</span></div>
+                  <div className="flex justify-between text-primary font-bold"><span>4 weeks:</span><span>₦100,000</span></div>
+                </div>
+                <ul className="space-y-2 text-xs text-on-surface-variant mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>₦3,000 daily Meta ad spend included</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Audience testing &amp; 3 creative variants</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Closecraft CRM lead capture integration</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-2 pt-2">
+                <a
+                  href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20get%20started%20with%20the%20Growth%20Sponsored%20Ads%20Package."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] text-center text-xs font-bold transition-all block"
+                >
+                  WhatsApp Sponsored
+                </a>
+                <Link
+                  href="/services/lead-generation"
+                  className="w-full py-2.5 rounded-xl bg-primary text-on-primary text-center text-xs font-bold hover:opacity-90 transition-opacity block"
+                >
+                  View Details &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* Elite Package */}
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-6 flex flex-col justify-between hover:border-primary/50 transition-all shadow-sm">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">
+                    HIGH IMPACT
+                  </span>
+                  <span className="text-[11px] font-mono text-on-surface-variant">₦4,000/day</span>
+                </div>
+                <h3 className="font-bold text-base text-on-surface mb-1">Elite Package</h3>
+                <p className="text-xs text-on-surface-variant mb-4">
+                  Rapid volume for aggressive sales teams and high-ticket closing.
+                </p>
+                <div className="mb-4">
+                  <span className="text-2xl font-extrabold text-on-surface">₦130,000</span>
+                  <span className="text-xs text-on-surface-variant"> / 4 weeks</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container mb-4 text-[11px] space-y-1">
+                  <div className="flex justify-between"><span>1 week:</span><span className="font-semibold text-on-surface">₦34,000</span></div>
+                  <div className="flex justify-between"><span>2 weeks:</span><span className="font-semibold text-on-surface">₦66,000</span></div>
+                  <div className="flex justify-between"><span>3 weeks:</span><span className="font-semibold text-on-surface">₦99,000</span></div>
+                  <div className="flex justify-between text-primary font-bold"><span>4 weeks:</span><span>₦130,000</span></div>
+                </div>
+                <ul className="space-y-2 text-xs text-on-surface-variant mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>₦4,000 daily Meta ad spend included</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Dynamic creative testing (5+ variants)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Dedicated campaign manager oversight</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-2 pt-2">
+                <a
+                  href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20get%20started%20with%20the%20Elite%20Sponsored%20Ads%20Package."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] text-center text-xs font-bold transition-all block"
+                >
+                  WhatsApp Sponsored
+                </a>
+                <Link
+                  href="/services/lead-generation"
+                  className="w-full py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/40 text-center text-xs font-bold transition-all block"
+                >
+                  View Details &rarr;
+                </Link>
+              </div>
+            </div>
+
+            {/* Enterprise Package */}
+            <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-low p-6 flex flex-col justify-between hover:border-primary/50 transition-all shadow-sm">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">
+                    TAILORED
+                  </span>
+                  <span className="text-[11px] font-mono text-on-surface-variant">Custom Budget</span>
+                </div>
+                <h3 className="font-bold text-base text-on-surface mb-1">Enterprise Package</h3>
+                <p className="text-xs text-on-surface-variant mb-4">
+                  Custom weekly budget and dedicated media buyer for larger brands.
+                </p>
+                <div className="mb-4">
+                  <span className="text-2xl font-extrabold text-on-surface">Custom Quote</span>
+                  <span className="text-xs text-on-surface-variant"> / flight</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-surface-container mb-4 text-[11px] space-y-1">
+                  <div className="flex justify-between"><span>1 week:</span><span className="font-semibold text-on-surface">Custom Quote</span></div>
+                  <div className="flex justify-between"><span>2 weeks:</span><span className="font-semibold text-on-surface">Custom Quote</span></div>
+                  <div className="flex justify-between"><span>3 weeks:</span><span className="font-semibold text-on-surface">Custom Quote</span></div>
+                  <div className="flex justify-between text-primary font-bold"><span>4 weeks:</span><span>Custom Quote</span></div>
+                </div>
+                <ul className="space-y-2 text-xs text-on-surface-variant mb-6">
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Custom ad spend tailored to targets</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Full-funnel architecture &amp; attribution</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-primary shrink-0 w-3.5 h-3.5 mt-0.5" />
+                    <span>Dedicated media buyer &amp; custom dashboard</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="space-y-2 pt-2">
+                <a
+                  href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20discuss%20an%20Enterprise%20Custom%20Ad%20Spend%20Campaign."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-2.5 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] text-center text-xs font-bold transition-all block"
+                >
+                  WhatsApp Enterprise
+                </a>
+                <a
+                  href="mailto:sales@closecrafthq.com?subject=Enterprise%20Ad%20Spend%20Quote"
+                  className="w-full py-2.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/40 text-center text-xs font-bold transition-all block"
+                >
+                  Request Custom Quote
+                </a>
+              </div>
+            </div>
           </div>
         </div>
 

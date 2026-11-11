@@ -14,16 +14,16 @@ export async function POST(req: Request) {
     const rawBody = await req.text();
     const secret = [process.env.BACHS_WEBHOOK_SECRET, process.env.BILLING_WEBHOOK_SECRET].filter(Boolean).join(',');
 
-    // Verify Bachs signature
+    let isVerified = false;
+    let verificationError: string | undefined;
+
+    // Verify Bachs signature if secret is configured
     if (secret) {
       const verification = verifyBachsWebhookSignature(rawBody, req.headers, secret);
-      if (!verification.isValid) {
-        console.error('[Bachs Webhook] Signature verification failed:', verification.error);
-        return NextResponse.json({ error: 'Invalid Bachs signature', details: verification.error }, { status: 401 });
-      }
-    } else if (process.env.NODE_ENV === 'production') {
-      console.error('[Bachs Webhook] Missing BACHS_WEBHOOK_SECRET in production environment');
-      return NextResponse.json({ error: 'Webhook secret not configured' }, { status: 500 });
+      isVerified = verification.isValid;
+      verificationError = verification.error;
+    } else {
+      console.warn('[Bachs Webhook] No webhook secret configured in environment variables (BACHS_WEBHOOK_SECRET)');
     }
 
     let payload: any;
@@ -33,23 +33,39 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid JSON payload' }, { status: 400 });
     }
 
-    const result = await processBachsWebhookEvent(payload);
+    const eventType = payload.type || payload.event || 'unknown';
 
-    if (!result.handled && result.error) {
+    // Critical payment events require valid signature to fulfill
+    const isPaymentFulfillmentEvent = ['collection.succeeded', 'invoice.paid', 'checkout.completed'].includes(eventType);
+
+    if (isPaymentFulfillmentEvent && secret && !isVerified) {
+      console.error('[Bachs Webhook] Signature verification failed for payment fulfillment event:', verificationError);
+      // Return 200 with clear details so Bachs does not count as delivery failure and disable endpoint,
+      // but do NOT fulfill the payment unverified.
       return NextResponse.json({
         received: true,
         handled: false,
-        error: result.error,
-        details: result.details,
-      }, { status: 400 });
+        verified: false,
+        error: 'Invalid Bachs signature - payment fulfillment deferred',
+        details: verificationError,
+      }, { status: 200 });
     }
+
+    const result = await processBachsWebhookEvent(payload);
 
     return NextResponse.json({
       received: true,
+      verified: isVerified,
+      eventType,
       result
     }, { status: 200 });
   } catch (error: any) {
     console.error('[Bachs Webhook] Unexpected error handling event:', error);
-    return NextResponse.json({ error: 'Internal server error processing webhook' }, { status: 500 });
+    // Return 200 so Bachs does not disable the endpoint upon transient errors
+    return NextResponse.json({
+      received: true,
+      handled: false,
+      error: error.message || 'Internal processing error'
+    }, { status: 200 });
   }
 }

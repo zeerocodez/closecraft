@@ -249,7 +249,120 @@ export interface StandardPackageDefinition {
 }
 
 export const STANDARD_PACKAGES: StandardPackageDefinition[] = [
-  // 1. LEAD GENERATION
+  // 1. LEAD GENERATION — SPONSORED ADS PACKAGES (RATE CARDS)
+  {
+    slug: 'meta-ad-starter',
+    category: 'LEAD_GENERATION',
+    packageType: 'MANAGED_LEAD_GENERATION',
+    title: 'Sponsored Ads Starter Package (₦2,000/day spend)',
+    description: 'Entry-level Meta sponsored advertising with ₦2,000 daily ad spend included. Ideal for testing new offers or launching initial lead generation on WhatsApp & Instagram.',
+    suitableCustomerSummary: 'Businesses starting out with paid ads or testing product demand. Rates: 1 wk: ₦19,000 | 2 wks: ₦36,000 | 3 wks: ₦54,000 | 4 wks: ₦70,000 (Popular Choice).',
+    defaultBasePrice: 70000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 2,
+    highlightFeature: 'Ad Spend + Setup + Targeting + Monitoring Included',
+    coverageHours: 'Monday - Friday (Campaign Management)',
+    responseExpectations: 'Campaign launch within 48 hours of asset approval',
+    defaultCapacity: 1.0,
+    capacityBasis: 'CAMPAIGNS',
+    activitiesIncluded: [
+      '₦2,000 daily Meta ad spend included in the fee',
+      'Targeted audience setup and geographic location scoping',
+      'High-converting WhatsApp sponsored ad copywriting',
+      'Direct WhatsApp click-to-chat & lead form routing',
+      'Daily monitoring and budget pacing',
+      'Weekly performance report'
+    ],
+    activitiesExcluded: [
+      'Custom studio video shoot',
+      'Broad organic social media management'
+    ]
+  },
+  {
+    slug: 'meta-ad-growth',
+    category: 'LEAD_GENERATION',
+    packageType: 'MANAGED_LEAD_GENERATION',
+    title: 'Sponsored Ads Growth Package (₦3,000/day spend)',
+    description: 'Our most recommended Meta ads package with ₦3,000 daily ad spend included. Built for businesses ready for steady daily lead flow and active sales follow-up.',
+    suitableCustomerSummary: 'Businesses with a validated offer looking to scale qualified buyer enquiries. Rates: 1 wk: ₦27,000 | 2 wks: ₦51,000 | 3 wks: ₦77,000 | 4 wks: ₦100,000 (Most Recommended).',
+    defaultBasePrice: 100000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 2,
+    highlightFeature: '₦3,000 Daily Ad Spend Included + Creative Optimization',
+    coverageHours: 'Monday - Saturday (Active Campaign Monitoring)',
+    responseExpectations: 'Creative rotation and bid tuning every 48 hours',
+    defaultCapacity: 2.0,
+    capacityBasis: 'CAMPAIGNS',
+    activitiesIncluded: [
+      '₦3,000 daily Meta ad spend included in the fee',
+      'Multiple audience angle testing (Lookalikes & Interest-based)',
+      '3 distinct ad creative variations & headline hooks',
+      'Direct WhatsApp and Closecraft CRM lead capture',
+      'Mid-week budget reallocation & conversion rate optimization',
+      'Bi-weekly lead quality audit clinic'
+    ],
+    activitiesExcluded: [
+      'Meta policy violation appeals for non-compliant niches'
+    ]
+  },
+  {
+    slug: 'meta-ad-elite',
+    category: 'LEAD_GENERATION',
+    packageType: 'MANAGED_LEAD_GENERATION',
+    title: 'Sponsored Ads Elite Package (₦4,000/day spend)',
+    description: 'High impact sponsored ad acquisition with ₦4,000 daily ad spend included. Delivers high enquiry velocity for aggressive sales teams and closing operations.',
+    suitableCustomerSummary: 'High-ticket service firms, real estate, education, and consultancies needing high lead volume. Rates: 1 wk: ₦34,000 | 2 wks: ₦66,000 | 3 wks: ₦99,000 | 4 wks: ₦130,000 (High Impact).',
+    defaultBasePrice: 130000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 1,
+    highlightFeature: '₦4,000 Daily Ad Spend Included + Rapid Scaling',
+    coverageHours: '7 Days a Week (High-Velocity Monitoring)',
+    responseExpectations: 'Same-day campaign optimization & scale triggers',
+    defaultCapacity: 4.0,
+    capacityBasis: 'CAMPAIGNS',
+    activitiesIncluded: [
+      '₦4,000 daily Meta ad spend included in the fee',
+      'Advanced custom audience retargeting and exclusion lists',
+      'Dynamic creative testing (5+ ad variants)',
+      'Instant Closecraft CRM routing with automated SLA follow-up triggers',
+      'Dedicated lead generation campaign manager',
+      'Weekly strategy and scaling review call'
+    ],
+    activitiesExcluded: [
+      'Celebrity influencer endorsements'
+    ]
+  },
+  {
+    slug: 'meta-ad-enterprise',
+    category: 'LEAD_GENERATION',
+    packageType: 'MANAGED_LEAD_GENERATION',
+    title: 'Sponsored Ads Enterprise Package (Custom Ad Spend)',
+    description: 'Custom weekly advertising budget tailored to your specific commercial growth targets. Includes multi-campaign funnels, omnichannel tracking, and dedicated media buyer.',
+    suitableCustomerSummary: 'Companies spending above ₦150,000/month on advertising seeking custom campaign strategy and enterprise CRM integration.',
+    defaultBasePrice: 200000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 1,
+    highlightFeature: 'Tailored Weekly Ad Spend & Dedicated Media Buyer',
+    coverageHours: 'Dedicated Media Buyer Support',
+    responseExpectations: 'Continuous live performance dashboard & Slack/WhatsApp channel',
+    defaultCapacity: 8.0,
+    capacityBasis: 'CAMPAIGNS',
+    activitiesIncluded: [
+      'Custom budget allocation agreed per business targets',
+      'Full-funnel campaign architecture (Top, Middle, Bottom of Funnel)',
+      'Omnichannel conversion tracking (Pixel, Conversions API, CRM)',
+      'Continuous creative testing & ad copy experimentation',
+      'Dedicated media buyer & sales funnel consultant',
+      'Weekly executive revenue contribution reports'
+    ],
+    activitiesExcluded: [
+      'Third-party external media buying software licenses'
+    ]
+  },
   {
     slug: 'meta-ad-acquisition',
     category: 'LEAD_GENERATION',

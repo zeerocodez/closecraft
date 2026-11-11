@@ -33,3 +33,4 @@ export const metadata: Metadata = {
 export default function DSSProductPage() {
   return <DSSProductClient />;
 }
+

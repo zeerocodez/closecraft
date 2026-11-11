@@ -235,9 +235,10 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
 
 /**
  * Verifies Bachs webhook authenticity.
- * Checks X-Bachs-Signature-V2 (t={timestamp},v1={sig}) or X-Bachs-Signature + X-Bachs-Timestamp.
- * Supports webhook-signature and webhook-timestamp header conventions.
- * Uses raw request body HMAC-SHA256 with 300s replay tolerance.
+ * Checks Svix headers (svix-id, svix-timestamp, svix-signature / webhook-signature)
+ * and Bachs V2 headers (X-Bachs-Signature-V2, X-Bachs-Signature, X-Bachs-Timestamp).
+ * Supports both whsec_ base64 secrets and standard utf8 secrets, with base64 and hex signature digests.
+ * Uses HMAC-SHA256 with 300s replay tolerance.
  */
 export function verifyBachsWebhookSignature(
   rawBody: string,
@@ -260,7 +261,6 @@ export function verifyBachsWebhookSignature(
     return lastResult;
   }
 
-
   const getHeader = (name: string): string | null => {
     if (typeof (headers as any).get === 'function') {
       return (headers as Headers).get(name) || (headers as Headers).get(name.toLowerCase());
@@ -270,9 +270,11 @@ export function verifyBachsWebhookSignature(
   };
 
   const v2Header = getHeader('X-Bachs-Signature-V2') || getHeader('x-bachs-signature-v2');
-  const sigHeader = getHeader('X-Bachs-Signature') || getHeader('x-bachs-signature') || getHeader('webhook-signature');
-  const timestampHeader = getHeader('X-Bachs-Timestamp') || getHeader('x-bachs-timestamp') || getHeader('webhook-timestamp');
+  const sigHeader = getHeader('X-Bachs-Signature') || getHeader('x-bachs-signature') || getHeader('webhook-signature') || getHeader('svix-signature');
+  const timestampHeader = getHeader('X-Bachs-Timestamp') || getHeader('x-bachs-timestamp') || getHeader('webhook-timestamp') || getHeader('svix-timestamp');
+  const msgIdHeader = getHeader('X-Bachs-Id') || getHeader('x-bachs-id') || getHeader('webhook-id') || getHeader('svix-id');
 
+  // Strategy 1: X-Bachs-Signature-V2 (t={timestamp},v1={sig})
   if (v2Header) {
     const parts = v2Header.split(',').map(p => p.trim());
     let timestamp: number | null = null;
@@ -294,19 +296,23 @@ export function verifyBachsWebhookSignature(
     }
 
     const message = `${timestamp}.${rawBody}`;
-    const expected = crypto.createHmac('sha256', secret).update(message, 'utf8').digest('hex');
+    const expectedHex = crypto.createHmac('sha256', secret).update(message, 'utf8').digest('hex');
+    const expectedBase64 = crypto.createHmac('sha256', secret).update(message, 'utf8').digest('base64');
 
     const match = signatures.some(sig => {
       try {
-        return crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expected, 'hex'));
-      } catch {
-        return false;
-      }
+        if (crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expectedHex, 'hex'))) return true;
+      } catch {}
+      try {
+        if (crypto.timingSafeEqual(Buffer.from(sig, 'base64'), Buffer.from(expectedBase64, 'base64'))) return true;
+      } catch {}
+      return false;
     });
 
     return { isValid: match, timestamp, error: match ? undefined : 'Signature mismatch' };
   }
 
+  // Strategy 2: Svix / Standard Webhook headers (webhook-signature / svix-signature + webhook-timestamp)
   if (sigHeader && timestampHeader) {
     const timestamp = parseInt(timestampHeader, 10);
     if (isNaN(timestamp)) {
@@ -318,26 +324,73 @@ export function verifyBachsWebhookSignature(
       return { isValid: false, error: 'Webhook timestamp outside tolerance window (replay protection)' };
     }
 
-    const message = `${timestamp}.${rawBody}`;
-    const expected = crypto.createHmac('sha256', secret).update(message, 'utf8').digest('hex');
-
-    try {
-      const match = crypto.timingSafeEqual(Buffer.from(sigHeader, 'hex'), Buffer.from(expected, 'hex'));
-      return { isValid: match, timestamp, error: match ? undefined : 'Signature mismatch' };
-    } catch {
-      return { isValid: false, error: 'Invalid signature encoding' };
+    // Prepare secrets: check if secret is whsec_ base64 formatted
+    const secretBuffers: Buffer[] = [];
+    if (secret.startsWith('whsec_')) {
+      try {
+        secretBuffers.push(Buffer.from(secret.slice(6), 'base64'));
+      } catch {}
     }
+    secretBuffers.push(Buffer.from(secret, 'utf8'));
+
+    // Prepare candidate payloads to sign (Svix signs msg_id.timestamp.body; Bachs signs timestamp.body)
+    const messages: string[] = [];
+    if (msgIdHeader) {
+      messages.push(`${msgIdHeader}.${timestamp}.${rawBody}`);
+    }
+    messages.push(`${timestamp}.${rawBody}`);
+
+    // Parse signatures from sigHeader (may be space-delimited "v1,abc v1,def" or single token)
+    const rawTokens = sigHeader.split(/\s+/).map(t => t.trim()).filter(Boolean);
+    const candidateSignatures: string[] = [];
+    for (const tok of rawTokens) {
+      if (tok.startsWith('v1,')) {
+        candidateSignatures.push(tok.slice(3));
+      } else if (tok.startsWith('v1=')) {
+        candidateSignatures.push(tok.slice(3));
+      } else {
+        candidateSignatures.push(tok);
+      }
+    }
+
+    for (const secBuf of secretBuffers) {
+      for (const msg of messages) {
+        const expectedHex = crypto.createHmac('sha256', secBuf).update(msg, 'utf8').digest('hex');
+        const expectedBase64 = crypto.createHmac('sha256', secBuf).update(msg, 'utf8').digest('base64');
+
+        for (const sig of candidateSignatures) {
+          try {
+            if (crypto.timingSafeEqual(Buffer.from(sig, 'hex'), Buffer.from(expectedHex, 'hex'))) {
+              return { isValid: true, timestamp };
+            }
+          } catch {}
+          try {
+            if (crypto.timingSafeEqual(Buffer.from(sig, 'base64'), Buffer.from(expectedBase64, 'base64'))) {
+              return { isValid: true, timestamp };
+            }
+          } catch {}
+        }
+      }
+    }
+
+    return { isValid: false, timestamp, error: 'Signature mismatch' };
   }
 
-  // Also support single hex signature if only sigHeader is supplied without timestamp header
+  // Strategy 3: Single hex/base64 signature without timestamp header
   if (sigHeader && !timestampHeader) {
-    const expected = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('hex');
+    const expectedHex = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('hex');
+    const expectedBase64 = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('base64');
     try {
-      const match = crypto.timingSafeEqual(Buffer.from(sigHeader, 'hex'), Buffer.from(expected, 'hex'));
-      return { isValid: match, error: match ? undefined : 'Signature mismatch' };
-    } catch {
-      return { isValid: false, error: 'Invalid signature encoding' };
-    }
+      if (crypto.timingSafeEqual(Buffer.from(sigHeader, 'hex'), Buffer.from(expectedHex, 'hex'))) {
+        return { isValid: true };
+      }
+    } catch {}
+    try {
+      if (crypto.timingSafeEqual(Buffer.from(sigHeader, 'base64'), Buffer.from(expectedBase64, 'base64'))) {
+        return { isValid: true };
+      }
+    } catch {}
+    return { isValid: false, error: 'Signature mismatch' };
   }
 
   return { isValid: false, error: 'Missing Bachs signature headers' };
