@@ -625,6 +625,60 @@ export async function processBachsWebhookEvent(event: any): Promise<{
       }
     }
 
+    // 4.B Fulfill Modular Service Purchase (ClientService)
+    if (purchaseType === 'SERVICE_PURCHASE' || metadata.clientServiceId) {
+      let parsedMetadata: any = {};
+      try {
+        parsedMetadata = typeof invoice.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice.metadata || {});
+      } catch (_) {}
+
+      const clientServiceId = metadata.clientServiceId || parsedMetadata.clientServiceId;
+      const paidThrough = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+      if (clientServiceId) {
+        await db.clientService.update({
+          where: { id: clientServiceId },
+          data: {
+            status: 'ACTIVE',
+            progressPercent: 20,
+            paidThroughDate: paidThrough,
+            lastActivityAt: now,
+          }
+        }).catch((err) => {
+          console.warn('[Bachs Webhook] Error updating clientService:', err.message);
+        });
+      } else {
+        const packageName = metadata.packageName || parsedMetadata.packageName || 'CloseCraft Modular Service';
+        const category = metadata.category || parsedMetadata.category || 'LEAD_GENERATION';
+        await db.clientService.create({
+          data: {
+            organizationId: targetOrgId,
+            name: packageName,
+            category,
+            description: `Activated via Invoice ${invoice.invoiceNumber}`,
+            status: 'ACTIVE',
+            pricePaid: invoice.amount,
+            currency: invoice.currency,
+            paidThroughDate: paidThrough,
+            progressPercent: 20,
+          }
+        }).catch((err) => {
+          console.warn('[Bachs Webhook] Error creating clientService:', err.message);
+        });
+      }
+
+      await db.auditLog.create({
+        data: {
+          organizationId: targetOrgId,
+          actorType: 'INTEGRATION',
+          action: 'CLIENT_SERVICE_ACTIVATED',
+          resourceType: 'SERVICE',
+          resourceId: clientServiceId || invoice.id,
+          newState: JSON.stringify({ invoiceNumber: invoice.invoiceNumber, amount: invoice.amount, paidThrough })
+        }
+      }).catch(() => {});
+    }
+
     // 5. Record processed WebhookEvent for event-level idempotency
     if (eventId) {
       await db.webhookEvent.create({

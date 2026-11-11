@@ -44,6 +44,7 @@ model User {
   verifiableCredentials     VerifiableCredential[]
   issuedCredentials         VerifiableCredential[]    @relation("CredentialIssuer")
   salesPlaybooks            SalesPlaybook[]
+  affiliateProfile          AffiliateProfile?
 }
 
 model Organization {
@@ -92,6 +93,8 @@ model Organization {
   outboxMessages      OutboxMessage[]
   qualifications      WorkspaceQualification[]
   serviceRequests     ServiceRequest[]
+  clientServices      ClientService[]
+  referralAttribution ReferralAttribution?
 
   // LMS Relations
   studentProfiles StudentProfile[]
@@ -1470,32 +1473,71 @@ model CustomPipelineStage {
 // -----------------------------------------------------------------------------
 
 model ServicePackage {
-  id                        String        @id @default(cuid())
-  organizationId            String?       // null for platform standard template, or tenant customized
-  packageType               String        // ENQUIRY_RESPONSE, APPOINTMENT_SETTING, SALES_CLOSING, COMBINED_SALES_SUPPORT
+  id                        String          @id @default(cuid())
+  organizationId            String?         // null for platform standard template, or tenant customized
+  slug                      String?         @unique
+  category                  String          @default("LEAD_GENERATION") // LEAD_GENERATION, LEAD_MANAGEMENT, APPOINTMENT_SETTING, SALES_CLOSING, SALES_ENABLEMENT
+  packageType               String          // ENQUIRY_RESPONSE, APPOINTMENT_SETTING, SALES_CLOSING, COMBINED_SALES_SUPPORT, etc.
   title                     String
   description               String
   suitableCustomerSummary   String
-  activitiesIncluded        String        @default("[]") // JSON string array
-  activitiesExcluded        String        @default("[]") // JSON string array
-  capacityBasis             String        @default("HOURS") // HOURS, OPPORTUNITIES
-  defaultCapacity           Float         @default(40.0)
-  coverageHours             String        @default("9am - 5pm WAT")
-  responseExpectations      String        @default("Within 1 hour")
-  requiredClientInputs      String        @default("")
-  reviewCadence             String        @default("Weekly Friday review")
-  commercialModel           String        @default("FIXED_PLUS_MANAGEMENT")
-  defaultBasePrice          Float         @default(150000.0)
-  currency                  String        @default("NGN")
-  version                   Int           @default(1)
-  isActive                  Boolean       @default(true)
-  createdAt                 DateTime      @default(now())
-  updatedAt                 DateTime      @updatedAt
+  activitiesIncluded        String          @default("[]") // JSON string array
+  activitiesExcluded        String          @default("[]") // JSON string array
+  capacityBasis             String          @default("HOURS") // HOURS, OPPORTUNITIES
+  defaultCapacity           Float           @default(40.0)
+  coverageHours             String          @default("9am - 5pm WAT")
+  responseExpectations      String          @default("Within 1 hour")
+  requiredClientInputs      String          @default("")
+  reviewCadence             String          @default("Weekly Friday review")
+  commercialModel           String          @default("FIXED_PLUS_MANAGEMENT")
+  billingFrequency          String          @default("MONTHLY") // MONTHLY, ONE_TIME, CUSTOM
+  slaDays                   Int             @default(3)
+  highlightFeature          String?
+  defaultBasePrice          Float           @default(150000.0)
+  currency                  String          @default("NGN")
+  version                   Int             @default(1)
+  isActive                  Boolean         @default(true)
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
 
-  organization              Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization              Organization?   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clientServices            ClientService[]
 
   @@index([organizationId])
+  @@index([category])
   @@index([packageType])
+}
+
+model ClientService {
+  id                  String          @id @default(cuid())
+  organizationId      String
+  servicePackageId    String?
+  category            String          // LEAD_GENERATION, LEAD_MANAGEMENT, APPOINTMENT_SETTING, SALES_CLOSING, SALES_ENABLEMENT
+  name                String
+  description         String
+  tier                String?         // STARTER, PRO, ENTERPRISE, SPRINT
+  status              String          @default("ACTIVE") // PENDING_SETUP, ACTIVE, PAUSED, COMPLETED, CANCELLED
+  pricePaid           Float           @default(0.0)
+  currency            String          @default("NGN")
+  billingFrequency    String          @default("MONTHLY") // ONE_TIME, MONTHLY, QUARTERLY
+  progressPercent     Int             @default(15) // 0-100
+  deliverables        String          @default("[]") // JSON string array of checklist items
+  assignedTeamMember  String?         @default("CloseCraft Revenue Operations")
+  assignedUserId      String?
+  accountManagerEmail String?         @default("sales@closecrafthq.com")
+  startDate           DateTime        @default(now())
+  paidThroughDate     DateTime?
+  lastActivityAt      DateTime        @default(now())
+  metadata            String?         // JSON metadata
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  organization        Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  servicePackage      ServicePackage? @relation(fields: [servicePackageId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([category])
+  @@index([status])
 }
 
 model CallQualityReview {
@@ -2138,6 +2180,95 @@ model ServiceRequest {
   @@index([stage])
   @@index([contactEmail])
 }
+
+// -------------------------------------------------------------
+// AFFILIATE ECOSYSTEM & REFERRAL ATTRIBUTION
+// -------------------------------------------------------------
+
+model AffiliateProfile {
+  id                String    @id @default(cuid())
+  userId            String    @unique
+  referralCode      String    @unique
+  channel           String    // Preferred promotional channels
+  marketingExp      String?   // Experience level
+  status            String    @default("PENDING") // PENDING, APPROVED, REJECTED, SUSPENDED
+  commissionRate    Float     @default(15.0)      // Base percentage
+  bankName          String?
+  bankAccountNumber String?
+  bankAccountName   String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  referralEvents    ReferralEvent[]
+  attributions      ReferralAttribution[]
+  commissions       AffiliateCommission[]
+  payouts           AffiliatePayout[]
+
+  @@index([referralCode])
+  @@index([status])
+}
+
+model ReferralEvent {
+  id              String    @id @default(cuid())
+  affiliateId     String
+  ipAddress       String?
+  userAgent       String?
+  landingPage     String
+  createdAt       DateTime  @default(now())
+
+  affiliate       AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId])
+  @@index([createdAt])
+}
+
+model ReferralAttribution {
+  id              String    @id @default(cuid())
+  affiliateId     String
+  organizationId  String    @unique
+  referredUserId  String
+  createdAt       DateTime  @default(now())
+
+  affiliate       AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId])
+}
+
+model AffiliateCommission {
+  id              String    @id @default(cuid())
+  affiliateId     String
+  invoiceId       String    @unique
+  amount          Float     // Commission earned in NGN
+  saleAmount      Float     // Total invoice sale amount in NGN
+  status          String    @default("PENDING") // PENDING, APPROVED, PAYABLE, PAID, REVERSED
+  clearsAt        DateTime  // e.g. 14 days after payment
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  affiliate       AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId])
+  @@index([status])
+}
+
+model AffiliatePayout {
+  id              String    @id @default(cuid())
+  affiliateId     String
+  amount          Float     // Payout amount in NGN
+  status          String    @default("REQUESTED") // REQUESTED, APPROVED, PROCESSING, PAID, REJECTED
+  reference       String?   // Bank payment transaction reference
+  bankDetails     String?   // Snapshot of bank details at time of request
+  requestedAt     DateTime  @default(now())
+  processedAt     DateTime?
+
+  affiliate       AffiliateProfile @relation(fields: [affiliateId], references: [id], onDelete: Cascade)
+
+  @@index([affiliateId])
+  @@index([status])
+}
+
 
 
 

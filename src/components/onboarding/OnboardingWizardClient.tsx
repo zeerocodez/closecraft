@@ -1094,6 +1094,26 @@ export default function OnboardingWizardClient({
             </form>
           </div>
 
+          {/* Marketplace Growth Services Card */}
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-surface-container-low via-surface-container to-surface-container-low border border-primary/30 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Self-Service Marketplace</span>
+              <h4 className="font-heading font-bold text-base text-on-surface mt-0.5">
+                Ready to accelerate your revenue pipeline?
+              </h4>
+              <p className="text-xs text-on-surface-variant max-w-xl mt-1 leading-relaxed">
+                Browse our modular packages for Meta & Google lead generation, dedicated appointment setters, high-ticket closers, or team playbooks.
+              </p>
+            </div>
+            <button
+              onClick={() => router.push('/services')}
+              className="py-2.5 px-4 rounded-xl bg-primary text-on-primary font-bold text-xs hover:opacity-90 transition-opacity shadow-sm flex items-center justify-center gap-1.5 shrink-0"
+            >
+              <span>Browse Services Catalogue</span>
+              <Icon name="ArrowRight" size={14} />
+            </button>
+          </div>
+
           {/* Practical Activation Steps */}
           <PracticalActivationCard
             softwareFit={completedResult.softwareFit}

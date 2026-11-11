@@ -120,7 +120,8 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
     {
       title: 'Sales Services',
       items: [
-        { href: '/sales-support/request', icon: 'FilePlus', label: 'Request Support', visible: isManagerOrOwner },
+        { href: '/services', icon: 'Briefcase', label: 'Services & Marketplace' },
+        { href: '/sales-support/request', icon: 'FilePlus', label: 'Custom Proposal', visible: isManagerOrOwner },
         { href: '/sales-support', icon: 'HeartHandshake', label: 'Engagements', exact: true },
         { href: '/sales-support/professionals', icon: 'ShieldCheck', label: 'Assigned Professionals' },
       ]

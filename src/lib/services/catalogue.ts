@@ -1,5 +1,7 @@
+import { db } from '@/lib/db';
+
 /**
- * Closecraft Service Catalogue
+ * Closecraft Service Catalogue (Legacy & CloseCraft 2.0 Unified)
  *
  * Configurable catalogue for:
  * 1. Individual sales training through Digital Sales School (DSS)
@@ -7,11 +9,7 @@
  * 3. Managed sales engagements
  * 4. External appointment setters
  * 5. External sales closers
- *
- * Availability states:
- * - AVAILABLE: Approved offer with published terms and active enrolment/checkout route.
- * - ASSESSMENT_REQUIRED: Requires commercial qualification and readiness review before quote.
- * - UNAVAILABLE: Currently waitlisted or paused for operational capacity.
+ * 6. Managed lead generation
  */
 
 export type ServiceAvailability = 'AVAILABLE' | 'ASSESSMENT_REQUIRED' | 'UNAVAILABLE';
@@ -106,36 +104,35 @@ export const SERVICE_CATALOGUE: CatalogueServiceItem[] = [
     name: 'Closecraft Managed Follow-up Pilot (30 Days)',
     category: 'SALES_SERVICES',
     description: 'Turnkey sales execution pilot where Closecraft operators and vetted sales professionals work your inbound enquiries, follow up stalled leads, and book qualified pipeline inside your workspace.',
-    scopeSummary: '30-day scoped pilot, dedicated follow-up execution, transparent activity logging, and weekly commercial review.',
+    scopeSummary: '30-day bounded engagement, designated sales professional, shared WhatsApp/email response windows, and weekly performance reviews.',
     eligibilityRequirements: [
-      'Legitimate, verifiable product or service with clear deliverables',
-      'Minimum of 10-25 new enquiries or qualified conversations per month',
-      'Documented pricing, refund policy, and accessible decision-maker',
-      'Readiness assessment score >= 80% with approved sales materials'
+      'Target gross profit margin and typical deal value sufficient to sustain managed sales unit economics',
+      'Completed client onboarding and approved sales brief',
+      'Willingness to review daily activity logs and respond to blocker flags within 24 hours'
     ],
     availability: 'ASSESSMENT_REQUIRED',
     pricingMethod: 'FIXED_PLUS_MANAGEMENT',
-    pricingDisplay: '₦150,000 / month base + management fee (Detailed in scoped proposal)',
+    pricingDisplay: '₦150,000 pilot fee for 30 days (Includes 40 hours of dedicated execution)',
     currency: 'NGN',
     enquiryRoute: '/sales-support/request',
     tasksIncluded: [
-      'Multi-channel enquiry triage (WhatsApp, Email, Phone) within agreed SLA',
-      'Structured follow-up cadences on stalled and new opportunities',
-      'Real-time activity logging and handover notes in your workspace CRM',
-      'Weekly commercial progress and conversion bottleneck reviews'
+      'Rapid outreach to new inbound leads within agreed response windows (e.g., < 1 hour)',
+      'Multi-touch follow-up on older or stalled pipeline leads',
+      'Direct qualification against agreed customer profile criteria',
+      'Booking qualified discovery calls or appointments on your calendar'
     ],
     tasksExcluded: [
-      'Unbounded outbound cold scraping or untargeted spam',
-      'Unilateral authority to discount prices or alter product terms',
-      'Guaranteed closed revenue numbers without historical conversion baselines'
+      'Guaranteed sales volume or revenue quotas without qualification',
+      'Unsupervised cold outbound spamming',
+      'Legal contract drafting or payment collection guarantees'
     ]
   },
   {
     id: 'srv-ext-setting',
     key: 'EXTERNAL_SETTING',
-    name: 'External Appointment Setting Engagement',
+    name: 'Dedicated Appointment Setting Service',
     category: 'SALES_SERVICES',
-    description: 'Vetted, pre-trained sales development reps (SDRs) allocated to qualify incoming leads, run initial discovery, and schedule qualified sales appointments on your calendar.',
+    description: 'Vetted, trained remote sales representatives who handle initial touchpoints, qualify leads, run initial discovery, and schedule qualified sales appointments on your calendar.',
     scopeSummary: 'Dedicated setter capacity, defined lead qualification criteria (BANT/MEDDIC), calendar appointment booking, and daily activity tracking.',
     eligibilityRequirements: [
       'Inbound enquiry flow of at least 30 leads per month',
@@ -212,7 +209,7 @@ export const SERVICE_CATALOGUE: CatalogueServiceItem[] = [
       'Transparent weekly performance reporting (ad spend, cost per enquiry, qualified rate)'
     ],
     tasksExcluded: [
-      'Paying client advertising spend (ad spend is billed directly by Meta to client ad account)',
+      'Advertising budget paid directly to Meta',
       'High-end custom video production or commercial photo shoots',
       'Guaranteed conversion rates or closed sales outcomes without follow-up control'
     ]
@@ -225,4 +222,294 @@ export function getCatalogueService(key: string): CatalogueServiceItem | undefin
 
 export function getServicesByCategory(category: 'TRAINING' | 'SALES_SERVICES'): CatalogueServiceItem[] {
   return SERVICE_CATALOGUE.filter(s => s.category === category);
+}
+
+// -----------------------------------------------------------------------------
+// CLOSECRAFT 2.0 DYNAMIC SERVICE MARKETPLACE & STANDARD PACKAGES
+// -----------------------------------------------------------------------------
+
+export interface StandardPackageDefinition {
+  slug: string;
+  category: 'LEAD_GENERATION' | 'LEAD_MANAGEMENT' | 'APPOINTMENT_SETTING' | 'SALES_CLOSING' | 'SALES_ENABLEMENT';
+  packageType: string;
+  title: string;
+  description: string;
+  suitableCustomerSummary: string;
+  defaultBasePrice: number;
+  currency: string;
+  billingFrequency: 'MONTHLY' | 'ONE_TIME' | 'CUSTOM';
+  slaDays: number;
+  highlightFeature: string;
+  coverageHours: string;
+  responseExpectations: string;
+  activitiesIncluded: string[];
+  activitiesExcluded: string[];
+  defaultCapacity: number;
+  capacityBasis: 'HOURS' | 'OPPORTUNITIES' | 'CAMPAIGNS';
+}
+
+export const STANDARD_PACKAGES: StandardPackageDefinition[] = [
+  // 1. LEAD GENERATION
+  {
+    slug: 'meta-ad-acquisition',
+    category: 'LEAD_GENERATION',
+    packageType: 'MANAGED_LEAD_GENERATION',
+    title: 'Managed Facebook & Instagram Lead Generation',
+    description: 'Full-funnel Meta advertising designed to capture verified business enquiries and route them instantly to your sales team. Learn more at /services/lead-generation.',
+    suitableCustomerSummary: 'Businesses spending or planning to spend on Meta ads who need consistent inbound lead flow without creative fatigue.',
+    defaultBasePrice: 180000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 3,
+    highlightFeature: 'High-Converting Creative Testing & Direct Lead CRM Sync',
+    coverageHours: 'Monday - Friday (Campaign Management)',
+    responseExpectations: 'Campaign adjustments within 24 hours',
+    defaultCapacity: 4.0,
+    capacityBasis: 'CAMPAIGNS',
+    activitiesIncluded: [
+      'Campaign architecture & audience segmentation',
+      '4 new ad creatives & copywriting variations every month',
+      'Instant WhatsApp & Closecraft CRM lead ingestion',
+      'Weekly spend & cost-per-lead optimization',
+      'Custom retargeting audiences setup',
+      'Bi-weekly performance review report'
+    ],
+    activitiesExcluded: [
+      'Advertising budget paid directly to Meta',
+      'Video production / custom studio shoot',
+      'Unrelated social media organic posting'
+    ]
+  },
+  {
+    slug: 'google-search-funnel',
+    category: 'LEAD_GENERATION',
+    packageType: 'MANAGED_LEAD_GENERATION',
+    title: 'Google Search & High-Intent Funnel',
+    description: 'Capture active buyers searching for your specific products and services on Google Search with high-intent landing funnels.',
+    suitableCustomerSummary: 'B2B and high-ticket service companies whose customers actively search on Google for solutions.',
+    defaultBasePrice: 220000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 4,
+    highlightFeature: 'Intent-Targeted Search Ads & Conversion Tracking',
+    coverageHours: 'Monday - Friday 9am - 5pm WAT',
+    responseExpectations: 'Keyword negative matching & bid reviews 3x weekly',
+    defaultCapacity: 2.0,
+    capacityBasis: 'CAMPAIGNS',
+    activitiesIncluded: [
+      'Commercial-intent keyword research & clustering',
+      'Negative keyword list buildout to prevent wasted spend',
+      'High-converting landing page lead capture setup',
+      'Google Tag Manager conversion tracking verification',
+      'Weekly bid adjustments & search term audits'
+    ],
+    activitiesExcluded: [
+      'Direct ad spend budget payable to Google',
+      'Broad SEO link building or external PR'
+    ]
+  },
+
+  // 2. LEAD MANAGEMENT
+  {
+    slug: 'crm-automated-followup',
+    category: 'LEAD_MANAGEMENT',
+    packageType: 'ENQUIRY_RESPONSE',
+    title: 'Omnichannel CRM Setup & Automated Follow-Up',
+    description: 'Stop lead leakage. Automatically capture, score, and nurture every incoming enquiry with 15-minute response automations.',
+    suitableCustomerSummary: 'Businesses receiving 30+ enquiries a month who lose sales due to delayed replies or forgotten follow-ups.',
+    defaultBasePrice: 120000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 2,
+    highlightFeature: '15-Minute Automated Response & WhatsApp Follow-ups',
+    coverageHours: '24/7 Automated Delivery',
+    responseExpectations: 'Instant automated lead acknowledgment (< 2 mins)',
+    defaultCapacity: 1000.0,
+    capacityBasis: 'OPPORTUNITIES',
+    activitiesIncluded: [
+      'Multi-channel enquiry capture (Website, WhatsApp, Meta, Forms)',
+      'Automated Day 0, Day 2, Day 4 follow-up sequences',
+      'Closecraft pipeline configuration with SLA warnings',
+      'Lost enquiry reactivation campaign setup',
+      'Weekly revenue leakage audit'
+    ],
+    activitiesExcluded: [
+      'Manual outbound telemarketing',
+      'Custom bespoke software code development'
+    ]
+  },
+
+  // 3. APPOINTMENT SETTING
+  {
+    slug: 'remote-appointment-setting',
+    category: 'APPOINTMENT_SETTING',
+    packageType: 'APPOINTMENT_SETTING',
+    title: 'Dedicated Remote Appointment Setting',
+    description: 'Trained appointment setters qualify inbound prospects, answer early questions, and book qualified meetings directly on your calendar.',
+    suitableCustomerSummary: 'Sales leaders and founders who spend too much time chasing unresponsive leads instead of conducting sales meetings.',
+    defaultBasePrice: 150000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 2,
+    highlightFeature: 'Guaranteed 30-Minute Qualification SLA & Calendar Sync',
+    coverageHours: 'Monday - Friday 9am - 5pm WAT',
+    responseExpectations: 'First contact attempt within 30 minutes of lead arrival',
+    defaultCapacity: 50.0,
+    capacityBasis: 'HOURS',
+    activitiesIncluded: [
+      'Inbound qualification via WhatsApp, Email & Phone',
+      'Multi-touch follow-up on unresponsive leads (up to 5 attempts)',
+      'Direct Google / Outlook Calendar booking with calendar invites',
+      'Pre-meeting reminder dispatch to maximize show-up rates',
+      'Daily asynchronous log of booking outcomes'
+    ],
+    activitiesExcluded: [
+      'Conducting final closing or pricing negotiations',
+      'Cold scraping of unconsented phone lists'
+    ]
+  },
+
+  // 4. SALES CLOSING
+  {
+    slug: 'high-ticket-sales-closing',
+    category: 'SALES_CLOSING',
+    packageType: 'SALES_CLOSING',
+    title: 'High-Ticket Remote Sales Closing',
+    description: 'Elite remote sales professionals who step in to conduct discovery calls, present commercial proposals, and close high-value deals.',
+    suitableCustomerSummary: 'Companies selling high-ticket services (₦300k - ₦5M+) needing experienced closers without full-time hiring overhead.',
+    defaultBasePrice: 250000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 3,
+    highlightFeature: 'Professional Deal Closing & Pipeline Negotiation',
+    coverageHours: 'Monday - Friday (Flexible Client Meeting Hours)',
+    responseExpectations: 'Proposal turnaround within 24 hours of discovery call',
+    defaultCapacity: 30.0,
+    capacityBasis: 'OPPORTUNITIES',
+    activitiesIncluded: [
+      'Discovery & qualification calls with prospective clients',
+      'Tailored commercial proposal delivery & negotiation',
+      'Objection handling and multi-stakeholder follow-through',
+      'Pipeline stage updates & CRM closing attribution',
+      'Weekly pipeline review and deal win/loss analysis'
+    ],
+    activitiesExcluded: [
+      'Outbound cold calling without qualified interest',
+      'Legal contract authoring or credit financing underwriting'
+    ]
+  },
+
+  // 5. SALES ENABLEMENT
+  {
+    slug: 'dss-team-enablement',
+    category: 'SALES_ENABLEMENT',
+    packageType: 'TEAM_TRAINING',
+    title: 'DSS Sales Team Enablement & Playbooks',
+    description: 'Transform your internal team with Digital Sales School battle-tested playbooks, objection frameworks, and AI buyer role-play drills.',
+    suitableCustomerSummary: 'Teams of 2 to 15 sales reps who need standardized objection handling, higher conversion rates, and accountable practice.',
+    defaultBasePrice: 160000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 2,
+    highlightFeature: 'Tailored Sales Playbook & AI Buyer Simulation Drills',
+    coverageHours: 'Self-paced 24/7 drills + Weekly Trainer Review',
+    responseExpectations: 'Roleplay scenario feedback within 48 hours',
+    defaultCapacity: 5.0,
+    capacityBasis: 'HOURS',
+    activitiesIncluded: [
+      'Custom company Sales Playbook & Objection Battlecards',
+      '5 seats on Digital Sales School Practice Studio & AI Buyer drills',
+      'Weekly asynchronous roleplay evaluation & rubric scoring',
+      'Monthly sales competence and conversion gap assessment',
+      'Official Closecraft Competency certification for passing reps'
+    ],
+    activitiesExcluded: [
+      'On-site in-person classroom travel',
+      'Guaranteeing individual employee performance without practice completion'
+    ]
+  }
+];
+
+/**
+ * Ensures standard platform packages exist in the database.
+ * Idempotent: creates missing packages, leaves existing customized packages intact.
+ */
+export async function ensureStandardPackages(): Promise<any[]> {
+  try {
+    for (const pkg of STANDARD_PACKAGES) {
+      await db.servicePackage.upsert({
+        where: { slug: pkg.slug },
+        update: {
+          title: pkg.title,
+          description: pkg.description,
+          category: pkg.category,
+          suitableCustomerSummary: pkg.suitableCustomerSummary,
+          defaultBasePrice: pkg.defaultBasePrice,
+          currency: pkg.currency,
+          billingFrequency: pkg.billingFrequency,
+          slaDays: pkg.slaDays,
+          highlightFeature: pkg.highlightFeature,
+          coverageHours: pkg.coverageHours,
+          responseExpectations: pkg.responseExpectations,
+          activitiesIncluded: JSON.stringify(pkg.activitiesIncluded),
+          activitiesExcluded: JSON.stringify(pkg.activitiesExcluded),
+          defaultCapacity: pkg.defaultCapacity,
+          capacityBasis: pkg.capacityBasis,
+          isActive: true,
+        },
+        create: {
+          slug: pkg.slug,
+          category: pkg.category,
+          packageType: pkg.packageType,
+          title: pkg.title,
+          description: pkg.description,
+          suitableCustomerSummary: pkg.suitableCustomerSummary,
+          defaultBasePrice: pkg.defaultBasePrice,
+          currency: pkg.currency,
+          billingFrequency: pkg.billingFrequency,
+          slaDays: pkg.slaDays,
+          highlightFeature: pkg.highlightFeature,
+          coverageHours: pkg.coverageHours,
+          responseExpectations: pkg.responseExpectations,
+          activitiesIncluded: JSON.stringify(pkg.activitiesIncluded),
+          activitiesExcluded: JSON.stringify(pkg.activitiesExcluded),
+          defaultCapacity: pkg.defaultCapacity,
+          capacityBasis: pkg.capacityBasis,
+          isActive: true,
+        }
+      });
+    }
+
+    return await db.servicePackage.findMany({
+      where: { isActive: true },
+      orderBy: { defaultBasePrice: 'asc' }
+    });
+  } catch (error) {
+    console.error('[Service Catalogue] Failed to ensure standard packages:', error);
+    return [];
+  }
+}
+
+/**
+ * Retrieves all active service packages from database, grouping by category.
+ */
+export async function getServiceCatalogue() {
+  let packages = await db.servicePackage.findMany({
+    where: { isActive: true },
+    orderBy: { defaultBasePrice: 'asc' }
+  });
+
+  if (packages.length === 0) {
+    packages = await ensureStandardPackages();
+  }
+
+  return packages.map((pkg: any) => ({
+    ...pkg,
+    activitiesIncluded: typeof pkg.activitiesIncluded === 'string' 
+      ? JSON.parse(pkg.activitiesIncluded || '[]') 
+      : (pkg.activitiesIncluded || []),
+    activitiesExcluded: typeof pkg.activitiesExcluded === 'string' 
+      ? JSON.parse(pkg.activitiesExcluded || '[]') 
+      : (pkg.activitiesExcluded || []),
+  }));
 }

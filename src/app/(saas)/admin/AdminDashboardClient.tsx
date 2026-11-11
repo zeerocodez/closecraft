@@ -8,7 +8,9 @@ import {
   updateOrganizationPlan,
   createClientOrganization,
   updateUserRole,
-  triggerAffiliatePayout
+  triggerAffiliatePayout,
+  updateServicePackageAction,
+  updateClientServiceStatusAction
 } from './actions';
 
 export type OrgWithDetails = {
@@ -133,6 +135,8 @@ interface AdminDashboardClientProps {
     totalRevenueActions: number;
   };
   finances: FinancialMetrics;
+  servicePackages?: any[];
+  clientServices?: any[];
 }
 
 export default function AdminDashboardClient({ 
@@ -140,10 +144,12 @@ export default function AdminDashboardClient({
   users, 
   wonDeals, 
   affiliateData, 
+  servicePackages = [],
+  clientServices = [],
   stats, 
   finances 
 }: AdminDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<'finance' | 'orgs' | 'users' | 'affiliates' | 'create'>('finance');
+  const [activeTab, setActiveTab] = useState<'finance' | 'orgs' | 'services' | 'affiliates' | 'users' | 'create'>('finance');
   const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'SUSPENDED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -348,6 +354,18 @@ export default function AdminDashboardClient({
               {stats.pendingOrgs}
             </span>
           )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('services')}
+          className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+            activeTab === 'services'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">shopping_bag</span>
+          <span>Services & Packages ({servicePackages.length})</span>
         </button>
 
         <button
@@ -881,6 +899,165 @@ export default function AdminDashboardClient({
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: SERVICES & PACKAGE PRICING MANAGEMENT */}
+      {activeTab === 'services' && (
+        <div className="space-y-8">
+          {/* Active Client Services Summary */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-on-surface">Client Service Deliveries</h3>
+                <p className="text-xs text-on-surface-variant">Active growth packages and delivery milestones across client workspaces.</p>
+              </div>
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/20">
+                {clientServices.length} Active Subscriptions
+              </span>
+            </div>
+
+            {clientServices.length === 0 ? (
+              <div className="p-8 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 text-center text-xs text-on-surface-variant">
+                No active client services found. Once clients purchase packages from the marketplace, their deliveries will appear here.
+              </div>
+            ) : (
+              <div className="bg-surface-container-lowest border border-outline-variant/30 rounded-2xl overflow-hidden shadow-sm">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-surface-container/40 border-b border-outline-variant/30 text-on-surface-variant text-[11px] font-bold uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4">Client Workspace</th>
+                      <th className="py-3 px-4">Package & Category</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Progress</th>
+                      <th className="py-3 px-4">Fee Paid</th>
+                      <th className="py-3 px-4">Assigned Lead</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/20">
+                    {clientServices.map((service: any) => (
+                      <tr key={service.id} className="hover:bg-surface-container-low/50 transition-colors">
+                        <td className="py-3.5 px-4 font-semibold text-on-surface">
+                          {service.organization?.name || 'Workspace'}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <p className="font-bold text-on-surface">{service.name}</p>
+                          <span className="text-[10px] text-primary uppercase font-mono">{service.category}</span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                            service.status === 'ACTIVE'
+                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                          }`}>
+                            {service.status}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <div className="w-24 space-y-1">
+                            <div className="flex justify-between text-[10px] text-on-surface-variant">
+                              <span>Progress</span>
+                              <span className="font-bold text-primary">{service.progressPercent}%</span>
+                            </div>
+                            <div className="w-full h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+                              <div className="h-full bg-primary rounded-full" style={{ width: `${service.progressPercent}%` }} />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-on-surface">
+                          ₦{service.pricePaid?.toLocaleString()}
+                        </td>
+                        <td className="py-3.5 px-4 text-on-surface-variant text-[11px]">
+                          {service.assignedTeamMember || 'Unassigned'}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            onClick={() => {
+                              const newStatus = service.status === 'ACTIVE' ? 'COMPLETED' : 'ACTIVE';
+                              startTransition(async () => {
+                                await updateClientServiceStatusAction(service.id, newStatus, newStatus === 'COMPLETED' ? 100 : 25);
+                                showNotification(`Service status updated to ${newStatus}`);
+                              });
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-[11px] font-semibold text-on-surface transition-colors"
+                          >
+                            Mark {service.status === 'ACTIVE' ? 'Completed' : 'Active'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Service Catalogue & Pricing Manager */}
+          <div className="space-y-4 pt-4 border-t border-outline-variant/30">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-on-surface">Service Catalogue & Price Architecture</h3>
+                <p className="text-xs text-on-surface-variant">Configure standard pricing, SLAs, and active status for marketplace packages.</p>
+              </div>
+              <span className="text-xs text-on-surface-variant">
+                Changes apply instantly to the in-app client marketplace.
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {servicePackages.map((pkg: any) => (
+                <div key={pkg.id} className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 space-y-3 flex flex-col justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-primary px-2 py-0.5 rounded bg-primary/10">
+                        {pkg.category}
+                      </span>
+                      <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                        pkg.isActive ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'
+                      }`}>
+                        {pkg.isActive ? 'Active' : 'Disabled'}
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-sm text-on-surface">{pkg.title}</h4>
+                    <p className="text-xs text-on-surface-variant line-clamp-2">{pkg.description}</p>
+                    <div className="text-xs text-on-surface-variant pt-1">
+                      <span>SLA: <strong>{pkg.slaDays} business days</strong></span>
+                      <span className="mx-2">•</span>
+                      <span>Frequency: <strong>{pkg.billingFrequency}</strong></span>
+                    </div>
+                  </div>
+
+                  <div className="pt-3 border-t border-outline-variant/20 flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] text-on-surface-variant block">Base Price</span>
+                      <strong className="text-sm font-extrabold text-on-surface">
+                        ₦{pkg.defaultBasePrice?.toLocaleString()}
+                      </strong>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        const newPriceStr = prompt(`Enter new base price in NGN for "${pkg.title}":`, String(pkg.defaultBasePrice));
+                        if (newPriceStr) {
+                          const newPrice = parseFloat(newPriceStr);
+                          if (!isNaN(newPrice) && newPrice > 0) {
+                            startTransition(async () => {
+                              await updateServicePackageAction(pkg.id, { defaultBasePrice: newPrice });
+                              showNotification(`✅ Updated "${pkg.title}" price to ₦${newPrice.toLocaleString()}`);
+                            });
+                          }
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-semibold transition-colors"
+                    >
+                      Update Price
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

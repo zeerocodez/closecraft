@@ -29,7 +29,7 @@ export default function AppShell({ children, user }: { children: React.ReactNode
   ] : [
     { href: '/today', icon: 'Clock', label: 'Today', exact: true },
     { href: '/leads', icon: 'Users', label: 'Enquiries' },
-    { href: '/sales-support', icon: 'HeartHandshake', label: 'Support' },
+    { href: '/services', icon: 'Briefcase', label: 'Services' },
     { href: '/team', icon: 'UserCheck', label: 'Team' },
     { href: '/billing', icon: 'CreditCard', label: 'Billing' },
   ];

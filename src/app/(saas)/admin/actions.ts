@@ -157,3 +157,38 @@ export async function triggerAffiliatePayout(saleId: string, reference?: string)
   revalidatePath('/admin');
   return { success };
 }
+
+export async function updateServicePackageAction(packageId: string, data: { defaultBasePrice?: number; isActive?: boolean; slaDays?: number }) {
+  await requireAdmin();
+
+  const updated = await db.servicePackage.update({
+    where: { id: packageId },
+    data: {
+      ...(data.defaultBasePrice !== undefined ? { defaultBasePrice: data.defaultBasePrice } : {}),
+      ...(data.isActive !== undefined ? { isActive: data.isActive } : {}),
+      ...(data.slaDays !== undefined ? { slaDays: data.slaDays } : {}),
+    }
+  });
+
+  revalidatePath('/admin');
+  revalidatePath('/services');
+  return { success: true, package: updated };
+}
+
+export async function updateClientServiceStatusAction(serviceId: string, status: string, progressPercent?: number) {
+  await requireAdmin();
+
+  const updated = await db.clientService.update({
+    where: { id: serviceId },
+    data: {
+      status,
+      ...(progressPercent !== undefined ? { progressPercent } : {}),
+      lastActivityAt: new Date(),
+    }
+  });
+
+  revalidatePath('/admin');
+  revalidatePath('/services');
+  return { success: true, service: updated };
+}
+

@@ -174,12 +174,25 @@ export default async function AdminPage() {
     }
   };
 
+  // Fetch service marketplace packages & active client services
+  const [servicePackages, clientServices] = await Promise.all([
+    db.servicePackage.findMany({ orderBy: { defaultBasePrice: 'asc' } }),
+    db.clientService.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        organization: { select: { id: true, name: true, slug: true } }
+      }
+    })
+  ]);
+
   return (
     <AdminDashboardClient
       organizations={organizations}
       users={users}
       wonDeals={wonDeals}
       affiliateData={affiliateData}
+      servicePackages={servicePackages}
+      clientServices={clientServices}
       stats={{
         totalOrgs,
         approvedOrgs,
