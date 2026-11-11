@@ -679,7 +679,44 @@ export async function processBachsWebhookEvent(event: any): Promise<{
       }).catch(() => {});
     }
 
-    // 5. Record processed WebhookEvent for event-level idempotency
+    // 5. Check and award Affiliate Commission if an active referral attribution exists
+    try {
+      const attribution = await db.referralAttribution.findUnique({
+        where: {
+          organizationId: targetOrgId,
+        },
+        include: { affiliate: true },
+      });
+
+      if (attribution && attribution.affiliate && attribution.affiliate.status !== 'SUSPENDED') {
+        const ratePercent = attribution.affiliate.commissionRate || 15.0; // 15% default
+        const commissionAmount = (invoice.amount * ratePercent) / 100.0;
+
+        if (commissionAmount > 0) {
+          // Idempotency: verify commission hasn't already been created for this invoiceId
+          const existingCommission = await db.affiliateCommission.findUnique({
+            where: { invoiceId: invoice.id },
+          });
+
+          if (!existingCommission) {
+            await db.affiliateCommission.create({
+              data: {
+                affiliateId: attribution.affiliate.id,
+                invoiceId: invoice.id,
+                amount: commissionAmount,
+                saleAmount: invoice.amount,
+                status: 'PAYABLE',
+                clearsAt: now,
+              },
+            });
+          }
+        }
+      }
+    } catch (affErr: any) {
+      console.warn('[Bachs Webhook] Affiliate Commission Error:', affErr.message);
+    }
+
+    // 6. Record processed WebhookEvent for event-level idempotency
     if (eventId) {
       await db.webhookEvent.create({
         data: {

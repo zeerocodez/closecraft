@@ -30,7 +30,12 @@ export async function POST(req: Request) {
       );
     }
 
-    const { name, email, password, companyName, whatsappNumber } = body;
+    const { name, email, password, companyName, whatsappNumber, ref: bodyRef } = body;
+    const cookieHeader = req.headers.get("cookie") || "";
+    const refMatch = cookieHeader.match(/(?:^|;\s*)(?:closecraft_ref|ref)=([A-Za-z0-9_-]{3,50})(?:;|$)/);
+    const activeRefCode = bodyRef || (refMatch ? refMatch[1] : null)
+      ? String(bodyRef || (refMatch ? refMatch[1] : '')).trim().toUpperCase()
+      : null;
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!email || typeof email !== "string" || !emailRegex.test(email.trim())) {
@@ -151,6 +156,27 @@ export async function POST(req: Request) {
       console.log(`[USER REGISTRATION] Email: ${cleanEmail}`);
       console.log(`Verification code generated: ${verificationCode}`);
       console.log(`=========================================\n`);
+
+      // Link affiliate referral attribution if referral code is present
+      if (activeRefCode) {
+        try {
+          const affiliate = await tx.affiliateProfile.findUnique({
+            where: { referralCode: activeRefCode },
+          });
+
+          if (affiliate && affiliate.status !== 'SUSPENDED') {
+            await tx.referralAttribution.create({
+              data: {
+                affiliateId: affiliate.id,
+                referredUserId: user.id,
+                organizationId: org.id,
+              },
+            });
+          }
+        } catch (affErr) {
+          console.warn('[Registration Affiliate Attribution Error]', affErr);
+        }
+      }
 
       return { user, org, verificationCode };
     });
