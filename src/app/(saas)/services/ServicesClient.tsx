@@ -61,6 +61,7 @@ export default function ServicesClient({
 
   const categories = [
     { id: 'ALL', label: 'All Services', icon: 'Grid' },
+    { id: 'DIGITAL_SALES_SCHOOL', label: 'Digital Sales School (DSS)', icon: 'GraduationCap' },
     { id: 'LEAD_GENERATION', label: 'Lead Generation', icon: 'TrendingUp' },
     { id: 'LEAD_MANAGEMENT', label: 'Lead Management', icon: 'Users' },
     { id: 'APPOINTMENT_SETTING', label: 'Appointment Setting', icon: 'Calendar' },
@@ -70,7 +71,12 @@ export default function ServicesClient({
 
   const filteredPackages = selectedCategory === 'ALL'
     ? packages
-    : packages.filter(p => p.category === selectedCategory);
+    : packages.filter(p => {
+        if (selectedCategory === 'DIGITAL_SALES_SCHOOL') {
+          return p.slug.startsWith('dss-') || p.category === 'DIGITAL_SALES_SCHOOL' || p.category === 'SALES_ENABLEMENT';
+        }
+        return p.category === selectedCategory;
+      });
 
   const handlePurchase = async (pkg: ServicePackageItem) => {
     setPurchasingSlug(pkg.slug);
@@ -292,6 +298,26 @@ export default function ServicesClient({
                         <span>Email Team</span>
                       </a>
                     </div>
+
+                    {/* DSS Quick Portal Action if applicable */}
+                    {(service.name.includes('DSS') || service.category.includes('ENABLEMENT') || service.category.includes('TRAINING')) && (
+                      <div className="pt-2 flex items-center gap-2 flex-wrap">
+                        <Link
+                          href="/dss"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-xs hover:bg-emerald-500/25 transition-colors"
+                        >
+                          <Icon name="GraduationCap" size={14} />
+                          <span>Launch DSS Academy Portal &rarr;</span>
+                        </Link>
+                        <Link
+                          href="/practice"
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-high border border-outline-variant/40 text-on-surface font-semibold text-xs hover:bg-surface-container-highest transition-colors"
+                        >
+                          <Icon name="PlayCircle" size={14} />
+                          <span>AI Roleplay Studio</span>
+                        </Link>
+                      </div>
+                    )}
                   </div>
 
                   {/* Footer Row: Pricing & Actions */}
@@ -463,3 +489,4 @@ export default function ServicesClient({
     </div>
   );
 }
+

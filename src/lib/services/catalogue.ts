@@ -399,7 +399,36 @@ export const STANDARD_PACKAGES: StandardPackageDefinition[] = [
     ]
   },
 
-  // 5. SALES ENABLEMENT
+  // 5. DIGITAL SALES SCHOOL & SALES ENABLEMENT
+  {
+    slug: 'dss-individual-sprint',
+    category: 'SALES_ENABLEMENT',
+    packageType: 'DSS_SPRINT',
+    title: 'Digital Sales School (DSS) 4-Week Career Sprint',
+    description: 'Structured 4-week sales capability sprint for modern professionals and ambitious reps. Master objection handling, commercial qualification, and closing with AI buyer role-play drills and verifiable portfolio credential.',
+    suitableCustomerSummary: 'Sales representatives, SDRs, and ambitious professionals wanting measurable evidence of modern digital sales competence.',
+    defaultBasePrice: 100000.0,
+    currency: 'NGN',
+    billingFrequency: 'ONE_TIME',
+    slaDays: 1,
+    highlightFeature: 'AI Buyer Roleplay Studio + Verifiable Credential',
+    coverageHours: 'Self-paced 24/7 drills + Weekly Live Review Clinics',
+    responseExpectations: 'Practice scenario feedback within 24 hours',
+    defaultCapacity: 1.0,
+    capacityBasis: 'HOURS',
+    activitiesIncluded: [
+      'Full access to DSS Learning Management System & 12 workshops',
+      'Unlimited practice conversations in the AI Role-play Studio',
+      'Weekly live cohort review sessions with certified sales leaders',
+      'Standardized 8-criterion competency scoring and portfolio reviews',
+      'Official Closecraft Verifiable Certificate of Competence',
+      'Eligibility for placement in the Closecraft remote talent pool'
+    ],
+    activitiesExcluded: [
+      'Guaranteed direct employment without passing milestone criteria',
+      'Private 1-on-1 resume rewriting'
+    ]
+  },
   {
     slug: 'dss-team-enablement',
     category: 'SALES_ENABLEMENT',
@@ -426,6 +455,32 @@ export const STANDARD_PACKAGES: StandardPackageDefinition[] = [
     activitiesExcluded: [
       'On-site in-person classroom travel',
       'Guaranteeing individual employee performance without practice completion'
+    ]
+  },
+  {
+    slug: 'dss-sales-leadership',
+    category: 'SALES_ENABLEMENT',
+    packageType: 'EXECUTIVE_COACHING',
+    title: 'DSS Sales Leadership & Revenue Architecture',
+    description: 'Senior revenue director advisory to engineer your sales playbook, compensation models, pipeline governance, and deal closing review.',
+    suitableCustomerSummary: 'Founders and Heads of Sales needing expert architecture, deal desk oversight, and pipeline acceleration.',
+    defaultBasePrice: 280000.0,
+    currency: 'NGN',
+    billingFrequency: 'MONTHLY',
+    slaDays: 3,
+    highlightFeature: 'Dedicated Revenue Director Advisory & Deal Desk Governance',
+    coverageHours: 'Bi-weekly strategic deal desk sessions',
+    responseExpectations: 'Advisory and deal feedback within 24 hours',
+    defaultCapacity: 10.0,
+    capacityBasis: 'HOURS',
+    activitiesIncluded: [
+      'Bi-weekly strategic deal desk pipeline review sessions',
+      'Sales compensation & quota model engineering',
+      'Hiring rubrics & interview frameworks for remote closers',
+      'Unlimited company team access to DSS practice library'
+    ],
+    activitiesExcluded: [
+      'Taking direct corporate officer or board liability'
     ]
   }
 ];

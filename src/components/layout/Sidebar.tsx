@@ -111,10 +111,11 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: { user: a
       ]
     },
     {
-      title: 'Training',
+      title: 'Digital Sales School',
       items: [
-        { href: '/practice', icon: 'PlayCircle', label: 'My Learning' },
-        { href: '/team/training', icon: 'GraduationCap', label: 'Team Training', visible: isManagerOrOwner },
+        { href: '/dss', icon: 'GraduationCap', label: 'DSS Academy' },
+        { href: '/practice', icon: 'PlayCircle', label: 'AI Roleplay Studio' },
+        { href: '/team/training', icon: 'Award', label: 'Team Playbooks', visible: isManagerOrOwner },
       ]
     },
     {

@@ -263,6 +263,155 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* Digital Sales School (DSS) Products & Enablement Services */}
+        <div className="mt-16 pt-12 border-t border-outline-variant/30">
+          <div className="text-center mb-10">
+            <div className="eyebrow mb-2 text-[#45bfae] text-xs font-bold uppercase tracking-widest">
+              Digital Sales School (DSS) Products & Services
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-on-surface mb-3">
+              Sales Enablement, AI Drills & Certification
+            </h2>
+            <p className="text-sm text-on-surface-variant max-w-xl mx-auto leading-relaxed">
+              Equip yourself or your corporate sales team with battle-tested playbooks, AI buyer simulations, and measurable sales competence.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-6 items-stretch">
+            {/* DSS 4-Week Career Sprint */}
+            <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/30 flex flex-col justify-between shadow-sm">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold text-on-surface">DSS Career Sprint</h3>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-teal-500/15 text-teal-300 font-bold">
+                    Individual
+                  </span>
+                </div>
+                <p className="text-on-surface-variant text-xs mb-4">
+                  4-week intensive capability sprint for modern reps & professionals
+                </p>
+                <div className="mb-6">
+                  <span className="text-2xl font-extrabold text-on-surface">₦100,000</span>
+                  <span className="text-on-surface-variant text-xs"> one-time</span>
+                </div>
+                <ul className="space-y-2.5 mb-6 text-xs text-on-surface">
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>LMS curriculum & 12 workshops</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>AI Buyer Role-play Studio practice</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Weekly live clinics & rubric review</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Verifiable Certificate of Competence</span>
+                  </li>
+                </ul>
+              </div>
+              <Link
+                href="/dss/apply"
+                className="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-center text-xs font-bold transition-colors block shadow-sm"
+              >
+                Apply for Sprint &rarr;
+              </Link>
+            </div>
+
+            {/* Corporate Team Enablement */}
+            <div className="bg-surface-container-low p-6 rounded-3xl border border-teal-500/30 flex flex-col justify-between shadow-sm relative">
+              <div className="absolute top-0 right-6 -translate-y-1/2 bg-teal-500 text-slate-950 font-extrabold text-[10px] uppercase px-2.5 py-0.5 rounded-full">
+                Popular Service
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold text-on-surface">Corporate Enablement</h3>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-teal-500/15 text-teal-300 font-bold">
+                    Team Retainer
+                  </span>
+                </div>
+                <p className="text-on-surface-variant text-xs mb-4">
+                  Custom playbooks, objection battlecards & AI drills for 5 reps
+                </p>
+                <div className="mb-6">
+                  <span className="text-2xl font-extrabold text-on-surface">₦160,000</span>
+                  <span className="text-on-surface-variant text-xs">/month</span>
+                </div>
+                <ul className="space-y-2.5 mb-6 text-xs text-on-surface">
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Custom company Sales Playbook</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>5 team seats on AI Roleplay Studio</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Weekly asynchronous roleplay scoring</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Monthly sales competence audit</span>
+                  </li>
+                </ul>
+              </div>
+              <Link
+                href="/services/sales-training"
+                className="w-full py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-center text-xs font-bold transition-colors block shadow-sm"
+              >
+                Explore Team Enablement &rarr;
+              </Link>
+            </div>
+
+            {/* Sales Leadership Advisory */}
+            <div className="bg-surface-container-low p-6 rounded-3xl border border-outline-variant/30 flex flex-col justify-between shadow-sm">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-lg font-bold text-on-surface">Sales Leadership</h3>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-bold">
+                    Advisory
+                  </span>
+                </div>
+                <p className="text-on-surface-variant text-xs mb-4">
+                  Revenue director deal desk governance & quota engineering
+                </p>
+                <div className="mb-6">
+                  <span className="text-2xl font-extrabold text-on-surface">₦280,000</span>
+                  <span className="text-on-surface-variant text-xs">/month</span>
+                </div>
+                <ul className="space-y-2.5 mb-6 text-xs text-on-surface">
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Bi-weekly strategic deal desk sessions</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Sales compensation & quota modeling</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Hiring rubrics for remote closers</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <Check className="text-teal-400 shrink-0 w-4 h-4 mt-0.5" />
+                    <span>Unlimited team access to DSS practice</span>
+                  </li>
+                </ul>
+              </div>
+              <a
+                href="mailto:sales@closecrafthq.com?subject=DSS%20Sales%20Leadership%20Inquiry"
+                className="w-full py-2.5 rounded-xl border border-outline text-on-surface text-center text-xs font-semibold hover:bg-surface-container transition-colors block"
+              >
+                Discuss Leadership Advisory
+              </a>
+            </div>
+          </div>
+        </div>
+
         {/* Commercial terms footer */}
         <div className="mt-12 text-center space-y-4">
           <p className="text-xs text-on-surface-variant">
