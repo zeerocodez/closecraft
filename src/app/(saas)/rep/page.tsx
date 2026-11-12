@@ -159,6 +159,24 @@ export default async function RepDashboardPage() {
     }
   });
 
+  // Fetch assigned service delivery tasks for this specialist
+  const assignedDeliveryTasks = await db.serviceDeliveryTask.findMany({
+    where: {
+      OR: [
+        { assignedStaff: { userId } },
+        { clientService: { assignedUserId: userId } },
+      ]
+    },
+    include: {
+      organization: { select: { id: true, name: true } },
+      clientService: { select: { id: true, name: true, category: true, tier: true } },
+    },
+    orderBy: [
+      { priority: 'desc' },
+      { dueDate: 'asc' },
+    ]
+  });
+
   // Compute metrics
   const activeLeadsCount = leads.filter(l => l.status !== 'CLOSED').length;
   const wonDeals = deals.filter(d => d.stage === 'WON');
@@ -174,6 +192,7 @@ export default async function RepDashboardPage() {
       deals={deals}
       appointments={appointments}
       teamMembers={teamMembers}
+      deliveryTasks={assignedDeliveryTasks as any}
       metrics={{
         activeLeadsCount,
         wonDealsCount: wonDeals.length,

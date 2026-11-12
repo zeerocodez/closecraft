@@ -25,6 +25,9 @@ export default async function ServicesPage() {
     where: { organizationId },
     include: {
       servicePackage: true,
+      deliveryTasks: {
+        orderBy: [{ priority: 'desc' }, { createdAt: 'desc' }],
+      },
     },
     orderBy: { createdAt: 'desc' }
   });

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
+import { reviewDeliveryTaskAction } from '@/app/(saas)/operator/workforceActions';
 
 interface ServicePackageItem {
   id: string;
@@ -35,6 +36,16 @@ interface ClientServiceItem {
   billingFrequency: string;
   progressPercent: number;
   deliverables: Array<{ id: string; title: string; completed: boolean }>;
+  deliveryTasks?: Array<{
+    id: string;
+    title: string;
+    status: string;
+    priority: string;
+    dueDate?: string | null;
+    deliverableUrl?: string | null;
+    completionNotes?: string | null;
+    clientApproved?: boolean;
+  }>;
   assignedTeamMember?: string;
   accountManagerEmail?: string;
   startDate?: string;
@@ -324,6 +335,68 @@ export default function ServicesClient({
                               <span className={item.completed ? 'text-on-surface-variant line-through' : 'text-on-surface'}>
                                 {item.title}
                               </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Live Delivery Tasks & Artifact Approvals */}
+                    {service.deliveryTasks && service.deliveryTasks.length > 0 && (
+                      <div className="space-y-2 pt-2 border-t border-outline-variant/20">
+                        <span className="text-xs font-semibold text-on-surface">Service Delivery Tasks & Proofs:</span>
+                        <div className="space-y-2">
+                          {service.deliveryTasks.map((t: any) => (
+                            <div key={t.id} className="p-2.5 rounded-xl bg-surface-container/60 border border-outline-variant/30 flex items-start justify-between gap-2 text-xs">
+                              <div className="space-y-1 flex-1 min-w-0">
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-on-surface">{t.title}</span>
+                                  {t.status === 'COMPLETED' ? (
+                                    <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400">
+                                      Done
+                                    </span>
+                                  ) : (
+                                    <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400">
+                                      {t.status.replace(/_/g, ' ')}
+                                    </span>
+                                  )}
+                                </div>
+                                {t.deliverableUrl && (
+                                  <div>
+                                    <a
+                                      href={t.deliverableUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-primary font-bold hover:underline inline-flex items-center gap-1 text-[11px]"
+                                    >
+                                      <Icon name="ExternalLink" size={12} />
+                                      <span>Proof: {t.deliverableUrl}</span>
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+
+                              {t.status === 'COMPLETED' && !t.clientApproved && (
+                                <button
+                                  onClick={async () => {
+                                    await reviewDeliveryTaskAction({
+                                      taskId: t.id,
+                                      decision: 'APPROVE',
+                                      isClientApproval: true,
+                                    });
+                                    window.location.reload();
+                                  }}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-500 text-white text-[11px] font-bold hover:bg-emerald-600 shadow-xs shrink-0"
+                                >
+                                  Approve
+                                </button>
+                              )}
+
+                              {t.clientApproved && (
+                                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shrink-0">
+                                  Approved ✓
+                                </span>
+                              )}
                             </div>
                           ))}
                         </div>

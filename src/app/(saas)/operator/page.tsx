@@ -101,6 +101,58 @@ export default async function OperatorPage() {
     },
   });
 
+  // Fetch Remote Workforce Staff Profiles
+  const staffProfiles = await db.staffProfile.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      user: { select: { id: true, name: true, email: true, image: true, role: true } },
+      assignedTasks: {
+        select: { id: true, status: true, priority: true, dueDate: true }
+      }
+    }
+  });
+
+  // Fetch Service Delivery Tasks
+  const deliveryTasks = await db.serviceDeliveryTask.findMany({
+    orderBy: [
+      { priority: 'desc' },
+      { dueDate: 'asc' },
+      { createdAt: 'desc' }
+    ],
+    include: {
+      organization: { select: { id: true, name: true } },
+      clientService: { select: { id: true, name: true, category: true, tier: true, progressPercent: true } },
+      assignedStaff: {
+        include: {
+          user: { select: { id: true, name: true, email: true } }
+        }
+      }
+    }
+  });
+
+  // Fetch Client Services
+  const clientServices = await db.clientService.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      organization: { select: { id: true, name: true } },
+      servicePackage: true,
+      deliveryTasks: true,
+    }
+  });
+
+  // Fetch Performance Metrics
+  const wonDeals = await db.deal.findMany({
+    where: { stage: 'WON' },
+    select: { amount: true, currency: true }
+  });
+  const totalClosedRevenue = wonDeals.reduce((sum, d) => sum + (d.amount || 0), 0);
+  const totalWonDeals = wonDeals.length;
+  const totalAppointments = await db.appointment.count();
+  const totalLeads = await db.lead.count();
+  const qualifiedLeads = await db.lead.count({
+    where: { status: { in: ['QUALIFIED', 'OPPORTUNITY', 'WON'] } }
+  });
+
   return (
     <div className="flex-1 overflow-y-auto">
       <OperatorDashboardClient
@@ -111,6 +163,16 @@ export default async function OperatorPage() {
         organizations={organizations as any}
         qualifications={qualifications as any}
         serviceRequests={serviceRequests as any}
+        staffProfiles={staffProfiles as any}
+        deliveryTasks={deliveryTasks as any}
+        clientServices={clientServices as any}
+        performanceMetrics={{
+          totalWonDeals,
+          totalClosedRevenue,
+          totalAppointments,
+          totalLeads,
+          qualifiedLeads,
+        }}
       />
     </div>
   );

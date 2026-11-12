@@ -11,6 +11,7 @@ import {
   claimLead,
   handoffLeadToCloser
 } from '@/app/(saas)/actions';
+import { updateDeliveryTaskStatusAction } from '@/app/(saas)/operator/workforceActions';
 import { LeadAiAssessmentModal } from '@/components/revenue-engine/LeadAiAssessmentModal';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
@@ -99,6 +100,7 @@ interface RepDashboardClientProps {
   deals: RepDeal[];
   appointments: RepAppointment[];
   teamMembers: any[];
+  deliveryTasks?: any[];
   metrics: {
     activeLeadsCount: number;
     wonDealsCount: number;
@@ -115,9 +117,13 @@ export default function RepDashboardClient({
   deals,
   appointments,
   teamMembers,
+  deliveryTasks = [],
   metrics,
 }: RepDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<'LEADS' | 'OPEN_POOL' | 'DEALS' | 'CALENDAR' | 'COMMISSIONS'>('LEADS');
+  const [activeTab, setActiveTab] = useState<'LEADS' | 'OPEN_POOL' | 'DEALS' | 'CALENDAR' | 'COMMISSIONS' | 'TASKS'>('LEADS');
+  const [submittingTask, setSubmittingTask] = useState<any | null>(null);
+  const [deliverableUrl, setDeliverableUrl] = useState('');
+  const [completionNotes, setCompletionNotes] = useState('');
   const [selectedLeadForAi, setSelectedLeadForAi] = useState<RepLead | null>(null);
   const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [showCreateDealModal, setShowCreateDealModal] = useState<RepLead | null>(null);
@@ -462,6 +468,21 @@ export default function RepDashboardClient({
         >
           <span className="material-symbols-outlined text-[16px]">receipt_long</span>
           <span>Transparent Commission Ledger</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('TASKS')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+            activeTab === 'TASKS'
+              ? 'bg-primary text-on-primary shadow-sm'
+              : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[16px]">task_alt</span>
+          <span>My Delivery Tasks</span>
+          <span className="px-1.5 py-0.2 rounded-full bg-surface-container text-secondary text-[10px]">
+            {deliveryTasks.length}
+          </span>
         </button>
       </div>
 
@@ -1062,6 +1083,249 @@ export default function RepDashboardClient({
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 5: My Assigned Service Delivery Tasks */}
+      {activeTab === 'TASKS' && (
+        <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
+          <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-on-surface">My Service Delivery Milestones & Tasks</h3>
+              <p className="text-xs text-on-surface-variant mt-0.5">
+                Campaign setups, outbound sequences, discovery audits, and deliverables assigned to your queue
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-primary/10 border border-primary/30 text-primary font-mono font-bold text-xs">
+                {deliveryTasks.length} Assigned Tasks
+              </span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-surface-container-low/70 border-b border-outline-variant/30 text-secondary uppercase font-bold tracking-wider text-[11px]">
+                  <th className="p-4">Task / Client</th>
+                  <th className="p-4">Category</th>
+                  <th className="p-4">Priority</th>
+                  <th className="p-4">Due Date</th>
+                  <th className="p-4">Status</th>
+                  <th className="p-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant/20">
+                {deliveryTasks.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-12 text-center text-on-surface-variant text-xs">
+                      No service delivery tasks currently assigned. New client campaign setups and closing tasks will appear here.
+                    </td>
+                  </tr>
+                ) : (
+                  deliveryTasks.map((task: any) => {
+                    const isOverdue = task.status !== 'COMPLETED' && task.dueDate && new Date(task.dueDate) < new Date();
+                    return (
+                      <tr key={task.id} className="hover:bg-surface-container/30 transition-colors">
+                        <td className="p-4">
+                          <div className="font-bold text-on-surface text-sm">{task.title}</div>
+                          <div className="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+                            <span className="font-semibold text-primary">{task.organization?.name || 'Client Workspace'}</span>
+                            {task.clientService && (
+                              <span>• {task.clientService.name}</span>
+                            )}
+                          </div>
+                          {task.description && (
+                            <p className="text-[11px] text-on-surface-variant/80 mt-1 max-w-md line-clamp-1">
+                              {task.description}
+                            </p>
+                          )}
+                          {task.deliverableUrl && (
+                            <div className="mt-1">
+                              <a
+                                href={task.deliverableUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary font-bold hover:underline inline-flex items-center gap-1 text-[11px]"
+                              >
+                                View Proof: {task.deliverableUrl}
+                              </a>
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">
+                            {task.category?.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                            task.priority === 'URGENT'
+                              ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                              : task.priority === 'HIGH'
+                              ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                              : 'bg-sky-500/20 text-sky-400'
+                          }`}>
+                            {task.priority}
+                          </span>
+                        </td>
+                        <td className="p-4 font-mono text-on-surface-variant">
+                          {task.dueDate ? (
+                            <span className={isOverdue ? 'text-amber-400 font-bold' : ''}>
+                              {new Date(task.dueDate).toLocaleDateString()}
+                              {isOverdue && ' (Overdue)'}
+                            </span>
+                          ) : (
+                            'Flexible'
+                          )}
+                        </td>
+                        <td className="p-4">
+                          <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                            task.status === 'COMPLETED'
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : task.status === 'IN_REVIEW'
+                              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                              : task.status === 'IN_PROGRESS'
+                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
+                              : 'bg-zinc-500/20 text-zinc-400'
+                          }`}>
+                            {task.status?.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right">
+                          {task.status === 'TODO' && (
+                            <button
+                              onClick={() => {
+                                startTransition(async () => {
+                                  await updateDeliveryTaskStatusAction({
+                                    taskId: task.id,
+                                    status: 'IN_PROGRESS',
+                                  });
+                                  setToastMessage(`Started work on "${task.title}"`);
+                                });
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-blue-500 text-white text-xs font-bold hover:bg-blue-600 shadow-xs"
+                            >
+                              Start Task
+                            </button>
+                          )}
+
+                          {task.status === 'IN_PROGRESS' && (
+                            <button
+                              onClick={() => {
+                                setSubmittingTask(task);
+                                setDeliverableUrl(task.deliverableUrl || '');
+                                setCompletionNotes(task.completionNotes || '');
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:opacity-90 shadow-xs"
+                            >
+                              Submit Deliverable
+                            </button>
+                          )}
+
+                          {task.status === 'IN_REVIEW' && (
+                            <span className="text-[11px] text-purple-400 font-medium">
+                              Awaiting Operator Review
+                            </span>
+                          )}
+
+                          {task.status === 'COMPLETED' && (
+                            <span className="text-[11px] text-emerald-400 font-bold flex items-center justify-end gap-1">
+                              <span className="material-symbols-outlined text-[14px]">verified</span>
+                              Completed
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Submit Deliverable Modal */}
+      {submittingTask && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-surface-container-low border border-outline-variant/30 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold text-on-surface">Submit Deliverable for Review</h3>
+              <button
+                onClick={() => setSubmittingTask(null)}
+                className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                startTransition(async () => {
+                  try {
+                    await updateDeliveryTaskStatusAction({
+                      taskId: submittingTask.id,
+                      status: 'IN_REVIEW',
+                      deliverableUrl: deliverableUrl.trim() || undefined,
+                      completionNotes: completionNotes.trim() || undefined,
+                    });
+                    setSubmittingTask(null);
+                    setToastMessage('Deliverable submitted for review!');
+                  } catch (err: any) {
+                    alert(err.message || 'Failed to submit deliverable');
+                  }
+                });
+              }}
+              className="space-y-3 text-xs"
+            >
+              <div className="p-3 rounded-2xl bg-surface-container/60 border border-outline-variant/20 space-y-1">
+                <p className="font-bold text-on-surface">{submittingTask.title}</p>
+                <p className="text-on-surface-variant">Client: {submittingTask.organization?.name}</p>
+              </div>
+
+              <div>
+                <label className="block text-on-surface-variant font-medium mb-1">Deliverable Link / Artifact URL *</label>
+                <input
+                  type="url"
+                  required
+                  placeholder="https://docs.google.com/..., https://figma.com/..., or live campaign link"
+                  value={deliverableUrl}
+                  onChange={(e) => setDeliverableUrl(e.target.value)}
+                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                />
+              </div>
+
+              <div>
+                <label className="block text-on-surface-variant font-medium mb-1">Completion Notes / Deliverable Summary</label>
+                <textarea
+                  rows={3}
+                  placeholder="Briefly describe what was completed, audience targeting used, or handover notes..."
+                  value={completionNotes}
+                  onChange={(e) => setCompletionNotes(e.target.value)}
+                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setSubmittingTask(null)}
+                  className="px-4 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container text-xs font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50"
+                >
+                  {isPending ? 'Submitting...' : 'Submit to Operator'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

@@ -45,6 +45,7 @@ model User {
   issuedCredentials         VerifiableCredential[]    @relation("CredentialIssuer")
   salesPlaybooks            SalesPlaybook[]
   affiliateProfile          AffiliateProfile?
+  staffProfile              StaffProfile?
 }
 
 model Organization {
@@ -94,6 +95,7 @@ model Organization {
   qualifications      WorkspaceQualification[]
   serviceRequests     ServiceRequest[]
   clientServices      ClientService[]
+  deliveryTasks       ServiceDeliveryTask[]
   referralAttribution ReferralAttribution?
 
   // LMS Relations
@@ -1534,6 +1536,7 @@ model ClientService {
 
   organization        Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   servicePackage      ServicePackage? @relation(fields: [servicePackageId], references: [id], onDelete: SetNull)
+  deliveryTasks       ServiceDeliveryTask[]
 
   @@index([organizationId])
   @@index([category])
@@ -2269,6 +2272,60 @@ model AffiliatePayout {
   @@index([status])
 }
 
+// -----------------------------------------------------------------------------
+// REMOTE WORKFORCE & SERVICE DELIVERY OPERATIONS
+// -----------------------------------------------------------------------------
 
+model StaffProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  role            String    @default("ACCOUNT_MANAGER") // OPERATIONS_MANAGER, ACCOUNT_MANAGER, MARKETING_SPECIALIST, ADS_SPECIALIST, LEAD_MANAGER, SETTER, CLOSER, SALES_TRAINER, SUPPORT_REP, SUPER_ADMIN
+  department      String    @default("OPERATIONS")      // OPERATIONS, SALES, MARKETING, SUPPORT, MANAGEMENT
+  phone           String?
+  timezone        String    @default("Africa/Lagos")
+  weeklyCapacity  Int       @default(40)                // Weekly work capacity in hours
+  status          String    @default("ACTIVE")          // ACTIVE, ON_LEAVE, INACTIVE
+  skills          String[]  @default([])
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  assignedTasks   ServiceDeliveryTask[]
 
+  @@index([role])
+  @@index([status])
+  @@index([department])
+}
+
+model ServiceDeliveryTask {
+  id                  String          @id @default(cuid())
+  organizationId      String
+  clientServiceId     String?
+  assignedStaffId     String?
+  title               String
+  description         String?
+  category            String          // LEAD_GENERATION, LEAD_MANAGEMENT, APPOINTMENT_SETTING, SALES_CLOSING, SALES_ENABLEMENT, GENERAL
+  priority            String          @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
+  status              String          @default("TODO")   // TODO, IN_PROGRESS, IN_REVIEW, COMPLETED, BLOCKED
+  dueDate             DateTime?
+  deliverableUrl      String?
+  completionNotes     String?
+  submittedAt         DateTime?
+  completedAt         DateTime?
+  reviewedByUserId    String?
+  clientFeedback      String?
+  clientApproved      Boolean         @default(false)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  organization        Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  clientService       ClientService?  @relation(fields: [clientServiceId], references: [id], onDelete: SetNull)
+  assignedStaff       StaffProfile?   @relation(fields: [assignedStaffId], references: [id], onDelete: SetNull)
+
+  @@index([organizationId])
+  @@index([clientServiceId])
+  @@index([assignedStaffId])
+  @@index([status])
+  @@index([dueDate])
+}

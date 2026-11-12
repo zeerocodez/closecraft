@@ -15,6 +15,7 @@ import {
   convertServiceRequestToPilotAction,
 } from '@/app/(saas)/operator/actions';
 import QualificationReviewQueue from '@/components/operator/QualificationReviewQueue';
+import RemoteWorkforceSection from '@/components/operator/RemoteWorkforceSection';
 
 export default function OperatorDashboardClient({
   requests,
@@ -24,6 +25,16 @@ export default function OperatorDashboardClient({
   organizations,
   qualifications = [],
   serviceRequests = [],
+  staffProfiles = [],
+  deliveryTasks = [],
+  clientServices = [],
+  performanceMetrics = {
+    totalWonDeals: 0,
+    totalClosedRevenue: 0,
+    totalAppointments: 0,
+    totalLeads: 0,
+    qualifiedLeads: 0,
+  },
 }: {
   requests: any[];
   engagements: any[];
@@ -32,8 +43,12 @@ export default function OperatorDashboardClient({
   organizations: any[];
   qualifications?: any[];
   serviceRequests?: any[];
+  staffProfiles?: any[];
+  deliveryTasks?: any[];
+  clientServices?: any[];
+  performanceMetrics?: any;
 }) {
-  const [activeTab, setActiveTab] = useState<'qualifications' | 'serviceRequests' | 'requests' | 'engagements' | 'professionals' | 'finance'>('serviceRequests');
+  const [activeTab, setActiveTab] = useState<'workforce' | 'serviceRequests' | 'qualifications' | 'requests' | 'engagements' | 'professionals' | 'finance'>('workforce');
 
   // Service Requests state
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
@@ -354,6 +369,21 @@ export default function OperatorDashboardClient({
       {/* Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-outline-variant/20 pb-2">
         <button
+          onClick={() => setActiveTab('workforce')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'workforce'
+              ? 'bg-primary-container text-primary-fixed'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
+          }`}
+        >
+          <Icon name="Briefcase" size={16} />
+          <span>Remote Operations & Tasks</span>
+          <span className="text-xs px-1.5 py-0.2 rounded-full bg-surface-container-highest">
+            {deliveryTasks.length}
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('qualifications')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'qualifications'
@@ -443,6 +473,17 @@ export default function OperatorDashboardClient({
           </span>
         </button>
       </div>
+
+      {/* Tab: Remote Operations & Workforce */}
+      {activeTab === 'workforce' && (
+        <RemoteWorkforceSection
+          staffProfiles={staffProfiles}
+          deliveryTasks={deliveryTasks}
+          clientServices={clientServices}
+          organizations={organizations}
+          performanceMetrics={performanceMetrics}
+        />
+      )}
 
       {/* Tab 0: Qualification Review Queue */}
       {activeTab === 'qualifications' && (
