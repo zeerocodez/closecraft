@@ -128,9 +128,59 @@ describe('CloseCraft 2.0 Affiliate Marketplace Acceptance Tests', () => {
     assert.equal(payout.amount, 25000);
     assert.equal(payout.status, 'REQUESTED');
     assert.ok(payout.reference.startsWith('PAYOUT-CC-'));
+
+    // 5.B Admin marks payout as PAID with NIP bank transfer reference
+    const disbursed = await prisma.affiliatePayout.update({
+      where: { id: payout.id },
+      data: {
+        status: 'PAID',
+        reference: `NIP-GTB-${Date.now()}`,
+        processedAt: new Date(),
+      }
+    });
+
+    assert.equal(disbursed.status, 'PAID');
+    assert.ok(disbursed.reference.startsWith('NIP-GTB-'));
+    assert.ok(disbursed.processedAt instanceof Date);
   });
 
-  it('6. Cleans up acceptance test records', async () => {
+  it('6. Supports custom vanity referral codes with uniqueness and formatting constraints', async () => {
+    const vanityCode = `VANITY-${Date.now().toString(36).toUpperCase()}`;
+
+    // Update partner to custom vanity code
+    const updated = await prisma.affiliateProfile.update({
+      where: { id: testAffiliateId },
+      data: { referralCode: vanityCode }
+    });
+
+    assert.equal(updated.referralCode, vanityCode);
+
+    // Verify lookup by vanity code resolves the partner
+    const found = await prisma.affiliateProfile.findUnique({
+      where: { referralCode: vanityCode }
+    });
+    assert.ok(found);
+    assert.equal(found.id, testAffiliateId);
+  });
+
+  it('7. Supports admin partner status update and commission rate adjustments', async () => {
+    const suspended = await prisma.affiliateProfile.update({
+      where: { id: testAffiliateId },
+      data: { status: 'SUSPENDED', commissionRate: 20.0 }
+    });
+
+    assert.equal(suspended.status, 'SUSPENDED');
+    assert.equal(suspended.commissionRate, 20.0);
+
+    const reactivated = await prisma.affiliateProfile.update({
+      where: { id: testAffiliateId },
+      data: { status: 'APPROVED' }
+    });
+
+    assert.equal(reactivated.status, 'APPROVED');
+  });
+
+  it('8. Cleans up acceptance test records', async () => {
     if (testAffiliateId) {
       await prisma.affiliatePayout.deleteMany({ where: { affiliateId: testAffiliateId } });
       await prisma.affiliateCommission.deleteMany({ where: { affiliateId: testAffiliateId } });

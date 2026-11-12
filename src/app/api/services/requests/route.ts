@@ -99,7 +99,16 @@ export async function POST(req: NextRequest) {
     const cleanName = contactName.trim().slice(0, 120);
     const cleanCompany = companyName ? String(companyName).trim().slice(0, 150) : null;
     const cleanPhone = contactPhone ? String(contactPhone).trim().slice(0, 40) : null;
-    const cleanAttribution = sourceAttribution ? String(sourceAttribution).trim().slice(0, 200) : 'Website Assessment';
+
+    // Check for affiliate referral cookie
+    const cookieHeader = req.headers.get("cookie") || "";
+    const refMatch = cookieHeader.match(/(?:^|;\s*)(?:closecraft_ref|ref)=([A-Za-z0-9_-]{3,50})(?:;|$)/);
+    const activeRefCode = body.ref || (refMatch ? refMatch[1] : null);
+
+    const baseAttribution = sourceAttribution ? String(sourceAttribution).trim().slice(0, 140) : 'Website Assessment';
+    const cleanAttribution = activeRefCode
+      ? `${baseAttribution} (Ref: ${String(activeRefCode).trim().toUpperCase()})`.slice(0, 200)
+      : baseAttribution;
 
     // Generate unique reference ID
     let reference = generateReference(cleanServiceType);

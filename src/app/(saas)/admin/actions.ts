@@ -158,6 +158,90 @@ export async function triggerAffiliatePayout(saleId: string, reference?: string)
   return { success };
 }
 
+export async function processCloseCraftAffiliatePayout(
+  payoutId: string, 
+  reference: string, 
+  action: 'APPROVE_PAID' | 'REJECT'
+) {
+  await requireAdmin();
+
+  const payout = await db.affiliatePayout.findUnique({
+    where: { id: payoutId },
+    include: { affiliate: { include: { user: true } } }
+  });
+
+  if (!payout) {
+    throw new Error('Payout request not found');
+  }
+
+  const now = new Date();
+  if (action === 'APPROVE_PAID') {
+    const cleanRef = reference ? reference.trim() : `NIP-${Date.now().toString(36).toUpperCase()}`;
+    await db.affiliatePayout.update({
+      where: { id: payoutId },
+      data: {
+        status: 'PAID',
+        reference: cleanRef,
+        processedAt: now,
+      }
+    });
+
+    // Mark corresponding commissions as PAID up to payout amount
+    const payableCommissions = await db.affiliateCommission.findMany({
+      where: {
+        affiliateId: payout.affiliateId,
+        status: { in: ['PAYABLE', 'APPROVED'] }
+      },
+      orderBy: { createdAt: 'asc' }
+    });
+
+    let remainingToMark = payout.amount;
+    for (const comm of payableCommissions) {
+      if (remainingToMark <= 0) break;
+      await db.affiliateCommission.update({
+        where: { id: comm.id },
+        data: { status: 'PAID' }
+      });
+      remainingToMark -= comm.amount;
+    }
+  } else {
+    // REJECT
+    await db.affiliatePayout.update({
+      where: { id: payoutId },
+      data: {
+        status: 'REJECTED',
+        processedAt: now,
+        reference: reference ? `REJECTED: ${reference}` : 'REJECTED: Payout rejected by administrator',
+      }
+    });
+  }
+
+  revalidatePath('/admin');
+  revalidatePath('/affiliate/dashboard');
+  return { success: true };
+}
+
+export async function updateAffiliateProfileStatus(
+  affiliateId: string,
+  status: 'APPROVED' | 'PENDING' | 'SUSPENDED',
+  commissionRate?: number
+) {
+  await requireAdmin();
+
+  const updated = await db.affiliateProfile.update({
+    where: { id: affiliateId },
+    data: {
+      status,
+      ...(commissionRate !== undefined ? { commissionRate } : {}),
+      updatedAt: new Date(),
+    }
+  });
+
+  revalidatePath('/admin');
+  revalidatePath('/affiliate/dashboard');
+  return { success: true, affiliate: updated };
+}
+
 export async function updateServicePackageAction(packageId: string, data: { defaultBasePrice?: number; isActive?: boolean; slaDays?: number }) {
   await requireAdmin();
 

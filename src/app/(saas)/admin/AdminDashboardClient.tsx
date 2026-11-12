@@ -9,6 +9,8 @@ import {
   createClientOrganization,
   updateUserRole,
   triggerAffiliatePayout,
+  processCloseCraftAffiliatePayout,
+  updateAffiliateProfileStatus,
   updateServicePackageAction,
   updateClientServiceStatusAction,
   updateServiceRequestStageAction
@@ -139,6 +141,8 @@ interface AdminDashboardClientProps {
   servicePackages?: any[];
   clientServices?: any[];
   serviceRequests?: any[];
+  closecraftAffiliates?: any[];
+  closecraftPayouts?: any[];
 }
 
 export default function AdminDashboardClient({ 
@@ -149,6 +153,8 @@ export default function AdminDashboardClient({
   servicePackages = [],
   clientServices = [],
   serviceRequests = [],
+  closecraftAffiliates = [],
+  closecraftPayouts = [],
   stats, 
   finances 
 }: AdminDashboardClientProps) {
@@ -161,6 +167,9 @@ export default function AdminDashboardClient({
   const [userSearchQuery, setUserSearchQuery] = useState('');
   const [affiliateSearchQuery, setAffiliateSearchQuery] = useState('');
   const [selectedOrgPolicy, setSelectedOrgPolicy] = useState<{ name: string; policy: string | null } | null>(null);
+  const [partnerSubTab, setPartnerSubTab] = useState<'PAYOUTS' | 'PARTNERS' | 'DSS'>('PAYOUTS');
+  const [payoutDisburseModal, setPayoutDisburseModal] = useState<{ id: string; partnerName: string; amount: number; bankDetails: string | null } | null>(null);
+  const [disburseReference, setDisburseReference] = useState('');
   const [isPending, startTransition] = useTransition();
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
@@ -245,6 +254,42 @@ export default function AdminDashboardClient({
         showNotification(`✅ Processed payout of ${formatMoney(commissionNgn)} for ${partnerName}.`);
       } catch (err: any) {
         alert(err.message || "Failed to process payout");
+      }
+    });
+  };
+
+  const handleDisburseCloseCraftPayout = (payoutId: string, reference: string) => {
+    startTransition(async () => {
+      try {
+        await processCloseCraftAffiliatePayout(payoutId, reference, 'APPROVE_PAID');
+        showNotification('✅ CloseCraft payout disbursed successfully with bank reference.');
+        setPayoutDisburseModal(null);
+        setDisburseReference('');
+      } catch (err: any) {
+        alert(err.message || "Failed to disburse payout");
+      }
+    });
+  };
+
+  const handleRejectCloseCraftPayout = (payoutId: string) => {
+    if (!confirm('Are you sure you want to reject this payout request? The balance will be restored to the affiliate.')) return;
+    startTransition(async () => {
+      try {
+        await processCloseCraftAffiliatePayout(payoutId, 'Rejected by operator', 'REJECT');
+        showNotification('ℹ️ Payout request rejected and balance restored.');
+      } catch (err: any) {
+        alert(err.message || "Failed to reject payout");
+      }
+    });
+  };
+
+  const handleUpdatePartnerStatus = (affiliateId: string, status: 'APPROVED' | 'PENDING' | 'SUSPENDED') => {
+    startTransition(async () => {
+      try {
+        await updateAffiliateProfileStatus(affiliateId, status);
+        showNotification(`✅ Partner status updated to ${status}.`);
+      } catch (err: any) {
+        alert(err.message || "Failed to update partner status");
       }
     });
   };
@@ -1182,160 +1227,469 @@ export default function AdminDashboardClient({
       )}
 
       {/* TAB 3: AFFILIATE & PARTNER PAYOUTS */}
-      {activeTab === 'affiliates' && (
-        <div className="space-y-6">
-          
-          {/* Payout Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm">
-              <span className="text-xs font-bold uppercase tracking-wider text-secondary">Total Commissions Earned</span>
-              <div className="text-2xl font-extrabold text-on-surface mt-2">
-                {formatMoney(finances.totalAffiliateCommissionNgn)}
-              </div>
-              <span className="text-xs text-on-surface-variant mt-1 block">
-                Across {safeSales.length} qualifying enrollments
-              </span>
-            </div>
+      {activeTab === 'affiliates' && (() => {
+        const ccTotalCommissionsEarned = closecraftAffiliates.reduce((sum, a) => sum + (a.totalEarnedNgn || 0), 0);
+        const ccTotalCommissionsPaid = closecraftPayouts.filter(p => p.status === 'PAID').reduce((sum, p) => sum + p.amount, 0);
+        const ccPendingPayouts = closecraftPayouts.filter(p => p.status === 'REQUESTED' || p.status === 'APPROVED' || p.status === 'PROCESSING');
+        const ccTotalPendingPayoutsNgn = ccPendingPayouts.reduce((sum, p) => sum + p.amount, 0);
 
-            <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm">
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Total Commissions Disbursed</span>
-              <div className="text-2xl font-extrabold text-emerald-400 mt-2">
-                {formatMoney(finances.paidAffiliateCommissionNgn)}
+        return (
+          <div className="space-y-6">
+            
+            {/* Payout Summary Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm">
+                <span className="text-xs font-bold uppercase tracking-wider text-secondary">Total Commissions Earned</span>
+                <div className="text-2xl font-extrabold text-on-surface mt-2">
+                  {formatMoney(ccTotalCommissionsEarned > 0 ? ccTotalCommissionsEarned : finances.totalAffiliateCommissionNgn)}
+                </div>
+                <span className="text-xs text-on-surface-variant mt-1 block">
+                  CloseCraft 2.0 Partner Network & Service Sales
+                </span>
               </div>
-              <span className="text-xs text-on-surface-variant mt-1 block">
-                {safePayouts.length} completed bank transfers
-              </span>
-            </div>
 
-            <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-sm">
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Pending Partner Payouts</span>
-              <div className="text-2xl font-extrabold text-amber-400 mt-2">
-                {formatMoney(finances.pendingAffiliateCommissionNgn)}
+              <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm">
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">Total Commissions Disbursed</span>
+                <div className="text-2xl font-extrabold text-emerald-400 mt-2">
+                  {formatMoney(ccTotalCommissionsPaid > 0 ? ccTotalCommissionsPaid : finances.paidAffiliateCommissionNgn)}
+                </div>
+                <span className="text-xs text-on-surface-variant mt-1 block">
+                  Completed bank disbursements
+                </span>
               </div>
-              <span className="text-xs text-amber-300/80 mt-1 block font-medium">
-                {pendingSales.length} commissions awaiting disbursement
-              </span>
-            </div>
-          </div>
 
-          {/* Sales & Payout Reconciliation Ledger */}
-          <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-bold text-on-surface">Affiliate Commission & Payout Ledger</h3>
-                <p className="text-xs text-on-surface-variant mt-0.5">
-                  Reconcile student enrollment sales, partner commission splits (35%), and trigger bank payouts
-                </p>
-              </div>
-              <div className="text-xs font-bold text-on-surface-variant">
-                {safeSales.length} Total Sales Records
+              <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 shadow-sm">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-500">Pending Withdrawal Requests</span>
+                <div className="text-2xl font-extrabold text-amber-400 mt-2">
+                  {formatMoney(ccTotalPendingPayoutsNgn > 0 ? ccTotalPendingPayoutsNgn : finances.pendingAffiliateCommissionNgn)}
+                </div>
+                <span className="text-xs text-amber-300/80 mt-1 block font-medium">
+                  {ccPendingPayouts.length > 0 ? `${ccPendingPayouts.length} withdrawal requests awaiting disbursement` : `${pendingSales.length} commissions awaiting disbursement`}
+                </span>
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-surface-container-low/70 border-b border-outline-variant/30 text-secondary uppercase font-bold tracking-wider text-[11px]">
-                    <th className="p-4">Partner Code & Reference</th>
-                    <th className="p-4">Gateway Platform</th>
-                    <th className="p-4">Gross Sale</th>
-                    <th className="p-4">Commission (35%)</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4 text-right">Disbursement Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/20">
-                  {safeSales.map((sale) => {
-                    const grossNgn = sale.amount / 100;
-                    const commissionNgn = sale.commission / 100;
-                    const isPaid = sale.status === 'paid';
-                    const isPendingPayout = sale.status === 'pending';
-
-                    // Find partner name if available
-                    const partner = safeAffiliates.find(a => a.code === sale.affiliate);
-
-                    return (
-                      <tr key={sale.id} className="hover:bg-surface-container/30 transition-colors">
-                        <td className="p-4">
-                          <div className="font-bold text-on-surface">{partner ? partner.name : sale.affiliate}</div>
-                          <div className="text-[11px] font-mono text-on-surface-variant">{sale.reference}</div>
-                        </td>
-
-                        <td className="p-4">
-                          <span className="px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 font-semibold text-on-surface">
-                            {sale.platform}
-                          </span>
-                        </td>
-
-                        <td className="p-4 font-bold text-on-surface">
-                          {formatMoney(grossNgn)}
-                        </td>
-
-                        <td className="p-4 font-bold text-amber-400">
-                          {formatMoney(commissionNgn)}
-                        </td>
-
-                        <td className="p-4">
-                          {isPaid ? (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
-                              <span className="material-symbols-outlined text-[13px]">check_circle</span>
-                              <span>Disbursed</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
-                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                              <span>Pending Payout</span>
-                            </span>
-                          )}
-                        </td>
-
-                        <td className="p-4 text-right">
-                          {isPendingPayout ? (
-                            <button
-                              disabled={isPending}
-                              onClick={() => handleProcessPayout(sale.id, partner?.name || sale.affiliate, sale.commission)}
-                              className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all active:scale-[0.98] inline-flex items-center gap-1"
-                            >
-                              <span className="material-symbols-outlined text-[15px]">send_money</span>
-                              <span>Process Payout</span>
-                            </button>
-                          ) : (
-                            <span className="text-on-surface-variant font-mono text-[11px]">
-                              Paid
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+            {/* Subtab Navigation */}
+            <div className="flex items-center gap-2 p-1 bg-surface-container rounded-2xl border border-outline-variant/30 w-fit">
+              <button
+                onClick={() => setPartnerSubTab('PAYOUTS')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  partnerSubTab === 'PAYOUTS'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                Withdrawal Requests ({closecraftPayouts.length})
+              </button>
+              <button
+                onClick={() => setPartnerSubTab('PARTNERS')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  partnerSubTab === 'PARTNERS'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                CloseCraft Partners ({closecraftAffiliates.length})
+              </button>
+              <button
+                onClick={() => setPartnerSubTab('DSS')}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                  partnerSubTab === 'DSS'
+                    ? 'bg-primary text-on-primary shadow-sm'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                DSS Course Sales ({safeSales.length})
+              </button>
             </div>
-          </div>
 
-          {/* Registered Affiliate Partners */}
-          <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden p-5">
-            <h3 className="text-sm font-bold text-on-surface mb-3">Active Affiliate Partners & Distribution Channels</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {safeAffiliates.map((aff) => (
-                <div key={aff.code} className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/20">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="font-bold text-on-surface text-sm">{aff.name}</span>
-                    <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary font-mono text-[10px] font-bold">
-                      {aff.code}
-                    </span>
+            {/* SUBTAB 1: CLOSE CRAFT PAYOUT REQUESTS */}
+            {partnerSubTab === 'PAYOUTS' && (
+              <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-on-surface">CloseCraft 2.0 Partner Withdrawal Queue</h3>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      Review withdrawal requests, verify Nigerian bank accounts, and disburse affiliate commissions.
+                    </p>
                   </div>
-                  <div className="text-xs text-on-surface-variant truncate mb-2">{aff.email}</div>
-                  <div className="text-[11px] text-secondary bg-surface-container p-2 rounded-lg line-clamp-2">
-                    {aff.channel}
+                  <div className="text-xs font-bold text-on-surface-variant">
+                    {closecraftPayouts.length} Total Requests
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
 
-        </div>
-      )}
+                {closecraftPayouts.length === 0 ? (
+                  <div className="p-8 text-center text-on-surface-variant text-xs">
+                    No partner withdrawal requests submitted yet.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-surface-container-low/70 border-b border-outline-variant/30 text-secondary uppercase font-bold tracking-wider text-[11px]">
+                          <th className="p-4">Partner</th>
+                          <th className="p-4">Code</th>
+                          <th className="p-4">Amount</th>
+                          <th className="p-4">Bank Details</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4">Requested Date</th>
+                          <th className="p-4 text-right">Disbursement Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/20">
+                        {closecraftPayouts.map((payout) => {
+                          const isRequested = payout.status === 'REQUESTED' || payout.status === 'APPROVED';
+                          const isPaid = payout.status === 'PAID';
+                          const isRejected = payout.status === 'REJECTED';
+
+                          return (
+                            <tr key={payout.id} className="hover:bg-surface-container/30 transition-colors">
+                              <td className="p-4">
+                                <div className="font-bold text-on-surface">{payout.affiliate?.user?.name || 'Partner'}</div>
+                                <div className="text-[11px] text-on-surface-variant">{payout.affiliate?.user?.email}</div>
+                              </td>
+
+                              <td className="p-4">
+                                <span className="px-2 py-0.5 rounded font-mono text-[11px] font-bold bg-primary/10 text-primary">
+                                  {payout.affiliate?.referralCode}
+                                </span>
+                              </td>
+
+                              <td className="p-4 font-bold text-emerald-400 text-sm">
+                                {formatMoney(payout.amount)}
+                              </td>
+
+                              <td className="p-4 text-xs">
+                                <div className="font-semibold text-on-surface">
+                                  {payout.affiliate?.bankName || 'Bank'}
+                                </div>
+                                <div className="font-mono text-[11px] text-on-surface-variant">
+                                  {payout.affiliate?.bankAccountNumber} ({payout.affiliate?.bankAccountName})
+                                </div>
+                              </td>
+
+                              <td className="p-4">
+                                {isPaid ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                                    <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                                    <span>Disbursed</span>
+                                  </span>
+                                ) : isRejected ? (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold">
+                                    <span>Rejected</span>
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                    <span>Awaiting Payout</span>
+                                  </span>
+                                )}
+                              </td>
+
+                              <td className="p-4 text-on-surface-variant font-mono text-[11px]">
+                                {new Date(payout.requestedAt).toLocaleDateString()}
+                              </td>
+
+                              <td className="p-4 text-right">
+                                {isRequested ? (
+                                  <div className="flex items-center justify-end gap-2">
+                                    <button
+                                      disabled={isPending}
+                                      onClick={() => setPayoutDisburseModal({
+                                        id: payout.id,
+                                        partnerName: payout.affiliate?.user?.name || payout.affiliate?.referralCode,
+                                        amount: payout.amount,
+                                        bankDetails: `${payout.affiliate?.bankName} - ${payout.affiliate?.bankAccountNumber} (${payout.affiliate?.bankAccountName})`,
+                                      })}
+                                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all inline-flex items-center gap-1"
+                                    >
+                                      <span className="material-symbols-outlined text-[15px]">send_money</span>
+                                      <span>Disburse</span>
+                                    </button>
+                                    <button
+                                      disabled={isPending}
+                                      onClick={() => handleRejectCloseCraftPayout(payout.id)}
+                                      className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-rose-500/10 text-on-surface-variant hover:text-rose-400 text-xs font-semibold transition-colors"
+                                    >
+                                      Reject
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <span className="text-on-surface-variant font-mono text-[11px]">
+                                    {payout.reference || 'Closed'}
+                                  </span>
+                                )}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SUBTAB 2: CLOSE CRAFT PARTNERS ROSTER */}
+            {partnerSubTab === 'PARTNERS' && (
+              <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden p-5 space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+                  <div>
+                    <h3 className="text-sm font-bold text-on-surface">Registered CloseCraft 2.0 Affiliate Partners</h3>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      Manage partner accounts, promotional channels, and commission rate tiers.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-on-surface-variant">
+                    {closecraftAffiliates.length} Total Partners
+                  </span>
+                </div>
+
+                {closecraftAffiliates.length === 0 ? (
+                  <div className="p-8 text-center text-on-surface-variant text-xs">
+                    No CloseCraft affiliate partners registered yet.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-surface-container-low/70 border-b border-outline-variant/30 text-secondary uppercase font-bold tracking-wider text-[11px]">
+                          <th className="p-4">Partner Name & Email</th>
+                          <th className="p-4">Referral Code</th>
+                          <th className="p-4">Commission %</th>
+                          <th className="p-4">Clicks / Referrals</th>
+                          <th className="p-4">Total Earned</th>
+                          <th className="p-4">Available Balance</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-outline-variant/20">
+                        {closecraftAffiliates.map((aff) => (
+                          <tr key={aff.id} className="hover:bg-surface-container/30 transition-colors">
+                            <td className="p-4">
+                              <div className="font-bold text-on-surface">{aff.user?.name || 'Partner'}</div>
+                              <div className="text-[11px] text-on-surface-variant">{aff.user?.email}</div>
+                              <div className="text-[10px] text-secondary mt-0.5">{aff.channel}</div>
+                            </td>
+
+                            <td className="p-4 font-mono font-bold text-primary">
+                              {aff.referralCode}
+                            </td>
+
+                            <td className="p-4 font-bold text-on-surface">
+                              {aff.commissionRate}%
+                            </td>
+
+                            <td className="p-4 text-on-surface-variant font-mono">
+                              {aff._count?.referralEvents || 0} clicks / {aff._count?.attributions || 0} clients
+                            </td>
+
+                            <td className="p-4 font-bold text-on-surface">
+                              {formatMoney(aff.totalEarnedNgn || 0)}
+                            </td>
+
+                            <td className="p-4 font-bold text-emerald-400">
+                              {formatMoney(aff.clearedBalanceNgn || 0)}
+                            </td>
+
+                            <td className="p-4">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  aff.status === 'APPROVED'
+                                    ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                    : aff.status === 'SUSPENDED'
+                                    ? 'bg-rose-500/10 text-rose-400 border border-rose-500/30'
+                                    : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                                }`}
+                              >
+                                {aff.status}
+                              </span>
+                            </td>
+
+                            <td className="p-4 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {aff.status !== 'APPROVED' && (
+                                  <button
+                                    disabled={isPending}
+                                    onClick={() => handleUpdatePartnerStatus(aff.id, 'APPROVED')}
+                                    className="px-2.5 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px]"
+                                  >
+                                    Approve
+                                  </button>
+                                )}
+                                {aff.status !== 'SUSPENDED' && (
+                                  <button
+                                    disabled={isPending}
+                                    onClick={() => handleUpdatePartnerStatus(aff.id, 'SUSPENDED')}
+                                    className="px-2.5 py-1 rounded bg-surface-container hover:bg-rose-500/10 text-on-surface-variant hover:text-rose-400 font-semibold text-[11px]"
+                                  >
+                                    Suspend
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* SUBTAB 3: DSS COURSE COMMISSIONS LEDGER */}
+            {partnerSubTab === 'DSS' && (
+              <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
+                <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-on-surface">DSS Course Sales & Payout Reconciliation Ledger</h3>
+                    <p className="text-xs text-on-surface-variant mt-0.5">
+                      Reconcile student enrollment sales, partner commission splits (35%), and trigger bank payouts
+                    </p>
+                  </div>
+                  <div className="text-xs font-bold text-on-surface-variant">
+                    {safeSales.length} Total Sales Records
+                  </div>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-surface-container-low/70 border-b border-outline-variant/30 text-secondary uppercase font-bold tracking-wider text-[11px]">
+                        <th className="p-4">Partner Code & Reference</th>
+                        <th className="p-4">Gateway Platform</th>
+                        <th className="p-4">Gross Sale</th>
+                        <th className="p-4">Commission (35%)</th>
+                        <th className="p-4">Status</th>
+                        <th className="p-4 text-right">Disbursement Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/20">
+                      {safeSales.map((sale) => {
+                        const grossNgn = sale.amount / 100;
+                        const commissionNgn = sale.commission / 100;
+                        const isPaid = sale.status === 'paid';
+                        const isPendingPayout = sale.status === 'pending';
+                        const partner = safeAffiliates.find(a => a.code === sale.affiliate);
+
+                        return (
+                          <tr key={sale.id} className="hover:bg-surface-container/30 transition-colors">
+                            <td className="p-4">
+                              <div className="font-bold text-on-surface">{partner ? partner.name : sale.affiliate}</div>
+                              <div className="text-[11px] font-mono text-on-surface-variant">{sale.reference}</div>
+                            </td>
+
+                            <td className="p-4">
+                              <span className="px-2 py-0.5 rounded bg-surface-container border border-outline-variant/30 font-semibold text-on-surface">
+                                {sale.platform}
+                              </span>
+                            </td>
+
+                            <td className="p-4 font-bold text-on-surface">
+                              {formatMoney(grossNgn)}
+                            </td>
+
+                            <td className="p-4 font-bold text-amber-400">
+                              {formatMoney(commissionNgn)}
+                            </td>
+
+                            <td className="p-4">
+                              {isPaid ? (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+                                  <span className="material-symbols-outlined text-[13px]">check_circle</span>
+                                  <span>Disbursed</span>
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-bold">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                  <span>Pending Payout</span>
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="p-4 text-right">
+                              {isPendingPayout ? (
+                                <button
+                                  disabled={isPending}
+                                  onClick={() => handleProcessPayout(sale.id, partner?.name || sale.affiliate, sale.commission)}
+                                  className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-sm transition-all active:scale-[0.98] inline-flex items-center gap-1"
+                                >
+                                  <span className="material-symbols-outlined text-[15px]">send_money</span>
+                                  <span>Process Payout</span>
+                                </button>
+                              ) : (
+                                <span className="text-on-surface-variant font-mono text-[11px]">
+                                  Paid
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Payout Disburse Modal */}
+            {payoutDisburseModal && (
+              <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+                <div className="w-full max-w-md bg-surface-container rounded-2xl border border-outline-variant/40 p-6 shadow-2xl space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+                    <h3 className="text-base font-bold text-on-surface">Confirm Bank Disbursement</h3>
+                    <button onClick={() => setPayoutDisburseModal(null)} className="text-on-surface-variant hover:text-on-surface text-sm font-bold">
+                      &times;
+                    </button>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-1 text-xs">
+                    <div className="text-secondary font-semibold">Partner: <strong className="text-on-surface">{payoutDisburseModal.partnerName}</strong></div>
+                    <div className="text-secondary font-semibold">Amount: <strong className="text-emerald-400 text-sm">{formatMoney(payoutDisburseModal.amount)}</strong></div>
+                    <div className="text-secondary font-semibold">Bank: <strong className="text-on-surface">{payoutDisburseModal.bankDetails}</strong></div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-xs font-bold text-on-surface">
+                      Bank Transfer Reference (NIP / Transaction ID) *
+                    </label>
+                    <input
+                      type="text"
+                      value={disburseReference}
+                      onChange={(e) => setDisburseReference(e.target.value)}
+                      placeholder="e.g. NIP-GTB-20261112-9908"
+                      className="w-full px-3 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/40 text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <p className="text-[11px] text-on-surface-variant">
+                      Enter the bank transaction reference confirming transfer to the partner account.
+                    </p>
+                  </div>
+
+                  <div className="pt-2 flex justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPayoutDisburseModal(null)}
+                      className="px-4 py-2 rounded-lg bg-surface-container-low text-xs font-semibold text-on-surface-variant"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      disabled={isPending}
+                      onClick={() => handleDisburseCloseCraftPayout(payoutDisburseModal.id, disburseReference)}
+                      className="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs disabled:opacity-50"
+                    >
+                      {isPending ? 'Processing...' : 'Confirm & Mark Paid'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </div>
+        );
+      })()}
 
       {/* TAB 4: USER DIRECTORY & ROLES */}
       {activeTab === 'users' && (

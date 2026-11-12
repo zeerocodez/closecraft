@@ -175,7 +175,7 @@ export default async function AdminPage() {
   };
 
   // Fetch service marketplace packages, active client services & early access/service requests
-  const [servicePackages, clientServices, serviceRequests] = await Promise.all([
+  const [servicePackages, clientServices, serviceRequests, closecraftAffiliatesRaw, closecraftPayoutsRaw] = await Promise.all([
     db.servicePackage.findMany({ orderBy: { defaultBasePrice: 'asc' } }),
     db.clientService.findMany({
       orderBy: { createdAt: 'desc' },
@@ -186,8 +186,86 @@ export default async function AdminPage() {
     db.serviceRequest.findMany({
       orderBy: { createdAt: 'desc' },
       take: 100,
+    }),
+    db.affiliateProfile.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: {
+        user: { select: { id: true, name: true, email: true } },
+        commissions: true,
+        payouts: true,
+        _count: {
+          select: {
+            referralEvents: true,
+            attributions: true,
+            commissions: true,
+            payouts: true,
+          }
+        }
+      }
+    }),
+    db.affiliatePayout.findMany({
+      orderBy: { requestedAt: 'desc' },
+      include: {
+        affiliate: {
+          include: {
+            user: { select: { id: true, name: true, email: true } }
+          }
+        }
+      },
+      take: 50,
     })
   ]);
+
+  const closecraftAffiliates = closecraftAffiliatesRaw.map((aff) => {
+    const totalEarned = aff.commissions
+      .filter((c) => c.status === 'APPROVED' || c.status === 'PAYABLE' || c.status === 'PAID')
+      .reduce((sum, c) => sum + c.amount, 0);
+
+    const totalPaid = aff.payouts
+      .filter((p) => p.status === 'PAID')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const totalPending = aff.payouts
+      .filter((p) => p.status === 'REQUESTED' || p.status === 'APPROVED' || p.status === 'PROCESSING')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const clearedBalance = Math.max(0, totalEarned - totalPaid - totalPending);
+
+    return {
+      id: aff.id,
+      userId: aff.userId,
+      referralCode: aff.referralCode,
+      channel: aff.channel,
+      status: aff.status,
+      commissionRate: aff.commissionRate,
+      bankName: aff.bankName,
+      bankAccountNumber: aff.bankAccountNumber,
+      bankAccountName: aff.bankAccountName,
+      createdAt: aff.createdAt.toISOString(),
+      user: aff.user,
+      _count: aff._count,
+      totalEarnedNgn: totalEarned,
+      clearedBalanceNgn: clearedBalance,
+    };
+  });
+
+  const closecraftPayouts = closecraftPayoutsRaw.map((p) => ({
+    id: p.id,
+    affiliateId: p.affiliateId,
+    amount: p.amount,
+    status: p.status,
+    reference: p.reference,
+    bankDetails: p.bankDetails,
+    requestedAt: p.requestedAt.toISOString(),
+    processedAt: p.processedAt ? p.processedAt.toISOString() : null,
+    affiliate: {
+      referralCode: p.affiliate.referralCode,
+      bankName: p.affiliate.bankName,
+      bankAccountNumber: p.affiliate.bankAccountNumber,
+      bankAccountName: p.affiliate.bankAccountName,
+      user: p.affiliate.user,
+    }
+  }));
 
   return (
     <AdminDashboardClient
@@ -198,6 +276,8 @@ export default async function AdminPage() {
       servicePackages={servicePackages}
       clientServices={clientServices}
       serviceRequests={serviceRequests}
+      closecraftAffiliates={closecraftAffiliates}
+      closecraftPayouts={closecraftPayouts}
       stats={{
         totalOrgs,
         approvedOrgs,

@@ -20,7 +20,15 @@ export default async function AffiliateDashboardPage() {
     include: {
       commissions: { orderBy: { createdAt: 'desc' }, take: 50 },
       payouts: { orderBy: { requestedAt: 'desc' }, take: 20 },
-      attributions: { orderBy: { createdAt: 'desc' }, take: 20 },
+      attributions: { 
+        orderBy: { createdAt: 'desc' }, 
+        take: 20,
+        include: {
+          organization: {
+            select: { id: true, name: true, plan: true, createdAt: true }
+          }
+        }
+      },
       _count: {
         select: {
           referralEvents: true,
@@ -82,8 +90,10 @@ export default async function AffiliateDashboardPage() {
     createdAt: p.requestedAt.toISOString(),
   }));
 
-  const serializedAttributions = profile.attributions.map((a) => ({
+  const serializedAttributions = profile.attributions.map((a: any) => ({
     id: a.id,
+    organizationName: a.organization?.name || 'Referred Client',
+    plan: a.organization?.plan || 'STARTER',
     status: 'ACTIVE',
     expiresAt: new Date(a.createdAt.getTime() + 60 * 24 * 60 * 60 * 1000).toISOString(),
     createdAt: a.createdAt.toISOString(),

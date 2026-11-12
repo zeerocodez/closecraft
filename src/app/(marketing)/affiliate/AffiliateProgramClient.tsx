@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import Logo from '@/components/ui/Logo';
 import {
   Sparkles,
@@ -67,6 +68,25 @@ export default function AffiliateProgramClient({ currentUser, existingProfile }:
       const data = await res.json();
       if (!res.ok) {
         throw new Error(data.error || 'Failed to activate affiliate profile.');
+      }
+
+      // If user was newly registered during affiliate onboarding, authenticate their session immediately
+      if (!currentUser && formData.email && formData.password) {
+        try {
+          const authResult = await signIn('credentials', {
+            email: formData.email,
+            password: formData.password,
+            redirect: false,
+          });
+
+          if (authResult?.error) {
+            router.push(`/login?callbackUrl=/affiliate/dashboard&email=${encodeURIComponent(formData.email)}`);
+            return;
+          }
+        } catch {
+          router.push(`/login?callbackUrl=/affiliate/dashboard&email=${encodeURIComponent(formData.email)}`);
+          return;
+        }
       }
 
       router.push('/affiliate/dashboard');
@@ -426,6 +446,28 @@ export default function AffiliateProgramClient({ currentUser, existingProfile }:
 
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Where will you promote CloseCraft?</label>
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {[
+                      'B2B Consulting & Agency',
+                      'LinkedIn & Twitter (X)',
+                      'WhatsApp Communities',
+                      'Email Newsletter',
+                      'Sales Training / DSS'
+                    ].map((ch) => (
+                      <button
+                        key={ch}
+                        type="button"
+                        onClick={() => setFormData({ ...formData, marketingChannels: ch })}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${
+                          formData.marketingChannels === ch
+                            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                            : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        {ch}
+                      </button>
+                    ))}
+                  </div>
                   <input
                     type="text"
                     value={formData.marketingChannels}
@@ -437,25 +479,44 @@ export default function AffiliateProgramClient({ currentUser, existingProfile }:
 
                 <div className="p-4 rounded-xl bg-slate-900/70 border border-slate-800 space-y-3">
                   <div className="text-xs font-bold text-emerald-400">Payout Details (Nigerian Bank Account)</div>
+                  <datalist id="nigerian-banks">
+                    <option value="Access Bank" />
+                    <option value="Zenith Bank" />
+                    <option value="Guaranty Trust Bank (GTBank)" />
+                    <option value="First Bank of Nigeria" />
+                    <option value="United Bank for Africa (UBA)" />
+                    <option value="Kuda Bank" />
+                    <option value="Moniepoint Microfinance Bank" />
+                    <option value="OPay" />
+                    <option value="Stanbic IBTC Bank" />
+                    <option value="Fidelity Bank" />
+                    <option value="Sterling Bank" />
+                    <option value="Wema Bank (ALAT)" />
+                    <option value="FCMB" />
+                    <option value="Union Bank" />
+                    <option value="PalmPay" />
+                  </datalist>
                   <div className="grid sm:grid-cols-3 gap-3">
                     <div>
                       <label className="block text-[11px] text-slate-400 mb-1">Bank Name</label>
                       <input
                         type="text"
+                        list="nigerian-banks"
                         value={formData.bankName}
                         onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
-                        placeholder="e.g. Zenith Bank"
+                        placeholder="Select or type bank"
                         className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] text-slate-400 mb-1">Account Number</label>
+                      <label className="block text-[11px] text-slate-400 mb-1">Account Number (10 Digits)</label>
                       <input
                         type="text"
+                        maxLength={10}
                         value={formData.bankAccountNumber}
-                        onChange={(e) => setFormData({ ...formData, bankAccountNumber: e.target.value })}
-                        placeholder="10-digit number"
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white"
+                        onChange={(e) => setFormData({ ...formData, bankAccountNumber: e.target.value.replace(/\D/g, '') })}
+                        placeholder="0123456789"
+                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-800 text-xs text-white font-mono"
                       />
                     </div>
                     <div>
