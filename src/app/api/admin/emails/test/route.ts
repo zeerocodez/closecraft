@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { requireSuperAdmin } from '@/lib/apiSecurity';
 import { auth } from '@/lib/auth';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import { sendTransactionalEmailEvent } from '@/lib/email/service';
@@ -13,6 +14,8 @@ export async function POST(req: Request) {
 
   try {
     const session = await auth();
+    const admin = await requireSuperAdmin(session);
+    if (!admin.authorized) return admin.response;
     if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized: Admin authentication required' }, { status: 401 });
     }

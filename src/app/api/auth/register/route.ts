@@ -152,11 +152,6 @@ export async function POST(req: Request) {
         }
       });
 
-      console.log(`\n=========================================`);
-      console.log(`[USER REGISTRATION] Email: ${cleanEmail}`);
-      console.log(`Verification code generated: ${verificationCode}`);
-      console.log(`=========================================\n`);
-
       // Link affiliate referral attribution if referral code is present
       if (activeRefCode) {
         try {

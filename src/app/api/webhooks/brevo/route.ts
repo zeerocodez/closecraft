@@ -19,7 +19,8 @@ export async function POST(req: Request) {
     // Optional webhook signature / token verification
     const secret = process.env.BREVO_WEBHOOK_SECRET;
     const authHeader = req.headers.get('authorization') || req.headers.get('x-sib-signature');
-    if (secret && process.env.NODE_ENV === 'production') {
+    if (!secret) return NextResponse.json({ error: 'Webhook secret unconfigured' }, { status: 503 });
+    if (secret) {
       if (authHeader !== secret && authHeader !== `Bearer ${secret}`) {
         console.warn('[Brevo Webhook] Webhook authorization mismatch');
         return NextResponse.json({ error: 'Unauthorized webhook request' }, { status: 401 });

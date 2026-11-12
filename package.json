@@ -21,15 +21,15 @@
     "date-fns": "^4.4.0",
     "inngest": "^4.22.0",
     "lucide-react": "^1.52.0",
-    "next": "16.3.8",
+    "next": "16.4.6",
     "next-auth": "^5.0.0-beta.32",
-    "nodemailer": "^8.0.11",
+    "nodemailer": "^10.5.0",
     "openai": "^7.28.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
     "resend": "^6.32.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -38,7 +38,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.6",
     "prisma": "^6.19.3",
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
@@ -46,5 +46,11 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "overrides": {
+    "nodemailer": "$nodemailer",
+    "deepmerge-ts": "^8.0.2",
+    "zod": "$zod",
+    "minimatch": "^11.0.1"
   }
 }

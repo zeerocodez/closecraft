@@ -89,7 +89,7 @@ export default function AffiliateProgramClient({ currentUser, existingProfile }:
         }
       }
 
-      router.push('/affiliate/dashboard');
+      router.push(data.verificationRequired ? '/verify-email' : '/affiliate/dashboard');
     } catch (err: any) {
       setErrorMsg(err.message || 'An unexpected error occurred. Please try again.');
     } finally {

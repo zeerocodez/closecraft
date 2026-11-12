@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
@@ -69,7 +70,7 @@ export const {
   signOut,
 } = NextAuth({
   trustHost: true,
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "closecraft_local_dev_auth_secret_key_32chars_long_min",
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV !== "production" ? randomBytes(32).toString("hex") : undefined),
   providers: authProviders,
   session: { strategy: "jwt" },
   callbacks: {
