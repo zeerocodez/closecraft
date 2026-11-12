@@ -143,3 +143,4 @@ describe('CloseCraft 2.0 Phase 6: SEO and Growth Acceptance Tests', () => {
     assert.ok(adminContent.includes('requireSuperAdmin'), 'Admin blog API must enforce superadmin access');
   });
 });
+

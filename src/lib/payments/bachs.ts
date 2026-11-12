@@ -787,6 +787,99 @@ export async function processBachsWebhookEvent(event: any): Promise<{
     return { handled: true, details: `Fulfillment completed for ${purchaseType} (Invoice ${invoice.invoiceNumber})` };
   }
 
+  // Handle refund events (charge.refunded, refund.succeeded, collection.refunded, invoice.refunded)
+  if (['refund.succeeded', 'charge.refunded', 'collection.refunded', 'invoice.refunded'].includes(eventType)) {
+    const checkoutId = eventData.checkout_id || eventData.id;
+    const chargeId = eventData.charge_id || eventData.payment_id || eventData.id;
+    const invoiceId = metadata.invoiceId;
+
+    let invoice = null;
+    if (invoiceId) {
+      invoice = await db.bachsInvoice.findUnique({ where: { id: invoiceId } });
+    }
+    if (!invoice && (chargeId || checkoutId)) {
+      invoice = await db.bachsInvoice.findFirst({
+        where: {
+          OR: [
+            { bachsChargeId: chargeId },
+            { bachsCheckoutId: checkoutId },
+            { id: checkoutId },
+          ],
+        },
+      });
+    }
+
+    if (invoice) {
+      const now = new Date();
+
+      // 1. Mark invoice as REFUNDED
+      await db.bachsInvoice.update({
+        where: { id: invoice.id },
+        data: {
+          status: 'REFUNDED',
+          updatedAt: now,
+        },
+      });
+
+      // 2. Clawback or cancel any unpaid affiliate commissions for this invoice
+      await db.affiliateCommission.updateMany({
+        where: {
+          invoiceId: invoice.id,
+          status: { in: ['PENDING', 'PAYABLE'] },
+        },
+        data: {
+          status: 'CANCELLED',
+        },
+      });
+
+      // 3. Cancel any ClientService activated via this invoice
+      const clientServices = await db.clientService.findMany({
+        where: {
+          organizationId: invoice.organizationId,
+          description: { contains: invoice.invoiceNumber },
+        },
+      });
+      for (const service of clientServices) {
+        await db.clientService.update({
+          where: { id: service.id },
+          data: {
+            status: 'CANCELLED',
+            lastActivityAt: now,
+          },
+        });
+      }
+
+      // 4. Audit log the refund
+      await db.auditLog.create({
+        data: {
+          organizationId: invoice.organizationId,
+          actorType: 'INTEGRATION',
+          action: 'INVOICE_REFUNDED',
+          resourceType: 'BILLING',
+          resourceId: invoice.id,
+          newState: JSON.stringify({ invoiceNumber: invoice.invoiceNumber, amount: invoice.amount }),
+        },
+      }).catch(() => {});
+
+      // 5. Record webhook event for idempotency
+      if (eventId) {
+        await db.webhookEvent.create({
+          data: {
+            eventId,
+            provider: 'BACHS',
+            eventType,
+            status: 'PROCESSED',
+            payload: JSON.stringify(event),
+          },
+        }).catch(() => {});
+      }
+
+      return { handled: true, details: `Refund processed for Invoice ${invoice.invoiceNumber}` };
+    }
+
+    return { handled: true, details: `Refund event recorded, no matching invoice found` };
+  }
+
   // Record other events for audit trail
   if (eventId) {
     await db.webhookEvent.create({

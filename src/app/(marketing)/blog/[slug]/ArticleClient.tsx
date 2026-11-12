@@ -266,3 +266,4 @@ export default function ArticleClient({ post, relatedPosts }: ArticleClientProps
     </div>
   );
 }
+

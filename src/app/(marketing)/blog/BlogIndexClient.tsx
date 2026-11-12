@@ -293,3 +293,4 @@ export default function BlogIndexClient({ initialPosts, categories }: BlogIndexC
     </div>
   );
 }
+

@@ -183,3 +183,4 @@ export function getFaqJsonLd(faqs: Array<{ question: string; answer: string }>) 
     })),
   };
 }
+
