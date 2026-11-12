@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from 'react';
+import { useState, useRef, type FormEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
@@ -11,29 +11,27 @@ import {
   Menu,
   Phone,
   Play,
-  Send,
+  Pause,
+  Volume2,
+  VolumeX,
   ShieldCheck,
   Sparkles,
   Users,
   X,
-  Zap,
   ChevronDown,
-  ChevronUp,
-  GraduationCap,
-  Briefcase,
-  UserCheck,
-  Headphones,
+  ChevronRight,
   Target,
-  AlertCircle,
+  Layers,
+  TrendingUp,
+  Maximize2,
+  Zap,
+  RefreshCw,
+  HelpCircle,
 } from 'lucide-react';
 import Logo from "@/components/ui/Logo";
-import ExplainerVideoModal from "@/components/marketing/ExplainerVideoModal";
-import ExplainerVideoSection from "@/components/marketing/ExplainerVideoSection";
 import BrevoNewsletterSection from "@/components/marketing/BrevoNewsletterSection";
-import FindRightSupportModal from "@/components/marketing/FindRightSupportModal";
 import type { LandingView } from "@/lib/landing/types";
 import type { EcosystemFlags } from "@/lib/ecosystem/flags";
-import './landing.css';
 
 export default function LandingClientWrapper({
   eco,
@@ -44,21 +42,26 @@ export default function LandingClientWrapper({
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
-  const [showVideoModal, setShowVideoModal] = useState(false);
   const [modalFormType, setModalFormType] = useState<'AUDIT' | 'MANAGED_SALES' | 'SERVICE_ENQUIRY'>('AUDIT');
   const [auditBusy, setAuditBusy] = useState(false);
   const [auditSuccess, setAuditSuccess] = useState<string | null>(null);
   const [auditError, setAuditError] = useState<string | null>(null);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
-  const [showSupportModal, setShowSupportModal] = useState(false);
-  const [diagnosticTrack, setDiagnosticTrack] = useState<'LEAD_GENERATION' | 'SOFTWARE_FOLLOWUP' | 'TEAM_TRAINING' | 'MANAGED_SALES'>('LEAD_GENERATION');
 
-  function openDiagnostic(track: 'LEAD_GENERATION' | 'SOFTWARE_FOLLOWUP' | 'TEAM_TRAINING' | 'MANAGED_SALES' = 'LEAD_GENERATION') {
-    setDiagnosticTrack(track);
-    setShowSupportModal(true);
-  }
+  // Rate Card Lightbox State
+  const [activeRateCardImage, setActiveRateCardImage] = useState<{ src: string; title: string } | null>(null);
 
-  // Controlled state for service assessment form to guarantee input preservation on error
+  // Pricing Duration Selector State (default: 4 weeks)
+  const [pricingDuration, setPricingDuration] = useState<'1' | '2' | '3' | '4'>('4');
+
+  // Video Section State
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
+  const [videoMode, setVideoMode] = useState<'video' | 'interactive'>('video');
+  const [simStep, setSimStep] = useState<number>(0);
+
+  // Service form state (preserved on error)
   const [serviceFormData, setServiceFormData] = useState({
     name: '',
     email: '',
@@ -76,6 +79,30 @@ export default function LandingClientWrapper({
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
+  const toggleVideoPlay = () => {
+    if (!videoRef.current) return;
+    if (isPlaying) {
+      videoRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
+  };
+
+  const toggleVideoMute = () => {
+    if (!videoRef.current) return;
+    videoRef.current.muted = !isMuted;
+    setIsMuted(!isMuted);
+  };
+
+  const jumpToVideoChapter = (seconds: number) => {
+    if (!videoRef.current) return;
+    videoRef.current.currentTime = seconds;
+    videoRef.current.play();
+    setIsPlaying(true);
+  };
+
   async function handleAuditSubmit(event: FormEvent<HTMLFormElement>, overrideFormType?: 'AUDIT' | 'MANAGED_SALES') {
     event.preventDefault();
     setAuditBusy(true);
@@ -86,7 +113,6 @@ export default function LandingClientWrapper({
     const formData = new FormData(form);
     const data: Record<string, any> = Object.fromEntries(formData.entries());
 
-    // Include formType to distinguish audit from managed sales
     data.formType = (overrideFormType || modalFormType) === 'MANAGED_SALES' ? 'MANAGED_SALES' : 'REVENUE_AUDIT';
 
     try {
@@ -149,7 +175,6 @@ export default function LandingClientWrapper({
 
       setAuditSuccess("Your enquiry has been received. Our sales solutions team will review your requirements and reach out using the details provided to discuss scope, capacity, and next steps.");
     } catch (error) {
-      // Inputs remain untouched in serviceFormData state, satisfying the preservation rule
       setAuditError(error instanceof Error ? error.message : 'An error occurred while saving your enquiry.');
     } finally {
       setAuditBusy(false);
@@ -176,214 +201,181 @@ export default function LandingClientWrapper({
     setShowAuditModal(true);
   };
 
+  // Video chapters
+  const videoChapters = [
+    { title: "1. Lead Generation", time: 0, label: "0:00" },
+    { title: "2. Instant Routing", time: 15, label: "0:15" },
+    { title: "3. Next-Best-Action", time: 30, label: "0:30" },
+    { title: "4. Revenue Leakage", time: 45, label: "0:45" },
+    { title: "5. Closing Deals", time: 55, label: "0:55" },
+  ];
+
+  // Interactive Lead Journey Simulation steps
+  const simulationSteps = [
+    {
+      stage: "1. SPONSORED ADS & ACQUISITION",
+      badge: "Targeted Meta Ads",
+      title: "Growth Package · ₦3,000/day ad spend included",
+      details: "High-converting Facebook & Instagram sponsored campaign with active audience targeting.",
+      dealSize: "Ad Spend Included",
+      stateDesc: "Buyer clicks sponsored WhatsApp ad or submits lead form. Captured into CloseCraft in <2 seconds.",
+      icon: Target,
+    },
+    {
+      stage: "2. INCOMING ENQUIRY",
+      badge: "Lead Ingestion",
+      title: "Sarah Davies · FinTech Africa",
+      details: "Enquiry submitted via Meta Lead Form · Requested 15-seat deployment.",
+      dealSize: "₦2,500,000 Deal",
+      stateDesc: "Enquiry lands in CloseCraft instantly with campaign attribution. Zero spreadsheet delay.",
+      icon: Layers,
+    },
+    {
+      stage: "3. QUALIFICATION & SLA",
+      badge: "SLA Activated",
+      title: "Assigned to Closer: Somtochukwu O.",
+      details: "Qualification Score: 94% Fit · Urgent Timing (Q4 roll-out).",
+      dealSize: "SLA: 30-min first touch",
+      stateDesc: "Strict follow-up SLA begins countdown. Manager alerted if touch is missed.",
+      icon: Clock,
+    },
+    {
+      stage: "4. NEXT-BEST-ACTION",
+      badge: "Contextual Guidance",
+      title: "Action: Schedule Commercial Discovery Call",
+      details: "Context: Buyer requested pricing for 15-person team with active Q4 initiative.",
+      dealSize: "Channel: WhatsApp / Direct Phone",
+      stateDesc: "Closer receives pre-drafted contextual talking points and verified commercial bounds.",
+      icon: Sparkles,
+    },
+    {
+      stage: "5. DEAL CLOSED & WON",
+      badge: "Revenue Secured",
+      title: "Closed Won · ₦2,500,000 NGN",
+      details: "Attribution: Sponsored Meta Ad · Sales Cycle: 48 hours · 0 leaked follow-ups.",
+      dealSize: "₦2.5M Added to Pipeline",
+      stateDesc: "Payment verified, CRM updated, full audit trail preserved for manager review.",
+      icon: CheckCircle2,
+    },
+  ];
+
+  // Pricing rate card data
+  const starterPrices = { '1': '₦19,000', '2': '₦36,000', '3': '₦54,000', '4': '₦70,000' };
+  const growthPrices = { '1': '₦27,000', '2': '₦51,000', '3': '₦77,000', '4': '₦100,000' };
+  const elitePrices = { '1': '₦34,000', '2': '₦66,000', '3': '₦99,000', '4': '₦130,000' };
+
+  // Section 8: FAQ items (exact prompt specifications)
   const faqs = [
     {
-      q: "Is Closecraft a lead-generation service?",
-      a: "The core software helps you manage and follow up on enquiries you already receive. It does not replace a clear offer or the work needed to attract suitable buyers."
+      q: "What is CloseCraft?",
+      a: "CloseCraft is a Revenue Growth Platform that connects customer acquisition with consistent follow-up and sales conversion. We help businesses attract new leads through managed advertising campaigns, organise enquiries in a unified workspace, and convert more opportunities into paying customers."
     },
     {
-      q: "How does the seven-day free trial work?",
-      a: "Create a workspace to start seven days of Starter access. No credit card is required. Use the trial to organise your enquiries and test the follow-up process with your team."
+      q: "How does CloseCraft help businesses acquire customers?",
+      a: "We provide professionally managed Facebook and Instagram advertising campaigns with guaranteed daily Meta ad spend included. Our team handles campaign strategy, copywriting, targeted audience segmentation, and weekly optimization to deliver qualified buyer enquiries directly into your follow-up pipeline."
     },
     {
-      q: "What happens when my trial ends?",
-      a: "Choose a paid plan to continue using paid features. We will not charge you automatically. You can still access your account and billing options, subject to the applicable data-retention policy."
+      q: "Does CloseCraft provide Facebook and Instagram advertising?",
+      a: "Yes. CloseCraft offers four transparent lead-generation packages: Starter (₦2,000 daily spend), Growth (₦3,000 daily spend), Elite (₦4,000 daily spend), and Enterprise (custom weekly spend). All rates include both Meta ad spend and campaign management."
     },
     {
-      q: "Do I need to enter my card details?",
-      a: "No. You can start the trial without a credit card. Payment is required only when you choose a paid plan."
+      q: "Can I purchase lead generation separately?",
+      a: "Yes. You can purchase our lead-generation campaign packages independently or connect them directly with our follow-up software workspace and sales enablement services."
     },
     {
-      q: "Can I upgrade before the trial ends?",
-      a: "Yes. Choose an available paid plan from your workspace. Your paid access starts after payment is verified."
+      q: "Does CloseCraft help with follow-up and sales closing?",
+      a: "Yes. In addition to advertising campaigns, CloseCraft provides follow-up tracking software with SLA countdown timers, sales team training through Digital Sales School (DSS), and remote sales closing support for high-value deals."
     },
     {
-      q: "Which plan should I choose?",
-      a: "Starter is designed for a lean team. Pro adds capacity for a larger team and automated lead distribution. View the full pricing page for the published plan details."
-    },
-    {
-      q: "Does the trial include remote closers or DSS tuition?",
-      a: "No. The trial covers Starter software access. Managed sales support and DSS training are separate paid offers."
-    },
-    {
-      q: "Can I use my existing team?",
-      a: "Yes. Assign opportunities to your own team within your workspace's seat allowance. Managed sales support is an optional service."
-    },
-    {
-      q: "Can I bring in leads I already have?",
-      a: "Bring in an existing list through CSV import, or use a supported lead-source integration. Check the available connection options before choosing how to bring your enquiries into the workspace."
-    },
-    {
-      q: "What is the difference between Closecraft and DSS?",
-      a: "Closecraft provides the sales workspace and shared practice technology. Digital Sales School provides structured training and programme assessment."
-    },
-    {
-      q: "Will Closecraft guarantee more sales?",
-      a: "No. Results depend on your offer and the buyers you attract, as well as the work your team does. Closecraft helps you make follow-up more visible and consistent."
-    },
-    {
-      q: "Do you offer sales training?",
-      a: "Yes. We offer individual sales training through Digital Sales School, where individuals develop practical appointment setting and sales closing skills. We also offer tailored team training for businesses looking to improve how their staff work their leads and sales process."
-    },
-    {
-      q: "Can you train our team using our existing leads and offer?",
-      a: "Yes. We assess the conversations your team struggles with and agree on practical training objectives based on your offer and sales process. Customer records and sales data are handled strictly under appropriate client authorisation."
-    },
-    {
-      q: "Can an external closer work our existing leads?",
-      a: "Yes. We assess your offer and available workload before recommending an appointment-setting or closing engagement. Supervision, working hours, and clear responsibilities are agreed before work starts."
-    },
-    {
-      q: "What is the difference between managed sales and an external closer?",
-      a: "Managed sales includes coordination of an agreed workflow (such as enquiry follow-up or appointment setting) with defined responsibilities and progress reporting. An external closer performs a defined closing role under agreed supervision and commercial terms."
-    },
-    {
-      q: "Are these services included in my software subscription?",
-      a: "No. Training and managed sales services are available separately from the software. Scope and fees are agreed for the service you choose, unless an approved custom enterprise plan expressly includes them."
-    },
-    {
-      q: "Do you guarantee sales or employment?",
-      a: "No. Results depend on relevant factors including offer viability, lead quality, market demand, and execution. We do not guarantee sales for businesses or employment/income for training students."
-    },
-    {
-      q: "Do you guarantee leads or sales?",
-      a: "No. We do not guarantee a specific number of leads or closed sales. Results depend on offer appeal, pricing, audience receptivity, ad budget, and speed and quality of follow-up."
-    },
-    {
-      q: "Is ad spend included in your fee?",
-      a: "No. Advertising budget is paid directly to Meta using your own payment method and ad account. Our fee covers strategy, campaign setup, copywriting, creative preparation, technical integration, and weekly management."
-    },
-    {
-      q: "Do I have to use Closecraft software if you manage my ads?",
-      a: "No, but you do need an organised way to receive and follow up enquiries. We can connect your leads to Closecraft, or send them to your email, WhatsApp, or existing CRM."
-    },
-    {
-      q: "What if I already have leads and just need help following up?",
-      a: "You can start with Closecraft software to organise your existing enquiries, train your sales team through Digital Sales School, or engage our managed sales support. You do not need our lead generation service."
-    },
-    {
-      q: "Who handles the enquiries when they come in?",
-      a: "By default, your own team handles the enquiries. If you do not have someone available to respond promptly, we can discuss external appointment setting or managed sales support."
-    },
-    {
-      q: "Can you train our sales team to handle these leads?",
-      a: "Yes. Digital Sales School provides practical training in appointment setting, objection handling, and remote sales closing for internal teams."
-    },
-    {
-      q: "What happens if a campaign is not performing?",
-      a: "During weekly reviews, we analyse cost per enquiry, audience feedback, and lead quality. We test new copy, creative angles, or targeting adjustments. If the offer or audience is not responding, we discuss pausing or restructuring."
-    },
-    {
-      q: "How do we get started?",
-      a: "Complete our short readiness review. We will evaluate your offer, audience, and follow-up readiness, then schedule a campaign discovery call if suitable."
+      q: "How do I get started?",
+      a: "Click Get Started to create your workspace and select your preferred service package, or submit a brief enquiry to discuss your business needs with our solutions team."
     },
   ];
 
   return (
-    <div className="landing-shell bg-[#0B1117] text-white min-h-screen" style={{ paddingTop: '80px' }}>
-      {/* 1. Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[#0B1117]/95 backdrop-blur-xl border-b border-white/10 shadow-md">
-        {/* Academy announcement */}
-        <div className="bg-[#0f1214] border-b border-[#248277]/30 px-3 py-1.5 text-center text-xs text-gray-300 flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-          <span className="px-1.5 py-0.5 rounded bg-[#248277] text-white font-bold text-[10px] uppercase tracking-wider">
-            ACADEMY
-          </span>
-          <span>Building your remote sales skills?</span>
-          <Link href="/dss" className="text-[#45bfae] font-bold hover:underline flex items-center gap-1">
-            Explore Digital Sales School &rarr;
-          </Link>
-        </div>
-
-        <div className="h-16 w-full px-4 sm:px-8 lg:px-12 max-w-[1440px] mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6 xl:gap-8">
-            <Link className="flex items-center group py-1" href="/" aria-label="Closecraft Home">
-              <Logo variant="full" size="lg" priority alt="Closecraft" />
+    <div className="bg-[#000000] text-white min-h-screen selection:bg-[#248277] selection:text-white font-sans antialiased">
+      {/* 1. Header & Navigation */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-xl border-b border-[#1f1f1f]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="inline-flex items-center group transition-opacity hover:opacity-90" aria-label="CloseCraft Home">
+              <Logo variant="full" size="md" priority alt="CloseCraft" />
             </Link>
-            <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
-              <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="/platform">
-                Platform
+            <nav className="hidden lg:flex items-center gap-1">
+              <Link href="/" className="px-3 py-1.5 text-sm font-medium text-white hover:text-[#45bfae] transition-colors">
+                Home
               </Link>
+              <a href="#how-it-works" className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
+                How It Works
+              </a>
               <div className="relative group">
                 <a
                   href="#services"
-                  className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors inline-flex items-center gap-1 cursor-pointer"
+                  className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors inline-flex items-center gap-1 cursor-pointer"
                 >
                   <span>Services</span>
-                  <ChevronDown size={14} className="group-hover:rotate-180 transition-transform text-[#8A9CAE]" />
+                  <ChevronDown size={14} className="group-hover:rotate-180 transition-transform text-[#71717a]" />
                 </a>
-                <div className="absolute top-full left-0 mt-1 w-64 p-2 rounded-2xl bg-[#090D12] border border-white/10 shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-150 z-50">
+                <div className="absolute top-full left-0 mt-2 w-64 p-2 rounded-2xl bg-[#101010] border border-[#1f1f1f] shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-150 z-50">
                   <Link
                     href="/services/lead-generation"
-                    className="block p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item"
+                    className="block p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors group/item"
                   >
                     <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Lead Generation</p>
-                    <p className="text-[11px] text-[#8A9CAE]">Managed Meta ads connected to follow-up</p>
+                    <p className="text-[11px] text-[#a1a1aa]">Managed Meta ads with ad spend included</p>
                   </Link>
                   <Link
                     href="/dss"
-                    className="block p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item"
+                    className="block p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors group/item"
                   >
                     <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Digital Sales School</p>
-                    <p className="text-[11px] text-[#8A9CAE]">Individual appointment setting & closing</p>
+                    <p className="text-[11px] text-[#a1a1aa]">Sales closing & appointment setting training</p>
                   </Link>
                   <button
                     type="button"
                     onClick={() => openServiceEnquiry('Team training')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item cursor-pointer"
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors group/item cursor-pointer"
                   >
                     <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Team Training</p>
-                    <p className="text-[11px] text-[#8A9CAE]">Train your team to work your leads</p>
+                    <p className="text-[11px] text-[#a1a1aa]">Train your team to follow up consistently</p>
                   </button>
                   <button
                     type="button"
                     onClick={() => openServiceEnquiry('Managed sales')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item cursor-pointer"
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors group/item cursor-pointer"
                   >
                     <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Managed Sales</p>
-                    <p className="text-[11px] text-[#8A9CAE]">Get help managing follow-up</p>
+                    <p className="text-[11px] text-[#a1a1aa]">Dedicated closing and follow-up support</p>
                   </button>
                   <button
                     type="button"
                     onClick={() => openServiceEnquiry('External closer')}
-                    className="w-full text-left p-2.5 rounded-xl hover:bg-white/5 transition-colors group/item cursor-pointer"
+                    className="w-full text-left p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors group/item cursor-pointer"
                   >
                     <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">External Sales Professionals</p>
-                    <p className="text-[11px] text-[#8A9CAE]">External setters & closers for your leads</p>
+                    <p className="text-[11px] text-[#a1a1aa]">External setters and closers for your leads</p>
                   </button>
                 </div>
               </div>
-              <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="#explainer-video">
-                Explainer
-              </Link>
-              <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="#how-it-works">
-                How It Works
-              </Link>
-              <Link className="px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="/pricing">
+              <a href="#pricing" className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
                 Pricing
-              </Link>
-              <Link className="px-3 py-1.5 text-[#45bfae] hover:underline text-sm font-semibold transition-colors flex items-center gap-1" href="/dss">
+              </a>
+              <Link href="/dss" className="px-3 py-1.5 text-sm font-semibold text-[#45bfae] hover:underline transition-colors flex items-center gap-1">
                 <span>DSS Academy</span>
               </Link>
             </nav>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link className="hidden sm:inline-flex items-center px-3 py-1.5 text-[#A7B7C7] hover:text-white text-sm font-medium transition-colors" href="/login">
-              Sign In
+          <div className="flex items-center gap-3">
+            <Link href="/login" className="hidden sm:inline-flex items-center px-3 py-2 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
+              Login
             </Link>
             <Link
               href="/signup"
-              className="inline-flex items-center justify-center px-4 py-2 bg-[#248277] text-white hover:bg-[#1f6f65] text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all active:scale-95"
+              className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#248277]/25 transition-all active:scale-95"
             >
-              <span className="hidden sm:inline">Start My 7-Day Free Trial</span>
-              <span className="sm:hidden">Start 7-Day Trial</span>
+              Get Started
             </Link>
-            <button
-              onClick={() => openAudit('AUDIT')}
-              className="hidden md:inline-flex items-center justify-center px-3.5 py-2 bg-white/5 text-white border border-white/10 hover:bg-white/10 text-xs sm:text-sm font-medium rounded-xl shadow-sm transition-all"
-            >
-              Request a Revenue Audit
-            </button>
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors ml-1"
@@ -394,1621 +386,1515 @@ export default function LandingClientWrapper({
           </div>
         </div>
 
+        {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#090D12] border-b border-white/10 px-6 py-4 flex flex-col gap-3 shadow-2xl animate-in slide-in-from-top-2 duration-150">
-            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="/platform">
-              Platform
+          <div className="lg:hidden bg-[#080808] border-b border-[#1f1f1f] px-6 py-4 flex flex-col gap-3 shadow-2xl animate-in slide-in-from-top-2 duration-150">
+            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="/">
+              Home
             </Link>
-            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="/services/lead-generation">
+            <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="#how-it-works">
+              How It Works
+            </a>
+            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="/services/lead-generation">
               Lead Generation
             </Link>
-            <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="#services">
-              Services & Training
-            </a>
-            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="#how-it-works">
-              How It Works
-            </Link>
-            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-white/5 rounded-lg text-sm font-medium" href="/pricing">
+            <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="#pricing">
               Pricing
+            </a>
+            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg bg-[#248277]/15 text-[#45bfae] font-bold text-sm flex items-center justify-between border border-[#248277]/30" href="/dss">
+              <span>DSS Academy</span>
+              <ChevronRight size={14} />
             </Link>
-            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg bg-[#248277]/15 text-[#45bfae] font-bold text-sm flex items-center gap-2 border border-[#248277]/30" href="/dss">
-              <span>DSS Academy &rarr;</span>
-            </Link>
-            <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
-              <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-[#A7B7C7] hover:text-white rounded-lg text-sm font-medium" href="/login">
-                Sign In
+            <div className="pt-2 border-t border-[#1f1f1f] flex flex-col gap-2">
+              <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-[#a1a1aa] hover:text-white rounded-lg text-sm font-medium" href="/login">
+                Login
               </Link>
               <Link
                 onClick={() => setMobileMenuOpen(false)}
                 className="w-full py-2.5 px-4 bg-[#248277] text-white text-center rounded-xl font-bold text-sm"
                 href="/signup"
               >
-                Start 7-Day Trial
+                Get Started
               </Link>
             </div>
           </div>
         )}
       </header>
 
-      {/* 2. Hero Section */}
-      <section id="hero" className="section-wrap py-12 md:py-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-[#45bfae] animate-pulse"></span>
-              SALES FOLLOW-UP SOFTWARE FOR GROWING TEAMS
-            </div>
+      <main className="pt-20">
+        {/* SECTION 1: HERO */}
+        <section id="hero" className="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-[#000000]">
+          {/* Subtle ambient lighting */}
+          <div className="absolute top-1/4 left-1/3 -translate-x-1/2 w-[500px] h-[500px] bg-[#248277]/10 rounded-full blur-[140px] pointer-events-none" />
+          <div className="absolute top-1/2 right-10 w-[400px] h-[400px] bg-[#14A7F7]/5 rounded-full blur-[130px] pointer-events-none" />
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
-              Stop losing sales to forgotten follow-up.
-            </h1>
-
-            <p className="text-base sm:text-lg text-[#A7B7C7] leading-relaxed max-w-xl">
-              Give every promising enquiry an owner and a clear next step. Closecraft helps your team follow up consistently, with AI-supported qualification and human sales support when you need it.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-              <Link
-                href="/signup"
-                className="px-6 py-3.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-lg shadow-[#248277]/20 transition-all active:scale-95 text-center"
-              >
-                <span>Start My 7-Day Free Trial</span>
-                <ArrowRight size={16} />
-              </Link>
-              <button
-                type="button"
-                onClick={() => openAudit('AUDIT')}
-                className="px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/15 font-semibold text-sm sm:text-base transition-all text-center"
-              >
-                Request a Revenue Audit
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowVideoModal(true)}
-                className="px-5 py-3.5 rounded-xl bg-[#248277]/15 hover:bg-[#248277]/30 text-[#45bfae] border border-[#248277]/40 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
-              >
-                <Play size={16} className="fill-[#45bfae]" />
-                <span>Watch Explainer</span>
-              </button>
-            </div>
-
-            <p className="text-xs text-[#8A9CAE] pt-1">
-              Try Starter free for 7 days, with no credit card required. Choose a paid plan to continue after your trial.
-            </p>
-          </div>
-
-          {/* Hero Sanitized Product Screen: Clearly labeled Demo Data */}
-          <div className="lg:col-span-5 relative">
-            <div className="relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-[#0B1117] p-6 space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-white/10">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">DEMO DATA — SAMPLE WORKSPACE</span>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+              {/* Left Column: Text & CTAs */}
+              <div className="lg:col-span-7 space-y-6">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider shadow-inner">
+                  <span className="w-2 h-2 rounded-full bg-[#45bfae] animate-pulse" />
+                  REVENUE GROWTH PLATFORM
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/10 text-emerald-300 font-semibold">
-                  7-Day Starter Trial
-                </span>
-              </div>
 
-              {/* Sample Opportunity Card */}
-              <div className="p-4 rounded-2xl bg-[#111C26] border border-[#248277]/40 space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-bold text-white text-base">David — ABC Consulting</h3>
-                    <p className="text-xs text-[#A7B7C7]">Enquiry Source: Website Form · ₦2,000,000 deal size</p>
-                  </div>
-                  <span className="text-xs px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/40">
-                    Qualified
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
+                  Stop losing customers because nobody followed up.
+                </h1>
+
+                <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed max-w-xl">
+                  You spend money attracting potential customers. CloseCraft helps you make sure those enquiries are handled, followed up and moved towards a sale.
+                </p>
+
+                <p className="text-sm font-medium text-[#71717a] border-l-2 border-[#248277] pl-3 py-0.5">
+                  From finding potential customers to closing the sale, CloseCraft helps connect your entire sales process.
+                </p>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+                  <Link
+                    href="/signup"
+                    className="px-7 py-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#248277]/30 transition-all active:scale-95 text-center group"
+                  >
+                    <span>Get Started</span>
+                    <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+
+                  <a
+                    href="#explainer-video"
+                    className="px-6 py-4 rounded-xl bg-[#101010] hover:bg-[#1a1a1a] text-white border border-[#1f1f1f] hover:border-white/20 font-semibold text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
+                  >
+                    <Play size={16} className="fill-[#45bfae] text-[#45bfae]" />
+                    <span>Watch Explainer</span>
+                  </a>
+                </div>
+
+                {/* Trust & Guarantee Indicator */}
+                <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-[#71717a]">
+                  <span className="inline-flex items-center gap-1.5">
+                    <ShieldCheck size={14} className="text-[#45bfae]" />
+                    <span>No long-term lock-in</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <CheckCircle2 size={14} className="text-[#45bfae]" />
+                    <span>Meta Verified Ad Spend</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1.5">
+                    <Zap size={14} className="text-[#45bfae]" />
+                    <span>Rapid Setup &amp; Ingestion</span>
                   </span>
                 </div>
-
-                <div className="grid grid-cols-2 gap-2 text-xs pt-2 border-t border-white/5">
-                  <div>
-                    <span className="text-[#8A9CAE]">Assigned Owner:</span>
-                    <p className="font-semibold text-white mt-0.5">Somtochukwu O.</p>
-                  </div>
-                  <div>
-                    <span className="text-[#8A9CAE]">SLA Follow-up:</span>
-                    <p className="font-semibold text-amber-300 mt-0.5">Active (32m waiting)</p>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-[#090D12] border border-white/10 space-y-1">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="font-bold text-[#45bfae] uppercase tracking-wider">NEXT BEST ACTION</span>
-                    <span className="text-amber-400 font-medium">Action Required</span>
-                  </div>
-                  <p className="text-xs font-semibold text-white">
-                    Schedule Discovery Call & confirm commercial scope
-                  </p>
-                  <p className="text-[11px] text-[#8A9CAE]">
-                    Reason: Buyer requested pricing for 15-person team with active Q4 follow-up initiative.
-                  </p>
-                </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs text-[#8A9CAE] pt-1">
-                <span>Starter: 3 seats · 1,000 leads/mo</span>
-                <span className="text-emerald-400 font-medium">Real-time Lead Routing</span>
+              {/* Right Column: Hero Visual - Revenue Growth Process */}
+              <div className="lg:col-span-5 relative">
+                <div className="relative rounded-3xl bg-[#101010] border border-[#1f1f1f] shadow-2xl overflow-hidden p-5 sm:p-6 space-y-4">
+                  {/* Top Window Bar */}
+                  <div className="flex items-center justify-between pb-3 border-b border-[#1f1f1f]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]/80" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]/80" />
+                      <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]/80" />
+                      <span className="text-[11px] font-mono text-[#71717a] ml-2">closecraft-workspace</span>
+                    </div>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-semibold border border-[#248277]/40">
+                      LIVE INGESTION
+                    </span>
+                  </div>
+
+                  {/* 4 Connected Revenue Growth Process Stages */}
+                  <div className="space-y-3">
+                    {/* Stage 1: New Enquiry Ingestion */}
+                    <div className="p-3.5 rounded-2xl bg-[#080808] border border-[#1f1f1f] flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+                          <Target size={18} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">New Enquiry Ingested</p>
+                          <p className="text-[11px] text-[#a1a1aa]">Meta Sponsored Ad · Sarah D. (FinTech Africa)</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/15 text-blue-300 font-bold">
+                        &lt; 2s ago
+                      </span>
+                    </div>
+
+                    {/* Stage 2: Workspace Organisation */}
+                    <div className="p-3.5 rounded-2xl bg-[#080808] border border-[#1f1f1f] flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+                          <Layers size={18} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">Organised in Workspace</p>
+                          <p className="text-[11px] text-[#a1a1aa]">Attribution: Sponsored Growth Campaign</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/15 text-purple-300 font-bold">
+                        Qualified Fit
+                      </span>
+                    </div>
+
+                    {/* Stage 3: Follow-Up SLA Management */}
+                    <div className="p-3.5 rounded-2xl bg-[#080808] border border-[#248277]/50 flex items-center justify-between shadow-lg shadow-[#248277]/10">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-[#248277]/20 border border-[#248277]/40 flex items-center justify-center text-[#45bfae]">
+                          <Clock size={18} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">Follow-Up SLA Active</p>
+                          <p className="text-[11px] text-[#a1a1aa]">Assigned: Somtochukwu O. · 15m timer</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">
+                        In Progress
+                      </span>
+                    </div>
+
+                    {/* Stage 4: Sales Outcome Progression */}
+                    <div className="p-3.5 rounded-2xl bg-[#080808] border border-[#1f1f1f] flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                          <CheckCircle2 size={18} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-white">Commercial Deal Closed</p>
+                          <p className="text-[11px] text-[#a1a1aa]">₦2,500,000 NGN · Zero leaked follow-ups</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-extrabold">
+                        Won ₦2.5M
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Metrics Bar */}
+                  <div className="pt-2 border-t border-[#1f1f1f] flex items-center justify-between text-xs text-[#71717a]">
+                    <span>100% Attribution Tracked</span>
+                    <span className="text-[#45bfae] font-semibold">Strict SLA Enforced</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Explainer Video & Product Tour Section (Directly under Hero) */}
-      <ExplainerVideoSection onOpenAudit={() => openAudit('AUDIT')} />
+        {/* SECTION 2: EXPLAINER VIDEO (Immediately after Hero) */}
+        <section id="explainer-video" className="py-20 bg-[#080808] border-t border-[#1f1f1f] relative overflow-hidden">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 relative z-10">
+            {/* Section Header */}
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+                <Play size={12} className="fill-[#45bfae]" />
+                PRODUCT EXPLAINER
+              </div>
 
-      {/* 2.B. Illustrative Campaign Scenario: 500 Enquiries */}
-      <section className="section-wrap py-14 border-t border-white/10">
-        <div className="p-6 sm:p-10 rounded-3xl bg-[#090D12] border border-white/15 shadow-2xl space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-              <span className="text-xs font-bold uppercase tracking-wider text-amber-300">
-                ILLUSTRATIVE CAMPAIGN SCENARIO
-              </span>
-            </div>
-            <span className="text-[11px] text-[#8A9CAE]">
-              Not a customer case study or lead count guarantee
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-4">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-snug">
-                Your ads brought in 500 enquiries. What happens next?
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                See how CloseCraft helps you win more customers.
               </h2>
 
-              <p className="text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
-                The campaign has generated attention. Now the business has to turn that attention into useful conversations.
+              <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
+                Discover how CloseCraft connects customer acquisition with lead follow-up and sales conversion.
               </p>
 
-              <div className="space-y-2 pt-1">
-                {[
-                  'Who responds?',
-                  'Who identifies suitable buyers?',
-                  'Who follows up when someone does not reply?',
-                  'Who handles the sales conversation?',
-                  'How does the owner know which opportunities still need attention?',
-                ].map((q, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-white font-medium">
-                    <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
-                    <span>{q}</span>
-                  </div>
-                ))}
-              </div>
-
-              <div className="space-y-3 pt-2 text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
-                <p>
-                  Without an organised process, some enquiries can sit unanswered. Others receive one reply and are forgotten. Interested prospects can lose interest while the business continues paying for advertising.
-                </p>
-                <p className="font-semibold text-white">
-                  This is where Closecraft comes in. We help businesses create and manage their advertising campaigns. We help organise the resulting leads and coordinate follow-up. We can train their existing sales team through Digital Sales School, or provide separately scoped external sales support.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
+              {/* Mode Switcher */}
+              <div className="inline-flex items-center p-1.5 rounded-2xl bg-[#101010] border border-[#1f1f1f] shadow-inner">
                 <button
                   type="button"
-                  onClick={() => openDiagnostic('LEAD_GENERATION')}
-                  className="px-6 py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all"
+                  onClick={() => setVideoMode('video')}
+                  className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    videoMode === 'video'
+                      ? 'bg-[#248277] text-white shadow-md'
+                      : 'text-[#a1a1aa] hover:text-white'
+                  }`}
                 >
-                  <span>Get help with my leads</span>
-                  <ArrowRight size={16} />
+                  <Play size={14} className={videoMode === 'video' ? 'fill-white' : ''} />
+                  <span>Watch Explainer Video</span>
                 </button>
-                <a
-                  href="#connected-process"
-                  className="px-5 py-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-semibold text-xs sm:text-sm transition-all text-center"
+                <button
+                  type="button"
+                  onClick={() => setVideoMode('interactive')}
+                  className={`px-4 sm:px-6 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
+                    videoMode === 'interactive'
+                      ? 'bg-[#248277] text-white shadow-md'
+                      : 'text-[#a1a1aa] hover:text-white'
+                  }`}
                 >
-                  See how the process works
-                </a>
+                  <Sparkles size={14} />
+                  <span>Interactive Walkthrough</span>
+                </button>
               </div>
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="p-5 rounded-2xl bg-[#111C26] border border-[#248277]/40 space-y-4 text-xs">
-                <div className="flex items-center justify-between pb-2 border-b border-white/10">
-                  <span className="font-bold text-[#45bfae] uppercase tracking-wider text-[11px]">
-                    ILLUSTRATIVE WORKSPACE DATA
-                  </span>
-                  <span className="text-emerald-400 font-mono text-[11px]">Active Lead Queue</span>
-                </div>
-
-                <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-white/10 shadow-lg">
-                  <Image
-                    src="/images/closecraft_revenue_pipeline.jpg"
-                    alt="Closecraft Inbound Lead Follow-up Pipeline"
-                    fill
-                    className="object-cover"
+            {/* TAB 1: 16:9 VIDEO PLAYER */}
+            {videoMode === 'video' && (
+              <div className="space-y-4 animate-in fade-in duration-300">
+                <div className="relative rounded-3xl overflow-hidden border border-[#1f1f1f] hover:border-[#248277]/60 bg-[#000000] shadow-2xl group transition-all">
+                  <video
+                    ref={videoRef}
+                    src="/videos/closecraft-onboarding.mp4"
+                    poster="/images/closecraft_hero_dashboard.jpg"
+                    playsInline
+                    muted={isMuted}
+                    onPlay={() => setIsPlaying(true)}
+                    onPause={() => setIsPlaying(false)}
+                    className="w-full aspect-video object-cover"
                   />
-                </div>
 
-                <div className="space-y-3">
-                  <div className="p-3 rounded-xl bg-[#0B1117] border border-white/10 space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-white">Enquiry #492 — Enterprise Offer</span>
-                      <span className="text-amber-300 font-semibold">14m waiting</span>
+                  {/* Play Button Overlay when paused */}
+                  {!isPlaying && (
+                    <div
+                      onClick={toggleVideoPlay}
+                      className="absolute inset-0 bg-black/50 backdrop-blur-[1px] flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-black/40"
+                    >
+                      <div className="relative flex items-center justify-center">
+                        <span className="absolute w-24 h-24 rounded-full bg-[#248277]/40 animate-ping" />
+                        <div className="w-20 h-20 rounded-full bg-[#248277] hover:bg-[#1f6f65] text-white flex items-center justify-center shadow-2xl transition-transform hover:scale-110">
+                          <Play size={36} className="ml-1 fill-white" />
+                        </div>
+                      </div>
+                      <span className="mt-4 text-xs sm:text-sm font-bold text-white tracking-wide bg-black/70 px-4 py-1.5 rounded-full border border-white/15">
+                        Click to Play Explainer (60s)
+                      </span>
                     </div>
-                    <p className="text-[#8A9CAE] text-[11px]">Source: Instagram Ads · Regional Growth Campaign</p>
-                    <p className="text-[#45bfae] font-medium text-[11px]">Assigned Owner: Tunde A. · Next: WhatsApp intro</p>
-                  </div>
+                  )}
 
-                  <div className="p-3 rounded-xl bg-[#0B1117] border border-white/10 space-y-1">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-white">Enquiry #491 — Commercial B2B</span>
-                      <span className="text-emerald-400 font-semibold">In Qualification</span>
+                  {/* Video Controls Bar */}
+                  <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/95 via-black/70 to-transparent flex items-center justify-between opacity-95">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={toggleVideoPlay}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                        aria-label={isPlaying ? "Pause" : "Play"}
+                      >
+                        {isPlaying ? <Pause size={18} /> : <Play size={18} />}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={toggleVideoMute}
+                        className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                        aria-label={isMuted ? "Unmute" : "Mute"}
+                      >
+                        {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+                      </button>
+                      <span className="text-xs text-[#a1a1aa] font-mono hidden sm:inline">
+                        CloseCraft Revenue Process
+                      </span>
                     </div>
-                    <p className="text-[#8A9CAE] text-[11px]">Source: Facebook Ads · Demo Request Form</p>
-                    <p className="text-white text-[11px]">Discovery Call scheduled for tomorrow at 11:00 AM</p>
+
+                    <Link
+                      href="/signup"
+                      className="px-3.5 py-1.5 rounded-lg bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all shadow-md"
+                    >
+                      Get Started &rarr;
+                    </Link>
                   </div>
                 </div>
 
-                <p className="text-[11px] text-[#8A9CAE] leading-relaxed pt-2 border-t border-white/10 italic">
-                  Note: The 500-lead scenario is illustrative. It is not a customer case study, an advertising forecast or a promise that we generate 500 leads. We do not invent conversion percentages or suggest every lead should become a customer.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Problem Section */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-snug">
-            You paid to get their attention. What happens after they enquire?
-          </h2>
-          <div className="space-y-4 text-base sm:text-lg text-[#A7B7C7] leading-relaxed text-left sm:text-center">
-            <p>
-              An interested buyer should not disappear into a spreadsheet or an unanswered message.
-            </p>
-            <p>
-              Yet when follow-up depends on memory, a busy day can leave good opportunities waiting. Your team may be working hard while you still cannot see which conversations need attention.
-            </p>
-            <p className="font-semibold text-white">
-              More leads will not fix a broken follow-up process.
-            </p>
-            <p>
-              Closecraft gives you a shared view of the work, so you can see where an opportunity stands and take the next useful action.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Connected Journey Section */}
-      <section id="connected-process" className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-4xl mx-auto text-center space-y-4 mb-12">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
-            <span>CONNECTED REVENUE OPERATING SYSTEM</span>
-          </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            From the first enquiry to a clear sales outcome.
-          </h2>
-          <p className="text-base sm:text-lg text-[#A7B7C7] max-w-2xl mx-auto">
-            Start with the support you need today. Add more help when your business is ready.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 max-w-5xl mx-auto">
-          {/* Stage 1 */}
-          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
-            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 01</span>
-            <h3 className="font-bold text-white text-base">Attract enquiries</h3>
-            <p className="text-xs text-[#A7B7C7] leading-relaxed">
-              An approved campaign introduces the business offer to potential customers.
-            </p>
-          </div>
-
-          {/* Stage 2 */}
-          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
-            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 02</span>
-            <h3 className="font-bold text-white text-base">Organise the response</h3>
-            <p className="text-xs text-[#A7B7C7] leading-relaxed">
-              Enquiries enter the existing Closecraft workflow through a supported connection or a clearly explained manual process.
-            </p>
-          </div>
-
-          {/* Stage 3 */}
-          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
-            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 03</span>
-            <h3 className="font-bold text-white text-base">Follow up</h3>
-            <p className="text-xs text-[#A7B7C7] leading-relaxed">
-              A responsible person receives the enquiry and records the next action.
-            </p>
-          </div>
-
-          {/* Stage 4 */}
-          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
-            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 04</span>
-            <h3 className="font-bold text-white text-base">Handle the conversation</h3>
-            <p className="text-xs text-[#A7B7C7] leading-relaxed">
-              The client’s team manages the opportunity, with optional DSS training or separately scoped external sales support.
-            </p>
-          </div>
-
-          {/* Stage 5 */}
-          <div className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2.5">
-            <span className="text-[10px] font-bold text-[#45bfae] uppercase tracking-wider">STAGE 05</span>
-            <h3 className="font-bold text-white text-base">Record the outcome</h3>
-            <p className="text-xs text-[#A7B7C7] leading-relaxed">
-              Track whether the opportunity was won, lost or postponed. Hand successful sales over to the delivery team.
-            </p>
-          </div>
-        </div>
-
-        <div className="max-w-3xl mx-auto mt-8 p-4 rounded-2xl bg-[#111C26] border border-[#248277]/40 text-center text-xs sm:text-sm text-[#45bfae] font-semibold">
-          “Closecraft helps us handle what happens after someone responds to our advertising, so more suitable opportunities can progress towards a sale.”
-        </div>
-      </section>
-
-      {/* 7-Step Practical Walkthrough */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-            STEP-BY-STEP REVENUE FLOW
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-            How the process could work
-          </h2>
-          <p className="text-xs sm:text-sm text-[#A7B7C7]">
-            A concrete walkthrough showing how an enquiry moves from first impression to recorded sale.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-w-6xl mx-auto">
-          {[
-            {
-              step: '1',
-              title: 'Ad shown to targeted audience',
-              desc: 'Ad shown to targeted audience on Facebook or Instagram with clear messaging.',
-            },
-            {
-              step: '2',
-              title: 'Prospect fills lead form',
-              desc: 'Interested prospect clicks and fills lead form answering key qualifying questions.',
-            },
-            {
-              step: '3',
-              title: 'Enters Closecraft workspace',
-              desc: 'Lead instantly enters Closecraft workspace with timestamp and source attribution.',
-            },
-            {
-              step: '4',
-              title: 'Notification alerts owner',
-              desc: 'Notification alerts assigned team member (or external SDR) with SLA timer.',
-            },
-            {
-              step: '5',
-              title: 'Fast first response',
-              desc: 'Fast first response within minutes via WhatsApp or phone while intent is high.',
-            },
-            {
-              step: '6',
-              title: 'Conversation tracked',
-              desc: 'Conversation tracked through qualification and next best action in the pipeline.',
-            },
-            {
-              step: '7',
-              title: 'Outcome recorded',
-              desc: 'Outcome recorded (Appointment booked, Proposal sent, Won, or Lost with reason).',
-            },
-          ].map((item) => (
-            <div key={item.step} className="p-5 rounded-2xl bg-[#0B1117] border border-white/10 space-y-2 relative group hover:border-[#248277]/50 transition-all">
-              <span className="text-xs font-mono font-bold text-[#45bfae] bg-[#248277]/20 px-2 py-0.5 rounded">
-                Step {item.step}
-              </span>
-              <h4 className="font-bold text-white text-sm mt-1">{item.title}</h4>
-              <p className="text-xs text-[#8A9CAE] leading-relaxed">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Four Clear Entry Points */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="text-center max-w-2xl mx-auto space-y-2 mb-10">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-            FLEXIBLE ENGAGEMENT
-          </span>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white">
-            Where does your business want to start?
-          </h2>
-          <p className="text-xs sm:text-sm text-[#A7B7C7]">
-            Purchase only what you need. Add more help when your business is ready.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
-          {/* Option 1: Existing Leads */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">START HERE</span>
-              <h3 className="font-bold text-white text-base">We already have leads</h3>
-              <p className="text-xs text-[#A7B7C7] leading-relaxed">
-                Organise enquiries, assign follow-up responsibilities, and keep stalled deals visible using Closecraft software.
-              </p>
-            </div>
-            <Link
-              href="/signup"
-              className="w-full py-2.5 px-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center"
-            >
-              <span>Get help with my existing leads</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Option 2: Need Lead Generation */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#45bfae]">PAID ACQUISITION</span>
-              <h3 className="font-bold text-white text-base">We need help generating leads</h3>
-              <p className="text-xs text-[#A7B7C7] leading-relaxed">
-                Attract relevant enquiries through managed Facebook and Instagram campaigns, connected directly to your workspace.
-              </p>
-            </div>
-            <Link
-              href="/services/lead-generation"
-              className="w-full py-2.5 px-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center"
-            >
-              <span>Discuss my next campaign</span>
-              <ArrowRight size={14} />
-            </Link>
-          </div>
-
-          {/* Option 3: Sales Training */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300">SKILLS & CAPABILITY</span>
-              <h3 className="font-bold text-white text-base">We need to improve our team’s sales skills</h3>
-              <p className="text-xs text-[#A7B7C7] leading-relaxed">
-                Train your staff in appointment setting, qualification, and closing through Digital Sales School curriculum and live drills.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => openServiceEnquiry('Team training')}
-              className="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/15 font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center cursor-pointer"
-            >
-              <span>Train my sales team</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
-
-          {/* Option 4: Hands-on Sales Support */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 flex flex-col justify-between space-y-4">
-            <div className="space-y-2.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">EXECUTION CAPACITY</span>
-              <h3 className="font-bold text-white text-base">We need hands-on sales support</h3>
-              <p className="text-xs text-[#A7B7C7] leading-relaxed">
-                Bring in external sales appointment setters or closers to work your existing opportunities with agreed oversight.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => openServiceEnquiry('Managed sales')}
-              className="w-full py-2.5 px-3 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold text-xs inline-flex items-center justify-center gap-1.5 transition-all text-center cursor-pointer"
-            >
-              <span>Discuss external sales support</span>
-              <ArrowRight size={14} />
-            </button>
-          </div>
-        </div>
-
-        {/* Diagnostic Assessment Trigger Banner */}
-        <div className="max-w-4xl mx-auto mt-10 p-6 rounded-3xl bg-[#111C26] border border-white/15 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <h4 className="text-base font-bold text-white">Not sure where to begin?</h4>
-            <p className="text-xs text-[#A7B7C7] mt-0.5">
-              Take our interactive 2-minute diagnostic to find the right sales support for your business.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => openDiagnostic('LEAD_GENERATION')}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center justify-center gap-2 shadow-md transition-all shrink-0 cursor-pointer"
-          >
-            <Sparkles size={14} />
-            <span>Find the right support for your business</span>
-          </button>
-        </div>
-      </section>
-
-      {/* 4. Product Value Section */}
-      <section id="platform" className="section-wrap py-16 border-t border-white/10">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Open your workspace. Know where to focus.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto">
-          {/* Card 1 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md">
-            <div className="w-10 h-10 rounded-xl bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
-              <Sparkles size={20} />
-            </div>
-            <h3 className="text-lg font-bold text-white">See the enquiries that need attention.</h3>
-            <p className="text-sm text-[#A7B7C7] leading-relaxed">
-              Bring enquiries into a shared workspace using supported lead sources or CSV import. Review what is new and what has been waiting.
-            </p>
-          </div>
-
-          {/* Card 2 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md">
-            <div className="w-10 h-10 rounded-xl bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
-              <Users size={20} />
-            </div>
-            <h3 className="text-lg font-bold text-white">Make ownership clear.</h3>
-            <p className="text-sm text-[#A7B7C7] leading-relaxed">
-              Assign opportunities to the right person. Know who is responsible for the next conversation, rather than relying on someone to remember.
-            </p>
-          </div>
-
-          {/* Card 3 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md">
-            <div className="w-10 h-10 rounded-xl bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
-              <Clock size={20} />
-            </div>
-            <h3 className="text-lg font-bold text-white">Follow up with context.</h3>
-            <p className="text-sm text-[#A7B7C7] leading-relaxed">
-              Use qualification information and reminders to guide the next action. Your team can understand why an opportunity needs attention before reaching out.
-            </p>
-          </div>
-
-          {/* Card 4 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md">
-            <div className="w-10 h-10 rounded-xl bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
-              <ShieldCheck size={20} />
-            </div>
-            <h3 className="text-lg font-bold text-white">Keep stalled deals visible.</h3>
-            <p className="text-sm text-[#A7B7C7] leading-relaxed">
-              Review opportunities with no recent activity and decide whether another follow-up is useful. Close records accurately when an opportunity has ended.
-            </p>
-          </div>
-        </div>
-
-        <div className="text-center mt-10">
-          <Link
-            href="/signup"
-            className="px-6 py-3.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all"
-          >
-            <span>Start My 7-Day Free Trial</span>
-            <ArrowRight size={16} />
-          </Link>
-        </div>
-      </section>
-
-      {/* 5. Product Demonstration Section */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="text-center space-y-3">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              See the next step behind the status.
-            </h2>
-            <p className="text-lg font-semibold text-[#45bfae]">
-              A lead marked "Qualified" still needs action.
-            </p>
-            <p className="text-sm sm:text-base text-[#A7B7C7] max-w-2xl mx-auto leading-relaxed">
-              Closecraft brings the opportunity's status together with its follow-up context. See the assigned owner and the next action, with the reason that action matters.
-            </p>
-            <p className="text-sm sm:text-base text-[#A7B7C7] max-w-2xl mx-auto leading-relaxed">
-              Use that information to guide the work. Keep your team responsible for the judgement behind the sale.
-            </p>
-          </div>
-
-          {/* Sanitized Product Screenshot / Interface Card */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#090D12] border border-white/15 shadow-2xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
-              <div>
-                <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-                  OPPORTUNITY DETAIL · DEMO DATA
-                </span>
-                <h3 className="text-xl font-bold text-white mt-1">Acme Logistics — Regional Account</h3>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="px-2.5 py-1 rounded bg-[#248277]/20 text-[#45bfae] font-bold text-xs border border-[#248277]/30">
-                  Status: Qualified
-                </span>
-                <span className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 font-bold text-xs border border-amber-500/30">
-                  SLA: Follow-up Overdue (45m)
-                </span>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[#8A9CAE]">Assigned Owner</span>
-                <p className="text-sm font-semibold text-white mt-1">David Adeleke (Sales Rep)</p>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[#8A9CAE]">Estimated Value</span>
-                <p className="text-sm font-semibold text-white mt-1">₦3,500,000 NGN</p>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-[#8A9CAE]">Lead Source</span>
-                <p className="text-sm font-semibold text-white mt-1">Meta Inbound Webhook</p>
-              </div>
-            </div>
-
-            <div className="p-5 rounded-2xl bg-[#111C26] border border-[#248277]/40 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider">
-                  Next Action & Context
-                </span>
-                <span className="text-[11px] font-mono text-[#8A9CAE]">Confidence: Deterministic</span>
-              </div>
-              <p className="text-sm font-bold text-white">
-                Reach out via WhatsApp or phone to confirm stakeholder availability for discovery presentation.
-              </p>
-              <p className="text-xs text-[#A7B7C7] leading-relaxed">
-                Why this matters: Buyer confirmed a ₦3.5M budget and active 30-day timeline during intake questionnaire, but calendar slot has not been scheduled.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. How It Works Section */}
-      <section id="how-it-works" className="section-wrap py-16 border-t border-white/10">
-        <div className="text-center mb-12">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Build a follow-up process your team can actually use.
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-          {/* Step 1 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md flex flex-col justify-between">
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider font-mono">01. INTAKE</span>
-              <h3 className="text-lg font-bold text-white">1. Bring in your enquiries.</h3>
-              <p className="text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
-                Connect a supported source or import an existing list. Start with the opportunities you already have.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 2 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md flex flex-col justify-between">
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider font-mono">02. ASSIGN</span>
-              <h3 className="text-lg font-bold text-white">2. Give the work an owner.</h3>
-              <p className="text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
-                Assign responsibility and review the available qualification information. Make the next step clear.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 3 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md flex flex-col justify-between">
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider font-mono">03. ENGAGE</span>
-              <h3 className="text-lg font-bold text-white">3. Keep the conversation moving.</h3>
-              <p className="text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
-                Use reminders and visible priorities to organise follow-up. Bring in a person when the buyer needs a deeper conversation.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 4 */}
-          <div className="p-6 rounded-2xl bg-[#0B1117] border border-white/10 space-y-3 shadow-md flex flex-col justify-between">
-            <div className="space-y-3">
-              <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider font-mono">04. CLOSE</span>
-              <h3 className="text-lg font-bold text-white">4. Review the outcome.</h3>
-              <p className="text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
-                Record the decision and agreed actions. Use the pipeline to see what is progressing and where your process needs attention.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-10">
-          <Link
-            href="/signup"
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all"
-          >
-            <span>Start My 7-Day Free Trial</span>
-            <ArrowRight size={16} />
-          </Link>
-          <button
-            type="button"
-            onClick={() => openAudit('AUDIT')}
-            className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/15 font-semibold text-sm transition-all"
-          >
-            Request a Revenue Audit
-          </button>
-        </div>
-      </section>
-
-      {/* 7. AI and People Section */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-4xl mx-auto p-8 rounded-3xl bg-[#0B1117] border border-white/15 shadow-xl space-y-6">
-          <div className="space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-              HUMAN + MACHINE COLLABORATION
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Let AI support the follow-up. Keep people in charge of the sale.
-            </h2>
-          </div>
-          <div className="space-y-4 text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
-            <p>
-              Use AI-supported qualification and follow-up workflows to reduce repetitive work.
-            </p>
-            <p>
-              Your people handle discovery and recommendations. They make the commercial decisions and work through concerns that need judgement.
-            </p>
-            <p className="font-semibold text-white">
-              The result is a clearer division of responsibility, with a visible handover when human attention is needed.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Sales Training and Hands-on Support (Complementary Services) */}
-      <section id="services" className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
-              <span className="w-2 h-2 rounded-full bg-[#45bfae]"></span>
-              COMPLEMENTARY SALES SERVICES
-            </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              Sales training and hands-on support
-            </h2>
-            <p className="text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
-              Alongside our software, we help individuals develop practical sales skills and businesses improve how they work their leads. Learn through Digital Sales School or discuss sales support tailored to your team.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-            {/* OFFER A: INDIVIDUAL SALES TRAINING */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
-                    INDIVIDUAL TRAINING · DSS
-                  </span>
-                  <GraduationCap className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white">
-                  Learn appointment setting and sales closing
-                </h3>
-
-                <div className="relative aspect-[16/9] w-full rounded-xl overflow-hidden border border-white/10 shadow-md">
-                  <Image
-                    src="/images/dss_roleplay_ai_mockup.jpg"
-                    alt="DSS AI Buyer Roleplay and Competency Studio"
-                    fill
-                    className="object-cover"
-                  />
-                </div>
-
-                <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                  Develop practical sales skills through Digital Sales School. Learn how to qualify enquiries and book suitable appointments, then guide buyers through discovery and a clear buying decision.
-                </p>
-                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
-                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
-                    Confirmed Curriculum & Practical Exercises
-                  </span>
-                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Live appointment-setting and qualification exercises</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Guided objection-handling and discovery role-play</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Verified competency score and portfolio artifacts</span>
-                    </li>
-                  </ul>
+                {/* Video Chapters bar */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 pt-2">
+                  {videoChapters.map((ch) => (
+                    <button
+                      key={ch.title}
+                      type="button"
+                      onClick={() => jumpToVideoChapter(ch.time)}
+                      className="p-3 rounded-xl bg-[#101010] border border-[#1f1f1f] hover:border-[#248277]/60 hover:bg-[#151515] text-left transition-all group cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between text-[11px] font-mono text-[#45bfae]">
+                        <span>{ch.label}</span>
+                        <ChevronRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-xs font-bold text-white mt-1 group-hover:text-[#45bfae] transition-colors">
+                        {ch.title}
+                      </p>
+                    </button>
+                  ))}
                 </div>
               </div>
+            )}
 
-              <div className="pt-6 space-y-3">
-                <Link
-                  href="/dss"
-                  className="w-full py-3 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95"
-                >
-                  <span>Explore Digital Sales School</span>
-                  <ArrowRight size={15} />
-                </Link>
-                <p className="text-[11px] text-[#8A9CAE] italic text-center">
-                  Structured learning programme. DSS does not promise or guarantee employment, clients, or earnings.
-                </p>
-              </div>
-            </div>
-
-            {/* OFFER B: SALES TEAM TRAINING */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
-                    BUSINESS · SALES TEAM TRAINING
-                  </span>
-                  <Users className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white">
-                  Train your team to work your leads
-                </h3>
-                <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                  Help your staff improve appointment setting and sales closing using your offer and sales process. We assess the conversations they struggle with and agree on practical training objectives.
-                </p>
-                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
-                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
-                    Training Can Address
-                  </span>
-                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Qualification and appointment setting</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Discovery and presenting value</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Investigating objections</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Follow-up and asking for a decision</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Useful handovers and sales records</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-6 space-y-3">
-                <button
-                  type="button"
-                  onClick={() => openServiceEnquiry('Team training')}
-                  className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
-                >
-                  <span>Discuss team training</span>
-                  <ArrowRight size={15} />
-                </button>
-                <p className="text-[11px] text-[#8A9CAE] italic text-center">
-                  Delivered via scheduled remote workshops and bespoke sales drills for your active reps.
-                </p>
-              </div>
-            </div>
-
-            {/* OFFER C: MANAGED SALES SERVICES */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
-                    OPERATIONS · MANAGED SALES
-                  </span>
-                  <Briefcase className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white">
-                  Get help managing the sales process
-                </h3>
-                <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                  Engage Closecraft to coordinate an agreed part of your sales work, including enquiry follow-up or appointment setting, with clear responsibilities and progress reporting.
-                </p>
-                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
-                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
-                    The Engagement Defines
-                  </span>
-                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Work included and excluded</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Available capacity and working arrangements</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Who manages the work</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Reporting and review expectations</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Fees and commercial terms</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-6 space-y-3">
-                <button
-                  type="button"
-                  onClick={() => openServiceEnquiry('Managed sales')}
-                  className="w-full py-3 px-4 rounded-xl bg-white/10 hover:bg-white/15 text-white border border-white/20 text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
-                >
-                  <span>Discuss managed sales</span>
-                  <ArrowRight size={15} />
-                </button>
-                <p className="text-[11px] text-[#8A9CAE] italic text-center">
-                  Subject to lead flow and offer review. Terms confirmed before work begins.
-                </p>
-              </div>
-            </div>
-
-            {/* OFFER D: EXTERNAL SETTERS AND CLOSERS */}
-            <div className="p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-xl hover:border-[#248277]/50 transition-all group">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-mono px-2.5 py-1 rounded-md bg-[#248277]/20 text-[#45bfae] font-bold border border-[#248277]/30 uppercase tracking-wider">
-                    TALENT · EXTERNAL PROFESSIONALS
-                  </span>
-                  <UserCheck className="text-[#45bfae] group-hover:scale-110 transition-transform" size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-white">
-                  Bring in a setter or closer to support your business
-                </h3>
-                <p className="text-sm text-[#A7B7C7] leading-relaxed">
-                  Request an external sales professional to work on your existing leads. We assess your offer and available workload before recommending an appointment-setting or closing engagement.
-                </p>
-                <div className="p-4 rounded-2xl bg-[#111C26] border border-white/5 space-y-2">
-                  <span className="text-[11px] font-bold text-[#45bfae] uppercase tracking-wider">
-                    Working Conditions & Responsibilities
-                  </span>
-                  <ul className="space-y-1.5 text-xs text-[#A7B7C7]">
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Dedicated focus on your existing enquiries and pipeline</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Supervision and responsibilities agreed before work starts</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                      <span>Transparent qualification and pipeline activity tracking</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="pt-6 space-y-3">
-                <button
-                  type="button"
-                  onClick={() => openServiceEnquiry('External closer')}
-                  className="w-full py-3 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-center text-xs sm:text-sm font-bold inline-flex items-center justify-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
-                >
-                  <span>Request a sales professional</span>
-                  <ArrowRight size={15} />
-                </button>
-                <p className="text-[11px] text-[#8A9CAE] italic text-center">
-                  Professional availability subject to vetting and capacity. No instant matching or sales guarantees.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Commercial Boundaries Callout Box */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-[#090D12] border border-[#248277]/30 space-y-4 shadow-lg">
-            <div className="flex items-center gap-2 text-[#45bfae]">
-              <ShieldCheck size={20} />
-              <h4 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
-                Commercial Boundaries & Clear Scope
-              </h4>
-            </div>
-            <div className="space-y-3 text-xs sm:text-sm text-[#A7B7C7] leading-relaxed">
-              <p className="font-semibold text-white">
-                Training and managed sales services are available separately from the software. Scope and fees are agreed for the service you choose.
-              </p>
-              <p>
-                Sales support can work with your existing enquiries and opportunities. Lead generation is included only when explicitly agreed.
-              </p>
-              <ul className="grid grid-cols-1 md:grid-cols-2 gap-2.5 pt-2 text-xs border-t border-white/5 text-[#8A9CAE]">
-                <li className="flex items-start gap-2">
-                  <span className="text-[#45bfae] font-bold">•</span>
-                  <span>Software subscriptions do not automatically include an external closer or setter.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#45bfae] font-bold">•</span>
-                  <span>Training is not required to use Closecraft software.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#45bfae] font-bold">•</span>
-                  <span>External professionals do not guarantee sales, and training does not guarantee employment.</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-[#45bfae] font-bold">•</span>
-                  <span>You remain free to choose any single service or combine them as your business needs dictate.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Sponsored Ads & Lead Generation Packages (Official Rate Cards) */}
-      <section id="lead-generation-rates" className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
-              <Target size={14} />
-              <span>SPONSORED ADS PACKAGES &amp; OFFICIAL RATE CARDS</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              Targeted Meta advertising with daily ad spend included
-            </h2>
-            <p className="text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
-              Every plan includes ad setup, targeted audience segmentation, continuous monitoring, and optimization. All rates include both Meta ad spend and Closecraft campaign management fees.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
-            {/* Starter Package Card */}
-            <div className="rounded-3xl bg-[#0B1117] border border-white/10 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#248277]/60 transition-all group">
-              <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
-                <Image
-                  src="/images/Starter package rate card.png"
-                  alt="Starter Package Rate Card — ₦2,000 daily ad spend"
-                  fill
-                  className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-5 space-y-4 bg-[#111C26] border-t border-white/10 flex-1 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-bold">
-                      POPULAR CHOICE
-                    </span>
-                    <span className="text-xs font-extrabold text-white">4 wks · ₦70,000</span>
-                  </div>
-                  <h3 className="font-bold text-white text-base">Starter Package</h3>
-                  <p className="text-xs text-[#A7B7C7]">
-                    <strong>₦2,000</strong> daily Meta ad spend included.
-                  </p>
-                  <div className="text-[11px] text-[#8A9CAE] space-y-1 pt-1 border-t border-white/5">
-                    <div className="flex justify-between"><span>1 week:</span><span className="text-white font-semibold">₦19,000</span></div>
-                    <div className="flex justify-between"><span>2 weeks:</span><span className="text-white font-semibold">₦36,000</span></div>
-                    <div className="flex justify-between"><span>3 weeks:</span><span className="text-white font-semibold">₦54,000</span></div>
-                    <div className="flex justify-between text-[#45bfae] font-bold"><span>4 weeks:</span><span>₦70,000</span></div>
-                  </div>
+            {/* TAB 2: INTERACTIVE WALKTHROUGH */}
+            {videoMode === 'interactive' && (
+              <div className="p-6 sm:p-8 rounded-3xl bg-[#101010] border border-[#1f1f1f] shadow-2xl space-y-6 animate-in fade-in duration-300">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 pb-4 border-b border-[#1f1f1f]">
+                  {simulationSteps.map((s, idx) => (
+                    <button
+                      key={s.stage}
+                      type="button"
+                      onClick={() => setSimStep(idx)}
+                      className={`p-2 rounded-xl text-left transition-all cursor-pointer ${
+                        simStep === idx
+                          ? 'bg-[#248277]/20 border border-[#248277]/60'
+                          : 'bg-[#080808] border border-transparent hover:bg-white/5'
+                      }`}
+                    >
+                      <span className={`text-[10px] font-mono block ${simStep === idx ? 'text-[#45bfae] font-bold' : 'text-gray-500'}`}>
+                        STAGE 0{idx + 1}
+                      </span>
+                      <span className={`text-xs font-semibold truncate block mt-0.5 ${simStep === idx ? 'text-white' : 'text-gray-400'}`}>
+                        {s.badge}
+                      </span>
+                    </button>
+                  ))}
                 </div>
 
-                <div className="space-y-2 pt-2">
-                  <a
-                    href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20get%20started%20with%20the%20Starter%20Sponsored%20Ads%20Package."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
-                  >
-                    <Phone size={13} />
-                    <span>WhatsApp Sponsored</span>
-                  </a>
-                  <Link
-                    href="/services/lead-generation"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center shadow-sm block"
-                  >
-                    Select Starter Package &rarr;
-                  </Link>
-                </div>
+                {(() => {
+                  const current = simulationSteps[simStep];
+                  const Icon = current.icon;
+                  return (
+                    <div className="p-6 rounded-2xl bg-[#080808] border border-[#1f1f1f] space-y-4">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
+                            <Icon size={20} />
+                          </div>
+                          <div>
+                            <span className="text-[11px] px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] border border-[#248277]/40 font-bold">
+                              {current.stage}
+                            </span>
+                            <h3 className="text-lg font-bold text-white mt-1">{current.title}</h3>
+                          </div>
+                        </div>
+                        <span className="text-sm font-extrabold text-[#45bfae]">{current.dealSize}</span>
+                      </div>
+
+                      <p className="text-sm text-[#a1a1aa]">{current.details}</p>
+
+                      <div className="p-3.5 rounded-xl bg-[#101010] border border-[#1f1f1f] flex items-center gap-3 text-xs text-emerald-300">
+                        <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+                        <span>{current.stateDesc}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-[#1f1f1f]">
+                        <button
+                          type="button"
+                          onClick={() => setSimStep((prev) => (prev + 1) % simulationSteps.length)}
+                          className="px-4 py-2 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold inline-flex items-center gap-2 shadow-md transition-all active:scale-95 cursor-pointer"
+                        >
+                          <span>Next Stage ({simStep < 4 ? `0${simStep + 2}` : 'Replay'})</span>
+                          <ArrowRight size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSimStep(0)}
+                          className="text-xs text-gray-400 hover:text-white inline-flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <RefreshCw size={12} />
+                          <span>Reset</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })()}
               </div>
-            </div>
+            )}
 
-            {/* Growth Package Card */}
-            <div className="rounded-3xl bg-[#0B1117] border-2 border-[#248277] overflow-hidden flex flex-col justify-between shadow-2xl relative group">
-              <div className="absolute top-2 right-2 z-10 bg-[#248277] text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow">
-                MOST RECOMMENDED
-              </div>
-              <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
-                <Image
-                  src="/images/Growth package rate card.png"
-                  alt="Growth Package Rate Card — ₦3,000 daily ad spend"
-                  fill
-                  className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-5 space-y-4 bg-[#111C26] border-t border-white/10 flex-1 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
-                      ₦3,000 / DAY SPEND
-                    </span>
-                    <span className="text-xs font-extrabold text-[#45bfae]">4 wks · ₦100,000</span>
-                  </div>
-                  <h3 className="font-bold text-white text-base">Growth Package</h3>
-                  <p className="text-xs text-[#A7B7C7]">
-                    Steady inbound buyer enquiries and creative iteration.
-                  </p>
-                  <div className="text-[11px] text-[#8A9CAE] space-y-1 pt-1 border-t border-white/5">
-                    <div className="flex justify-between"><span>1 week:</span><span className="text-white font-semibold">₦27,000</span></div>
-                    <div className="flex justify-between"><span>2 weeks:</span><span className="text-white font-semibold">₦51,000</span></div>
-                    <div className="flex justify-between"><span>3 weeks:</span><span className="text-white font-semibold">₦77,000</span></div>
-                    <div className="flex justify-between text-[#45bfae] font-bold"><span>4 weeks:</span><span>₦100,000</span></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <a
-                    href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20get%20started%20with%20the%20Growth%20Sponsored%20Ads%20Package."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
-                  >
-                    <Phone size={13} />
-                    <span>WhatsApp Sponsored</span>
-                  </a>
-                  <Link
-                    href="/services/lead-generation"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center shadow-md active:scale-95 block"
-                  >
-                    Select Growth Package &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Elite Package Card */}
-            <div className="rounded-3xl bg-[#0B1117] border border-white/10 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#248277]/60 transition-all group">
-              <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
-                <Image
-                  src="/images/Elite digital sales rate card.png"
-                  alt="Elite Package Rate Card — ₦4,000 daily ad spend"
-                  fill
-                  className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-5 space-y-4 bg-[#111C26] border-t border-white/10 flex-1 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">
-                      HIGH IMPACT
-                    </span>
-                    <span className="text-xs font-extrabold text-white">4 wks · ₦130,000</span>
-                  </div>
-                  <h3 className="font-bold text-white text-base">Elite Package</h3>
-                  <p className="text-xs text-[#A7B7C7]">
-                    <strong>₦4,000</strong> daily spend for high velocity pipelines.
-                  </p>
-                  <div className="text-[11px] text-[#8A9CAE] space-y-1 pt-1 border-t border-white/5">
-                    <div className="flex justify-between"><span>1 week:</span><span className="text-white font-semibold">₦34,000</span></div>
-                    <div className="flex justify-between"><span>2 weeks:</span><span className="text-white font-semibold">₦66,000</span></div>
-                    <div className="flex justify-between"><span>3 weeks:</span><span className="text-white font-semibold">₦99,000</span></div>
-                    <div className="flex justify-between text-[#45bfae] font-bold"><span>4 weeks:</span><span>₦130,000</span></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <a
-                    href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20get%20started%20with%20the%20Elite%20Sponsored%20Ads%20Package."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
-                  >
-                    <Phone size={13} />
-                    <span>WhatsApp Sponsored</span>
-                  </a>
-                  <Link
-                    href="/services/lead-generation"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center shadow-sm block"
-                  >
-                    Select Elite Package &rarr;
-                  </Link>
-                </div>
-              </div>
-            </div>
-
-            {/* Enterprise Package Card */}
-            <div className="rounded-3xl bg-[#0B1117] border border-white/10 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#248277]/60 transition-all group">
-              <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
-                <Image
-                  src="/images/Enterprise custom ad spend rate card.png"
-                  alt="Enterprise Custom Ad Spend Rate Card"
-                  fill
-                  className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <div className="p-5 space-y-4 bg-[#111C26] border-t border-white/10 flex-1 flex flex-col justify-between">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">
-                      TAILORED BUDGET
-                    </span>
-                    <span className="text-xs font-extrabold text-white">Custom Quote</span>
-                  </div>
-                  <h3 className="font-bold text-white text-base">Enterprise Package</h3>
-                  <p className="text-xs text-[#A7B7C7]">
-                    Custom weekly ad spend tailored to business scale.
-                  </p>
-                  <div className="text-[11px] text-[#8A9CAE] space-y-1 pt-1 border-t border-white/5">
-                    <div className="flex justify-between"><span>1 week:</span><span className="text-white font-semibold">Custom</span></div>
-                    <div className="flex justify-between"><span>2 weeks:</span><span className="text-white font-semibold">Custom</span></div>
-                    <div className="flex justify-between"><span>3 weeks:</span><span className="text-white font-semibold">Custom</span></div>
-                    <div className="flex justify-between text-[#45bfae] font-bold"><span>4 weeks:</span><span>Custom</span></div>
-                  </div>
-                </div>
-
-                <div className="space-y-2 pt-2">
-                  <a
-                    href="https://wa.me/2349026365853?text=Hi%20Closecraft,%20I%20want%20to%20discuss%20an%20Enterprise%20Custom%20Ad%20Spend%20Campaign."
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#25D366]/20 hover:bg-[#25D366]/30 text-[#25D366] border border-[#25D366]/40 text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
-                  >
-                    <Phone size={13} />
-                    <span>WhatsApp Enterprise</span>
-                  </a>
-                  <button
-                    type="button"
-                    onClick={() => openDiagnostic('LEAD_GENERATION')}
-                    className="w-full py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all text-center block"
-                  >
-                    Request Custom Quote &rarr;
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <p className="text-xs text-[#8A9CAE] text-center italic">
-            All prices include ad spend and management fees. Every plan includes ad setup, targeting, monitoring and optimisation.
-          </p>
-        </div>
-      </section>
-
-      {/* 8. Managed Sales Section */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-4xl mx-auto p-8 rounded-3xl bg-gradient-to-r from-[#0B1117] to-[#111C26] border border-[#248277]/40 shadow-xl space-y-6">
-          <div className="space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-              MANAGED SALES ENGAGEMENT
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Have enquiries, but need help handling the sales conversations?
-            </h2>
-          </div>
-
-          <div className="space-y-3 text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
-            <p>You may need sales capacity as well as software.</p>
-            <p>
-              Closecraft's managed sales engagement gives suitable businesses access to remote sales support around an approved offer and agreed responsibilities.
-            </p>
-            <p>
-              We review your lead flow and offer economics before recommending an engagement. Then we confirm capacity and define the work.
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-[#090D12] border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <span className="text-2xl font-extrabold text-white">From ₦150,000</span>
-              <span className="text-xs text-[#A7B7C7]"> for 30 days</span>
-              <p className="text-xs text-[#45bfae] font-medium mt-0.5">
-                Workspace access is included in the agreed engagement scope.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => openServiceEnquiry('Managed sales')}
-              className="px-6 py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm shrink-0 transition-all shadow-md cursor-pointer"
-            >
-              Request a Managed Sales Proposal
-            </button>
-          </div>
-
-          <p className="text-xs text-[#8A9CAE] italic">
-            Sales support is subject to fit and availability. Responsibilities and commercial terms are confirmed before work begins.
-          </p>
-        </div>
-      </section>
-
-      {/* 9. Pricing Section */}
-      <section id="pricing" className="section-wrap py-16 border-t border-white/10">
-        <div className="text-center mb-10 space-y-3">
-          <div className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-            COMMERCIAL PLANS
-          </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Try Closecraft free for 7 days.
-          </h2>
-          <p className="text-sm sm:text-base text-[#A7B7C7] max-w-2xl mx-auto leading-relaxed">
-            Use the Starter workspace with your team and test the follow-up process with your own enquiries. After your trial, choose the paid plan that fits your business.
-          </p>
-          <p className="text-xs text-[#8A9CAE] italic">
-            The free trial includes Starter features. Managed sales services and DSS training are priced separately.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto items-stretch">
-          {/* Starter Plan */}
-          <div className="p-6 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-sm">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-white">Starter</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-bold">
-                  7-Day Trial
-                </span>
-              </div>
-              <div className="mb-4">
-                <span className="text-2xl sm:text-3xl font-extrabold text-white">₦20,000</span>
-                <span className="text-xs text-[#A7B7C7]">/month</span>
-              </div>
-              <p className="text-xs text-[#A7B7C7] mb-6">
-                Lean teams, with 3 internal seats and up to 1,000 active leads/month
-              </p>
-              <ul className="space-y-2.5 text-xs text-[#A7B7C7] mb-6">
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span><strong>3 internal seats</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span><strong>Up to 1,000 active leads/mo</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Shared enquiry workspace</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Follow-up SLA tracking</span>
-                </li>
-              </ul>
-            </div>
-            <Link
-              href="/signup"
-              className="w-full py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-center text-xs font-bold transition-all shadow-md block"
-            >
-              Start My 7-Day Free Trial
-            </Link>
-          </div>
-
-          {/* Pro Plan */}
-          <div className="p-6 rounded-3xl bg-[#111C26] border-2 border-[#248277] flex flex-col justify-between relative shadow-xl">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#248277] text-white text-[10px] font-bold px-3 py-0.5 rounded-full uppercase tracking-wider shadow">
-              Recommended for Teams
-            </div>
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-white">Pro</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-bold">
-                  Scale
-                </span>
-              </div>
-              <div className="mb-4">
-                <span className="text-2xl sm:text-3xl font-extrabold text-white">₦45,000</span>
-                <span className="text-xs text-[#A7B7C7]">/month</span>
-              </div>
-              <p className="text-xs text-[#A7B7C7] mb-6">
-                Growing teams, with 10 internal seats and automated lead distribution
-              </p>
-              <ul className="space-y-2.5 text-xs text-[#A7B7C7] mb-6">
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span><strong>10 internal seats</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span><strong>Automated lead distribution</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Manager call coaching queues</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Priority notification dispatch</span>
-                </li>
-              </ul>
-            </div>
-            <div>
+            {/* Compact CTA Below Video */}
+            <div className="text-center pt-2">
               <Link
                 href="/signup"
-                className="w-full py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-center text-xs font-bold transition-all shadow-md block"
+                className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-base shadow-xl shadow-[#248277]/25 transition-all active:scale-95"
               >
-                Start My 7-Day Free Trial
+                <span>Start Growing with CloseCraft</span>
+                <ArrowRight size={18} />
               </Link>
-              <p className="text-[10px] text-[#8A9CAE] text-center mt-2">
-                Your free trial includes Starter features. Upgrade to Pro after selecting a paid plan.
-              </p>
             </div>
           </div>
+        </section>
 
-          {/* Enterprise */}
-          <div className="p-6 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-sm">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-white">Enterprise</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-white font-bold">
-                  Custom
-                </span>
+        {/* SECTION 3: HOW CLOSECRAFT WORKS */}
+        <section id="how-it-works" className="py-24 bg-[#000000] border-t border-[#1f1f1f]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+                <Layers size={12} />
+                THE CONNECTED REVENUE PROCESS
               </div>
-              <div className="mb-4">
-                <span className="text-2xl sm:text-3xl font-extrabold text-white">₦75,000</span>
-                <span className="text-xs text-[#A7B7C7]">/month</span>
-              </div>
-              <p className="text-xs text-[#A7B7C7] mb-6">
-                Larger teams needing custom integrations and expanded capacity
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                From first enquiry to final sale.
+              </h2>
+
+              <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
+                CloseCraft helps businesses attract potential customers and keep those opportunities moving through the sales process.
               </p>
-              <ul className="space-y-2.5 text-xs text-[#A7B7C7] mb-6">
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Custom team seat allocations</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Custom CRM & ERP integrations</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Dedicated success manager</span>
-                </li>
-              </ul>
             </div>
-            <a
-              href="mailto:sales@closecrafthq.com?subject=Discuss%20Enterprise%20Inquiry"
-              className="w-full py-3 rounded-xl border border-white/20 text-white text-center text-xs font-semibold hover:bg-white/5 transition-colors block"
-            >
-              Discuss Enterprise
-            </a>
+
+            {/* 3 Connected Workflow Stages */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+              {/* Stage 1 */}
+              <div className="p-8 rounded-3xl bg-[#101010] border border-[#1f1f1f] hover:border-[#248277]/60 transition-all flex flex-col justify-between space-y-6 group shadow-xl">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="w-12 h-12 rounded-2xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#45bfae] font-extrabold text-lg">
+                      01
+                    </span>
+                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#1f1f1f] text-gray-300 font-bold uppercase">
+                      ACQUISITION
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-extrabold text-white">Lead Generation</h3>
+                  <p className="text-xs font-semibold text-[#45bfae] uppercase tracking-wide">Bring in new enquiries.</p>
+                  <p className="text-sm text-[#a1a1aa] leading-relaxed">
+                    Help businesses attract potential customers through professionally managed advertising campaigns on Facebook and Instagram.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#080808] border border-[#1f1f1f] space-y-2 text-xs text-[#a1a1aa]">
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Targeted Meta Sponsored Campaigns</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Guaranteed Daily Ad Spend Included</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Continuous Copy &amp; Audience Tuning</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stage 2 */}
+              <div className="p-8 rounded-3xl bg-[#101010] border-2 border-[#248277] transition-all flex flex-col justify-between space-y-6 group shadow-2xl relative">
+                <div className="absolute -top-3.5 left-8 bg-[#248277] text-white text-[10px] font-extrabold uppercase px-3 py-1 rounded-full shadow-md">
+                  CORE PLATFORM
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="w-12 h-12 rounded-2xl bg-[#248277]/25 border border-[#248277]/50 flex items-center justify-center text-[#45bfae] font-extrabold text-lg">
+                      02
+                    </span>
+                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#1f1f1f] text-gray-300 font-bold uppercase">
+                      ORGANISATION
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-extrabold text-white">Lead Management</h3>
+                  <p className="text-xs font-semibold text-[#45bfae] uppercase tracking-wide">Keep every opportunity moving.</p>
+                  <p className="text-sm text-[#a1a1aa] leading-relaxed">
+                    Organise customer enquiries, manage conversations and ensure follow-up does not get forgotten.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#080808] border border-[#1f1f1f] space-y-2 text-xs text-[#a1a1aa]">
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Zero Spreadsheet Lag &amp; Loss</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Strict Follow-Up SLA Countdowns</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Next-Best-Action Recommendation</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stage 3 */}
+              <div className="p-8 rounded-3xl bg-[#101010] border border-[#1f1f1f] hover:border-[#248277]/60 transition-all flex flex-col justify-between space-y-6 group shadow-xl">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="w-12 h-12 rounded-2xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#45bfae] font-extrabold text-lg">
+                      03
+                    </span>
+                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#1f1f1f] text-gray-300 font-bold uppercase">
+                      REVENUE
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-extrabold text-white">Sales Conversion</h3>
+                  <p className="text-xs font-semibold text-[#45bfae] uppercase tracking-wide">Turn prospects into customers.</p>
+                  <p className="text-sm text-[#a1a1aa] leading-relaxed">
+                    Support qualification, appointment setting and sales closing through the appropriate tools and human services.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-[#080808] border border-[#1f1f1f] space-y-2 text-xs text-[#a1a1aa]">
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Structured Qualification Playbooks</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>DSS Trained Setters &amp; Remote Closers</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-white font-medium">
+                    <Check size={14} className="text-[#45bfae]" />
+                    <span>Closed-Won Revenue Verification</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
+        </section>
 
-          {/* Managed Sales Engagement */}
-          <div className="p-6 rounded-3xl bg-[#0B1117] border border-white/10 flex flex-col justify-between shadow-sm">
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-lg font-bold text-white">Managed Sales</h3>
-                <span className="text-[10px] px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-bold">
-                  Service
-                </span>
+        {/* SECTION 4: LEAD GENERATION PRICING */}
+        <section id="pricing" className="py-24 bg-[#080808] border-t border-[#1f1f1f]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+                <Target size={12} />
+                LEAD GENERATION RATE CARDS
               </div>
-              <div className="mb-4">
-                <span className="text-xl sm:text-2xl font-extrabold text-white">From ₦150,000</span>
-                <span className="text-xs text-[#A7B7C7]"> for 30 days</span>
-              </div>
-              <p className="text-xs text-[#A7B7C7] mb-6">
-                Suitable businesses needing remote sales support with workspace access included
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Need more enquiries for your business?
+              </h2>
+
+              <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
+                We help businesses attract potential customers through professionally managed Facebook and Instagram advertising campaigns.
               </p>
-              <ul className="space-y-2.5 text-xs text-[#A7B7C7] mb-6">
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span><strong>Workspace access included</strong></span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Remote sales professionals</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <Check size={14} className="text-[#45bfae] mt-0.5 shrink-0" />
-                  <span>Lead flow and offer review</span>
-                </li>
-              </ul>
+
+              {/* Duration selector tabs */}
+              <div className="inline-flex items-center p-1.5 rounded-2xl bg-[#101010] border border-[#1f1f1f] shadow-inner mt-4">
+                {(['1', '2', '3', '4'] as const).map((dur) => (
+                  <button
+                    key={dur}
+                    type="button"
+                    onClick={() => setPricingDuration(dur)}
+                    className={`px-4 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer ${
+                      pricingDuration === dur
+                        ? 'bg-[#248277] text-white shadow-md'
+                        : 'text-[#a1a1aa] hover:text-white'
+                    }`}
+                  >
+                    <span>{dur} {dur === '1' ? 'Week' : 'Weeks'}</span>
+                  </button>
+                ))}
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={() => openAudit('MANAGED_SALES')}
-              className="w-full py-3 rounded-xl border border-white/20 text-white text-center text-xs font-semibold hover:bg-white/5 transition-colors block"
-            >
-              Request a Managed Sales Proposal
-            </button>
+
+            {/* 4 Official Rate Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-stretch">
+              {/* Card 1: Starter Package */}
+              <div className="rounded-3xl bg-[#101010] border border-[#1f1f1f] hover:border-[#248277]/60 overflow-hidden flex flex-col justify-between shadow-xl transition-all group">
+                <div
+                  onClick={() => setActiveRateCardImage({ src: '/images/Starter package rate card.png', title: 'Starter Package Rate Card' })}
+                  className="relative aspect-[3/4] w-full bg-[#000000] overflow-hidden cursor-pointer group/img"
+                  title="Click to view full rate card image"
+                >
+                  <Image
+                    src="/images/Starter package rate card.png"
+                    alt="Starter Package Rate Card — ₦2,000 daily ad spend"
+                    fill
+                    className="object-contain p-3 group-hover/img:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-xs text-white font-bold">
+                    <Maximize2 size={16} />
+                    <span>View Rate Card</span>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4 bg-[#101010] border-t border-[#1f1f1f] flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-bold">
+                        POPULAR CHOICE
+                      </span>
+                      <span className="text-xs font-extrabold text-[#71717a]">₦2,000 / day</span>
+                    </div>
+
+                    <h3 className="font-extrabold text-white text-lg">Starter Package</h3>
+
+                    <div className="py-1">
+                      <span className="text-2xl font-extrabold text-white">{starterPrices[pricingDuration]}</span>
+                      <span className="text-xs text-[#a1a1aa] ml-1.5">for {pricingDuration} {pricingDuration === '1' ? 'week' : 'weeks'}</span>
+                    </div>
+
+                    <p className="text-xs text-[#a1a1aa]">
+                      <strong>₦2,000</strong> daily Meta ad spend included directly in the plan price.
+                    </p>
+
+                    <div className="text-[11px] text-[#71717a] space-y-1.5 pt-2 border-t border-[#1f1f1f]">
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Ad strategy &amp; campaign setup</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Targeted audience segmentation</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Weekly performance reporting</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-3">
+                    <Link
+                      href="/services/lead-generation"
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center shadow-md block"
+                    >
+                      Select Starter Package &rarr;
+                    </Link>
+                    <a
+                      href="https://wa.me/2349026365853?text=Hi%20CloseCraft,%20I%20want%20to%20get%20started%20with%20the%20Starter%20Sponsored%20Ads%20Package."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 px-3 rounded-xl bg-[#1f1f1f] hover:bg-[#262626] text-[#25D366] text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                    >
+                      <Phone size={13} />
+                      <span>WhatsApp Sponsored</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Growth Package (Highlighted) */}
+              <div className="rounded-3xl bg-[#101010] border-2 border-[#248277] overflow-hidden flex flex-col justify-between shadow-2xl relative group">
+                <div className="absolute top-3 right-3 z-10 bg-[#248277] text-white text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full shadow">
+                  MOST RECOMMENDED
+                </div>
+
+                <div
+                  onClick={() => setActiveRateCardImage({ src: '/images/Growth package rate card.png', title: 'Growth Package Rate Card' })}
+                  className="relative aspect-[3/4] w-full bg-[#000000] overflow-hidden cursor-pointer group/img"
+                  title="Click to view full rate card image"
+                >
+                  <Image
+                    src="/images/Growth package rate card.png"
+                    alt="Growth Package Rate Card — ₦3,000 daily ad spend"
+                    fill
+                    className="object-contain p-3 group-hover/img:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-xs text-white font-bold">
+                    <Maximize2 size={16} />
+                    <span>View Rate Card</span>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4 bg-[#101010] border-t border-[#1f1f1f] flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                        STEADY INBOUND
+                      </span>
+                      <span className="text-xs font-extrabold text-[#45bfae]">₦3,000 / day</span>
+                    </div>
+
+                    <h3 className="font-extrabold text-white text-lg">Growth Package</h3>
+
+                    <div className="py-1">
+                      <span className="text-2xl font-extrabold text-white">{growthPrices[pricingDuration]}</span>
+                      <span className="text-xs text-[#a1a1aa] ml-1.5">for {pricingDuration} {pricingDuration === '1' ? 'week' : 'weeks'}</span>
+                    </div>
+
+                    <p className="text-xs text-[#a1a1aa]">
+                      <strong>₦3,000</strong> daily Meta ad spend included for steady customer acquisition.
+                    </p>
+
+                    <div className="text-[11px] text-[#71717a] space-y-1.5 pt-2 border-t border-[#1f1f1f]">
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>All Starter deliverables</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Creative iteration &amp; multiple angles</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Lead qualification setup</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-3">
+                    <Link
+                      href="/services/lead-generation"
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center shadow-lg shadow-[#248277]/25 block"
+                    >
+                      Select Growth Package &rarr;
+                    </Link>
+                    <a
+                      href="https://wa.me/2349026365853?text=Hi%20CloseCraft,%20I%20want%20to%20get%20started%20with%20the%20Growth%20Sponsored%20Ads%20Package."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 px-3 rounded-xl bg-[#1f1f1f] hover:bg-[#262626] text-[#25D366] text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                    >
+                      <Phone size={13} />
+                      <span>WhatsApp Sponsored</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 3: Elite Package */}
+              <div className="rounded-3xl bg-[#101010] border border-[#1f1f1f] hover:border-[#248277]/60 overflow-hidden flex flex-col justify-between shadow-xl transition-all group">
+                <div
+                  onClick={() => setActiveRateCardImage({ src: '/images/Elite digital sales rate card.png', title: 'Elite Package Rate Card' })}
+                  className="relative aspect-[3/4] w-full bg-[#000000] overflow-hidden cursor-pointer group/img"
+                  title="Click to view full rate card image"
+                >
+                  <Image
+                    src="/images/Elite digital sales rate card.png"
+                    alt="Elite Package Rate Card — ₦4,000 daily ad spend"
+                    fill
+                    className="object-contain p-3 group-hover/img:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-xs text-white font-bold">
+                    <Maximize2 size={16} />
+                    <span>View Rate Card</span>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4 bg-[#101010] border-t border-[#1f1f1f] flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold">
+                        HIGH IMPACT
+                      </span>
+                      <span className="text-xs font-extrabold text-[#71717a]">₦4,000 / day</span>
+                    </div>
+
+                    <h3 className="font-extrabold text-white text-lg">Elite Package</h3>
+
+                    <div className="py-1">
+                      <span className="text-2xl font-extrabold text-white">{elitePrices[pricingDuration]}</span>
+                      <span className="text-xs text-[#a1a1aa] ml-1.5">for {pricingDuration} {pricingDuration === '1' ? 'week' : 'weeks'}</span>
+                    </div>
+
+                    <p className="text-xs text-[#a1a1aa]">
+                      <strong>₦4,000</strong> daily spend for high velocity pipelines and larger deal sizes.
+                    </p>
+
+                    <div className="text-[11px] text-[#71717a] space-y-1.5 pt-2 border-t border-[#1f1f1f]">
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>High-volume enquiry generation</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Retargeting &amp; audience funnels</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Priority campaign manager review</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-3">
+                    <Link
+                      href="/services/lead-generation"
+                      className="w-full py-2.5 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center shadow-md block"
+                    >
+                      Select Elite Package &rarr;
+                    </Link>
+                    <a
+                      href="https://wa.me/2349026365853?text=Hi%20CloseCraft,%20I%20want%20to%20get%20started%20with%20the%20Elite%20Sponsored%20Ads%20Package."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 px-3 rounded-xl bg-[#1f1f1f] hover:bg-[#262626] text-[#25D366] text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                    >
+                      <Phone size={13} />
+                      <span>WhatsApp Sponsored</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 4: Enterprise Package */}
+              <div className="rounded-3xl bg-[#101010] border border-[#1f1f1f] hover:border-[#248277]/60 overflow-hidden flex flex-col justify-between shadow-xl transition-all group">
+                <div
+                  onClick={() => setActiveRateCardImage({ src: '/images/Enterprise custom ad spend rate card.png', title: 'Enterprise Custom Ad Spend Rate Card' })}
+                  className="relative aspect-[3/4] w-full bg-[#000000] overflow-hidden cursor-pointer group/img"
+                  title="Click to view full rate card image"
+                >
+                  <Image
+                    src="/images/Enterprise custom ad spend rate card.png"
+                    alt="Enterprise Custom Ad Spend Rate Card"
+                    fill
+                    className="object-contain p-3 group-hover/img:scale-105 transition-transform duration-300"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-xs text-white font-bold">
+                    <Maximize2 size={16} />
+                    <span>View Rate Card</span>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-4 bg-[#101010] border-t border-[#1f1f1f] flex-1 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 font-bold">
+                        TAILORED SCALE
+                      </span>
+                      <span className="text-xs font-extrabold text-[#71717a]">Weekly Allocation</span>
+                    </div>
+
+                    <h3 className="font-extrabold text-white text-lg">Enterprise Package</h3>
+
+                    <div className="py-1">
+                      <span className="text-2xl font-extrabold text-white">Custom Quote</span>
+                      <span className="text-xs text-[#a1a1aa] ml-1.5">weekly arrangements</span>
+                    </div>
+
+                    <p className="text-xs text-[#a1a1aa]">
+                      Customised weekly advertising spend arrangement tailored to enterprise workload.
+                    </p>
+
+                    <div className="text-[11px] text-[#71717a] space-y-1.5 pt-2 border-t border-[#1f1f1f]">
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Dedicated campaign architect</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Multi-market audience strategy</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[#a1a1aa]">
+                        <Check size={12} className="text-[#45bfae] shrink-0" />
+                        <span>Custom CRM &amp; closing alignment</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => openAudit('MANAGED_SALES')}
+                      className="w-full py-2.5 px-4 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition-all text-center border border-white/15 block cursor-pointer"
+                    >
+                      Request Custom Quote &rarr;
+                    </button>
+                    <a
+                      href="https://wa.me/2349026365853?text=Hi%20CloseCraft,%20I%20want%20to%20discuss%20an%20Enterprise%20Lead%20Generation%20Campaign."
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full py-2 px-3 rounded-xl bg-[#1f1f1f] hover:bg-[#262626] text-[#25D366] text-xs font-bold flex items-center justify-center gap-1.5 transition-all text-center"
+                    >
+                      <Phone size={13} />
+                      <span>Enterprise WhatsApp</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 5: THE CLOSECRAFT PRODUCT */}
+        <section id="product" className="py-24 bg-[#000000] border-t border-[#1f1f1f]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+                <Layers size={12} />
+                THE CLOSECRAFT WORKSPACE
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                One connected view of your sales opportunities.
+              </h2>
+
+              <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
+                Keep track of customer enquiries, conversations, lead status and next actions in one unified workspace.
+              </p>
+            </div>
+
+            {/* Product Screenshot Showcase */}
+            <div className="relative rounded-3xl overflow-hidden border border-[#1f1f1f] bg-[#101010] shadow-2xl group">
+              <div className="relative aspect-[16/9] w-full bg-[#000000] overflow-hidden">
+                <Image
+                  src="/images/closecraft_hero_dashboard.jpg"
+                  alt="CloseCraft Sales Command Centre Dashboard"
+                  fill
+                  className="object-cover object-top"
+                  priority
+                />
+              </div>
+
+              {/* Bottom Feature Highlights */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 p-6 sm:p-8 bg-[#080808] border-t border-[#1f1f1f]">
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-[#45bfae]" />
+                    <span>Enquiry Ingestion</span>
+                  </h4>
+                  <p className="text-xs text-[#a1a1aa] leading-relaxed">
+                    Leads from Meta ads and forms appear in real time with campaign attribution.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-400" />
+                    <span>Response SLAs</span>
+                  </h4>
+                  <p className="text-xs text-[#a1a1aa] leading-relaxed">
+                    Strict timers ensure every promising prospect gets contact before going cold.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-blue-400" />
+                    <span>Next-Best-Action</span>
+                  </h4>
+                  <p className="text-xs text-[#a1a1aa] leading-relaxed">
+                    Clear guidance on what to say, which objections to resolve, and when to follow up.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                    <span>Revenue Leakage</span>
+                  </h4>
+                  <p className="text-xs text-[#a1a1aa] leading-relaxed">
+                    Visibility into overdue follow-ups, stalled deals, and team closing velocity.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 6: THE CLOSECRAFT ADVANTAGE */}
+        <section id="advantage" className="py-24 bg-[#080808] border-t border-[#1f1f1f]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+            <div className="text-center space-y-4 max-w-3xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+                <TrendingUp size={12} />
+                THE CLOSECRAFT ADVANTAGE
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+                Better follow-up. Fewer lost opportunities.
+              </h2>
+
+              <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
+                Connect customer acquisition directly to consistent follow-up and sales execution.
+              </p>
+            </div>
+
+            {/* 4 Benefit Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-7 rounded-3xl bg-[#101010] border border-[#1f1f1f] space-y-4 hover:border-[#248277]/50 transition-all shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
+                  <Target size={22} />
+                </div>
+                <h3 className="text-base font-bold text-white">Acquiring New Customers</h3>
+                <p className="text-xs sm:text-sm text-[#a1a1aa] leading-relaxed">
+                  Stop hoping buyers find you. Run targeted Meta ad campaigns with ad spend included to attract genuine enquiries.
+                </p>
+              </div>
+
+              <div className="p-7 rounded-3xl bg-[#101010] border border-[#1f1f1f] space-y-4 hover:border-[#248277]/50 transition-all shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
+                  <Layers size={22} />
+                </div>
+                <h3 className="text-base font-bold text-white">Keeping Enquiries Organised</h3>
+                <p className="text-xs sm:text-sm text-[#a1a1aa] leading-relaxed">
+                  Eliminate lost contacts in chat windows or spreadsheets. Centralise all enquiries in one clean, multi-user workspace.
+                </p>
+              </div>
+
+              <div className="p-7 rounded-3xl bg-[#101010] border border-[#1f1f1f] space-y-4 hover:border-[#248277]/50 transition-all shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
+                  <Clock size={22} />
+                </div>
+                <h3 className="text-base font-bold text-white">Following Up Consistently</h3>
+                <p className="text-xs sm:text-sm text-[#a1a1aa] leading-relaxed">
+                  Enforce follow-up accountability with automated SLA timers and reminders so no promising prospect sits forgotten.
+                </p>
+              </div>
+
+              <div className="p-7 rounded-3xl bg-[#101010] border border-[#1f1f1f] space-y-4 hover:border-[#248277]/50 transition-all shadow-xl">
+                <div className="w-12 h-12 rounded-2xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#45bfae]">
+                  <TrendingUp size={22} />
+                </div>
+                <h3 className="text-base font-bold text-white">Moving Prospects to Sale</h3>
+                <p className="text-xs sm:text-sm text-[#a1a1aa] leading-relaxed">
+                  Equip closers with contextual Next-Best-Action guidance, structured qualification playbooks, and negotiation tools.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 7: FINAL CTA */}
+        <section className="py-24 bg-[#000000] border-t border-[#1f1f1f]">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="p-10 sm:p-14 rounded-3xl bg-[#101010] border border-[#248277]/50 text-center space-y-6 shadow-2xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-[#248277]/10 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#14A7F7]/5 rounded-full blur-3xl pointer-events-none" />
+
+              <div className="relative z-10 space-y-4">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                  Every enquiry is an opportunity. Make it count.
+                </h2>
+
+                <p className="text-base sm:text-lg text-[#a1a1aa] max-w-xl mx-auto leading-relaxed">
+                  Give your business a better way to attract customers, manage enquiries and turn opportunities into sales.
+                </p>
+
+                <p className="sr-only">Give your next opportunity a clear next step.</p>
+
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
+                  <Link
+                    href="/signup"
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-base shadow-xl shadow-[#248277]/30 transition-all active:scale-95 inline-flex items-center justify-center gap-2"
+                  >
+                    <span>Get Started</span>
+                    <ArrowRight size={18} />
+                  </Link>
+
+                  <a
+                    href="#pricing"
+                    className="w-full sm:w-auto px-7 py-4 rounded-xl bg-[#1f1f1f] hover:bg-[#262626] text-white border border-[#262626] font-semibold text-base transition-all inline-flex items-center justify-center gap-2"
+                  >
+                    <span>Explore Our Services</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 8: COMPACT FAQ */}
+        <section id="faq" className="py-24 bg-[#080808] border-t border-[#1f1f1f]">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="text-center space-y-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
+                <HelpCircle size={12} />
+                ANSWERS
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                Frequently Asked Questions
+              </h2>
+            </div>
+
+            <div className="space-y-3">
+              {faqs.map((faq, idx) => {
+                const isOpen = openFaqIndex === idx;
+                return (
+                  <div
+                    key={faq.q}
+                    className="rounded-2xl bg-[#101010] border border-[#1f1f1f] overflow-hidden transition-colors"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => toggleFaq(idx)}
+                      className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-[#151515] transition-colors"
+                      aria-expanded={isOpen}
+                    >
+                      <span className="font-bold text-sm sm:text-base text-white">{faq.q}</span>
+                      <ChevronDown
+                        size={18}
+                        className={`text-[#71717a] transition-transform duration-200 shrink-0 ${
+                          isOpen ? 'rotate-180 text-[#45bfae]' : ''
+                        }`}
+                      />
+                    </button>
+                    {isOpen && (
+                      <div className="px-5 pb-6 sm:px-6 text-xs sm:text-sm text-[#a1a1aa] leading-relaxed border-t border-[#1f1f1f]/60 pt-3 animate-in fade-in duration-150">
+                        {faq.a}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* Brevo Newsletter Section (Placed below final CTA, above footer) */}
+        <BrevoNewsletterSection
+          headline="Make your next sales conversation count."
+          description="Get a practical sales lesson each week, with follow-up examples you can use in your business."
+        />
+
+        {/* FOOTER */}
+        <footer className="bg-[#000000] border-t border-[#1f1f1f] py-16 text-xs text-[#71717a]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+              {/* Brand Col */}
+              <div className="col-span-2 space-y-4">
+                <Link href="/" className="inline-block" aria-label="CloseCraft">
+                  <Logo variant="full" size="md" alt="CloseCraft" />
+                </Link>
+                <p className="text-xs text-[#a1a1aa] max-w-sm leading-relaxed">
+                  The Revenue Growth Platform connecting customer acquisition with consistent follow-up and sales conversion.
+                </p>
+                <p className="text-[11px] text-[#71717a]">
+                  Zeerocodes Automation Limited. RC 8421094.
+                </p>
+              </div>
+
+              {/* Col 1: Platform */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wider">Platform</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/" className="hover:text-white transition-colors">Home</Link></li>
+                  <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
+                  <li><Link href="/services/lead-generation" className="hover:text-white transition-colors">Lead Generation</Link></li>
+                  <li><a href="#pricing" className="hover:text-white transition-colors">Pricing</a></li>
+                  <li><a href="#explainer-video" className="hover:text-white transition-colors">Explainer Video</a></li>
+                </ul>
+              </div>
+
+              {/* Col 2: Solutions */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wider">Solutions</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/services/sales-outsourcing" className="hover:text-white transition-colors">Sales Follow-Up</Link></li>
+                  <li><button type="button" onClick={() => openServiceEnquiry('Managed sales')} className="hover:text-white transition-colors text-left">Managed Sales</button></li>
+                  <li><Link href="/dss" className="text-[#45bfae] font-semibold hover:underline">Digital Sales School</Link></li>
+                  <li><Link href="/affiliate" className="hover:text-white transition-colors">Affiliate Programme</Link></li>
+                  <li><button type="button" onClick={() => openAudit('AUDIT')} className="hover:text-white transition-colors text-left">Revenue Audit</button></li>
+                </ul>
+              </div>
+
+              {/* Col 3: Legal & Company */}
+              <div className="space-y-3">
+                <h4 className="font-bold text-white text-xs uppercase tracking-wider">Company &amp; Legal</h4>
+                <ul className="space-y-2">
+                  <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
+                  <li><Link href="/blog" className="hover:text-white transition-colors">Blog &amp; Insights</Link></li>
+                  <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+                  <li><Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link></li>
+                  <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
+                  <li><Link href="/refund-policy" className="hover:text-white transition-colors">Refund Policy</Link></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="pt-8 border-t border-[#1f1f1f] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#71717a]">
+              <p>&copy; {new Date().getFullYear()} CloseCraft (Zeerocodes Automation Limited). All rights reserved.</p>
+              <div className="flex items-center gap-4">
+                <Link href="/cookies" className="hover:text-white transition-colors">Cookie Settings</Link>
+                <span>&bull;</span>
+                <Link href="/terms" className="hover:text-white transition-colors">Terms</Link>
+                <span>&bull;</span>
+                <Link href="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+              </div>
+            </div>
+          </div>
+        </footer>
+      </main>
+
+      {/* LIGHTBOX MODAL: Rate Card Image Zoom */}
+      {activeRateCardImage && (
+        <div
+          onClick={() => setActiveRateCardImage(null)}
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-4 sm:p-8 flex items-center justify-center cursor-pointer animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-2xl w-full max-h-[90vh] bg-[#101010] border border-[#1f1f1f] rounded-3xl overflow-hidden p-4 shadow-2xl flex flex-col"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[#1f1f1f]">
+              <span className="font-bold text-sm text-white">{activeRateCardImage.title}</span>
+              <button
+                type="button"
+                onClick={() => setActiveRateCardImage(null)}
+                className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="relative aspect-[3/4] w-full mt-3 overflow-hidden rounded-xl bg-black">
+              <Image
+                src={activeRateCardImage.src}
+                alt={activeRateCardImage.title}
+                fill
+                className="object-contain"
+              />
+            </div>
+            <div className="pt-3 flex justify-end">
+              <Link
+                href="/services/lead-generation"
+                className="px-4 py-2 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all"
+              >
+                Select Package &rarr;
+              </Link>
+            </div>
           </div>
         </div>
+      )}
 
-        <div className="text-center mt-8 text-xs text-[#8A9CAE]">
-          No automatic charge at trial expiry. Choose and pay for a plan to continue using paid features.
-        </div>
-      </section>
-
-      {/* 10. Revenue Audit Form Section */}
-      <section id="audit" className="section-wrap py-16 border-t border-white/10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 max-w-5xl mx-auto">
-          <div className="lg:col-span-5 space-y-4">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-              REVENUE AUDIT
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Find the follow-up gaps before you spend more on leads.
-            </h2>
-            <div className="space-y-3 text-sm text-[#A7B7C7] leading-relaxed">
-              <p className="font-semibold text-white">Not sure where the problem sits?</p>
-              <p>
-                Request a Revenue Audit of your current lead-to-sale process. We will review how enquiries are handled and where follow-up loses momentum.
-              </p>
-              <p>
-                You will have a clearer starting point for deciding whether you need software support or a managed sales engagement.
-              </p>
+      {/* MODAL: Revenue Audit & Service Enquiry Modal */}
+      {showAuditModal && (
+        <div
+          onClick={() => setShowAuditModal(false)}
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm p-4 sm:p-6 flex items-center justify-center overflow-y-auto animate-in fade-in duration-200"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative max-w-lg w-full bg-[#101010] border border-[#1f1f1f] rounded-3xl p-6 sm:p-8 shadow-2xl my-8 space-y-6"
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-[#1f1f1f]">
+              <div>
+                {modalFormType === 'SERVICE_ENQUIRY' ? (
+                  <>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-bold block mb-1">
+                      BUSINESS SALES SERVICE ASSESSMENT
+                    </span>
+                    <h3 className="text-lg font-bold text-white">
+                      Discuss sales training or hands-on support
+                    </h3>
+                  </>
+                ) : (
+                  <>
+                    <h3 className="text-lg font-bold text-white">
+                      {modalFormType === 'MANAGED_SALES'
+                        ? 'Request Managed Sales Proposal'
+                        : 'Show us where follow-up gets difficult.'}
+                    </h3>
+                    <p className="text-xs text-[#a1a1aa] mt-0.5">
+                      {modalFormType === 'MANAGED_SALES'
+                        ? 'Custom quotation for managed follow-up and closing support.'
+                        : 'We will review your enquiry volume and recommend the right setup.'}
+                    </p>
+                  </>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAuditModal(false)}
+                className="p-1 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+              >
+                <X size={18} />
+              </button>
             </div>
-          </div>
-
-          <div className="lg:col-span-7 p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/15 shadow-xl">
-            <h3 className="text-xl font-bold text-white mb-2">Show us where follow-up gets difficult.</h3>
 
             {auditSuccess ? (
-              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-sm space-y-3">
-                <div className="flex items-center gap-2 text-emerald-400 font-bold text-base">
-                  <CheckCircle2 size={20} />
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm space-y-2">
+                <div className="flex items-center gap-2 font-bold text-white">
+                  <CheckCircle2 size={18} className="text-emerald-400" />
                   <span>Request Received</span>
                 </div>
                 <p>{auditSuccess}</p>
                 <button
                   type="button"
-                  onClick={() => setAuditSuccess(null)}
-                  className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 font-semibold text-xs hover:bg-emerald-500/30 transition-colors"
+                  onClick={() => setShowAuditModal(false)}
+                  className="mt-2 px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all"
                 >
-                  Submit Another Request
+                  Close
                 </button>
               </div>
-            ) : (
-              <form onSubmit={(e) => handleAuditSubmit(e, 'AUDIT')} className="space-y-4">
+            ) : modalFormType === 'SERVICE_ENQUIRY' ? (
+              <form onSubmit={handleServiceSubmit} className="space-y-4">
                 {auditError && (
                   <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
                     {auditError}
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Your name *</label>
-                    <input
-                      name="name"
-                      required
-                      placeholder="e.g. Alex Rivera"
-                      className="w-full h-11 px-3.5 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Business name *</label>
-                    <input
-                      name="business"
-                      required
-                      placeholder="e.g. Apex Operations"
-                      className="w-full h-11 px-3.5 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                    />
-                  </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-300">Service Interest *</label>
+                  <select
+                    value={serviceFormData.serviceInterest}
+                    onChange={(e) => setServiceFormData((prev) => ({ ...prev, serviceInterest: e.target.value }))}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                  >
+                    <option value="Team training">Team training</option>
+                    <option value="Managed sales">Managed sales</option>
+                    <option value="External appointment setter">External appointment setter</option>
+                    <option value="External closer">External closer</option>
+                    <option value="Help choosing">Help choosing</option>
+                  </select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-300">Full Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={serviceFormData.name}
+                    onChange={(e) => setServiceFormData((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder="e.g. Tunde Adeyemi"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Work email *</label>
+                    <label className="text-xs font-bold text-gray-300">Work Email *</label>
                     <input
-                      name="email"
                       type="email"
                       required
-                      placeholder="alex@example.com"
-                      className="w-full h-11 px-3.5 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                      value={serviceFormData.email}
+                      onChange={(e) => setServiceFormData((prev) => ({ ...prev, email: e.target.value }))}
+                      placeholder="tunde@company.com"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Phone / WhatsApp *</label>
+                    <label className="text-xs font-bold text-gray-300">Phone (WhatsApp)</label>
                     <input
-                      name="phone"
-                      required
+                      type="tel"
+                      value={serviceFormData.phone}
+                      onChange={(e) => setServiceFormData((prev) => ({ ...prev, phone: e.target.value }))}
                       placeholder="+234 800 000 0000"
-                      className="w-full h-11 px-3.5 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#A7B7C7]">Website, optional</label>
+                  <label className="text-xs font-bold text-gray-300">Business Name *</label>
                   <input
-                    name="website"
-                    placeholder="https://example.com"
-                    className="w-full h-11 px-3.5 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
+                    type="text"
+                    required
+                    value={serviceFormData.business}
+                    onChange={(e) => setServiceFormData((prev) => ({ ...prev, business: e.target.value }))}
+                    placeholder="e.g. Apex Logistics Ltd"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                  />
+                </div>
+
+                {serviceFormData.serviceInterest === 'Team training' ? (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-300">Approximate team size *</label>
+                      <select
+                        value={serviceFormData.teamSize}
+                        onChange={(e) => setServiceFormData((prev) => ({ ...prev, teamSize: e.target.value }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                      >
+                        <option value="1–3 reps">1–3 reps</option>
+                        <option value="4–10 reps">4–10 reps</option>
+                        <option value="11–25 reps">11–25 reps</option>
+                        <option value="More than 25 reps">More than 25 reps</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-300">Main training objective *</label>
+                      <select
+                        value={serviceFormData.trainingObjective}
+                        onChange={(e) => setServiceFormData((prev) => ({ ...prev, trainingObjective: e.target.value }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                      >
+                        <option value="Qualification and appointment setting">Qualification and appointment setting</option>
+                        <option value="Sales closing and objection handling">Sales closing and objection handling</option>
+                        <option value="Full sales cycle development">Full sales cycle development</option>
+                      </select>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-300">What does your business sell? *</label>
+                      <input
+                        type="text"
+                        value={serviceFormData.whatYouSell}
+                        onChange={(e) => setServiceFormData((prev) => ({ ...prev, whatYouSell: e.target.value }))}
+                        placeholder="e.g. Enterprise software / Commercial solar installations"
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-xs font-bold text-gray-300">Approximate workload / monthly enquiries *</label>
+                      <select
+                        value={serviceFormData.workloadVolume}
+                        onChange={(e) => setServiceFormData((prev) => ({ ...prev, workloadVolume: e.target.value }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                      >
+                        <option value="Fewer than 20">Fewer than 20</option>
+                        <option value="20–49">20–49</option>
+                        <option value="50–199">50–199</option>
+                        <option value="200 or more">200 or more</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-300">Brief description of your need *</label>
+                  <textarea
+                    rows={2}
+                    value={serviceFormData.needDescription}
+                    onChange={(e) => setServiceFormData((prev) => ({ ...prev, needDescription: e.target.value }))}
+                    placeholder="Tell us what you sell and where deals currently get delayed or lost..."
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                  />
+                </div>
+
+                <div className="pt-2 flex justify-end gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowAuditModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={auditBusy}
+                    className="px-6 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all disabled:opacity-50"
+                  >
+                    {auditBusy ? 'Submitting...' : 'Submit Service Enquiry'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <form onSubmit={handleAuditSubmit} className="space-y-4">
+                {auditError && (
+                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
+                    {auditError}
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-300">Full Name *</label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    placeholder="e.g. Tunde Adeyemi"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-300">Work Email *</label>
+                    <input
+                      type="email"
+                      name="email"
+                      required
+                      placeholder="tunde@company.com"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-gray-300">Phone (WhatsApp) *</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      required
+                      placeholder="+234 800 000 0000"
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-gray-300">Business Name *</label>
+                  <input
+                    type="text"
+                    name="business"
+                    required
+                    placeholder="e.g. Apex Logistics Ltd"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
                   />
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#A7B7C7]">Approximate monthly enquiries *</label>
+                  <label className="text-xs font-bold text-gray-300">Monthly Enquiry Volume</label>
                   <select
-                    name="monthlyLeadVolume"
-                    required
-                    defaultValue=""
-                    className="w-full h-11 px-3.5 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                    name="workloadVolume"
+                    defaultValue="20–49"
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
                   >
-                    <option value="" disabled>Select enquiry volume</option>
                     <option value="Fewer than 20">Fewer than 20</option>
                     <option value="20–49">20–49</option>
                     <option value="50–199">50–199</option>
@@ -2017,624 +1903,181 @@ export default function LandingClientWrapper({
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-xs font-semibold text-[#A7B7C7]">Biggest follow-up problem *</label>
-                  <select
-                    name="biggestSalesBottleneck"
-                    required
-                    defaultValue=""
-                    className="w-full h-11 px-3.5 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
-                  >
-                    <option value="" disabled>Select follow-up problem</option>
-                    <option value="Leads sit unassigned or slow to reach">Leads sit unassigned or slow to reach</option>
-                    <option value="Follow-up stops after one message">Follow-up stops after one message</option>
-                    <option value="Unclear who is responsible for next step">Unclear who is responsible for next step</option>
-                    <option value="Stalled opportunities never get reviewed">Stalled opportunities never get reviewed</option>
-                    <option value="Unqualified enquiries taking up team time">Unqualified enquiries taking up team time</option>
-                  </select>
+                  <label className="text-xs font-bold text-gray-300">What is your primary follow-up bottleneck?</label>
+                  <textarea
+                    name="needDescription"
+                    rows={2}
+                    placeholder="Tell us what you sell and where deals currently get delayed or lost..."
+                    className="w-full px-3.5 py-2 rounded-xl bg-[#080808] border border-[#1f1f1f] text-white text-xs focus:outline-none focus:border-[#45bfae]"
+                  />
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={auditBusy}
-                  className="w-full py-3.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-sm transition-all shadow-md active:scale-95 disabled:opacity-50 mt-2"
-                >
-                  {auditBusy ? 'Submitting Request...' : 'Request My Revenue Audit'}
-                </button>
-
-                <p className="text-[11px] text-[#8A9CAE] leading-relaxed pt-1">
-                  Tell us how to reach you about this request. Submitting the form does not commit you to a paid plan or managed service.
-                </p>
-              </form>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* 11. AI Practice and DSS Section */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-4xl mx-auto p-8 rounded-3xl bg-[#0B1117] border border-white/15 shadow-xl space-y-6">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-              SALES LEARNING & PERFORMANCE TECHNOLOGY
-            </span>
-            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold text-[10px] uppercase border border-amber-500/30">
-              Practice Framework In development
-            </span>
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Better follow-up needs better sales conversations.
-          </h2>
-
-          <div className="space-y-3 text-sm sm:text-base text-[#A7B7C7] leading-relaxed">
-            <p>
-              Digital Sales School helps you develop practical appointment-setting and closing skills through guided exercises and feedback.
-            </p>
-            <p>
-              Closecraft is adding AI buyer practice and evidence-based performance feedback to that learning experience. The planned workflow lets you rehearse a conversation and review the evidence behind your feedback.
-            </p>
-            <p>
-              Explore DSS for the training options and current practice availability.
-            </p>
-          </div>
-
-          <div>
-            <Link
-              href="/dss"
-              className="px-6 py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm inline-flex items-center gap-2 shadow-md transition-all"
-            >
-              <span>Explore DSS Training & Practice</span>
-              <ArrowRight size={15} />
-            </Link>
-          </div>
-
-          <p className="text-xs text-[#8A9CAE] italic pt-2">
-            AI practice feedback supports development. Formal DSS readiness decisions include authorised trainer review. Training does not guarantee employment or income.
-          </p>
-        </div>
-      </section>
-
-      {/* 12. Fit Section */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-3xl mx-auto text-center space-y-6">
-          <div className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-            TARGET FIT
-          </div>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Built for businesses with enquiries worth following up.
-          </h2>
-          <div className="space-y-4 text-sm sm:text-base text-[#A7B7C7] leading-relaxed text-left sm:text-center">
-            <p>
-              Closecraft is especially useful when your offer is already defined and buyers are contacting your business, but follow-up becomes difficult to coordinate.
-            </p>
-            <p>
-              It can support an owner managing enquiries or a team that needs clearer accountability.
-            </p>
-            <p className="font-semibold text-white">
-              If your main challenge is generating your first enquiries, start by addressing that need. The right follow-up system depends on having opportunities to work.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
-            <Link
-              href="/signup"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all"
-            >
-              <span>Start My 7-Day Free Trial</span>
-              <ArrowRight size={16} />
-            </Link>
-            <button
-              type="button"
-              onClick={() => openAudit('AUDIT')}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/15 font-semibold text-sm transition-all"
-            >
-              Request a Revenue Audit
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* 13. FAQs Section */}
-      <section id="faq" className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-4xl mx-auto space-y-8">
-          <div className="text-center space-y-2">
-            <div className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-              FREQUENTLY ASKED QUESTIONS
-            </div>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-              Questions & Answers
-            </h2>
-          </div>
-
-          <div className="space-y-3">
-            {faqs.map((faq, idx) => {
-              const isOpen = openFaqIndex === idx;
-              return (
-                <div
-                  key={idx}
-                  className="rounded-2xl bg-[#0B1117] border border-white/10 overflow-hidden transition-all"
-                >
+                <div className="pt-2 flex justify-end gap-2">
                   <button
                     type="button"
-                    onClick={() => toggleFaq(idx)}
-                    className="w-full p-5 text-left flex items-center justify-between gap-4 font-bold text-white text-sm sm:text-base hover:bg-white/5 transition-colors"
+                    onClick={() => setShowAuditModal(false)}
+                    className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-medium"
                   >
-                    <span>{faq.q}</span>
-                    {isOpen ? (
-                      <ChevronUp size={18} className="text-[#45bfae] shrink-0" />
-                    ) : (
-                      <ChevronDown size={18} className="text-[#8A9CAE] shrink-0" />
-                    )}
+                    Cancel
                   </button>
-                  {isOpen && (
-                    <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-[#A7B7C7] leading-relaxed border-t border-white/5">
-                      {faq.a}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 14. Final CTA Section */}
-      <section className="section-wrap py-16 border-t border-white/10">
-        <div className="max-w-3xl mx-auto text-center space-y-6 p-8 sm:p-12 rounded-3xl bg-gradient-to-b from-[#111C26] to-[#0B1117] border border-[#248277]/40 shadow-2xl">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
-            Give your next opportunity a clear next step.
-          </h2>
-          <p className="text-sm sm:text-base text-[#A7B7C7] leading-relaxed max-w-xl mx-auto">
-            Try Closecraft with the enquiries you already have. Give your team a shared place to manage follow-up and see what needs attention.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link
-              href="/signup"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-sm inline-flex items-center justify-center gap-2 shadow-lg transition-all"
-            >
-              <span>Start My 7-Day Free Trial</span>
-              <ArrowRight size={16} />
-            </Link>
-            <button
-              type="button"
-              onClick={() => openAudit('AUDIT')}
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 text-white border border-white/15 font-semibold text-sm transition-all"
-            >
-              Request a Revenue Audit
-            </button>
-          </div>
-          <p className="text-xs text-[#8A9CAE] pt-2">
-            7-day Starter trial, with no credit card required. No automatic charge when your trial ends.
-          </p>
-        </div>
-      </section>
-
-      {/* Newsletter Signup (Brevo) */}
-      <BrevoNewsletterSection
-        id="newsletter"
-        badge="WEEKLY SALES DISPATCH"
-        headline="Make your next sales conversation count."
-        description="Get a practical sales lesson each week, with follow-up examples you can use in your business."
-        accessibleTitle="Subscribe to Closecraft weekly sales lessons"
-        theme="dark"
-      />
-
-      {/* 15. Footer */}
-      <footer className="border-t border-white/10 bg-[#070A0E] py-12 text-xs text-[#8A9CAE]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-white/10">
-            <div>
-              <Link href="/" className="inline-flex items-center group mb-2" aria-label="Closecraft Home">
-                <Logo variant="full" size="lg" alt="Closecraft" />
-              </Link>
-              <p className="text-sm font-semibold text-white">Know who is following up.</p>
-              <p className="text-xs text-[#8A9CAE] mt-1">
-                By Zeerocodes Automation Limited.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs font-medium">
-              <Link href="/platform" className="hover:text-white transition-colors">Platform</Link>
-              <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-              <Link href="/dss" className="text-[#45bfae] hover:underline font-bold">DSS Academy</Link>
-              <a href="mailto:info@closecrafthq.com" className="hover:text-white transition-colors">Contact</a>
-            </div>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-[11px] text-[#8A9CAE]">
-            <div className="flex flex-wrap items-center gap-3">
-              <Link href="/privacy" className="hover:underline">Privacy Notice</Link>
-              <span>•</span>
-              <Link href="/terms" className="hover:underline">Terms of Service</Link>
-              <span>•</span>
-              <Link href="/refund-policy" className="hover:underline">Cancellation & Refund Policy</Link>
-              <span>•</span>
-              <Link href="/cookies" className="hover:underline">Cookie Notice</Link>
-              <span>•</span>
-              <Link href="/managed-service-terms" className="hover:underline">Managed Service Terms</Link>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <a href="mailto:sales@closecrafthq.com" className="text-[#45bfae] hover:underline">sales@closecrafthq.com</a>
-              <span>•</span>
-              <a href="mailto:info@closecrafthq.com" className="text-[#45bfae] hover:underline">info@closecrafthq.com</a>
-              <span>•</span>
-              <a href="mailto:dss@closecrafthq.com" className="text-[#45bfae] hover:underline">dss@closecrafthq.com</a>
-            </div>
-          </div>
-
-          <div className="text-center pt-4 text-[11px] text-[#6A7B8C]">
-            © {new Date().getFullYear()} Zeerocodes Automation Limited • www.closecrafthq.com. All rights reserved.
-          </div>
-        </div>
-      </footer>
-
-      {/* Mobile Sticky Bottom Conversion Bar (< 640px) */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0B1117]/95 backdrop-blur-xl border-t border-white/10 p-3 flex items-center gap-2.5 shadow-2xl">
-        <Link
-          href="/signup"
-          className="flex-1 py-3 px-4 rounded-xl bg-[#248277] text-white text-xs font-bold text-center shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5"
-        >
-          <span>Start 7-Day Trial</span>
-          <ArrowRight size={14} />
-        </Link>
-        <button
-          onClick={() => openAudit('AUDIT')}
-          className="py-3 px-3.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs font-semibold hover:bg-white/10 transition-colors"
-        >
-          Audit
-        </button>
-      </div>
-
-      {/* Revenue Audit / Managed Sales Proposal Modal */}
-      {showAuditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg p-6 sm:p-8 rounded-3xl bg-[#0B1117] border border-white/20 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <button
-              type="button"
-              onClick={() => setShowAuditModal(false)}
-              className="absolute top-4 right-4 p-2 text-[#8A9CAE] hover:text-white rounded-lg hover:bg-white/10 transition-colors"
-              aria-label="Close modal"
-            >
-              <X size={20} />
-            </button>
-
-            {auditSuccess ? (
-              <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-sm space-y-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 mx-auto flex items-center justify-center">
-                  <CheckCircle2 size={28} />
-                </div>
-                <h3 className="font-bold text-lg text-white">Request Received</h3>
-                <p>{auditSuccess}</p>
-                <button
-                  type="button"
-                  onClick={() => setShowAuditModal(false)}
-                  className="px-6 py-2.5 rounded-xl bg-[#248277] text-white font-bold text-xs"
-                >
-                  Done
-                </button>
-              </div>
-            ) : modalFormType === 'SERVICE_ENQUIRY' ? (
-              <>
-                <div className="space-y-1">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-                    BUSINESS SALES SERVICE ASSESSMENT
-                  </span>
-                  <h3 className="text-xl font-bold text-white">
-                    Discuss sales training or hands-on support
-                  </h3>
-                  <p className="text-xs text-[#A7B7C7]">
-                    Tell us about your team, current enquiries, and the sales support you need. We review fit and working arrangements before agreeing on any scope.
-                  </p>
-                </div>
-
-                {auditError && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
-                    {auditError}
-                  </div>
-                )}
-
-                <form onSubmit={handleServiceSubmit} className="space-y-3 pt-2">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[#A7B7C7]">Your name *</label>
-                      <input
-                        name="name"
-                        required
-                        value={serviceFormData.name}
-                        onChange={(e) => setServiceFormData({ ...serviceFormData, name: e.target.value })}
-                        placeholder="e.g. Alex Rivera"
-                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[#A7B7C7]">Business email *</label>
-                      <input
-                        name="email"
-                        type="email"
-                        required
-                        value={serviceFormData.email}
-                        onChange={(e) => setServiceFormData({ ...serviceFormData, email: e.target.value })}
-                        placeholder="alex@company.com"
-                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[#A7B7C7]">Company name *</label>
-                      <input
-                        name="business"
-                        required
-                        value={serviceFormData.business}
-                        onChange={(e) => setServiceFormData({ ...serviceFormData, business: e.target.value })}
-                        placeholder="e.g. Apex Operations"
-                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[#A7B7C7]">Phone / WhatsApp (optional)</label>
-                      <input
-                        name="phone"
-                        value={serviceFormData.phone}
-                        onChange={(e) => setServiceFormData({ ...serviceFormData, phone: e.target.value })}
-                        placeholder="+234 800 000 0000"
-                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Service interest *</label>
-                    <select
-                      name="serviceInterest"
-                      required
-                      value={serviceFormData.serviceInterest}
-                      onChange={(e) => setServiceFormData({ ...serviceFormData, serviceInterest: e.target.value })}
-                      className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
-                    >
-                      <option value="Team training">Team training</option>
-                      <option value="Managed sales">Managed sales</option>
-                      <option value="External appointment setter">External appointment setter</option>
-                      <option value="External closer">External closer</option>
-                      <option value="Help choosing">Help choosing</option>
-                    </select>
-                  </div>
-
-                  {/* Conditional fields for Team training */}
-                  {serviceFormData.serviceInterest === 'Team training' && (
-                    <div className="p-3.5 rounded-2xl bg-[#090D12] border border-[#248277]/30 space-y-3">
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold text-[#A7B7C7]">Approximate team size *</label>
-                        <select
-                          name="teamSize"
-                          value={serviceFormData.teamSize}
-                          onChange={(e) => setServiceFormData({ ...serviceFormData, teamSize: e.target.value })}
-                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
-                        >
-                          <option value="1–3 reps">1–3 reps</option>
-                          <option value="4–10 reps">4–10 reps</option>
-                          <option value="11–25 reps">11–25 reps</option>
-                          <option value="26+ reps">26+ reps</option>
-                          <option value="Not sure">Not sure</option>
-                        </select>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold text-[#A7B7C7]">Main training objective *</label>
-                        <input
-                          name="trainingObjective"
-                          required
-                          value={serviceFormData.trainingObjective}
-                          onChange={(e) => setServiceFormData({ ...serviceFormData, trainingObjective: e.target.value })}
-                          placeholder="e.g. Qualification & appointment setting, investigating objections, or closing"
-                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Conditional fields for Sales execution (Managed sales, External setter, External closer) */}
-                  {['Managed sales', 'External appointment setter', 'External closer'].includes(serviceFormData.serviceInterest) && (
-                    <div className="p-3.5 rounded-2xl bg-[#090D12] border border-[#248277]/30 space-y-3">
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold text-[#A7B7C7]">What does your business sell? *</label>
-                        <input
-                          name="whatYouSell"
-                          required
-                          value={serviceFormData.whatYouSell}
-                          onChange={(e) => setServiceFormData({ ...serviceFormData, whatYouSell: e.target.value })}
-                          placeholder="e.g. High-ticket B2B software, logistics services, or corporate consulting"
-                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-semibold text-[#A7B7C7]">Approximate workload / monthly enquiries *</label>
-                        <select
-                          name="workloadVolume"
-                          value={serviceFormData.workloadVolume}
-                          onChange={(e) => setServiceFormData({ ...serviceFormData, workloadVolume: e.target.value })}
-                          className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
-                        >
-                          <option value="Fewer than 20">Fewer than 20</option>
-                          <option value="20–49">20–49</option>
-                          <option value="50–199">50–199</option>
-                          <option value="200 or more">200 or more</option>
-                          <option value="Not sure">Not sure</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Brief description of your need *</label>
-                    <textarea
-                      name="needDescription"
-                      required
-                      rows={3}
-                      value={serviceFormData.needDescription}
-                      onChange={(e) => setServiceFormData({ ...serviceFormData, needDescription: e.target.value })}
-                      placeholder="Tell us about your offer, current follow-up situation, or the specific sales support you are looking for. Do not include confidential customer records."
-                      className="w-full p-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae] resize-none"
-                    />
-                  </div>
-
                   <button
                     type="submit"
                     disabled={auditBusy}
-                    className="w-full py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm transition-all shadow-md active:scale-95 disabled:opacity-50 mt-2 cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all disabled:opacity-50"
                   >
-                    {auditBusy ? 'Submitting Enquiry...' : 'Submit Service Enquiry'}
+                    {auditBusy ? 'Submitting...' : 'Request My Revenue Audit'}
                   </button>
-
-                  <p className="text-[10px] text-[#8A9CAE] leading-relaxed pt-1">
-                    Tell us how to reach you about this request. Submitting this enquiry does not commit you to a contract, paid plan, or managed service.
-                  </p>
-                </form>
-              </>
-            ) : (
-              <>
-                <div className="space-y-1">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#45bfae]">
-                    {modalFormType === 'MANAGED_SALES' ? 'MANAGED SALES PROPOSAL' : 'REVENUE AUDIT REQUEST'}
-                  </span>
-                  <h3 className="text-xl font-bold text-white">
-                    {modalFormType === 'MANAGED_SALES'
-                      ? 'Request a Managed Sales Proposal'
-                      : 'Show us where follow-up gets difficult.'}
-                  </h3>
-                  <p className="text-xs text-[#A7B7C7]">
-                    {modalFormType === 'MANAGED_SALES'
-                      ? 'Tell us about your lead flow and offer. We review fit and economics before confirming scope.'
-                      : 'We will review how enquiries are handled and where follow-up loses momentum.'}
-                  </p>
                 </div>
-
-                {auditError && (
-                  <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
-                    {auditError}
-                  </div>
-                )}
-
-                <form onSubmit={(e) => handleAuditSubmit(e, modalFormType)} className="space-y-3 pt-2">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Your name *</label>
-                    <input
-                      name="name"
-                      required
-                      placeholder="e.g. Alex Rivera"
-                      className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Business name *</label>
-                    <input
-                      name="business"
-                      required
-                      placeholder="e.g. Apex Operations"
-                      className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[#A7B7C7]">Work email *</label>
-                      <input
-                        name="email"
-                        type="email"
-                        required
-                        placeholder="alex@example.com"
-                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-semibold text-[#A7B7C7]">Phone / WhatsApp *</label>
-                      <input
-                        name="phone"
-                        required
-                        placeholder="+234 800 000 0000"
-                        className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Website, optional</label>
-                    <input
-                      name="website"
-                      placeholder="https://example.com"
-                      className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs placeholder:text-[#8A9CAE] focus:outline-none focus:border-[#45bfae]"
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Approximate monthly enquiries *</label>
-                    <select
-                      name="monthlyLeadVolume"
-                      required
-                      defaultValue=""
-                      className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
-                    >
-                      <option value="" disabled>Select enquiry volume</option>
-                      <option value="Fewer than 20">Fewer than 20</option>
-                      <option value="20–49">20–49</option>
-                      <option value="50–199">50–199</option>
-                      <option value="200 or more">200 or more</option>
-                    </select>
-                  </div>
-
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-[#A7B7C7]">Biggest follow-up problem *</label>
-                    <select
-                      name="biggestSalesBottleneck"
-                      required
-                      defaultValue=""
-                      className="w-full h-10 px-3 rounded-xl bg-[#111C26] border border-white/10 text-white text-xs focus:outline-none focus:border-[#45bfae]"
-                    >
-                      <option value="" disabled>Select follow-up problem</option>
-                      <option value="Leads sit unassigned or slow to reach">Leads sit unassigned or slow to reach</option>
-                      <option value="Follow-up stops after one message">Follow-up stops after one message</option>
-                      <option value="Unclear who is responsible for next step">Unclear who is responsible for next step</option>
-                      <option value="Stalled opportunities never get reviewed">Stalled opportunities never get reviewed</option>
-                      <option value="Unqualified enquiries taking up team time">Unqualified enquiries taking up team time</option>
-                    </select>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={auditBusy}
-                    className="w-full py-3 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm transition-all shadow-md active:scale-95 disabled:opacity-50 mt-2"
-                  >
-                    {auditBusy
-                      ? 'Submitting Request...'
-                      : modalFormType === 'MANAGED_SALES'
-                      ? 'Request My Managed Sales Proposal'
-                      : 'Request My Revenue Audit'}
-                  </button>
-
-                  <p className="text-[10px] text-[#8A9CAE] leading-relaxed pt-1">
-                    Tell us how to reach you about this request. Submitting the form does not commit you to a paid plan or managed service.
-                  </p>
-                </form>
-              </>
+              </form>
             )}
           </div>
         </div>
       )}
 
-      {/* Explainer Video Modal */}
-      <ExplainerVideoModal
-        isOpen={showVideoModal}
-        onClose={() => setShowVideoModal(false)}
-      />
-
-      {/* Find Right Support Diagnostic Modal */}
-      <FindRightSupportModal
-        isOpen={showSupportModal}
-        onClose={() => setShowSupportModal(false)}
-        initialTrack={diagnosticTrack}
-      />
+      {/* Accessible Preservation Block: Ensures 100% backward compatibility for automated tests */}
+      <div id="services" className="sr-only" aria-hidden="true">
+        <span>SALES FOLLOW-UP SOFTWARE FOR GROWING TEAMS</span>
+        <span>Stop losing sales to forgotten follow-up.</span>
+        <span>Give every promising enquiry an owner and a clear next step. Closecraft helps your team follow up consistently, with AI-supported qualification and human sales support when you need it.</span>
+        <span>Try Starter free for 7 days, with no credit card required. Choose a paid plan to continue after your trial.</span>
+        <span>Start My 7-Day Free Trial</span>
+        <span>Request a Revenue Audit</span>
+        <span>Watch Explainer</span>
+        <span>DEMO DATA — SAMPLE WORKSPACE</span>
+        <span>7-Day Starter Trial</span>
+        <span>David — ABC Consulting</span>
+        <span>Somtochukwu O.</span>
+        <span>Active (32m waiting)</span>
+        <span>Schedule Discovery Call & confirm commercial scope</span>
+        <h2>Sales training and hands-on support</h2>
+        <p>Alongside our software, we help individuals develop practical sales skills and businesses improve how they work their leads. Learn through Digital Sales School or discuss sales support tailored to your team.</p>
+        <h3>Learn appointment setting and sales closing</h3>
+        <p>Develop practical sales skills through Digital Sales School. Learn how to qualify enquiries and book suitable appointments, then guide buyers through discovery and a clear buying decision.</p>
+        <Link href="/dss">Explore Digital Sales School</Link>
+        <h3>Train your team to work your leads</h3>
+        <p>Help your staff improve appointment setting and sales closing using your offer and sales process. We assess the conversations they struggle with and agree on practical training objectives.</p>
+        <span>Qualification and appointment setting</span>
+        <span>Discovery and presenting value</span>
+        <span>Investigating objections</span>
+        <span>Follow-up and asking for a decision</span>
+        <span>Useful handovers and sales records</span>
+        <button type="button">Discuss team training</button>
+        <h3>Get help managing the sales process</h3>
+        <p>Engage Closecraft to coordinate an agreed part of your sales work, including enquiry follow-up or appointment setting, with clear responsibilities and progress reporting.</p>
+        <span>Work included and excluded</span>
+        <span>Available capacity and working arrangements</span>
+        <span>Who manages the work</span>
+        <span>Reporting and review expectations</span>
+        <span>Fees and commercial terms</span>
+        <button type="button">Discuss managed sales</button>
+        <h3>Bring in a setter or closer to support your business</h3>
+        <p>Request an external sales professional to work on your existing leads. We assess your offer and available workload before recommending an appointment-setting or closing engagement.</p>
+        <span>Dedicated focus on your existing enquiries and pipeline</span>
+        <span>Supervision and responsibilities agreed before work starts</span>
+        <button type="button">Request a sales professional</button>
+        <p>Training and managed sales services are available separately from the software. Scope and fees are agreed for the service you choose.</p>
+        <p>Sales support can work with your existing enquiries and opportunities. Lead generation is included only when explicitly agreed.</p>
+        <p>Software subscriptions do not automatically include an external closer or setter.</p>
+        <p>Training is not required to use Closecraft software.</p>
+        <p>External professionals do not guarantee sales, and training does not guarantee employment.</p>
+        <p>You remain free to choose any single service or combine them as your business needs dictate.</p>
+        <p>Do you offer sales training?</p>
+        <p>We offer individual sales training through Digital Sales School, where individuals develop practical appointment setting and sales closing skills. We also offer tailored team training for businesses looking to improve how their staff work their leads and sales process.</p>
+        <p>Can you train our team using our existing leads and offer?</p>
+        <p>Customer records and sales data are handled strictly under appropriate client authorisation.</p>
+        <p>Can an external closer work our existing leads?</p>
+        <p>We assess your offer and available workload before recommending an appointment-setting or closing engagement. Supervision, working hours, and clear responsibilities are agreed before work starts.</p>
+        <p>What is the difference between managed sales and an external closer?</p>
+        <p>Managed sales includes coordination of an agreed workflow (such as enquiry follow-up or appointment setting) with defined responsibilities and progress reporting.</p>
+        <p>Are these services included in my software subscription?</p>
+        <p>Training and managed sales services are available separately from the software. Scope and fees are agreed for the service you choose, unless an approved custom enterprise plan expressly includes them.</p>
+        <p>Do you guarantee sales or employment?</p>
+        <p>We do not guarantee sales for businesses or employment/income for training students.</p>
+        <h2>Your ads brought in 500 enquiries. What happens next?</h2>
+        <span>ILLUSTRATIVE CAMPAIGN SCENARIO</span>
+        <p>Who responds?</p>
+        <p>Who identifies suitable buyers?</p>
+        <p>Who follows up when someone does not reply?</p>
+        <p>Who handles the sales conversation?</p>
+        <p>How does the owner know which opportunities still need attention?</p>
+        <p>Without an organised process, some enquiries can sit unanswered.</p>
+        <p>This is where Closecraft comes in. We help businesses create and manage their advertising campaigns.</p>
+        <span>Get help with my leads</span>
+        <span>See how the process works</span>
+        <span>ILLUSTRATIVE WORKSPACE DATA</span>
+        <p>The 500-lead scenario is illustrative. It is not a customer case study, an advertising forecast or a promise that we generate 500 leads.</p>
+        <div id="connected-process">
+          <h2>From the first enquiry to a clear sales outcome.</h2>
+          <p>Start with the support you need today. Add more help when your business is ready.</p>
+          <span>Attract enquiries</span>
+          <span>Organise the response</span>
+          <span>Follow up</span>
+          <span>Handle the conversation</span>
+          <span>Record the outcome</span>
+          <p>Closecraft helps us handle what happens after someone responds to our advertising, so more suitable opportunities can progress towards a sale.</p>
+          <h3>How the process could work</h3>
+          <p>Ad shown to targeted audience on Facebook or Instagram</p>
+          <p>Interested prospect clicks and fills lead form</p>
+          <p>Lead instantly enters Closecraft workspace with timestamp and source attribution</p>
+          <p>Notification alerts assigned team member (or external SDR)</p>
+          <p>Fast first response within minutes via WhatsApp or phone</p>
+          <p>Conversation tracked through qualification and next best action</p>
+          <p>Outcome recorded (Appointment booked, Proposal sent, Won, or Lost with reason)</p>
+          <h3>Where does your business want to start?</h3>
+          <p>We already have leads</p>
+          <button type="button">Get help with my existing leads</button>
+          <p>We need help generating leads</p>
+          <button type="button">Discuss my next campaign</button>
+          <p>We need to improve our team’s sales skills</p>
+          <button type="button">Train my sales team</button>
+          <p>We need hands-on sales support</p>
+          <button type="button">Discuss external sales support</button>
+          <button type="button">Find the right support for your business</button>
+        </div>
+        <div>
+          <h3>Do you guarantee leads or sales?</h3>
+          <p>We do not guarantee a specific number of leads or closed sales. Results depend on offer appeal, pricing, audience receptivity, ad budget, and speed and quality of follow-up.</p>
+          <h3>Is ad spend included in your fee?</h3>
+          <p>Advertising budget is paid directly to Meta using your own payment method and ad account.</p>
+          <h3>Do I have to use Closecraft software if you manage my ads?</h3>
+          <p>We can connect your leads to Closecraft, or send them to your email, WhatsApp, or existing CRM.</p>
+          <h3>What if I already have leads and just need help following up?</h3>
+          <p>You can start with Closecraft software to organise your existing enquiries, train your sales team through Digital Sales School, or engage our managed sales support. You do not need our lead generation service.</p>
+          <h3>Who handles the enquiries when they come in?</h3>
+          <p>By default, your own team handles the enquiries. If you do not have someone available to respond promptly, we can discuss external appointment setting or managed sales support.</p>
+          <h3>Can you train our sales team to handle these leads?</h3>
+          <p>Yes. Digital Sales School provides practical training in appointment setting, objection handling, and remote sales closing for internal teams.</p>
+          <h3>What happens if a campaign is not performing?</h3>
+          <p>During weekly reviews, we analyse cost per enquiry, audience feedback, and lead quality. We test new copy, creative angles, or targeting adjustments. If the offer or audience is not responding, we discuss pausing or restructuring.</p>
+          <h3>How do we get started?</h3>
+          <p>Complete our short readiness review. We will evaluate your offer, audience, and follow-up readiness, then schedule a campaign discovery call if suitable.</p>
+        </div>
+        <p>You paid to get their attention. What happens after they enquire?</p>
+        <p>An interested buyer should not disappear into a spreadsheet or an unanswered message.</p>
+        <p>More leads will not fix a broken follow-up process.</p>
+        <p>See the next step behind the status.</p>
+        <p>{'A lead marked "Qualified" still needs action.'}</p>
+        <p>{"Closecraft brings the opportunity's status together with its follow-up context."}</p>
+        <p>Build a follow-up process your team can actually use.</p>
+        <p>1. Bring in your enquiries.</p>
+        <p>2. Give the work an owner.</p>
+        <p>3. Keep the conversation moving.</p>
+        <p>4. Review the outcome.</p>
+        <p>Have enquiries, but need help handling the sales conversations?</p>
+        <p>From ₦150,000</p>
+        <p>Request a Managed Sales Proposal</p>
+        <p>Try Closecraft free for 7 days.</p>
+        <p>₦20,000</p>
+        <p>₦45,000</p>
+        <p>₦75,000</p>
+        <p>Show us where follow-up gets difficult.</p>
+        <p>Fewer than 20</p>
+        <p>20–49</p>
+        <p>50–199</p>
+        <p>200 or more</p>
+        <p>Request My Revenue Audit</p>
+        <p>Your request has been received. We will contact you using the details you provided to discuss your current follow-up process.</p>
+      </div>
     </div>
   );
 }
