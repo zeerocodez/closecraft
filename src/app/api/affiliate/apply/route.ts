@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { sendTransactionalEmailEvent } from '@/lib/email/service';
 import { auth } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
@@ -43,6 +44,7 @@ export async function POST(req: NextRequest) {
     } = body;
 
     let targetUserId = session?.user?.id;
+    let verificationRequired = false;
 
     if (!targetUserId) {
       if (!email || !password || !name) {
@@ -52,6 +54,10 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      if (typeof email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ||
+          typeof password !== 'string' || password.length < 8 || password.length > 100) {
+        return NextResponse.json({ error: 'Valid email and password of 8 to 100 characters required.' }, { status: 400 });
+      }
       const cleanEmail = email.trim().toLowerCase();
       const existingUser = await db.user.findUnique({
         where: { email: cleanEmail },
@@ -68,6 +74,7 @@ export async function POST(req: NextRequest) {
       const cleanName = name.trim();
       const baseSlug = `affiliate-${cleanName.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15)}-${Date.now().toString(36)}`;
 
+      const verificationCode = crypto.randomInt(100000, 1000000).toString();
       const created = await db.$transaction(async (tx) => {
         const org = await tx.organization.create({
           data: {
@@ -84,7 +91,9 @@ export async function POST(req: NextRequest) {
             name: cleanName,
             email: cleanEmail,
             passwordHash,
-            emailVerified: new Date(),
+            emailVerified: null,
+            emailVerificationCode: verificationCode,
+            emailVerificationExpiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
             memberships: {
               create: {
                 role: 'ADMIN',
@@ -98,6 +107,17 @@ export async function POST(req: NextRequest) {
       });
 
       targetUserId = created.user.id;
+      verificationRequired = true;
+      try {
+        await sendTransactionalEmailEvent({
+          templateId: 'CC-01', recipientEmail: cleanEmail, recipientName: cleanName,
+          organizationId: created.org.id, sourceEvent: 'user.registered',
+          data: { first_name: cleanName.split(' ')[0], verification_code: verificationCode,
+            verification_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.closecrafthq.com'}/verify-email?email=${encodeURIComponent(cleanEmail)}&code=${verificationCode}`,
+            verification_expiry_description: 'in 24 hours' },
+        });
+      } catch { console.error('[Affiliate Apply] Verification email delivery failed'); }
+
     }
 
     // Check if user already has an affiliate profile
@@ -110,7 +130,8 @@ export async function POST(req: NextRequest) {
         success: true,
         affiliateCode: existingProfile.referralCode,
         message: 'You are already an active CloseCraft affiliate partner.',
-        redirectUrl: '/affiliate/dashboard',
+        verificationRequired,
+        redirectUrl: verificationRequired ? '/verify-email' : '/affiliate/dashboard',
       });
     }
 
@@ -139,7 +160,8 @@ export async function POST(req: NextRequest) {
       success: true,
       affiliateCode: profile.referralCode,
       message: 'CloseCraft Affiliate Partner profile activated successfully.',
-      redirectUrl: '/affiliate/dashboard',
+      verificationRequired,
+      redirectUrl: verificationRequired ? '/verify-email' : '/affiliate/dashboard',
     }, { status: 201 });
   } catch (error: any) {
     console.error('[Affiliate Apply Error]', error);

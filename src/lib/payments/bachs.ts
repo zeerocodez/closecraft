@@ -121,6 +121,9 @@ export async function createBachsCheckoutSession(params: BachsCheckoutParams): P
     : `${safeSuccessUrl}?checkout_id={CHECKOUT_ID}&invoice_id=${invoice.id}`;
 
   if (!apiKey) {
+    if (process.env.NODE_ENV === 'production' || process.env.ALLOW_PAYMENT_SIMULATOR !== 'true') {
+      throw new Error('Bachs API key is required');
+    }
     // If Bachs API key is not yet configured, provide simulated sandbox checkout
     const simulatedCheckoutId = `chk_mock_${invoice.id}_${Date.now()}`;
     const simulatedCheckoutUrl = `/billing/checkout/mock?checkout_id=${simulatedCheckoutId}&invoice_id=${invoice.id}&amount=${decimalAmount}&currency=${currency}`;

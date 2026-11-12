@@ -30,8 +30,7 @@ export async function requireSuperAdmin(session: any) {
 
   const isSuperAdmin =
     user?.role === 'SUPER_ADMIN' ||
-    user?.role === 'OPERATOR' ||
-    Boolean(user?.email?.endsWith('@closecrafthq.com') || user?.email?.endsWith('@closecraft.com'));
+    user?.role === 'OPERATOR';
 
   if (!isSuperAdmin) {
     return {

@@ -1,6 +1,8 @@
 import React from 'react';
 import { db } from '@/lib/db';
 import { processBachsWebhookEvent } from '@/lib/payments/bachs';
+import { auth } from '@/lib/auth';
+import { notFound } from 'next/navigation';
 import { redirect } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
 
@@ -9,11 +11,25 @@ export const metadata = {
   description: 'Simulated hosted checkout session for testing payment flows in development and sandbox environments.',
 };
 
+async function requireSimulatorAccess(invoiceId?: string) {
+  if (process.env.NODE_ENV === 'production' || process.env.ALLOW_PAYMENT_SIMULATOR !== 'true') notFound();
+  const session = await auth();
+  if (!session?.user?.id) redirect('/login');
+  if (invoiceId) {
+    const invoice = await db.bachsInvoice.findUnique({ where: { id: invoiceId } });
+    const member = invoice && await db.organizationMember.findFirst({
+      where: { userId: session.user.id, organizationId: invoice.organizationId },
+    });
+    if (!member) notFound();
+  }
+}
+
 async function simulatePaymentAction(formData: FormData) {
   'use server';
 
   const invoiceId = formData.get('invoiceId') as string;
   if (!invoiceId) throw new Error('Invoice ID required');
+  await requireSimulatorAccess(invoiceId);
 
   const invoice = await db.bachsInvoice.findUnique({
     where: { id: invoiceId },
@@ -57,6 +73,7 @@ export default async function MockCheckoutPage({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  await requireSimulatorAccess();
   const params = await searchParams;
   const invoiceId = typeof params.invoice_id === 'string' ? params.invoice_id : '';
   const checkoutId = typeof params.checkout_id === 'string' ? params.checkout_id : '';
@@ -75,6 +92,8 @@ export default async function MockCheckoutPage({
       include: { organization: true, engagement: true }
     });
   }
+
+  if (invoice) await requireSimulatorAccess(invoice.id);
 
   const amount = invoice ? invoice.amount : parseFloat((params.amount as string) || '15000');
   const currency = invoice ? invoice.currency : ((params.currency as string) || 'NGN');

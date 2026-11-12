@@ -363,12 +363,6 @@ export async function assertStaffPermission(
     return { granted: true, staffProfile: user.staffProfile, user };
   }
 
-  // Fallback for closecraft staff email domains
-  const isCloseCraftEmail = user.email?.endsWith('@closecrafthq.com') || user.email?.endsWith('@closecraft.com') || user.email === 'zeerocodes@gmail.com';
-  if (isCloseCraftEmail) {
-    return { granted: true, staffProfile: user.staffProfile, user };
-  }
-
   throw new Error(`Access Denied: Missing required staff permission '${permission}'.`);
 }
 
