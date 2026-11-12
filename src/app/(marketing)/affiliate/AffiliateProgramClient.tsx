@@ -70,6 +70,11 @@ export default function AffiliateProgramClient({ currentUser, existingProfile }:
         throw new Error(data.error || 'Failed to activate affiliate profile.');
       }
 
+      if (data.verificationRequired) {
+        router.push(`/verify-email?flow=affiliate&email=${encodeURIComponent(data.verificationEmail || formData.email)}`);
+        return;
+      }
+
       // If user was newly registered during affiliate onboarding, authenticate their session immediately
       if (!currentUser && formData.email && formData.password) {
         try {
@@ -89,7 +94,7 @@ export default function AffiliateProgramClient({ currentUser, existingProfile }:
         }
       }
 
-      router.push(data.verificationRequired ? '/verify-email' : '/affiliate/dashboard');
+      router.push('/affiliate/dashboard');
     } catch (err: any) {
       setErrorMsg(err.message || 'An unexpected error occurred. Please try again.');
     } finally {

@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import NextAuth from "next-auth";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
@@ -34,6 +34,7 @@ authProviders.push(
       const user = await db.user.findUnique({
         where: { email },
         include: {
+          affiliateProfile: { select: { id: true } },
           memberships: {
             include: { organization: true }
           }
@@ -41,6 +42,7 @@ authProviders.push(
       });
 
       if (!user || !user.passwordHash) return null;
+      if (user.affiliateProfile && !user.emailVerified) return null;
 
       const isPasswordValid = await bcrypt.compare(
         credentials.password as string,
@@ -63,12 +65,7 @@ authProviders.push(
   })
 );
 
-export const {
-  handlers: { GET, POST },
-  auth,
-  signIn,
-  signOut,
-} = NextAuth({
+export const authConfig: NextAuthConfig = {
   trustHost: true,
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || (process.env.NODE_ENV !== "production" ? randomBytes(32).toString("hex") : undefined),
   providers: authProviders,
@@ -85,8 +82,12 @@ export const {
         try {
           let dbUser = await db.user.findUnique({
             where: { email },
-            include: { memberships: { include: { organization: true } } }
+            include: { affiliateProfile: { select: { id: true } }, memberships: { include: { organization: true } } }
           });
+
+          if (dbUser?.affiliateProfile && !dbUser.emailVerified) {
+            return `/verify-email?flow=affiliate&email=${encodeURIComponent(email)}`;
+          }
 
           if (!dbUser) {
             // Auto-provision user + organization on Google Sign-In
@@ -112,6 +113,7 @@ export const {
                 }
               },
               include: {
+                affiliateProfile: { select: { id: true } },
                 memberships: {
                   include: { organization: true }
                 }
@@ -166,6 +168,15 @@ export const {
         token.organizationStatus = (user as any).organizationStatus ?? null;
         token.emailVerified = (user as any).emailVerified ?? null;
       }
+      // Recheck persisted state so sessions issued before verification enforcement are rejected.
+      if (typeof token.id === 'string') {
+        const current = await db.user.findUnique({
+          where: { id: token.id },
+          select: { emailVerified: true, affiliateProfile: { select: { id: true } } },
+        });
+        if (current?.affiliateProfile && !current.emailVerified) return null;
+        if (current) token.emailVerified = current.emailVerified;
+      }
       return token;
     },
     async session({ session, token }) {
@@ -182,4 +193,6 @@ export const {
     signIn: '/login',
     error: '/login',
   }
-});
+};
+
+export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth(authConfig);

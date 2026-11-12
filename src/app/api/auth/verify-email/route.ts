@@ -58,6 +58,7 @@ export async function POST(req: Request) {
       user = await db.user.findUnique({
         where: { id: session.user.id },
         include: {
+          affiliateProfile: { select: { id: true } },
           memberships: {
             include: { organization: true },
           },
@@ -68,6 +69,7 @@ export async function POST(req: Request) {
       user = await db.user.findUnique({
         where: { email: cleanEmail },
         include: {
+          affiliateProfile: { select: { id: true } },
           memberships: {
             include: { organization: true },
           },
@@ -113,7 +115,7 @@ export async function POST(req: Request) {
       });
 
       const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || 'https://www.closecrafthq.com';
-      const verificationUrl = `${baseUrl}/verify-email?code=${newCode}&email=${encodeURIComponent(user.email)}`;
+      const verificationUrl = `${baseUrl}/verify-email?${user.affiliateProfile ? 'flow=affiliate&' : ''}code=${newCode}&email=${encodeURIComponent(user.email)}`;
       const primaryOrg = user.memberships[0]?.organization;
 
       try {

@@ -108,7 +108,7 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      setFormError("Invalid email or password. Please verify your credentials or register a new workspace.");
+      setFormError("Unable to sign in. Check your credentials and verify your email if you registered as an affiliate.");
       setIsLoading(false);
     } else {
       const searchParams = new URLSearchParams(window.location.search);
@@ -166,7 +166,7 @@ export default function LoginPage() {
           {formError && (
             <div className="mb-4 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px] text-red-400">error</span>
-              <span>{formError}</span>
+              <span>{formError} <Link href={`/verify-email?flow=affiliate&email=${encodeURIComponent(email)}`} className="underline">Verify affiliate email</Link></span>
             </div>
           )}
 

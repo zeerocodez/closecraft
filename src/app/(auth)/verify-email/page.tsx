@@ -8,6 +8,8 @@ import Logo from '@/components/ui/Logo';
 function VerifyEmailContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const affiliateFlow = searchParams.get('flow') === 'affiliate';
+  const destination = affiliateFlow ? '/login?callbackUrl=%2Faffiliate%2Fdashboard' : '/onboarding';
 
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,11 +51,11 @@ function VerifyEmailContent() {
           setUserEmail(data.email);
         }
         if (data.verified) {
-          router.push('/onboarding');
+          router.push(destination);
         }
       })
       .catch(() => {});
-  }, [searchParams, router, userEmail]);
+  }, [searchParams, router, userEmail, destination]);
 
   const handleVerify = async (e?: React.FormEvent, explicitCode?: string) => {
     if (e) e.preventDefault();
@@ -84,13 +86,13 @@ function VerifyEmailContent() {
         return;
       }
 
-      setSuccessMessage('Email verified successfully! Redirecting to your workspace...');
+      setSuccessMessage(affiliateFlow ? 'Email verified successfully! Please sign in to continue.' : 'Email verified successfully! Redirecting to your workspace...');
       try {
         sessionStorage.removeItem('pendingVerificationEmail');
       } catch {}
 
       setTimeout(() => {
-        window.location.href = '/onboarding';
+        window.location.href = destination;
       }, 1000);
     } catch (err: any) {
       setErrorMessage('Network error occurred. Please try again.');

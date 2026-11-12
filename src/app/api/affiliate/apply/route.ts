@@ -113,12 +113,15 @@ export async function POST(req: NextRequest) {
           templateId: 'CC-01', recipientEmail: cleanEmail, recipientName: cleanName,
           organizationId: created.org.id, sourceEvent: 'user.registered',
           data: { first_name: cleanName.split(' ')[0], verification_code: verificationCode,
-            verification_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.closecrafthq.com'}/verify-email?email=${encodeURIComponent(cleanEmail)}&code=${verificationCode}`,
+            verification_url: `${process.env.NEXT_PUBLIC_APP_URL || 'https://www.closecrafthq.com'}/verify-email?flow=affiliate&email=${encodeURIComponent(cleanEmail)}&code=${verificationCode}`,
             verification_expiry_description: 'in 24 hours' },
         });
       } catch { console.error('[Affiliate Apply] Verification email delivery failed'); }
 
     }
+
+    const user = await db.user.findUnique({ where: { id: targetUserId } });
+    verificationRequired = !user?.emailVerified;
 
     // Check if user already has an affiliate profile
     const existingProfile = await db.affiliateProfile.findUnique({
@@ -131,11 +134,11 @@ export async function POST(req: NextRequest) {
         affiliateCode: existingProfile.referralCode,
         message: 'You are already an active CloseCraft affiliate partner.',
         verificationRequired,
+        verificationEmail: user?.email,
         redirectUrl: verificationRequired ? '/verify-email' : '/affiliate/dashboard',
       });
     }
 
-    const user = await db.user.findUnique({ where: { id: targetUserId } });
     let code = generateAffiliateCode(user?.name || 'PARTNER');
 
     while (await db.affiliateProfile.findUnique({ where: { referralCode: code } })) {
@@ -161,6 +164,7 @@ export async function POST(req: NextRequest) {
       affiliateCode: profile.referralCode,
       message: 'CloseCraft Affiliate Partner profile activated successfully.',
       verificationRequired,
+      verificationEmail: user?.email,
       redirectUrl: verificationRequired ? '/verify-email' : '/affiliate/dashboard',
     }, { status: 201 });
   } catch (error: any) {
