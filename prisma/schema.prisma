@@ -2329,3 +2329,36 @@ model ServiceDeliveryTask {
   @@index([status])
   @@index([dueDate])
 }
+
+// -----------------------------------------------------------------------------
+// CONTENT MARKETING & BLOG SYSTEM
+// -----------------------------------------------------------------------------
+
+model BlogPost {
+  id              String    @id @default(cuid())
+  slug            String    @unique
+  title           String
+  excerpt         String
+  content         String    // Full article body (markdown or HTML)
+  coverImage      String?
+  category        String    // Lead Generation, Sales Closing, Appointment Setting, B2B Growth, Revenue Operations
+  tags            String[]  @default([])
+  authorName      String    @default("CloseCraft Growth Team")
+  authorRole      String    @default("Revenue Operations")
+  authorAvatar    String?
+  status          String    @default("PUBLISHED") // DRAFT, PUBLISHED, SCHEDULED, ARCHIVED
+  metaTitle       String?
+  metaDescription String?
+  canonicalUrl    String?
+  targetKeyword   String?
+  readTimeMinutes Int       @default(5)
+  publishedAt     DateTime? @default(now())
+  scheduledFor    DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([status])
+  @@index([category])
+  @@index([publishedAt])
+}

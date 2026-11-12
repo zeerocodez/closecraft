@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import LoopGuide from "@/components/guide/LoopGuide";
 import CookieConsent from "@/components/layout/CookieConsent";
+import AnalyticsScripts from "@/components/analytics/AnalyticsScripts";
+import JsonLd from "@/components/seo/JsonLd";
+import { getOrganizationJsonLd, getWebSiteJsonLd } from "@/lib/seo/schema";
 import "./globals.css";
 
 const inter = Inter({
@@ -74,6 +77,9 @@ export const metadata: Metadata = {
     ],
   },
   manifest: "/site.webmanifest",
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION || "google-site-verification-closecraft",
+  },
 };
 
 export default function RootLayout({
@@ -93,6 +99,8 @@ export default function RootLayout({
  suppressHydrationWarning
  className={`${inter.variable} ${plusJakartaSans.variable} font-body-lg antialiased bg-surface text-on-surface flex flex-col min-h-screen selection:bg-primary selection:text-on-primary`}
  >
+ <JsonLd data={[getOrganizationJsonLd(), getWebSiteJsonLd()]} />
+ <AnalyticsScripts />
  {children}
  <LoopGuide />
  <CookieConsent />
