@@ -5,6 +5,22 @@ import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
 import Logo from '@/components/ui/Logo';
+import { Button } from '@/components/ui/Button';
+import { Input, Field } from '@/components/ui/Field';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Lock,
+  Mail,
+  Key,
+  Eye,
+  EyeOff,
+  ArrowRight,
+  ArrowLeft,
+  GraduationCap,
+  ShieldCheck,
+  Rocket,
+} from 'lucide-react';
 
 function AuthStatusBanner() {
   const searchParams = useSearchParams();
@@ -15,7 +31,7 @@ function AuthStatusBanner() {
   if (error === 'Configuration') {
     return (
       <div className="mb-5 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-left flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-400 text-[20px] shrink-0 mt-0.5">info</span>
+        <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
         <div className="text-xs space-y-1">
           <p className="font-semibold text-amber-200">Authentication Configuration</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
@@ -28,8 +44,8 @@ function AuthStatusBanner() {
 
   if (error === 'DatabaseError') {
     return (
-      <div className="mb-5 p-3.5 rounded-lg bg-red-950/40 border border-red-500/40 text-left flex items-start gap-3">
-        <span className="material-symbols-outlined text-red-400 text-[20px] shrink-0 mt-0.5">database</span>
+      <div className="mb-5 p-3.5 rounded-xl bg-red-950/40 border border-red-500/40 text-left flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
         <div className="text-xs space-y-1">
           <p className="font-semibold text-red-200">Database Connection Error</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
@@ -47,8 +63,8 @@ function AuthStatusBanner() {
 
   if (error === 'AccessDenied') {
     return (
-      <div className="mb-5 p-3.5 rounded-lg bg-amber-950/40 border border-amber-500/40 text-left flex items-start gap-3">
-        <span className="material-symbols-outlined text-amber-400 text-[20px] shrink-0 mt-0.5">lock</span>
+      <div className="mb-5 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-left flex items-start gap-3">
+        <Lock className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
         <div className="text-xs space-y-1">
           <p className="font-semibold text-amber-200">Access Denied During Sign-in</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
@@ -61,8 +77,8 @@ function AuthStatusBanner() {
 
   if (error === 'NoEmail') {
     return (
-      <div className="mb-5 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
-        <span className="material-symbols-outlined text-[18px] text-red-400">mail</span>
+      <div className="mb-5 p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
+        <Mail className="w-4 h-4 text-red-400 shrink-0" />
         <span>Google did not provide an email address. Please allow email access on your account.</span>
       </div>
     );
@@ -70,8 +86,8 @@ function AuthStatusBanner() {
 
   if (error) {
     return (
-      <div className="mb-5 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
-        <span className="material-symbols-outlined text-[18px] text-red-400">warning</span>
+      <div className="mb-5 p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
+        <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
         <span>Authentication failed. Please verify your credentials or register a new workspace.</span>
       </div>
     );
@@ -79,8 +95,8 @@ function AuthStatusBanner() {
 
   if (registered === 'true') {
     return (
-      <div className="mb-5 p-3 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-200 flex items-center gap-2">
-        <span className="material-symbols-outlined text-[18px] text-emerald-400">check_circle</span>
+      <div className="mb-5 p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-xs text-emerald-200 flex items-center gap-2">
+        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
         <span>Workspace created successfully! Please sign in with your credentials.</span>
       </div>
     );
@@ -100,7 +116,7 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
     setFormError(null);
-    
+
     const res = await signIn('credentials', {
       redirect: false,
       email: email.trim().toLowerCase(),
@@ -108,201 +124,200 @@ export default function LoginPage() {
     });
 
     if (res?.error) {
-      setFormError("Invalid email or password. Please verify your credentials or register a new workspace.");
+      setFormError('Invalid email or password. Please verify your credentials or register a new workspace.');
       setIsLoading(false);
     } else {
       const searchParams = new URLSearchParams(window.location.search);
-      const callback = searchParams.get('callbackUrl') || '/today';
+      const callback = searchParams.get('callbackUrl') || '/dashboard';
       window.location.href = callback;
     }
   };
 
   return (
-    <div className="flex flex-col w-full px-4 md:px-8 pb-8 pt-8 min-h-screen justify-center items-center bg-surface">
+    <div className="flex flex-col w-full px-4 md:px-8 pb-12 pt-8 min-h-screen justify-center items-center bg-surface">
       <div className="w-full max-w-md mx-auto flex flex-col pt-4">
+        {/* Top Header Links */}
         <div className="flex items-center justify-between mb-4">
-          <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-colors py-1.5 px-3 rounded-lg bg-surface-container-high/60 hover:bg-surface-container-high">
-            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface transition-colors py-1.5 px-3 rounded-xl bg-surface-container-high/60 hover:bg-surface-container-high border border-outline-variant/30"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Home</span>
           </Link>
-          <Link href="/dss" className="inline-flex items-center gap-1 text-xs font-bold text-[#45bfae] hover:underline">
-            <span className="material-symbols-outlined text-[16px]">school</span>
+          <Link
+            href="/dss"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#45bfae] hover:underline"
+          >
+            <GraduationCap className="w-4 h-4" />
             <span>DSS Academy &rarr;</span>
           </Link>
         </div>
-        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container mb-6 shadow-sm">
+
+        {/* Enterprise Security Pill */}
+        <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-surface-container mb-6 shadow-sm border border-outline-variant/30">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-            <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">Enterprise Gateway</span>
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">
+              Workspace Access
+            </span>
           </div>
-          <div className="flex items-center gap-1 text-primary">
-            <span className="material-symbols-outlined text-[16px]">verified_user</span>
-            <span className="text-xs font-semibold uppercase">v4.18 Secure</span>
+          <div className="flex items-center gap-1.5 text-primary">
+            <ShieldCheck className="w-4 h-4" />
+            <span className="text-xs font-semibold uppercase">Encrypted</span>
           </div>
         </div>
 
+        {/* Brand Headline */}
         <div className="flex flex-col items-center text-center mb-6">
           <Link href="/" className="mb-4 inline-flex items-center group transition-transform hover:scale-105" title="CloseCraft Home">
             <Logo variant="full" size="xl" priority alt="Closecraft" />
           </Link>
           <div className="flex items-center gap-2 mb-1">
-            <span className="px-2 py-0.5 rounded bg-primary text-on-primary text-xs font-semibold uppercase tracking-widest text-[10px]">REVENUE OS</span>
+            <span className="px-2 py-0.5 rounded bg-primary/20 text-primary-fixed text-xs font-semibold uppercase tracking-widest text-[10px] border border-primary/30">
+              REVENUE OS
+            </span>
           </div>
-          <h1 className="font-headline-xl text-headline-xl text-on-surface font-bold tracking-tight mb-2">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight mb-2">
             Turn More Leads Into Sales.
           </h1>
-          <p className="font-body-md text-body-md text-on-surface-variant max-w-xs leading-relaxed">
+          <p className="text-xs sm:text-sm text-on-surface-variant max-w-xs leading-relaxed">
             AI qualifies, follows up and routes opportunities. Your sales team closes.
           </p>
         </div>
 
-        <div className="relative w-full rounded-xl bg-surface-container-lowest shadow-xl p-6 mb-6 overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-container to-tertiary"></div>
-          
+        {/* Login Card */}
+        <div className="relative w-full rounded-2xl bg-surface-container-lowest border border-outline-variant/40 shadow-xl p-6 sm:p-7 mb-6 overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-fixed to-emerald-400" />
+
           <Suspense fallback={null}>
             <AuthStatusBanner />
           </Suspense>
 
           {formError && (
-            <div className="mb-4 p-3 rounded-lg bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-red-400">error</span>
+            <div className="mb-4 p-3 rounded-xl bg-red-950/40 border border-red-500/40 text-xs text-red-200 flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-red-400 shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase text-secondary tracking-wider">Operator Authentication</span>
-            <span className="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant text-sm font-medium flex items-center gap-1">
-              <span className="material-symbols-outlined text-[14px] text-primary">lock</span> Encrypted
+          <div className="flex items-center justify-between mb-5">
+            <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">
+              Sign In to Account
+            </span>
+            <span className="px-2 py-0.5 rounded-lg bg-surface-container-high text-on-surface-variant text-xs font-medium flex items-center gap-1">
+              <Lock className="w-3 h-3 text-primary" /> Secure
             </span>
           </div>
 
           <form className="space-y-4" onSubmit={handleLogin}>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-on-surface" htmlFor="work-email">Work Email</label>
+            <Field label="Work Email" required>
+              <Input
+                id="work-email"
+                name="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="operator@company.com"
+                required
+                type="email"
+                autoFocus
+                leftIcon={<Mail className="w-4 h-4" />}
+              />
+            </Field>
+
+            <Field label="Password" required>
               <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">mail</span>
-                <input 
-                  className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" 
-                  id="work-email" 
-                  name="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="operator@company.com" 
-                  required 
-                  type="email"
-                  autoFocus
-                />
-              </div>
-            </div>
-            
-            <div className="space-y-1">
-              <div className="flex items-center justify-between">
-                <label className="block text-sm font-medium text-on-surface" htmlFor="password-input">Master Password</label>
-                <span className="font-semibold text-[10px] text-secondary tracking-normal">AES-256</span>
-              </div>
-              <div className="relative flex items-center">
-                <span className="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">key</span>
-                <input 
-                  className="w-full h-11 pl-10 pr-11 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest transition-all" 
+                <Input
                   id="password-input"
                   name="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••" 
-                  required 
-                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••••••"
+                  required
+                  type={showPassword ? 'text' : 'password'}
+                  leftIcon={<Key className="w-4 h-4" />}
                 />
-                <button 
-                  aria-label="Toggle password visibility" 
-                  className="absolute right-1 w-9 h-9 flex items-center justify-center text-secondary hover:text-on-surface transition-colors" 
-                  onClick={() => setShowPassword(!showPassword)}
+                <button
                   type="button"
+                  aria-label="Toggle password visibility"
+                  className="absolute right-3 text-on-surface-variant hover:text-on-surface transition-colors"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  <span className="material-symbols-outlined text-[20px]">{showPassword ? 'visibility_off' : 'visibility'}</span>
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
-            </div>
+            </Field>
 
             <div className="flex items-center justify-between pt-1">
               <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input className="w-4 h-4 rounded bg-surface-container-high text-primary focus:ring-0 focus:outline-none cursor-pointer" id="remember-device" type="checkbox"/>
-                <span className="text-sm text-on-surface-variant">Remember this device</span>
+                <input
+                  className="w-4 h-4 rounded bg-surface-container-high text-primary focus:ring-0 focus:outline-none cursor-pointer"
+                  id="remember-device"
+                  type="checkbox"
+                />
+                <span className="text-xs text-on-surface-variant">Remember this device</span>
               </label>
-              <Link href="/forgot-password" className="text-sm font-medium text-primary hover:text-primary-fixed transition-colors">
+              <Link
+                href="/forgot-password"
+                className="text-xs font-semibold text-primary-fixed hover:underline transition-colors"
+              >
                 Forgot password?
               </Link>
             </div>
 
-            <button 
-              className={`w-full h-12 rounded ${isLoading ? 'bg-primary-container opacity-80 pointer-events-none' : 'bg-primary hover:bg-primary-container active:scale-[0.99]'} text-on-primary font-medium text-sm font-semibold flex items-center justify-center gap-2 shadow-md transition-all mt-3`}
+            <Button
               type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full mt-2"
+              isLoading={isLoading}
+              rightIcon={<ArrowRight className="w-4 h-4" />}
             >
-              {isLoading ? (
-                <>
-                  <span className="material-symbols-outlined text-[20px] animate-spin">sync</span>
-                  <span>Authenticating...</span>
-                </>
-              ) : (
-                <>
-                  <span>Log In</span>
-                  <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
-                </>
-              )}
-            </button>
+              Sign In
+            </Button>
           </form>
 
+          {/* Alternative Provider */}
           <div className="relative flex items-center justify-center my-6">
-            <div className="w-full h-px bg-surface-container-high"></div>
-            <span className="absolute px-3 bg-surface-container-lowest text-on-surface-variant text-xs font-semibold uppercase tracking-wider">
-              or continue with enterprise SSO
+            <div className="w-full h-px bg-outline-variant/30" />
+            <span className="absolute px-3 bg-surface-container-lowest text-on-surface-variant/80 text-[11px] font-semibold uppercase tracking-wider">
+              or continue with
             </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-3">
-            <button 
-              className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm" 
+          <div className="grid grid-cols-1 gap-2.5">
+            <button
               type="button"
-              onClick={() => signIn('google', { callbackUrl: '/today' })}
+              className="w-full h-11 px-4 rounded-xl border border-outline-variant/40 bg-surface-container-high/60 hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-xs font-semibold shadow-sm"
+              onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
             >
-              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"></path>
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"></path>
+              <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335" />
               </svg>
               <span>Google Workspace</span>
-            </button>
-            <button 
-              className="w-full h-11 px-4 rounded bg-surface-container hover:bg-surface-container-high active:scale-[0.99] flex items-center justify-center gap-3 transition-colors text-on-surface text-sm font-medium shadow-sm" 
-              type="button"
-              onClick={() => {
-                setFormError("Microsoft Azure AD SSO is an enterprise feature. Please contact enterprise support to configure your tenant directory.");
-              }}
-            >
-              <svg className="w-5 h-5 shrink-0" viewBox="0 0 23 23">
-                <path d="M1 1h10v10H1z" fill="#f35325"></path>
-                <path d="M12 1h10v10H12z" fill="#81bc06"></path>
-                <path d="M1 12h10v10H1z" fill="#05a6f0"></path>
-                <path d="M12 12h10v10H12z" fill="#ffba08"></path>
-              </svg>
-              <span>Microsoft Azure AD / Entra ID</span>
             </button>
           </div>
         </div>
 
-        <div className="rounded-xl bg-surface-container-high p-4 flex items-center justify-between mb-8 shadow-sm">
+        {/* Free Trial Banner */}
+        <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-high/40 p-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-9 h-9 rounded-lg bg-inverse-surface flex items-center justify-center text-primary-fixed shrink-0">
-              <span className="material-symbols-outlined text-[20px]">rocket_launch</span>
+            <div className="w-9 h-9 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center text-primary-fixed shrink-0">
+              <Rocket className="w-4 h-4" />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="font-medium text-sm font-semibold text-on-surface truncate">New to Closecraft?</span>
-              <span className="text-sm text-on-surface-variant truncate">7-day Starter trial, no card required</span>
+              <span className="font-semibold text-xs text-on-surface truncate">New to Closecraft?</span>
+              <span className="text-xs text-on-surface-variant truncate">7-day Starter trial, no card required</span>
             </div>
           </div>
-          <Link href="/signup" className="shrink-0 px-4 py-2 rounded bg-inverse-surface text-inverse-on-surface hover:bg-on-surface transition-colors text-sm font-medium font-semibold ml-2">
-            Start 7-Day Trial
+          <Link
+            href="/signup"
+            className="shrink-0 px-3.5 py-2 rounded-xl bg-primary text-on-primary hover:bg-[#5cd4c3] transition-colors text-xs font-bold shadow-sm"
+          >
+            Start Trial
           </Link>
         </div>
       </div>

@@ -1,55 +1,205 @@
 'use client';
-import React from 'react';
-import Link from 'next/link';
-import { Icon } from '@/components/ui/Icon';
-import { Logo, DSSLogo } from '@/components/ui/Logo';
 
-export default function WorkspaceHeader({ user, onMenuClick, isMobile }: { user: any, onMenuClick: () => void, isMobile: boolean }) {
+import React, { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { signOut } from 'next-auth/react';
+import { Icon } from '@/components/ui/Icon';
+import Logo from '@/components/ui/Logo';
+import ProductSwitcher, { getActiveProduct } from '@/components/ui/ProductSwitcher';
+import { Badge } from '@/components/ui/Badge';
+import {
+  Bell,
+  Plus,
+  LogOut,
+  User as UserIcon,
+  Settings,
+  ChevronDown,
+  Layers,
+  Sparkles,
+} from 'lucide-react';
+
+export interface WorkspaceHeaderProps {
+  user: any;
+  onMenuClick: () => void;
+  isMobile: boolean;
+}
+
+export default function WorkspaceHeader({
+  user,
+  onMenuClick,
+  isMobile,
+}: WorkspaceHeaderProps) {
+  const pathname = usePathname() || '';
+  const activeProduct = getActiveProduct(pathname);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const orgName = user?.organization?.name || 'Workspace';
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
+
   return (
-    <header className="h-16 flex-shrink-0 bg-surface-container border-b border-outline-variant/30 flex items-center justify-between px-4 lg:px-8 z-20 sticky top-0">
-      <div className="flex items-center gap-3 sm:gap-4">
+    <header className="h-16 flex-shrink-0 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 flex items-center justify-between px-3 sm:px-6 lg:px-8 z-30 sticky top-0">
+      {/* Left Column: Menu Button + Product Switcher + Workspace Pill */}
+      <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
         {isMobile && (
-          <button onClick={onMenuClick} className="p-2 text-on-surface hover:bg-surface-container-high rounded-md transition-colors" aria-label="Open menu">
-            <Icon name="Menu" size={20} />
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="w-9 h-9 rounded-xl border border-outline-variant/40 hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors shrink-0"
+            aria-label="Open navigation menu"
+          >
+            <Icon name="Menu" size={18} />
           </button>
         )}
-        <div className="flex items-center gap-3">
-          <Link 
-            href="/" 
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold uppercase tracking-wider transition-all border border-outline-variant/40"
-            title="Return to CloseCraft Home"
-          >
-            <Icon name="ArrowLeft" size={14} />
-            <Logo variant="icon" size="xs" />
-            <span className="hidden sm:inline">Home</span>
-          </Link>
-          <div className="flex flex-col">
-            <h1 className="text-sm font-semibold text-on-surface leading-tight">{user?.organization?.name || 'Workspace'}</h1>
-          </div>
+
+        {/* 1-Click Product Switcher */}
+        <div className="shrink-0">
+          <ProductSwitcher />
+        </div>
+
+        {/* Workspace Context Badge (Hidden on very narrow mobile screens) */}
+        <div className="hidden md:flex items-center gap-2 px-2.5 py-1 rounded-xl bg-surface-container-high/40 border border-outline-variant/30">
+          <span className="w-1.5 h-1.5 rounded-full bg-primary-fixed shrink-0 animate-pulse" />
+          <span className="text-xs font-semibold text-on-surface truncate max-w-[160px]">
+            {orgName}
+          </span>
         </div>
       </div>
-      <div className="flex items-center gap-3 sm:gap-4">
-        <Link 
-          href="/onboarding" 
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/15 hover:bg-primary/25 text-primary text-xs font-bold transition-all border border-primary/30 shadow-sm"
-          title="Workspace Onboarding & Qualification Wizard"
+
+      {/* Right Column: Context Action + Notifications + User Profile Menu */}
+      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* Context-Aware Primary Action Button */}
+        {activeProduct === 'closecraft' && (
+          <Link
+            href="/services"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:bg-[#5cd4c3] text-xs font-bold transition-all shadow-sm shadow-primary/10 select-none"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Growth Services</span>
+          </Link>
+        )}
+
+        {activeProduct === 'revenue' && (
+          <Link
+            href="/leads?action=new"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0b1117] text-xs font-bold transition-all shadow-sm select-none"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Enquiry</span>
+          </Link>
+        )}
+
+        {activeProduct === 'dss' && (
+          <Link
+            href="/dss/dashboard"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#248277]/20 hover:bg-[#248277]/30 text-[#45bfae] border border-[#248277]/40 text-xs font-bold transition-all select-none"
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>My Learning</span>
+          </Link>
+        )}
+
+        {/* Notification Bell */}
+        <button
+          type="button"
+          className="relative w-9 h-9 rounded-xl border border-outline-variant/30 hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors"
+          title="Notifications"
+          aria-label="View notifications"
         >
-          <Icon name="Compass" size={15} />
-          <span>Qualification</span>
-        </Link>
-        <Link 
-          href="/dss" 
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#248277]/15 hover:bg-[#248277]/25 text-[#45bfae] text-xs font-bold transition-all border border-[#248277]/30"
-          title="Digital Sales School Academy"
-        >
-          <DSSLogo variant="icon" size="xs" />
-          <span className="hidden sm:inline">DSS Academy</span>
-        </Link>
-        <button className="p-2 text-on-surface-variant hover:text-on-surface transition-colors" title="Notifications">
-          <Icon name="Bell" size={20} />
+          <Bell className="w-4 h-4" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-primary" />
         </button>
-        <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary font-medium text-sm border border-primary/30">
-          {user?.name?.charAt(0) || 'U'}
+
+        {/* User Profile Popover */}
+        <div ref={profileRef} className="relative">
+          <button
+            type="button"
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="flex items-center gap-2 p-1 rounded-xl hover:bg-surface-container-high transition-colors select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            aria-expanded={profileOpen}
+            aria-haspopup="true"
+          >
+            <div className="w-8 h-8 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center text-primary-fixed font-bold text-xs">
+              {userInitial}
+            </div>
+            <ChevronDown className="w-3 h-3 text-on-surface-variant hidden sm:block" />
+          </button>
+
+          {profileOpen && (
+            <div
+              role="menu"
+              className="absolute right-0 mt-2 w-64 rounded-2xl border border-outline-variant/60 bg-surface-container-lowest p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-150 backdrop-blur-md"
+            >
+              {/* Account summary header */}
+              <div className="px-3 py-2.5 border-b border-outline-variant/20 mb-1">
+                <div className="text-xs font-bold text-on-surface truncate">
+                  {user?.name || 'User Account'}
+                </div>
+                <div className="text-[11px] text-on-surface-variant truncate">
+                  {user?.email || 'Logged in'}
+                </div>
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  <Badge variant="primary" size="sm">
+                    {user?.role || 'MEMBER'}
+                  </Badge>
+                  {user?.organization?.plan && (
+                    <span className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-gray-300">
+                      {user.organization.plan}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              {/* Account links */}
+              <div className="space-y-0.5 text-xs">
+                <Link
+                  href="/settings"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+                  role="menuitem"
+                >
+                  <Settings className="w-4 h-4 text-on-surface-variant" />
+                  <span>Workspace Settings</span>
+                </Link>
+
+                <Link
+                  href="/billing"
+                  onClick={() => setProfileOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-colors"
+                  role="menuitem"
+                >
+                  <Icon name="CreditCard" size={16} className="text-on-surface-variant" />
+                  <span>Billing & Subscription</span>
+                </Link>
+
+                <div className="my-1 border-t border-outline-variant/20" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProfileOpen(false);
+                    signOut({ callbackUrl: '/login' });
+                  }}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-error hover:bg-error-container/20 transition-colors text-left"
+                  role="menuitem"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -154,3 +154,4 @@ export const ProductSwitcher = ({ className = '' }: ProductSwitcherProps) => {
 };
 
 export default ProductSwitcher;
+
