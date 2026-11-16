@@ -579,7 +579,7 @@ export default function LandingClientWrapper({
         </section>
 
         {/* SECTION 2: EXPLAINER VIDEO (Immediately after Hero) */}
-        <section id="explainer-video" className="py-20 bg-[#080808] border-t border-[#1f1f1f] relative overflow-hidden">
+        <section id="explainer-video" className="py-20 bg-[#080808] border-t border-[#1f1f1f] relative overflow-hidden scroll-mt-24">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10 relative z-10">
             {/* Section Header */}
             <div className="text-center space-y-4 max-w-3xl mx-auto">
@@ -637,7 +637,7 @@ export default function LandingClientWrapper({
                     muted={isMuted}
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
-                    className="w-full aspect-video object-cover"
+                    className="w-full aspect-video object-contain bg-black"
                   />
 
                   {/* Play Button Overlay when paused */}
@@ -803,7 +803,7 @@ export default function LandingClientWrapper({
         </section>
 
         {/* SECTION 3: HOW CLOSECRAFT WORKS */}
-        <section id="how-it-works" className="py-24 bg-[#000000] border-t border-[#1f1f1f]">
+        <section id="how-it-works" className="py-24 bg-[#000000] border-t border-[#1f1f1f] scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
             <div className="text-center space-y-4 max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
@@ -935,7 +935,7 @@ export default function LandingClientWrapper({
         </section>
 
         {/* SECTION 4: LEAD GENERATION PRICING */}
-        <section id="pricing" className="py-24 bg-[#080808] border-t border-[#1f1f1f]">
+        <section id="pricing" className="py-24 bg-[#080808] border-t border-[#1f1f1f] scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center space-y-4 max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
@@ -1281,7 +1281,7 @@ export default function LandingClientWrapper({
         </section>
 
         {/* SECTION 5: THE CLOSECRAFT PRODUCT */}
-        <section id="product" className="py-24 bg-[#000000] border-t border-[#1f1f1f]">
+        <section id="product" className="py-24 bg-[#000000] border-t border-[#1f1f1f] scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
             <div className="text-center space-y-4 max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
@@ -1357,7 +1357,7 @@ export default function LandingClientWrapper({
         </section>
 
         {/* SECTION 6: THE CLOSECRAFT ADVANTAGE */}
-        <section id="advantage" className="py-24 bg-[#080808] border-t border-[#1f1f1f]">
+        <section id="advantage" className="py-24 bg-[#080808] border-t border-[#1f1f1f] scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
             <div className="text-center space-y-4 max-w-3xl mx-auto">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
@@ -1459,7 +1459,7 @@ export default function LandingClientWrapper({
         </section>
 
         {/* SECTION 8: COMPACT FAQ */}
-        <section id="faq" className="py-24 bg-[#080808] border-t border-[#1f1f1f]">
+        <section id="faq" className="py-24 bg-[#080808] border-t border-[#1f1f1f] scroll-mt-24">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
