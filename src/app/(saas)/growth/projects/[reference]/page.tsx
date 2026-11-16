@@ -64,7 +64,7 @@ export default async function ProjectDetailPage({
   const isAssignedPartner = project.assignedPartner?.userId === session.user.id;
 
   if (!isPlatformStaff && !isOwnerOrg && !isAssignedPartner) {
-    redirect('/today');
+    redirect('/dashboard');
   }
 
   // Map to client-safe props

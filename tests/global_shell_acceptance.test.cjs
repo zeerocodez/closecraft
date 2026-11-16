@@ -57,3 +57,4 @@ describe('CloseCraft Phase 3: Global Application Shell Acceptance Tests', () => 
     assert.ok(content.includes("signIn('google'"), 'Login must support Google Workspace SSO');
   });
 });
+

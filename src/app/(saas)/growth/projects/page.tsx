@@ -75,8 +75,8 @@ export default async function GrowthProjectsIndexPage() {
         </div>
 
         <Link
-          href="/#services-catalogue"
-          className="px-5 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center gap-2 shadow-lg shadow-[#248277]/20 transition-all cursor-pointer"
+          href="/services"
+          className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs inline-flex items-center gap-2 shadow-sm transition-all cursor-pointer"
         >
           <Plus size={15} />
           <span>Select New Services</span>
@@ -117,8 +117,8 @@ export default async function GrowthProjectsIndexPage() {
             </p>
           </div>
           <Link
-            href="/#services-catalogue"
-            className="px-5 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs inline-flex items-center gap-2"
+            href="/services"
+            className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs inline-flex items-center gap-2"
           >
             <span>Explore Growth Services</span>
             <ArrowRight size={14} />
