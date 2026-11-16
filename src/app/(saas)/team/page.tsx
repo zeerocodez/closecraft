@@ -2,7 +2,13 @@ import React from 'react';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { redirect } from 'next/navigation';
+import { getOrCreateWorkspaceSubscription } from '@/lib/payments/subscription';
 import TeamPageClient from './TeamPageClient';
+
+export const metadata = {
+  title: 'Team Management & User Roles | Closecraft',
+  description: 'Manage your sales closers, appointment setters, lead routing, and team seat capacity.',
+};
 
 export default async function TeamPage() {
   const session = await auth();
@@ -11,75 +17,70 @@ export default async function TeamPage() {
     redirect('/login');
   }
 
-  const organizationId = session.organizationId;
+  const organizationId = (session as any)?.organizationId;
   if (!organizationId) {
     redirect('/login');
   }
 
-  // Fetch tenant organization
-  const organization = await db.organization.findUnique({
-    where: { id: organizationId },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      leadRoutingMode: true,
-    }
-  });
+  // Fetch tenant organization, subscription, members, leads, deals, appointments
+  const [organization, subscription, members, leads, deals, appointments] = await Promise.all([
+    db.organization.findUnique({
+      where: { id: organizationId },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        leadRoutingMode: true,
+      }
+    }),
+    getOrCreateWorkspaceSubscription(organizationId),
+    db.organizationMember.findMany({
+      where: { organizationId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            image: true,
+          }
+        }
+      },
+      orderBy: { createdAt: 'asc' }
+    }),
+    db.lead.findMany({
+      where: { organizationId },
+      select: {
+        id: true,
+        assignedUserId: true,
+        status: true,
+      }
+    }),
+    db.deal.findMany({
+      where: { organizationId },
+      select: {
+        id: true,
+        amount: true,
+        stage: true,
+        closerId: true,
+        commissionAmount: true,
+        commissionStatus: true,
+      }
+    }),
+    db.appointment.findMany({
+      where: { organizationId },
+      select: {
+        id: true,
+        closerId: true,
+        status: true,
+        scheduledAt: true,
+      }
+    })
+  ]);
 
   if (!organization) {
     redirect('/login');
   }
-
-  // Fetch all members of this tenant with their commission and google calendar settings
-  const members = await db.organizationMember.findMany({
-    where: { organizationId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-        }
-      }
-    },
-    orderBy: { createdAt: 'asc' }
-  });
-
-  // Fetch leads for this tenant to compute workflow distributions
-  const leads = await db.lead.findMany({
-    where: { organizationId },
-    select: {
-      id: true,
-      assignedUserId: true,
-      status: true,
-    }
-  });
-
-  // Fetch deals for this tenant to compute closed deals and commission totals
-  const deals = await db.deal.findMany({
-    where: { organizationId },
-    select: {
-      id: true,
-      amount: true,
-      stage: true,
-      closerId: true,
-      commissionAmount: true,
-      commissionStatus: true,
-    }
-  });
-
-  // Fetch appointments to compute rep schedule load
-  const appointments = await db.appointment.findMany({
-    where: { organizationId },
-    select: {
-      id: true,
-      closerId: true,
-      status: true,
-      scheduledAt: true,
-    }
-  });
 
   const memberLeadCounts: Record<string, number> = {};
   let totalAssignedLeads = 0;
@@ -129,6 +130,7 @@ export default async function TeamPage() {
     <TeamPageClient
       organization={organization}
       members={members}
+      subscription={subscription}
       stats={{
         totalClosers,
         totalSetters,

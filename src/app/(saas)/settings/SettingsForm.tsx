@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { updateQualificationPolicy } from '@/app/(saas)/actions';
+import { Sparkles, BrainCircuit, CheckCircle2, Save, FileText, RefreshCw, Loader2 } from 'lucide-react';
 
 const TEMPLATES = [
   {
@@ -18,7 +19,7 @@ DISQUALIFICATION RULES:
 - High urgency leads (<30 days) that meet criteria must immediately trigger ASSIGN_HUMAN with 15m SLA.`
   },
   {
-    name: 'Digital Sales School (DSS) Academy (₦100k - ₦150k / $100 - $150)',
+    name: 'Digital Sales School (DSS) Academy (₦100k - ₦150k)',
     text: `A lead is QUALIFIED if:
 1. Prospect is an aspiring sales closer, setter, freelancer, career switcher, or B2B founder.
 2. Budget is at least ₦100,000 / $100 for single route (Setters, Closers, Live Roleplays/Internship) or ₦150,000 / $150 for Both Routes bundle.
@@ -28,6 +29,16 @@ DISQUALIFICATION RULES:
 DISQUALIFICATION RULES:
 - If budget is strictly below ₦100,000 / $100, route to AUTOMATION for tuition installment/sample lesson guide.
 - Qualified applicants should receive SEND_BOOKING_LINK for admissions diagnostic.`
+  },
+  {
+    name: 'Growth Services & Creative Studio (₦150k+)',
+    text: `A lead is QUALIFIED if:
+1. Prospect requires 1 or more of the 5 Growth Services (Meta Ads, AI Flyer, AI Video, Landing Page, VSL).
+2. Active business with product-market fit or validated commercial offer.
+3. Monthly marketing budget exceeding ₦150,000.
+
+DISQUALIFICATION RULES:
+- Inquiries without clear business context or sub-₦50,000 budget should receive service rate card via WhatsApp automated nurture.`
   }
 ];
 
@@ -53,27 +64,40 @@ export function SettingsForm({ initialPolicy }: { initialPolicy: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-5 font-sans">
+      {success && (
+        <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2.5 animate-in fade-in duration-200">
+          <CheckCircle2 size={16} className="text-emerald-400 shrink-0" />
+          <span>AI qualification policy updated successfully.</span>
+        </div>
+      )}
+
       <div>
-        <label className="block text-sm font-bold text-on-surface mb-1">
-          Ideal Customer Profile (ICP) &amp; Qualification Policy
-        </label>
-        <p className="text-xs text-on-surface-variant mb-4 leading-relaxed">
+        <div className="flex items-center gap-2 mb-1">
+          <BrainCircuit size={16} className="text-[#45bfae]" />
+          <label className="text-xs font-bold text-gray-200">
+            Ideal Customer Profile (ICP) & Qualification Criteria
+          </label>
+        </div>
+        <p className="text-xs text-gray-400 mb-4 leading-relaxed">
           Define what makes an inbound lead "Qualified" for your business. The AI Revenue Engine strictly incorporates this policy when calculating Intent, Fit, and setting the Next Best Action for every lead.
         </p>
 
         {/* 1-Click Templates */}
-        <div className="mb-3">
-          <span className="text-xs font-semibold text-on-surface-variant block mb-2">Quick Presets:</span>
+        <div className="mb-3 space-y-2">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400 flex items-center gap-1.5">
+            <Sparkles size={12} className="text-[#45bfae]" />
+            <span>1-Click Presets:</span>
+          </span>
           <div className="flex flex-wrap gap-2">
             {TEMPLATES.map((t, idx) => (
               <button
                 key={idx}
                 type="button"
                 onClick={() => setPolicy(t.text)}
-                className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high border border-outline-variant/60 text-xs font-bold text-primary transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-[#45bfae] hover:text-[#5cd4c3] transition-colors cursor-pointer flex items-center gap-1.5"
               >
-                + {t.name}
+                <span>+ {t.name}</span>
               </button>
             ))}
           </div>
@@ -85,38 +109,46 @@ export function SettingsForm({ initialPolicy }: { initialPolicy: string }) {
           value={policy} 
           onChange={(e) => setPolicy(e.target.value)}
           rows={11}
-          className="w-full p-4 bg-surface-container-low border border-surface-container rounded-xl text-on-surface focus:outline-none focus:border-primary text-xs md:text-sm font-mono leading-relaxed"
+          className="w-full p-4 bg-[#0a0d12] border border-white/10 rounded-2xl text-gray-200 focus:outline-none focus:border-[#45bfae] text-xs font-mono leading-relaxed transition-colors"
           placeholder="e.g. A qualified lead must be a B2B SaaS company with >₦500k budget. If they mention urgency, assign them to a HUMAN immediately..."
         />
       </div>
 
       {/* Reprocess Option */}
-      <div className="p-3 bg-surface-container-low border border-surface-container rounded-lg flex items-center justify-between">
-        <label className="flex items-center gap-2 cursor-pointer text-xs font-bold text-on-surface">
+      <div className="p-4 bg-[#0a0d12] border border-white/5 rounded-xl flex items-center justify-between">
+        <label className="flex items-center gap-3 cursor-pointer text-xs font-bold text-gray-200">
           <input
             type="checkbox"
             checked={reprocess}
             onChange={(e) => setReprocess(e.target.checked)}
-            className="w-4 h-4 rounded text-primary focus:ring-0 cursor-pointer"
+            className="w-4 h-4 rounded bg-black/40 border border-white/20 text-[#248277] focus:ring-0 cursor-pointer"
           />
-          <span>Immediately re-score and re-evaluate all existing leads with this policy</span>
+          <div className="flex flex-col">
+            <span>Reprocess Active Leads with New Policy</span>
+            <span className="text-[11px] font-normal text-gray-400">Re-evaluates unclosed leads and refreshes the Next Best Action</span>
+          </div>
         </label>
+        <RefreshCw size={14} className="text-gray-500 shrink-0" />
       </div>
-      
-      <div className="flex items-center gap-3">
+
+      <div className="pt-2">
         <button 
-          type="submit" 
-          disabled={loading} 
-          className="px-6 py-2.5 bg-primary hover:bg-primary-container text-on-primary rounded-lg font-bold text-sm transition-colors shadow-sm disabled:opacity-50 cursor-pointer"
+          type="submit"
+          disabled={loading}
+          className="px-5 py-2.5 bg-[#45bfae] text-[#0f1214] hover:bg-[#5cd4c3] font-bold text-xs rounded-xl shadow-lg shadow-[#248277]/20 transition-all disabled:opacity-50 flex items-center gap-2"
         >
-          {loading ? 'Saving & Re-evaluating...' : 'Save & Activate AI Policy'}
+          {loading ? (
+            <>
+              <Loader2 size={14} className="animate-spin" />
+              <span>Saving Policy...</span>
+            </>
+          ) : (
+            <>
+              <Save size={14} />
+              <span>Save AI Policy</span>
+            </>
+          )}
         </button>
-        {success && (
-          <span className="text-primary text-xs font-bold flex items-center gap-1 animate-in fade-in">
-            <span className="material-symbols-outlined text-[16px]">check_circle</span>
-            Policy updated &amp; Revenue Engine synchronized!
-          </span>
-        )}
       </div>
     </form>
   );

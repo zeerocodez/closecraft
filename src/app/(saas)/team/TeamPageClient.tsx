@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
+import Link from 'next/link';
 import { 
   addTenantTeamMember, 
   removeTenantTeamMember, 
@@ -8,6 +9,30 @@ import {
   updateTenantRoutingMode,
   updateMemberCommission 
 } from '@/app/(saas)/actions';
+import { 
+  Users, 
+  UserPlus, 
+  ShieldCheck, 
+  TrendingUp, 
+  Calendar, 
+  DollarSign, 
+  CheckCircle2, 
+  AlertCircle, 
+  Sliders, 
+  Sparkles, 
+  X, 
+  Info, 
+  ArrowRight, 
+  Check, 
+  ExternalLink,
+  Target,
+  Briefcase,
+  Percent,
+  Clock,
+  Layers,
+  Search,
+  Filter
+} from 'lucide-react';
 
 interface Member {
   id: string;
@@ -42,6 +67,13 @@ interface TeamPageClientProps {
     leadRoutingMode: string;
   };
   members: Member[];
+  subscription?: {
+    plan: string;
+    maxInternalSeats: number;
+    internalSeatsUsed: number;
+    pricePerMonth: number;
+    currency: string;
+  };
   stats: {
     totalClosers: number;
     totalSetters: number;
@@ -56,6 +88,7 @@ interface TeamPageClientProps {
 export default function TeamPageClient({
   organization,
   members,
+  subscription,
   stats,
   currentUserRole,
 }: TeamPageClientProps) {
@@ -63,9 +96,12 @@ export default function TeamPageClient({
     (organization.leadRoutingMode as any) || 'OPEN_POOL'
   );
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showRoleMatrixModal, setShowRoleMatrixModal] = useState(false);
   const [editingMember, setEditingMember] = useState<Member | null>(null);
   const [editRate, setEditRate] = useState<number>(10);
   const [editType, setEditType] = useState<'PERCENTAGE' | 'FIXED_PER_DEAL' | 'FIXED_PER_APPOINTMENT'>('PERCENTAGE');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [roleFilter, setRoleFilter] = useState<string>('ALL');
   
   const [isPending, startTransition] = useTransition();
   const [notification, setNotification] = useState<string | null>(null);
@@ -75,7 +111,13 @@ export default function TeamPageClient({
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<'SETTER' | 'CLOSER' | 'ADMIN' | 'MANAGER' | 'MEMBER'>('CLOSER');
 
-  const canManageTeam = currentUserRole === 'ADMIN' || currentUserRole === 'MANAGER' || currentUserRole === 'SUPER_ADMIN';
+  const canManageTeam = ['OWNER', 'ADMIN', 'MANAGER', 'SUPER_ADMIN'].includes(currentUserRole);
+
+  const internalMembers = members.filter(m => m.role !== 'EXTERNAL_PROFESSIONAL');
+  const maxSeats = subscription?.maxInternalSeats ?? 3;
+  const seatsUsed = internalMembers.length;
+  const isSeatLimitReached = seatsUsed >= maxSeats;
+  const seatPercentage = Math.min(100, Math.round((seatsUsed / maxSeats) * 100));
 
   const showToast = (msg: string) => {
     setNotification(msg);
@@ -87,7 +129,7 @@ export default function TeamPageClient({
     startTransition(async () => {
       try {
         await updateTenantRoutingMode(mode);
-        showToast(`✅ Lead distribution updated to ${mode.replace('_', ' ')}.`);
+        showToast(`Lead distribution updated to ${mode.replace(/_/g, ' ')}.`);
       } catch (err: any) {
         alert(err.message || 'Failed to update distribution mode');
       }
@@ -109,7 +151,12 @@ export default function TeamPageClient({
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newEmail || !newEmail.includes('@')) {
-      alert('Please enter a valid email address');
+      alert('Please enter a valid work email address');
+      return;
+    }
+
+    if (isSeatLimitReached) {
+      alert(`Seat limit reached (${seatsUsed}/${maxSeats} seats used). Please upgrade to the Pro plan in Billing to add more team members.`);
       return;
     }
 
@@ -123,7 +170,7 @@ export default function TeamPageClient({
         setShowAddModal(false);
         setNewName('');
         setNewEmail('');
-        showToast(`✅ Added ${newName || newEmail} as ${newRole}.`);
+        showToast(`Added ${newName || newEmail} as ${newRole}.`);
       } catch (err: any) {
         alert(err.message || 'Failed to add team member');
       }
@@ -142,7 +189,7 @@ export default function TeamPageClient({
           commissionType: editType,
         });
         const name = editingMember.user.name || editingMember.user.email;
-        showToast(`✅ Updated ${name}'s commission rate to ${editRate}${editType === 'PERCENTAGE' ? '%' : ' NGN'}.`);
+        showToast(`Updated ${name}'s commission rate to ${editRate}${editType === 'PERCENTAGE' ? '%' : ' NGN'}.`);
         setEditingMember(null);
       } catch (err: any) {
         alert(err.message || 'Failed to update commission rate');
@@ -162,336 +209,398 @@ export default function TeamPageClient({
     });
   };
 
+  const filteredMembers = members.filter(m => {
+    const matchesSearch = 
+      (m.user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+      m.user.email.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesRole = roleFilter === 'ALL' || m.role === roleFilter;
+    return matchesSearch && matchesRole;
+  });
+
   return (
-    <div className="flex flex-col gap-6 lg:gap-8 w-full max-w-7xl mx-auto pb-12">
+    <div className="space-y-8 max-w-7xl mx-auto font-sans pb-16">
       
       {/* Toast Notification */}
       {notification && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-surface-container-highest border border-primary/30 text-on-surface shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
-          <span className="material-symbols-outlined text-primary text-[20px]">task_alt</span>
-          <span className="text-sm font-medium">{notification}</span>
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-[#121c1a] border border-[#248277]/50 text-white shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-2">
+          <CheckCircle2 size={16} className="text-[#45bfae] shrink-0" />
+          <span className="text-xs font-semibold">{notification}</span>
         </div>
       )}
 
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/5">
         <div>
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#248277]/10 px-2.5 py-1 rounded-full border border-[#248277]/20 mb-2">
+            <Users size={13} />
+            <span>Sales Force Governance</span>
+          </div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl md:text-3xl font-heading font-semibold text-on-surface">Team & Sales Force</h1>
-            <span className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-wider uppercase">
+            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-tight">
+              Team & Sales Operations
+            </h1>
+            <span className="px-2.5 py-0.5 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] text-[11px] font-bold tracking-wider uppercase">
               {organization.name}
             </span>
           </div>
-          <p className="text-sm text-on-surface-variant mt-1">
-            Manage your Closers, Appointment Setters, Commission Rates, and Google Calendar transparency.
+          <p className="text-xs md:text-sm text-gray-400 mt-1">
+            Manage your Closers, Appointment Setters, lead distribution routing, and commission rates.
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowRoleMatrixModal(true)}
+            className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs border border-white/10 transition-colors flex items-center gap-1.5"
+          >
+            <ShieldCheck size={14} className="text-[#45bfae]" />
+            <span>Role & Permissions Matrix</span>
+          </button>
+
           {canManageTeam && (
             <button
+              type="button"
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-md hover:shadow-primary/20 transition-all active:scale-[0.98]"
+              className="px-4 py-2.5 rounded-xl bg-[#45bfae] text-[#0f1214] hover:bg-[#5cd4c3] font-bold text-xs shadow-lg shadow-[#248277]/20 transition-all flex items-center gap-2"
             >
-              <span className="material-symbols-outlined text-[18px]">person_add</span>
-              <span>Add Team Member</span>
+              <UserPlus size={15} />
+              <span>Invite Team Member</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* Metric Cards */}
+      {/* 4-KPI Operational Metric Strip */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Closers */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-secondary mb-2">
+        {/* Active Closers */}
+        <div className="p-5 rounded-2xl bg-[#0f1214] border border-white/5 shadow-xl flex flex-col justify-between">
+          <div className="flex items-center justify-between text-gray-400 mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider">Active Closers</span>
-            <span className="material-symbols-outlined text-[20px] text-primary">verified</span>
+            <ShieldCheck size={18} className="text-[#45bfae]" />
           </div>
-          <div className="text-2xl font-bold text-on-surface font-headline">{stats.totalClosers}</div>
-          <div className="text-[11px] text-on-surface-variant mt-1">High-ticket deals & proposal negotiations</div>
+          <div className="text-3xl font-bold text-white font-mono">{stats.totalClosers}</div>
+          <div className="text-[11px] text-gray-400 mt-1">High-ticket deals & proposal negotiations</div>
         </div>
 
         {/* Total Setters */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-secondary mb-2">
+        <div className="p-5 rounded-2xl bg-[#0f1214] border border-white/5 shadow-xl flex flex-col justify-between">
+          <div className="flex items-center justify-between text-gray-400 mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider">Appointment Setters</span>
-            <span className="material-symbols-outlined text-[20px] text-cyan-400">event_available</span>
+            <Calendar size={18} className="text-cyan-400" />
           </div>
-          <div className="text-2xl font-bold text-on-surface font-headline">{stats.totalSetters}</div>
-          <div className="text-[11px] text-on-surface-variant mt-1">Discovery calls & booking qualified demos</div>
+          <div className="text-3xl font-bold text-white font-mono">{stats.totalSetters}</div>
+          <div className="text-[11px] text-gray-400 mt-1">Discovery calls & booking qualified demos</div>
         </div>
 
-        {/* Active Claimed Leads */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-secondary mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider">In Team Workflow</span>
-            <span className="material-symbols-outlined text-[20px] text-emerald-400">trending_up</span>
+        {/* Assigned Leads */}
+        <div className="p-5 rounded-2xl bg-[#0f1214] border border-white/5 shadow-xl flex flex-col justify-between">
+          <div className="flex items-center justify-between text-gray-400 mb-2">
+            <span className="text-[11px] font-bold uppercase tracking-wider">Leads in Workflow</span>
+            <TrendingUp size={18} className="text-emerald-400" />
           </div>
-          <div className="text-2xl font-bold text-on-surface font-headline">{stats.totalAssignedLeads}</div>
-          <div className="text-[11px] text-on-surface-variant mt-1">Leads claimed by Closers & Setters</div>
+          <div className="text-3xl font-bold text-emerald-400 font-mono">{stats.totalAssignedLeads}</div>
+          <div className="text-[11px] text-gray-400 mt-1">Claimed & actively engaged by reps</div>
         </div>
 
         {/* Unassigned Pool */}
-        <div className="p-5 rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm flex flex-col justify-between">
-          <div className="flex items-center justify-between text-secondary mb-2">
+        <div className="p-5 rounded-2xl bg-[#0f1214] border border-white/5 shadow-xl flex flex-col justify-between">
+          <div className="flex items-center justify-between text-gray-400 mb-2">
             <span className="text-[11px] font-bold uppercase tracking-wider">Open Pool (Unassigned)</span>
-            <span className="material-symbols-outlined text-[20px] text-amber-400">all_inbox</span>
+            <Clock size={18} className="text-amber-400" />
           </div>
-          <div className="text-2xl font-bold text-amber-400 font-headline">{stats.totalUnassignedLeads}</div>
-          <div className="text-[11px] text-on-surface-variant mt-1">Ready to be claimed by available reps</div>
+          <div className="text-3xl font-bold text-amber-400 font-mono">{stats.totalUnassignedLeads}</div>
+          <div className="text-[11px] text-gray-400 mt-1">Ready to be claimed or auto-routed</div>
+        </div>
+      </div>
+
+      {/* Workspace Seat Utilization & Plan Capacity Bar */}
+      <div className="p-6 rounded-2xl bg-[#0f1214] border border-white/5 shadow-xl space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h2 className="font-serif text-base font-bold text-white flex items-center gap-2">
+              <Users size={16} className="text-[#45bfae]" />
+              <span>Workspace Seat Capacity</span>
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {subscription?.plan || 'Starter'} Workspace Tier: <strong className="text-white font-semibold">{seatsUsed} of {maxSeats} seats assigned</strong> ({Math.max(0, maxSeats - seatsUsed)} remaining)
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {isSeatLimitReached && (
+              <span className="text-[11px] px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-300 font-bold border border-amber-500/20">
+                Seat Limit Reached
+              </span>
+            )}
+            <Link
+              href="/billing"
+              className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs border border-white/10 transition-colors inline-flex items-center gap-1.5"
+            >
+              <span>Manage Seats in Billing</span>
+              <ExternalLink size={12} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="space-y-1.5">
+          <div className="w-full bg-[#0a0d12] rounded-full h-2.5 overflow-hidden border border-white/5">
+            <div
+              className={`h-full rounded-full transition-all duration-300 ${
+                isSeatLimitReached ? 'bg-amber-400' : 'bg-gradient-to-r from-[#248277] to-[#45bfae]'
+              }`}
+              style={{ width: `${Math.max(5, seatPercentage)}%` }}
+            />
+          </div>
+          <div className="flex justify-between items-center text-[11px] text-gray-500">
+            <span>* Remote sales professionals on managed pilots do not count against internal seat quotas.</span>
+            <span>{seatPercentage}% capacity used</span>
+          </div>
         </div>
       </div>
 
       {/* Lead Routing Configuration Strip */}
-      <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4">
-          <div>
-            <h2 className="text-base font-bold text-on-surface flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[20px]">hub</span>
-              <span>Lead Distribution Policy</span>
-            </h2>
-            <p className="text-xs text-on-surface-variant mt-0.5">
-              Control how newly qualified leads are distributed across your team members
-            </p>
-          </div>
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant/30 text-primary">
-            Active Mode: {routingMode.replace('_', ' ')}
-          </span>
+      <div className="p-6 rounded-2xl bg-[#0f1214] border border-white/5 shadow-xl space-y-4">
+        <div>
+          <h2 className="font-serif text-base font-bold text-white flex items-center gap-2">
+            <Sliders size={16} className="text-[#45bfae]" />
+            <span>Inbound Lead Routing Engine</span>
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Determines how new qualified leads from website forms, WhatsApp, and marketing campaigns are allocated to your team.
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          {/* 1. Open Pool */}
-          <div 
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+          {/* Option 1: Open Pool */}
+          <button
+            type="button"
             onClick={() => handleRoutingModeChange('OPEN_POOL')}
-            className={`p-4 rounded-xl border cursor-pointer transition-all ${
+            disabled={!canManageTeam}
+            className={`p-4 rounded-xl border text-left transition-all ${
               routingMode === 'OPEN_POOL'
-                ? 'bg-primary/10 border-primary shadow-sm'
-                : 'bg-surface-container-low border-outline-variant/20 hover:border-outline-variant/60'
+                ? 'bg-[#121c1a] border-[#248277] shadow-lg'
+                : 'bg-[#0a0d12] border-white/5 hover:border-white/10'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-primary text-[18px]">group_work</span>
-                <span>Open Pool (Self-Claim)</span>
-              </span>
-              {routingMode === 'OPEN_POOL' && (
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              )}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-bold text-xs text-white">Open Pool (First-to-Claim)</span>
+              {routingMode === 'OPEN_POOL' && <Check size={14} className="text-[#45bfae]" />}
             </div>
-            <p className="text-[11px] text-on-surface-variant leading-relaxed">
-              Every qualified lead lands in your organization's open pool. Any available Setter or Closer can review the AI assessment and claim it immediately into their personal lead sheet.
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              Leads land in the shared inbox. Any available rep can claim and begin immediate outreach.
             </p>
-          </div>
+          </button>
 
-          {/* 2. Round-Robin Auto Push */}
-          <div 
+          {/* Option 2: Round Robin */}
+          <button
+            type="button"
             onClick={() => handleRoutingModeChange('ROUND_ROBIN')}
-            className={`p-4 rounded-xl border cursor-pointer transition-all ${
+            disabled={!canManageTeam}
+            className={`p-4 rounded-xl border text-left transition-all ${
               routingMode === 'ROUND_ROBIN'
-                ? 'bg-primary/10 border-primary shadow-sm'
-                : 'bg-surface-container-low border-outline-variant/20 hover:border-outline-variant/60'
+                ? 'bg-[#121c1a] border-[#248277] shadow-lg'
+                : 'bg-[#0a0d12] border-white/5 hover:border-white/10'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-primary text-[18px]">sync_alt</span>
-                <span>Round-Robin Auto-Push</span>
-              </span>
-              {routingMode === 'ROUND_ROBIN' && (
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              )}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-bold text-xs text-white">Automated Round-Robin</span>
+              {routingMode === 'ROUND_ROBIN' && <Check size={14} className="text-[#45bfae]" />}
             </div>
-            <p className="text-[11px] text-on-surface-variant leading-relaxed">
-              The Revenue Engine automatically assigns incoming qualified leads to active, available team members sequentially, matching Closers for high-ticket deals and Setters for discovery.
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              Sequentially distributes leads across active and available closers to maintain balanced workloads.
             </p>
-          </div>
+          </button>
 
-          {/* 3. Owner Manual Assignment */}
-          <div 
+          {/* Option 3: Owner / Manager Manual */}
+          <button
+            type="button"
             onClick={() => handleRoutingModeChange('OWNER_MANUAL')}
-            className={`p-4 rounded-xl border cursor-pointer transition-all ${
+            disabled={!canManageTeam}
+            className={`p-4 rounded-xl border text-left transition-all ${
               routingMode === 'OWNER_MANUAL'
-                ? 'bg-primary/10 border-primary shadow-sm'
-                : 'bg-surface-container-low border-outline-variant/20 hover:border-outline-variant/60'
+                ? 'bg-[#121c1a] border-[#248277] shadow-lg'
+                : 'bg-[#0a0d12] border-white/5 hover:border-white/10'
             }`}
           >
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-on-surface flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-primary text-[18px]">how_to_reg</span>
-                <span>Owner Manual Assignment</span>
-              </span>
-              {routingMode === 'OWNER_MANUAL' && (
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-              )}
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="font-bold text-xs text-white">Manual Manager Assignment</span>
+              {routingMode === 'OWNER_MANUAL' && <Check size={14} className="text-[#45bfae]" />}
             </div>
-            <p className="text-[11px] text-on-surface-variant leading-relaxed">
-              Leads remain unassigned until the business owner or sales director reviews the lead's buying intent and manually selects the designated closer from the dropdown.
+            <p className="text-[11px] text-gray-400 leading-relaxed">
+              All incoming leads require explicit triaging and manual assignment by an Organization Owner or Admin.
             </p>
-          </div>
+          </button>
         </div>
       </div>
 
-      {/* Team Roster Table with Rates & Calendar Transparency */}
-      <div className="rounded-2xl bg-surface-container-lowest border border-outline-variant/30 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-outline-variant/30 flex items-center justify-between">
+      {/* Team Members Roster */}
+      <div className="p-6 md:p-8 rounded-3xl bg-[#0f1214] border border-white/5 shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-sm font-bold text-on-surface">Active Team Roster & Performance Ledger</h3>
-            <p className="text-xs text-on-surface-variant mt-0.5">
-              Transparent commission rates, Google Calendar sync status, and performance tracking
+            <h2 className="font-serif text-lg font-bold text-white flex items-center gap-2">
+              <Users size={18} className="text-[#45bfae]" />
+              <span>Workspace Members Roster ({members.length})</span>
+            </h2>
+            <p className="text-xs text-gray-400 mt-0.5">
+              Active closers, appointment setters, and workspace administrators.
             </p>
           </div>
-          <div className="text-xs text-on-surface-variant font-medium">
-            {members.length} Members Registered
+
+          {/* Search and Role Filter */}
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search size={14} className="text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search member..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 pl-9 pr-3 rounded-xl bg-[#0a0d12] text-white border border-white/10 text-xs focus:outline-none focus:border-[#45bfae] transition-colors w-40 sm:w-48"
+              />
+            </div>
+
+            <select
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+              className="h-9 px-3 rounded-xl bg-[#0a0d12] text-gray-300 border border-white/10 text-xs focus:outline-none focus:border-[#45bfae]"
+            >
+              <option value="ALL">All Roles</option>
+              <option value="CLOSER">Closers</option>
+              <option value="SETTER">Setters</option>
+              <option value="ADMIN">Admins</option>
+              <option value="OWNER">Owners</option>
+            </select>
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-surface-container-low/70 border-b border-outline-variant/30 text-secondary uppercase font-bold tracking-wider text-[11px]">
-                <th className="p-4">Team Member</th>
-                <th className="p-4">Role</th>
-                <th className="p-4">Commission Rate</th>
-                <th className="p-4">Google Calendar</th>
-                <th className="p-4">Leads / Won Deals</th>
-                <th className="p-4">Commission Earned</th>
-                <th className="p-4">Availability</th>
-                <th className="p-4 text-right">Actions</th>
+        {/* Member Table */}
+        <div className="overflow-x-auto rounded-2xl border border-white/5 bg-[#0a0d12]">
+          <table className="w-full text-left text-xs">
+            <thead className="border-b border-white/5 text-gray-400 bg-white/[0.01]">
+              <tr>
+                <th className="py-3 px-4 font-semibold">Member</th>
+                <th className="py-3 px-4 font-semibold">Role</th>
+                <th className="py-3 px-4 font-semibold">Availability</th>
+                <th className="py-3 px-4 font-semibold text-center">Assigned Leads</th>
+                <th className="py-3 px-4 font-semibold text-center">Deals Won</th>
+                <th className="py-3 px-4 font-semibold text-center">Commission</th>
+                <th className="py-3 px-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-outline-variant/20">
-              {members.map((member) => {
-                const displayName = member.user.name || member.user.email.split('@')[0];
+            <tbody className="divide-y divide-white/5 text-gray-300">
+              {filteredMembers.map((member) => {
                 const leadCount = stats.memberLeadCounts[member.user.id] || 0;
-                const mStats = stats.memberStats?.[member.user.id] || { wonCount: 0, wonVolume: 0, totalCommission: 0, activeAppointments: 0 };
-
-                let roleBadgeColor = "bg-blue-500/10 text-blue-400 border-blue-500/20";
-                if (member.role === 'CLOSER') {
-                  roleBadgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
-                } else if (member.role === 'SETTER') {
-                  roleBadgeColor = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
-                } else if (member.role === 'MANAGER') {
-                  roleBadgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/20";
-                } else if (member.role === 'ADMIN') {
-                  roleBadgeColor = "bg-purple-500/10 text-purple-400 border-purple-500/20";
-                }
-
-                const rateFormatted = member.commissionType === 'PERCENTAGE' 
-                  ? `${member.commissionRate ?? 10}%` 
-                  : `₦${Number(member.commissionRate || 0).toLocaleString()}/deal`;
+                const mStat = stats.memberStats?.[member.user.id] || {
+                  wonCount: 0,
+                  wonVolume: 0,
+                  totalCommission: 0,
+                  activeAppointments: 0,
+                };
 
                 return (
-                  <tr key={member.id} className="hover:bg-surface-container/30 transition-colors">
-                    {/* Member Details */}
-                    <td className="p-4">
+                  <tr key={member.id} className="hover:bg-white/[0.02] transition-colors">
+                    {/* User Profile */}
+                    <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs uppercase shrink-0">
-                          {displayName[0]}
+                        <div className="w-8 h-8 rounded-full bg-[#248277]/20 border border-[#248277]/40 text-[#45bfae] font-bold flex items-center justify-center text-xs">
+                          {member.user.name ? member.user.name.substring(0, 2).toUpperCase() : 'CC'}
                         </div>
                         <div>
-                          <div className="font-bold text-on-surface text-sm">{displayName}</div>
-                          <div className="text-[11px] font-mono text-on-surface-variant">{member.user.email}</div>
+                          <p className="font-bold text-white">{member.user.name || 'Team Member'}</p>
+                          <p className="text-[11px] text-gray-400 font-mono">{member.user.email}</p>
                         </div>
                       </div>
                     </td>
 
-                    {/* Role */}
-                    <td className="p-4">
-                      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-bold tracking-wide uppercase ${roleBadgeColor}`}>
-                        <span className="material-symbols-outlined text-[13px]">
-                          {member.role === 'MANAGER' ? 'manage_accounts' : member.role === 'CLOSER' ? 'verified' : member.role === 'SETTER' ? 'event_available' : 'badge'}
-                        </span>
-                        <span>{member.role}</span>
+                    {/* Role Badge */}
+                    <td className="py-3 px-4">
+                      <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${
+                        member.role === 'OWNER'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
+                          : member.role === 'ADMIN'
+                          ? 'bg-[#248277]/20 text-[#45bfae] border border-[#248277]/30'
+                          : member.role === 'CLOSER'
+                          ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                          : member.role === 'SETTER'
+                          ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30'
+                          : 'bg-white/10 text-gray-300'
+                      }`}>
+                        {member.role}
                       </span>
                     </td>
 
-                    {/* Commission Rate */}
-                    <td className="p-4">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-mono font-bold text-primary text-xs bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
-                          {rateFormatted}
-                        </span>
-                        {canManageTeam && (
-                          <button
-                            onClick={() => {
-                              setEditingMember(member);
-                              setEditRate(member.commissionRate ?? 10);
-                              setEditType((member.commissionType as any) || 'PERCENTAGE');
-                            }}
-                            className="p-1 text-on-surface-variant hover:text-primary rounded hover:bg-surface-container transition-colors"
-                            title="Edit Commission Rate"
-                          >
-                            <span className="material-symbols-outlined text-[16px]">edit</span>
-                          </button>
-                        )}
-                      </div>
-                    </td>
-
-                    {/* Google Calendar Status */}
-                    <td className="p-4">
-                      {member.googleCalendarConnected ? (
-                        <div className="flex flex-col gap-0.5">
-                          <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-400">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                            <span>Google Calendar Synced</span>
-                          </span>
-                          <span className="text-[10px] text-on-surface-variant font-mono truncate max-w-[140px]">
-                            {member.googleCalendarEmail || member.user.email}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-on-surface-variant">
-                          <span className="w-1.5 h-1.5 rounded-full bg-outline"></span>
-                          <span>Not Connected</span>
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Leads / Won Deals */}
-                    <td className="p-4">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-on-surface">{leadCount} in workflow</span>
-                        <span className="text-[11px] text-emerald-400 font-semibold">{mStats.wonCount} won ({mStats.activeAppointments} appts)</span>
-                      </div>
-                    </td>
-
-                    {/* Commission Earned */}
-                    <td className="p-4">
-                      <div className="flex flex-col">
-                        <span className="font-mono font-bold text-on-surface">₦{mStats.totalCommission.toLocaleString()}</span>
-                        <span className="text-[10px] text-on-surface-variant">from ₦{(mStats.wonVolume / 1000000).toFixed(1)}M volume</span>
-                      </div>
-                    </td>
-
                     {/* Availability Toggle */}
-                    <td className="p-4">
+                    <td className="py-3 px-4">
                       <button
-                        disabled={isPending}
-                        onClick={() => handleToggleAvailability(member.id, member.isAvailable, displayName)}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
+                        type="button"
+                        onClick={() => handleToggleAvailability(member.id, member.isAvailable, member.user.name || member.user.email)}
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold border transition-colors ${
                           member.isAvailable
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20'
-                            : 'bg-surface-container border-outline-variant/30 text-on-surface-variant hover:text-on-surface'
+                            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/25'
+                            : 'bg-gray-500/15 text-gray-400 border-gray-500/30 hover:bg-gray-500/25'
                         }`}
                       >
-                        <span className={`w-2 h-2 rounded-full ${member.isAvailable ? 'bg-emerald-400 animate-pulse' : 'bg-outline'}`}></span>
+                        <span className={`w-1.5 h-1.5 rounded-full ${member.isAvailable ? 'bg-emerald-400 animate-pulse' : 'bg-gray-400'}`}></span>
                         <span>{member.isAvailable ? 'Available' : 'Away'}</span>
                       </button>
                     </td>
 
-                    {/* Actions */}
-                    <td className="p-4 text-right">
-                      {canManageTeam && (
-                        <button
-                          disabled={isPending}
-                          onClick={() => handleRemoveMember(member.id, displayName)}
-                          className="p-1.5 text-on-surface-variant hover:text-error hover:bg-error/10 rounded-lg transition-colors"
-                          title="Remove from Workspace"
-                        >
-                          <span className="material-symbols-outlined text-[18px]">delete</span>
-                        </button>
+                    {/* Assigned Leads */}
+                    <td className="py-3 px-4 text-center font-mono font-bold text-white">
+                      {leadCount}
+                    </td>
+
+                    {/* Deals Won */}
+                    <td className="py-3 px-4 text-center">
+                      <span className="font-mono font-bold text-white">{mStat.wonCount}</span>
+                      {mStat.wonVolume > 0 && (
+                        <span className="block text-[10px] text-gray-400 font-mono">
+                          ₦{mStat.wonVolume.toLocaleString()}
+                        </span>
                       )}
+                    </td>
+
+                    {/* Commission */}
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-xs font-bold text-[#45bfae] font-mono">
+                        {member.commissionRate ? `${member.commissionRate}%` : 'Standard'}
+                      </span>
+                      {mStat.totalCommission > 0 && (
+                        <span className="block text-[10px] text-emerald-400 font-mono">
+                          ₦{mStat.totalCommission.toLocaleString()}
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-3 px-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {canManageTeam && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingMember(member);
+                              setEditRate(member.commissionRate || 10);
+                              setEditType((member.commissionType as any) || 'PERCENTAGE');
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white font-medium text-[11px] border border-white/5 transition-colors"
+                          >
+                            Commission
+                          </button>
+                        )}
+
+                        {canManageTeam && member.role !== 'OWNER' && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveMember(member.id, member.user.name || member.user.email)}
+                            className="px-2.5 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 font-medium text-[11px] border border-rose-500/20 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -501,160 +610,92 @@ export default function TeamPageClient({
         </div>
       </div>
 
-      {/* Edit Commission Rate Modal */}
-      {editingMember && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-4">
-              <div>
-                <h3 className="font-bold text-base text-on-surface">Configure Commission Rate</h3>
-                <p className="text-xs text-on-surface-variant mt-0.5">
-                  Set payout terms for {editingMember.user.name || editingMember.user.email}
-                </p>
-              </div>
-              <button 
-                onClick={() => setEditingMember(null)}
-                className="p-1 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container"
-              >
-                <span className="material-symbols-outlined text-[20px]">close</span>
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveCommission} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
-                  Commission Payout Structure
-                </label>
-                <select
-                  value={editType}
-                  onChange={(e: any) => setEditType(e.target.value)}
-                  className="w-full h-10 px-3 bg-surface-container-low text-on-surface text-xs rounded-xl border border-outline-variant/30 focus:outline-none focus:border-primary"
-                >
-                  <option value="PERCENTAGE">Percentage of Won Deal Value (%)</option>
-                  <option value="FIXED_PER_DEAL">Fixed Payout per Closed Deal (₦)</option>
-                  <option value="FIXED_PER_APPOINTMENT">Fixed Payout per Qualified Appointment (₦)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
-                  {editType === 'PERCENTAGE' ? 'Commission Rate (%)' : 'Payout Amount (₦ NGN)'}
-                </label>
-                <input
-                  type="number"
-                  step="any"
-                  value={editRate}
-                  onChange={(e) => setEditRate(Number(e.target.value))}
-                  placeholder={editType === 'PERCENTAGE' ? 'e.g. 10 or 15' : 'e.g. 50000'}
-                  className="w-full h-10 px-3 bg-surface-container-low text-on-surface text-xs rounded-xl border border-outline-variant/30 focus:outline-none focus:border-primary font-mono"
-                  required
-                />
-                <p className="text-[11px] text-on-surface-variant mt-1">
-                  {editType === 'PERCENTAGE' 
-                    ? `Whenever this rep marks a deal as WON, ${editRate}% is automatically credited to their commission ledger.`
-                    : `Rep will be credited ₦${Number(editRate).toLocaleString()} upon completion.`}
-                </p>
-              </div>
-
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/20">
-                <button
-                  type="button"
-                  onClick={() => setEditingMember(null)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isPending}
-                  className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs shadow-md transition-all active:scale-[0.98]"
-                >
-                  {isPending ? 'Saving...' : 'Save Commission Rate'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Add Team Member Modal */}
+      {/* Modal 1: Add Team Member */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-surface-container-lowest border border-outline-variant/30 rounded-2xl p-6 shadow-2xl animate-in zoom-in-95">
-            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/20 mb-4">
-              <div>
-                <h3 className="font-bold text-base text-on-surface">Add Team Member</h3>
-                <p className="text-xs text-on-surface-variant mt-0.5">
-                  Invite a Closer, Setter, or Workspace Administrator
-                </p>
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#0f1214] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6 animate-in zoom-in-95">
+            <div className="flex items-center justify-between pb-4 border-b border-white/5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#248277]/20 text-[#45bfae] flex items-center justify-center border border-[#248277]/40">
+                  <UserPlus size={18} />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-white text-base">Invite Team Member</h3>
+                  <p className="text-[11px] text-gray-400">Add a closer, setter, or manager to your workspace</p>
+                </div>
               </div>
-              <button 
+              <button
+                type="button"
                 onClick={() => setShowAddModal(false)}
-                className="p-1 text-on-surface-variant hover:text-on-surface rounded-lg hover:bg-surface-container"
+                className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/5"
               >
-                <span className="material-symbols-outlined text-[20px]">close</span>
+                <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handleAddMember} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
-                  Full Name (Optional)
-                </label>
+            {isSeatLimitReached && (
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs flex items-start gap-2.5">
+                <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold">Seat Limit Reached:</span> You are using all {maxSeats} seats under your current plan. Please upgrade to Pro in Billing to invite additional members.
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleAddMember} className="space-y-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-gray-200">Full Name</label>
                 <input
                   type="text"
+                  required
+                  placeholder="e.g. Tunde Balogun"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  placeholder="e.g. Sarah Jenkins"
-                  className="w-full h-10 px-3 bg-surface-container-low text-on-surface text-xs rounded-xl border border-outline-variant/30 focus:outline-none focus:border-primary"
+                  className="w-full h-10 px-3.5 rounded-xl bg-[#0a0d12] text-white border border-white/10 focus:outline-none focus:border-[#45bfae]"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
-                  Work Email Address
-                </label>
+              <div className="space-y-1.5">
+                <label className="font-bold text-gray-200">Work Email Address</label>
                 <input
                   type="email"
+                  required
+                  placeholder="e.g. tunde@company.com"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  placeholder="closer@company.com"
-                  className="w-full h-10 px-3 bg-surface-container-low text-on-surface text-xs rounded-xl border border-outline-variant/30 focus:outline-none focus:border-primary"
-                  required
+                  className="w-full h-10 px-3.5 rounded-xl bg-[#0a0d12] text-white border border-white/10 focus:outline-none focus:border-[#45bfae]"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-secondary mb-1">
-                  Assigned Workspace Role
-                </label>
+              <div className="space-y-1.5">
+                <label className="font-bold text-gray-200">Workspace Role</label>
                 <select
                   value={newRole}
-                  onChange={(e: any) => setNewRole(e.target.value)}
-                  className="w-full h-10 px-3 bg-surface-container-low text-on-surface text-xs rounded-xl border border-outline-variant/30 focus:outline-none focus:border-primary"
+                  onChange={(e) => setNewRole(e.target.value as any)}
+                  className="w-full h-10 px-3.5 rounded-xl bg-[#0a0d12] text-white border border-white/10 focus:outline-none focus:border-[#45bfae]"
                 >
-                  <option value="CLOSER">High-Ticket Sales Closer</option>
-                  <option value="SETTER">Appointment Setter (Discovery)</option>
-                  <option value="MANAGER">Sales & Team Manager (Manages Setters & Closers)</option>
-                  <option value="ADMIN">Organization Administrator</option>
-                  <option value="MEMBER">Standard Team Member</option>
+                  <option value="CLOSER">Closer (Conducts demos, negotiates, closes deals)</option>
+                  <option value="SETTER">Appointment Setter (Triages inbox, schedules calls)</option>
+                  <option value="MANAGER">Sales Manager (Team oversight & lead routing)</option>
+                  <option value="ADMIN">Administrator (Full workspace & billing access)</option>
+                  <option value="MEMBER">General Member</option>
                 </select>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-outline-variant/20">
+              <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/5">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-on-surface-variant hover:bg-surface-container transition-colors"
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={isPending}
-                  className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-bold text-xs shadow-md transition-all active:scale-[0.98]"
+                  disabled={isPending || isSeatLimitReached}
+                  className="px-5 py-2 rounded-xl bg-[#45bfae] text-[#0f1214] hover:bg-[#5cd4c3] font-bold shadow-md disabled:opacity-50"
                 >
-                  {isPending ? 'Adding...' : 'Confirm & Add Member'}
+                  {isPending ? 'Inviting...' : 'Confirm Invitation'}
                 </button>
               </div>
             </form>
@@ -662,6 +703,161 @@ export default function TeamPageClient({
         </div>
       )}
 
+      {/* Modal 2: Edit Commission */}
+      {editingMember && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-[#0f1214] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6 animate-in zoom-in-95">
+            <div className="flex items-center justify-between pb-4 border-b border-white/5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center border border-emerald-500/30">
+                  <DollarSign size={18} />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-white text-base">Commission Settings</h3>
+                  <p className="text-[11px] text-gray-400">{editingMember.user.name || editingMember.user.email}</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingMember(null)}
+                className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/5"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveCommission} className="space-y-4 text-xs">
+              <div className="space-y-1.5">
+                <label className="font-bold text-gray-200">Commission Structure</label>
+                <select
+                  value={editType}
+                  onChange={(e) => setEditType(e.target.value as any)}
+                  className="w-full h-10 px-3.5 rounded-xl bg-[#0a0d12] text-white border border-white/10 focus:outline-none focus:border-[#45bfae]"
+                >
+                  <option value="PERCENTAGE">Percentage of Closed Deal Volume (%)</option>
+                  <option value="FIXED_PER_DEAL">Fixed Amount Per Closed Deal (NGN)</option>
+                  <option value="FIXED_PER_APPOINTMENT">Fixed Amount Per Scheduled Demo (NGN)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="font-bold text-gray-200">
+                  {editType === 'PERCENTAGE' ? 'Commission Percentage Rate (%)' : 'Fixed Payout (NGN)'}
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max={editType === 'PERCENTAGE' ? '100' : '10000000'}
+                  step={editType === 'PERCENTAGE' ? '0.5' : '1000'}
+                  required
+                  value={editRate}
+                  onChange={(e) => setEditRate(Number(e.target.value))}
+                  className="w-full h-10 px-3.5 rounded-xl bg-[#0a0d12] text-white border border-white/10 focus:outline-none focus:border-[#45bfae] font-mono"
+                />
+              </div>
+
+              <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setEditingMember(null)}
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isPending}
+                  className="px-5 py-2 rounded-xl bg-[#45bfae] text-[#0f1214] hover:bg-[#5cd4c3] font-bold shadow-md disabled:opacity-50"
+                >
+                  {isPending ? 'Saving...' : 'Save Commission'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal 3: Role & Permissions Matrix */}
+      {showRoleMatrixModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-2xl bg-[#0f1214] border border-white/10 rounded-3xl p-6 shadow-2xl space-y-6 animate-in zoom-in-95 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-4 border-b border-white/5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#248277]/20 text-[#45bfae] flex items-center justify-center border border-[#248277]/40">
+                  <ShieldCheck size={18} />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-white text-base">Role & Permissions Matrix</h3>
+                  <p className="text-[11px] text-gray-400">Enterprise governance and access control across CloseCraft</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRoleMatrixModal(false)}
+                className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/5"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs text-gray-300">
+              {/* OWNER & ADMIN */}
+              <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white text-sm">Owner & Administrator</span>
+                  <span className="px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 text-[10px] font-bold">FULL ACCESS</span>
+                </div>
+                <p className="text-gray-400 text-[11px]">
+                  Full control over billing subscriptions, Bachs checkout, team member invites, lead routing policy, AI qualification rules, and data exports.
+                </p>
+              </div>
+
+              {/* CLOSER */}
+              <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white text-sm">Closer</span>
+                  <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">SALES CLOSING</span>
+                </div>
+                <p className="text-gray-400 text-[11px]">
+                  Access to Sales Command Centre, Unified Inbox, Deal Pipeline, scheduled video appointments, proposal creation, and personal commission tracking.
+                </p>
+              </div>
+
+              {/* SETTER */}
+              <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white text-sm">Appointment Setter</span>
+                  <span className="px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-300 text-[10px] font-bold">PROSPECT TRIAGE</span>
+                </div>
+                <p className="text-gray-400 text-[11px]">
+                  Access to incoming lead streams, WhatsApp outreach, conversation triage, calendar scheduling for closers, and setter appointment bonuses.
+                </p>
+              </div>
+
+              {/* MANAGER */}
+              <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white text-sm">Sales Operations Manager</span>
+                  <span className="px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] text-[10px] font-bold">OPERATIONS</span>
+                </div>
+                <p className="text-gray-400 text-[11px]">
+                  Team performance oversight, round-robin routing controls, call review queues, rep commission adjustments, and revenue leakage detection.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowRoleMatrixModal(false)}
+                className="px-5 py-2 rounded-xl bg-[#45bfae] text-[#0f1214] font-bold text-xs"
+              >
+                Close Matrix
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

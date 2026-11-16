@@ -350,7 +350,7 @@ export async function addTenantTeamMember(data: { name: string; email: string; r
   const caller = await db.organizationMember.findFirst({
     where: { userId: session?.user?.id, organizationId }
   });
-  if (caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
+  if (caller?.role !== 'OWNER' && caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
     throw new Error("Only organization owners and managers can add team members");
   }
 
@@ -465,7 +465,7 @@ export async function updateTenantRoutingMode(mode: 'OPEN_POOL' | 'ROUND_ROBIN' 
   const caller = await db.organizationMember.findFirst({
     where: { userId: session?.user?.id, organizationId }
   });
-  if (caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
+  if (caller?.role !== 'OWNER' && caller?.role !== 'ADMIN' && caller?.role !== 'MANAGER' && (session?.user as any)?.role !== 'SUPER_ADMIN') {
     throw new Error("Only organization owners and managers can update lead distribution");
   }
 
