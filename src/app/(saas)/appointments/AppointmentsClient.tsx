@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
-import { bookOrUpdateAppointment, updateAppointmentStatus } from '@/app/(saas)/actions';
+import { bookOrUpdateAppointment, updateAppointmentStatus, updateGoogleCalendarIntegration } from '@/app/(saas)/actions';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
 import { 
   Calendar, 
@@ -99,6 +99,20 @@ export default function AppointmentsClient({
         showToast(`Meeting status marked as ${nextStatus}.`);
       } catch (err: any) {
         alert(err.message || 'Failed to update status');
+      }
+    });
+  };
+
+  const handleToggleGoogleCalendar = () => {
+    startTransition(async () => {
+      try {
+        await updateGoogleCalendarIntegration({
+          googleCalendarConnected: !googleCalendarConnected,
+          googleCalendarEmail: googleCalendarConnected ? undefined : currentUser.email,
+        });
+        showToast(googleCalendarConnected ? 'Google Calendar disconnected.' : 'Google Calendar connected.');
+      } catch (err: any) {
+        alert(err.message || 'Failed to update calendar integration');
       }
     });
   };
@@ -508,10 +522,18 @@ export default function AppointmentsClient({
               <span className="font-mono text-gray-400 truncate max-w-[200px]">
                 {googleCalendarEmail || currentUser.email}
               </span>
-              <span className="text-emerald-400 font-bold flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <span>Active</span>
-              </span>
+              <button
+                type="button"
+                disabled={isPending}
+                onClick={handleToggleGoogleCalendar}
+                className={`px-3 py-1.5 rounded-lg font-bold text-xs transition-colors ${
+                  googleCalendarConnected
+                    ? 'bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20'
+                    : 'bg-[#45bfae] text-[#0f1214] hover:bg-[#5cd4c3]'
+                }`}
+              >
+                {googleCalendarConnected ? 'Disconnect' : 'Connect Calendar'}
+              </button>
             </div>
           </div>
 

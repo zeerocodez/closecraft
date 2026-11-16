@@ -59,6 +59,7 @@ describe('CloseCraft HQ Phase 8: Appointment Operations & Calendar Acceptance Te
     assert.match(content, /WhatsApp 24h Confirmation/, '24h confirmation reminder rule');
     assert.match(content, /SMS \/ Email 1h Flash Reminder/, '1h flash reminder rule');
     assert.match(content, /Google Calendar Synchronization/, 'Google Calendar sync integration');
+    assert.match(content, /updateGoogleCalendarIntegration/, 'Invokes server action to connect/disconnect calendar');
   });
 
   test('6. Schedule Appointment Modal captures prospect, closer, date/time, and duration', () => {
@@ -72,3 +73,4 @@ describe('CloseCraft HQ Phase 8: Appointment Operations & Calendar Acceptance Te
     assert.match(content, /bookOrUpdateAppointment/, 'Invokes server action to book and sync appointment');
   });
 });
+
