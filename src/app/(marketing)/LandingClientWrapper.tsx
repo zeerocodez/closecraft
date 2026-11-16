@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import Logo from "@/components/ui/Logo";
 import BrevoNewsletterSection from "@/components/marketing/BrevoNewsletterSection";
+import GrowthServicesSection from "@/components/growth/GrowthServicesSection";
 import type { LandingView } from "@/lib/landing/types";
 import type { EcosystemFlags } from "@/lib/ecosystem/flags";
 
@@ -317,6 +318,13 @@ export default function LandingClientWrapper({
                   <ChevronDown size={14} className="group-hover:rotate-180 transition-transform text-[#71717a]" />
                 </a>
                 <div className="absolute top-full left-0 mt-2 w-64 p-2 rounded-2xl bg-[#101010] border border-[#1f1f1f] shadow-2xl opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-150 z-50">
+                  <a
+                    href="#services-catalogue"
+                    className="block p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors group/item"
+                  >
+                    <p className="text-xs font-bold text-white group-hover/item:text-[#45bfae]">Growth Services</p>
+                    <p className="text-[11px] text-[#a1a1aa]">Ads, AI Video, Flyers, Landing Pages & VSLs</p>
+                  </a>
                   <Link
                     href="/services/lead-generation"
                     className="block p-2.5 rounded-xl hover:bg-[#1a1a1a] transition-colors group/item"
@@ -394,6 +402,9 @@ export default function LandingClientWrapper({
             </Link>
             <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="#how-it-works">
               How It Works
+            </a>
+            <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-[#45bfae] hover:bg-[#101010] rounded-lg text-sm font-semibold" href="#services-catalogue">
+              Growth Services
             </a>
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="/services/lead-generation">
               Lead Generation
@@ -934,7 +945,10 @@ export default function LandingClientWrapper({
           </div>
         </section>
 
-        {/* SECTION 4: LEAD GENERATION PRICING */}
+        {/* SECTION 4: INTRODUCTORY GROWTH SERVICES */}
+        <GrowthServicesSection />
+
+        {/* SECTION 5: LEAD GENERATION PRICING */}
         <section id="pricing" className="py-24 bg-[#080808] border-t border-[#1f1f1f] scroll-mt-24">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
             <div className="text-center space-y-4 max-w-3xl mx-auto">
