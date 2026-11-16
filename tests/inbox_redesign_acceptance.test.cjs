@@ -94,3 +94,4 @@ describe('CloseCraft HQ Phase 7: Unified Revenue Inbox & Multichannel Communicat
     assert.match(content, /Lead Intel/, 'Mobile tab for context inspector');
   });
 });
+

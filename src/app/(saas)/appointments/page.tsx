@@ -4,6 +4,11 @@ import { db } from '@/lib/db';
 import { redirect } from 'next/navigation';
 import AppointmentsClient from './AppointmentsClient';
 
+export const metadata = {
+  title: 'Appointment Operations & Calendar | CloseCraft HQ',
+  description: 'Executive sales presentations, Google Calendar synchronization, video bridges, and automated no-show prevention.',
+};
+
 export default async function AppointmentsPage() {
   const session = await auth();
   if (!session?.user) {
@@ -69,17 +74,19 @@ export default async function AppointmentsPage() {
   });
 
   return (
-    <AppointmentsClient
-      appointments={appointments}
-      leads={leads}
-      teamMembers={teamMembers}
-      currentUser={{
-        id: session.user.id,
-        name: session.user.name,
-        email: session.user.email || '',
-      }}
-      googleCalendarConnected={member?.googleCalendarConnected ?? false}
-      googleCalendarEmail={member?.googleCalendarEmail}
-    />
+    <div className="w-full h-full p-4 md:p-6 max-w-[1600px] mx-auto">
+      <AppointmentsClient
+        appointments={appointments}
+        leads={leads}
+        teamMembers={teamMembers}
+        currentUser={{
+          id: session.user.id,
+          name: session.user.name,
+          email: session.user.email || '',
+        }}
+        googleCalendarConnected={member?.googleCalendarConnected ?? false}
+        googleCalendarEmail={member?.googleCalendarEmail}
+      />
+    </div>
   );
 }
