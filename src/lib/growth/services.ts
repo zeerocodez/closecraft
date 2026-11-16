@@ -418,12 +418,14 @@ export function buildWhatsAppConsultationLink(
   reference: string,
   businessName: string,
   serviceKeys: GrowthServiceKey[],
-  contactName: string
+  contactName: string,
+  partnerName?: string | null
 ): string {
   const officialNumber = process.env.NEXT_PUBLIC_CLOSECRAFT_WHATSAPP_NUMBER || '2349026365853';
   const serviceNames = serviceKeys.map((k) => GROWTH_SERVICES[k]?.name || k).join(', ');
+  const partnerSegment = partnerName ? ` My assigned partner is ${partnerName}.` : '';
 
-  const text = `Hello CloseCraft Growth Team,\n\nI have submitted Project Brief ${reference} for ${businessName}.\n\n*Services Selected:* ${serviceNames}\n*Contact:* ${contactName}\n\nI would like to schedule our WhatsApp consultation to review the project brief and discuss the custom proposal.`;
+  const text = `Hello CloseCraft, my name is ${contactName}. I submitted project request ${reference} for ${businessName} (${serviceNames}).${partnerSegment} I would like to discuss my project requirements and next steps.`;
 
   return `https://wa.me/${officialNumber}?text=${encodeURIComponent(text)}`;
 }

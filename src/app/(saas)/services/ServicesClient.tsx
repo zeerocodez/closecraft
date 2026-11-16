@@ -208,6 +208,14 @@ export default function ServicesClient({
             <Icon name="PlusCircle" size={16} />
             <span>Add Services</span>
           </button>
+
+          <Link
+            href="/growth/projects"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high"
+          >
+            <Icon name="Layers" size={16} />
+            <span>Growth Projects</span>
+          </Link>
         </div>
       </div>
 

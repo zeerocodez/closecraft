@@ -556,6 +556,44 @@ export default function OnboardingWizardClient({
             ))}
           </div>
 
+          {/* Introductory Growth Services (Optional Multi-Select) */}
+          <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-on-surface">
+                  Are you interested in CloseCraft Concierge Growth Services? (Optional)
+                </h4>
+                <p className="text-[11px] text-on-surface-variant">
+                  Select any services you would like tailored consultation and proposals for:
+                </p>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-primary/20 text-primary font-bold">
+                Multi-Select
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 pt-1">
+              {[
+                { key: 'META_ADS', label: 'Facebook & Instagram Ads Management' },
+                { key: 'AI_FLYERS', label: 'AI Image & Flyer Creation' },
+                { key: 'AI_VIDEO', label: 'AI Video Marketing Creation' },
+                { key: 'LANDING_PAGE', label: 'High-Converting Landing Page Design' },
+                { key: 'VSL_DESIGN', label: 'Video Sales Letter (VSL) Design' },
+              ].map((svc) => (
+                <div
+                  key={svc.key}
+                  className="p-2.5 rounded-xl bg-surface-container border border-outline-variant/30 text-xs flex items-center gap-2 text-on-surface hover:border-primary/50 transition-colors"
+                >
+                  <span className="text-primary font-bold">✓</span>
+                  <span className="text-[11px] font-medium">{svc.label}</span>
+                </div>
+              ))}
+            </div>
+            <p className="text-[10px] text-on-surface-variant italic">
+              Selecting growth services preserves your existing software onboarding and unlocks custom scoped proposals inside your workspace.
+            </p>
+          </div>
+
           <div className="flex items-center justify-between pt-4 border-t border-outline-variant/30">
             <button onClick={handleBack} className="text-xs text-on-surface-variant hover:text-on-surface flex items-center gap-1">
               <Icon name="ArrowLeft" size={14} />

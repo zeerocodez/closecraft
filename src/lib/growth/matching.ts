@@ -115,7 +115,7 @@ export async function rankEligiblePartnersForProject(
 ): Promise<PartnerMatchResult[]> {
   const projectRequest = await db.projectRequest.findUnique({
     where: { id: projectRequestId },
-    include: { brief: true },
+    include: { brief: true, requestedBy: true },
   });
 
   if (!projectRequest) {
@@ -259,7 +259,7 @@ export async function assignPartnerToProjectRequest(params: {
 
   const projectRequest = await db.projectRequest.findUnique({
     where: { id: projectRequestId },
-    include: { brief: true },
+    include: { brief: true, requestedBy: true },
   });
 
   if (!projectRequest) {
@@ -296,11 +296,13 @@ export async function assignPartnerToProjectRequest(params: {
     });
 
     // Rebuild WhatsApp thread with partner context
+    const contactName = projectRequest.requestedBy?.name || 'Client';
     const businessName = projectRequest.brief?.businessName || 'Client';
     const whatsappUrl = buildWhatsAppConsultationLink(
       projectRequest.reference,
       businessName,
       projectRequest.services as GrowthServiceKey[],
+      contactName,
       partner.fullName
     );
 

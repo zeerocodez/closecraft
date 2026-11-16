@@ -32,11 +32,11 @@ export interface BachsCheckoutParams {
   organizationId: string;
   invoiceId?: string;
   engagementId?: string;
-  type?: 'SOFTWARE_SUBSCRIPTION' | 'WORKSPACE_INVOICE' | 'PILOT_ENGAGEMENT' | 'PERFORMANCE_FEE';
+  type?: 'SOFTWARE_SUBSCRIPTION' | 'WORKSPACE_INVOICE' | 'PILOT_ENGAGEMENT' | 'PERFORMANCE_FEE' | 'GROWTH_SERVICE';
   plan?: 'STARTER' | 'PRO';
   successUrl: string;
   cancelUrl: string;
-  metadata?: Record<string, string>;
+  metadata?: Record<string, any>;
 }
 
 export interface BachsCheckoutResult {
@@ -733,6 +733,82 @@ export async function processBachsWebhookEvent(event: any): Promise<{
           newState: JSON.stringify({ invoiceNumber: invoice.invoiceNumber, amount: invoice.amount, paidThrough })
         }
       }).catch(() => {});
+    }
+
+    // 4.C Fulfill Concierge Growth Service Project Request & ProjectInvoice
+    if (purchaseType === 'GROWTH_SERVICE' || metadata.projectRequestId || metadata.projectInvoiceId) {
+      let parsedMetadata: any = {};
+      try {
+        parsedMetadata = typeof invoice.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice.metadata || {});
+      } catch (_) {}
+
+      const projectRequestId = metadata.projectRequestId || parsedMetadata.projectRequestId;
+      const projectInvoiceId = metadata.projectInvoiceId || parsedMetadata.projectInvoiceId;
+
+      // Find matching ProjectInvoice
+      let projInvoice = null;
+      if (projectInvoiceId) {
+        projInvoice = await db.projectInvoice.findUnique({ where: { id: projectInvoiceId } });
+      } else if (checkoutId) {
+        projInvoice = await db.projectInvoice.findFirst({
+          where: {
+            OR: [
+              { bachsCheckoutId: checkoutId },
+              { id: checkoutId },
+            ],
+          },
+        });
+      }
+
+      if (projInvoice) {
+        await db.projectInvoice.update({
+          where: { id: projInvoice.id },
+          data: {
+            status: 'PAID',
+            paidAt: now,
+            bachsChargeId: chargeId || invoice.bachsChargeId,
+          },
+        });
+      }
+
+      const targetRequestId = projectRequestId || projInvoice?.projectRequestId;
+      if (targetRequestId) {
+        await db.projectRequest.update({
+          where: { id: targetRequestId },
+          data: {
+            status: 'IN_DELIVERY',
+          },
+        });
+
+        // Activate first milestone if any
+        const firstMilestone = await db.projectMilestone.findFirst({
+          where: { projectRequestId: targetRequestId, status: 'PENDING' },
+          orderBy: { sequenceOrder: 'asc' },
+        });
+
+        if (firstMilestone) {
+          await db.projectMilestone.update({
+            where: { id: firstMilestone.id },
+            data: { status: 'IN_PROGRESS' },
+          });
+        }
+
+        await db.auditLog.create({
+          data: {
+            organizationId: targetOrgId,
+            actorType: 'INTEGRATION',
+            action: 'PROJECT_REQUEST_PAID_IN_DELIVERY',
+            resourceType: 'PROJECT_REQUEST',
+            resourceId: targetRequestId,
+            newState: JSON.stringify({
+              invoiceNumber: invoice.invoiceNumber,
+              projectInvoiceId: projInvoice?.id,
+              amount: invoice.amount,
+              paidAt: now,
+            }),
+          },
+        }).catch(() => {});
+      }
     }
 
     // 5. Check and award Affiliate Commission if an active referral attribution exists
