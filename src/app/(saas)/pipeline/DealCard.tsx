@@ -1,17 +1,37 @@
-"use client";
+'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useTransition } from 'react';
 import { updateDealStage } from '@/app/(saas)/actions';
+import { Badge } from '@/components/ui/Badge';
+import {
+  Trophy,
+  ArrowRight,
+  Flame,
+  AlertTriangle,
+  User,
+  Sparkles,
+  CheckCircle2,
+  XCircle,
+  Clock,
+} from 'lucide-react';
 
 interface DealCardProps {
   deal: {
     id: string;
+    title?: string | null;
     amount: number;
     stage: string;
+    updatedAt?: string | Date;
+    closer?: {
+      id: string;
+      name?: string | null;
+      email?: string;
+    } | null;
     lead: {
       id: string;
       name: string;
       email: string;
+      phone?: string | null;
       buyingIntent?: number | null;
       revenueActions?: Array<{
         type: string;
@@ -25,91 +45,141 @@ interface DealCardProps {
 
 export function DealCard({ deal }: DealCardProps) {
   const [isPending, startTransition] = useTransition();
-  const [showMenu, setShowMenu] = useState(false);
 
   const nextAction = deal.lead.revenueActions?.[0];
-  const isHot = deal.lead.buyingIntent && deal.lead.buyingIntent >= 80;
+  const isHot = deal.lead.buyingIntent && deal.lead.buyingIntent >= 70;
+
+  // Stalled calculation: deal updated > 7 days ago and not won/lost
+  const isStalled =
+    deal.updatedAt &&
+    !['WON', 'LOST'].includes(deal.stage) &&
+    new Date().getTime() - new Date(deal.updatedAt).getTime() >
+      7 * 24 * 60 * 60 * 1000;
 
   function handleStageChange(newStage: string) {
-    setShowMenu(false);
     startTransition(async () => {
       try {
         await updateDealStage(deal.id, newStage);
       } catch (err) {
-        console.error("Failed to move deal:", err);
+        console.error('Failed to move deal:', err);
       }
     });
   }
 
+  const getNextStage = (current: string) => {
+    switch (current) {
+      case 'OPPORTUNITY':
+        return 'PROPOSAL';
+      case 'PROPOSAL':
+        return 'NEGOTIATION';
+      case 'NEGOTIATION':
+        return 'WON';
+      default:
+        return null;
+    }
+  };
+
+  const nextStage = getNextStage(deal.stage);
+
   return (
-    <div className={`p-3 bg-surface border rounded-lg shadow-sm hover:shadow-md transition-all relative ${
-      isPending ? 'opacity-50 pointer-events-none' : 'border-surface-container-high'
-    }`}>
-      {/* Header */}
-      <div className="flex items-start justify-between gap-1 mb-2">
-        <h3 className="font-medium text-sm font-bold text-on-surface flex items-center gap-1.5 min-w-0">
-          {isHot && (
-            <span className="w-2 h-2 rounded-full bg-error shrink-0 animate-pulse" title="High Buying Intent" />
-          )}
-          <span className="truncate" title={deal.lead.name}>{deal.lead.name}</span>
-        </h3>
-        <span className="font-semibold text-xs text-primary font-bold shrink-0">
-          ₦{(deal.amount / 1000000).toFixed(1)}M
+    <div
+      className={`p-4 rounded-2xl border transition-all space-y-3 shadow-xs ${
+        isPending
+          ? 'opacity-50 pointer-events-none'
+          : isStalled
+          ? 'bg-rose-500/[0.03] border-rose-500/30 hover:border-rose-500/50'
+          : 'bg-surface-container-low border-outline-variant/40 hover:border-primary/40'
+      }`}
+    >
+      {/* Header: Lead Name & Deal Amount */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            {isHot && (
+              <Flame size={14} className="text-amber-400 shrink-0" />
+            )}
+            <h4 className="font-bold text-sm text-on-surface truncate" title={deal.lead.name}>
+              {deal.lead.name}
+            </h4>
+          </div>
+          <p className="text-[11px] text-on-surface-variant truncate mt-0.5">
+            {deal.title || deal.lead.email}
+          </p>
+        </div>
+
+        <span className="font-mono font-extrabold text-xs text-primary shrink-0">
+          ₦{deal.amount.toLocaleString()}
         </span>
       </div>
 
-      {/* Meta */}
-      <div className="flex flex-col gap-1.5 text-on-surface-variant text-[11px]">
-        <div className="flex items-center justify-between">
-          <span className="truncate text-on-surface-variant">{deal.lead.email}</span>
-          <span className="font-semibold px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant text-[10px]">
-            Intent: {deal.lead.buyingIntent ?? 50}
-          </span>
-        </div>
+      {/* Flags & Intent Pill */}
+      <div className="flex items-center gap-1.5 flex-wrap">
+        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-surface-container border border-outline-variant/30 text-on-surface-variant font-semibold">
+          Intent: {deal.lead.buyingIntent ?? 50}%
+        </span>
 
-        {nextAction && (
-          <div className="mt-1 pt-1.5 border-t border-surface-container/60 flex items-center justify-between gap-1">
-            <span className="truncate text-secondary font-medium">
-              Action: {nextAction.type.replace(/_/g, ' ')}
-            </span>
-            <span className="material-symbols-outlined text-[13px] text-on-surface-variant">
-              {nextAction.recommendedActor === 'HUMAN' ? 'person' : 'smart_toy'}
-            </span>
-          </div>
+        {isStalled && (
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300 font-bold flex items-center gap-1">
+            <AlertTriangle size={10} />
+            Stalled &gt;7d
+          </span>
+        )}
+
+        {deal.closer && (
+          <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant flex items-center gap-1">
+            <User size={10} />
+            {deal.closer.name || deal.closer.email?.split('@')[0]}
+          </span>
         )}
       </div>
 
-      {/* Stage Transition Control Bar */}
-      <div className="mt-2.5 pt-2 border-t border-surface-container/50 flex items-center justify-between gap-1">
-        <span className="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider">
+      {/* Next Best Action */}
+      {nextAction && (
+        <div className="p-2 rounded-xl bg-surface-container/70 border border-outline-variant/20 flex items-center justify-between gap-1 text-[11px]">
+          <span className="truncate text-on-surface-variant font-medium">
+            Action: <strong className="text-on-surface">{nextAction.type.replace(/_/g, ' ')}</strong>
+          </span>
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/10 text-primary font-bold shrink-0">
+            {nextAction.recommendedActor}
+          </span>
+        </div>
+      )}
+
+      {/* Stage Actions */}
+      <div className="pt-2 border-t border-outline-variant/20 flex items-center justify-between gap-1.5">
+        <span className="text-[10px] font-mono uppercase font-bold text-on-surface-variant">
           Stage:
         </span>
-        <div className="flex items-center gap-1">
-          {deal.stage === 'OPPORTUNITY' && (
+
+        <div className="flex items-center gap-1.5 flex-wrap justify-end">
+          {nextStage && (
             <button
-              onClick={() => handleStageChange('PROPOSAL')}
+              onClick={() => handleStageChange(nextStage)}
               disabled={isPending}
-              className="px-2 py-0.5 rounded bg-surface-container hover:bg-surface-container-high text-on-surface text-[10px] font-semibold transition-colors flex items-center gap-1"
+              className="px-2.5 py-1 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface text-[11px] font-bold border border-outline-variant/30 flex items-center gap-1 transition-colors"
             >
-              <span>To Proposal</span>
-              <span className="material-symbols-outlined text-[11px]">arrow_forward</span>
+              <span>{nextStage === 'WON' ? 'Close Won' : `To ${nextStage.toLowerCase()}`}</span>
+              <ArrowRight size={11} />
             </button>
           )}
 
-          {deal.stage === 'PROPOSAL' && (
+          {deal.stage !== 'WON' && deal.stage !== 'LOST' && (
             <>
               <button
                 onClick={() => handleStageChange('WON')}
                 disabled={isPending}
-                className="px-2 py-0.5 rounded bg-primary text-on-primary hover:bg-primary-container text-[10px] font-bold transition-colors flex items-center gap-0.5"
+                className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1 transition-colors"
+                title="Mark Closed-Won"
               >
-                <span className="material-symbols-outlined text-[11px]">trophy</span>
+                <Trophy size={11} />
                 <span>Won</span>
               </button>
+
               <button
                 onClick={() => handleStageChange('LOST')}
                 disabled={isPending}
-                className="px-1.5 py-0.5 rounded bg-surface-container hover:bg-error-container hover:text-error text-on-surface-variant text-[10px] font-semibold transition-colors"
+                className="px-2 py-1 rounded-lg bg-surface-container hover:bg-rose-500/20 text-on-surface-variant hover:text-rose-300 text-[11px] font-semibold transition-colors"
+                title="Mark Lost"
               >
                 Lost
               </button>
@@ -117,16 +187,11 @@ export function DealCard({ deal }: DealCardProps) {
           )}
 
           {deal.stage === 'WON' && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary-container/20 text-primary text-[10px] font-bold">
-              <span className="material-symbols-outlined text-[12px]">check_circle</span>
-              <span>Closed Won</span>
-            </span>
+            <Badge variant="success" dot>Closed-Won</Badge>
           )}
 
           {deal.stage === 'LOST' && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-error-container text-on-error-container text-[10px] font-bold">
-              <span>Lost</span>
-            </span>
+            <Badge variant="destructive">Lost</Badge>
           )}
         </div>
       </div>

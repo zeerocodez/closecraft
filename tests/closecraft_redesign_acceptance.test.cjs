@@ -116,3 +116,4 @@ describe('CloseCraft HQ Phase 4: Customer Experience & Growth Services Overhaul'
     assert.match(clientContent, /GrowthReceiptModal/, 'Official verified receipts');
   });
 });
+
