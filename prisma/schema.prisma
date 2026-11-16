@@ -46,6 +46,8 @@ model User {
   salesPlaybooks            SalesPlaybook[]
   affiliateProfile          AffiliateProfile?
   staffProfile              StaffProfile?
+  projectRequests           ProjectRequest[]  @relation("UserProjectRequests")
+  createdProposals          ProjectProposal[] @relation("UserProposals")
 }
 
 model Organization {
@@ -97,6 +99,8 @@ model Organization {
   clientServices      ClientService[]
   deliveryTasks       ServiceDeliveryTask[]
   referralAttribution ReferralAttribution?
+  projectRequests     ProjectRequest[]      @relation("OrgProjectRequests")
+  projectInvoices     ProjectInvoice[]      @relation("OrgProjectInvoices")
 
   // LMS Relations
   studentProfiles StudentProfile[]
@@ -1017,6 +1021,7 @@ model ProfessionalProfile {
   engagements              PilotEngagement[]
   payables                 ProfessionalPayable[]
   qualityReviews           CallQualityReview[]
+  assignedProjects         ProjectRequest[]       @relation("PartnerProjectRequests")
 }
 
 model ClientOfferReadiness {
@@ -2328,6 +2333,311 @@ model ServiceDeliveryTask {
   @@index([assignedStaffId])
   @@index([status])
   @@index([dueDate])
+}
+
+// -----------------------------------------------------------------------------
+// BUSINESS GROWTH PLATFORM — CONCIERGE SERVICES
+// Extends CloseCraft to support consultation-based introductory services:
+//   ADS_MANAGEMENT, AI_FLYER_DESIGN, AI_VIDEO_CREATION, LANDING_PAGE_DESIGN, VSL_DESIGN
+// Customer journey: Select → Brief → Assign → WhatsApp → Propose → Approve → Invoice → Deliver
+// -----------------------------------------------------------------------------
+
+// Enumeration of growth platform service types
+// Never use hardcoded prices; pricing is derived post-brief via ProjectProposal
+enum GrowthServiceType {
+  ADS_MANAGEMENT       // Facebook & Instagram Ads Management
+  AI_FLYER_DESIGN      // AI Image & Flyer Creation
+  AI_VIDEO_CREATION    // AI Marketing Video Production
+  LANDING_PAGE_DESIGN  // High-Converting Landing Page Design
+  VSL_DESIGN           // Video Sales Letter Design
+}
+
+// Full lifecycle status for a consolidated multi-service client project request
+enum ProjectRequestStatus {
+  PENDING_ASSIGNMENT   // Submitted by client; awaiting operator/partner assignment
+  ASSIGNED             // Partner assigned; WhatsApp consultation not yet initiated
+  CONSULTING           // WhatsApp consultation in progress
+  PROPOSAL_SENT        // Scoped proposal issued to client
+  PROPOSAL_APPROVED    // Client accepted the proposal
+  PROPOSAL_REJECTED    // Client declined; operator follows up
+  INVOICED             // Bachs invoice generated and issued to client
+  PAID                 // Payment confirmed via HMAC-verified webhook
+  IN_DELIVERY          // Work in progress (milestones active)
+  COMPLETED            // All milestones approved by client
+  CANCELLED            // Cancelled before delivery
+}
+
+// Proposal lifecycle enum
+enum ProposalStatus {
+  DRAFT     // Operator/partner building the proposal
+  SENT      // Proposal delivered to client for review
+  ACCEPTED  // Client approved; triggers invoice creation
+  REJECTED  // Client declined; available for revision
+  EXPIRED   // Exceeded validUntil date without a client decision
+}
+
+// Priority tiers for project brief urgency signalling
+enum ProjectUrgency {
+  STANDARD  // Normal SLA (14–21 days delivery)
+  HIGH      // Priority queue (7–14 days delivery)
+  CRITICAL  // Expedited (under 7 days; subject to availability)
+}
+
+// Delivery phase status for individual milestones within a project
+enum MilestoneStatus {
+  PENDING      // Not yet started
+  IN_PROGRESS  // Partner is actively working on this milestone
+  SUBMITTED    // Deliverable proof uploaded; awaiting review
+  REVISION     // Client or operator requested changes
+  APPROVED     // Client signed off on this milestone
+}
+
+// -----------------------------------------------------------------------------
+// PROJECT REQUEST — consolidated multi-service enquiry per client organization
+// -----------------------------------------------------------------------------
+
+model ProjectRequest {
+  id              String               @id @default(cuid())
+  reference       String               @unique // e.g. CC-PR-2026-XXXX — human-readable reference
+
+  // Tenant boundary — NEVER expose cross-organization data
+  organizationId  String
+  organization    Organization         @relation("OrgProjectRequests", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // The User who submitted the project request (workspace owner or admin)
+  requestedById   String
+  requestedBy     User                 @relation("UserProjectRequests", fields: [requestedById], references: [id])
+
+  // Bundle of selected services; must contain at least one item
+  services        GrowthServiceType[]
+
+  status          ProjectRequestStatus @default(PENDING_ASSIGNMENT)
+
+  // Partner assignment — set by operator after brief review
+  assignedPartnerId String?
+  assignedPartner   ProfessionalProfile? @relation("PartnerProjectRequests", fields: [assignedPartnerId], references: [id], onDelete: SetNull)
+  assignedAt        DateTime?
+
+  // WhatsApp concierge consultation tracking
+  whatsappThreadUrl  String?   // Deep link with prefilled context
+  consultationNotes  String?   // Operator logs of the consultation outcome
+  consultedAt        DateTime? // Timestamp when consultation was marked complete
+
+  // Operator internal notes and SLA tracking
+  operatorNotes    String?
+  slaBreachedAt    DateTime? // Set if no assignment within 30 minutes of submission
+
+  // Relations
+  brief            ProjectBrief?
+  proposals        ProjectProposal[]
+  projectInvoices  ProjectInvoice[]
+  milestones       ProjectMilestone[]
+
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+
+  @@index([organizationId, status])
+  @@index([assignedPartnerId])
+  @@index([reference])
+  @@index([status])
+  @@index([createdAt])
+}
+
+// -----------------------------------------------------------------------------
+// PROJECT BRIEF — personalised project questionnaire per request
+// Collected after service selection via progressive disclosure UI
+// -----------------------------------------------------------------------------
+
+model ProjectBrief {
+  id               String         @id @default(cuid())
+  projectRequestId String         @unique
+  projectRequest   ProjectRequest @relation(fields: [projectRequestId], references: [id], onDelete: Cascade)
+
+  // ——— Business Profile ———
+  businessName     String
+  industry         String
+  businessOverview String         @db.Text
+  websiteUrl       String?
+  socialLinks      String[]       @default([])
+
+  // ——— Core Objectives ———
+  primaryGoal       String        @db.Text
+  currentBottleneck String        @db.Text
+  targetAudience    String        @db.Text
+  promotedProducts  String        @db.Text
+  successDefinition String        @db.Text
+
+  // ——— Service-Specific Dynamic Parameters ———
+  // Stored as JSON to flexibly handle per-service question sets without schema
+  // bloat. Validated at the application layer via Zod before persistence.
+  // Examples: { adsBudget: "₦150,000/mo", preferredPlatforms: ["Facebook"],
+  //   videoTone: "Professional", vslAngle: "Problem-Agitate-Solution" }
+  serviceParameters Json          @default("{}")
+
+  // ——— Timeline & Delivery Preferences ———
+  targetLaunchDate  DateTime?
+  urgency           ProjectUrgency @default(STANDARD)
+
+  // ——— Communication Preferences ———
+  preferredContactMethod String?  // "WhatsApp" | "Email" | "Phone"
+  availabilityWindow     String?  // e.g. "Weekdays 9am–5pm WAT"
+
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+}
+
+// -----------------------------------------------------------------------------
+// PROJECT PROPOSAL — scoped, itemised commercial proposal
+// Built by operator/partner AFTER WhatsApp consultation.
+// Client must accept before a Bachs invoice is generated.
+// NO fixed prices are ever displayed before this stage.
+// -----------------------------------------------------------------------------
+
+model ProjectProposal {
+  id               String          @id @default(cuid())
+  proposalNumber   String          @unique // e.g. CC-PROP-2026-XXXX
+
+  projectRequestId String
+  projectRequest   ProjectRequest  @relation(fields: [projectRequestId], references: [id], onDelete: Cascade)
+
+  // The CloseCraft operator or partner who authored the proposal
+  createdById      String
+  createdBy        User            @relation("UserProposals", fields: [createdById], references: [id])
+
+  title            String
+  scopeSummary     String          @db.Text
+  
+  // Financial summary — computed from line items; stored for quick reads
+  totalAmount      Decimal         @db.Decimal(14, 2)
+  currency         String          @default("NGN")
+  
+  status           ProposalStatus  @default(DRAFT)
+
+  // Timeline
+  estimatedDays    Int             @default(14)
+  validUntil       DateTime        // Proposal expires if not accepted by this date
+
+  // Client decision audit
+  clientAcceptedAt       DateTime?
+  clientRejectionReason  String?
+  revisionHistory        String?   // JSON array of revision summaries for auditability
+
+  // Linked invoice — set only once proposal is accepted and invoice generated
+  projectInvoiceId String?         @unique
+
+  lineItems        ProposalLineItem[]
+  projectInvoice   ProjectInvoice?   @relation(fields: [projectInvoiceId], references: [id], onDelete: SetNull)
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([projectRequestId, status])
+  @@index([proposalNumber])
+  @@index([status])
+}
+
+// -----------------------------------------------------------------------------
+// PROPOSAL LINE ITEM — individual service deliverables within a proposal
+// -----------------------------------------------------------------------------
+
+model ProposalLineItem {
+  id          String          @id @default(cuid())
+  proposalId  String
+  proposal    ProjectProposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+
+  serviceType  GrowthServiceType
+  title        String
+  description  String          @db.Text
+  quantity     Int             @default(1)
+  unitPrice    Decimal         @db.Decimal(14, 2)
+  totalPrice   Decimal         @db.Decimal(14, 2)
+  deliverables String[]        @default([]) // Human-readable checklist of included outputs
+
+  sortOrder    Int             @default(0)  // Display order within proposal
+
+  createdAt    DateTime        @default(now())
+
+  @@index([proposalId])
+}
+
+// -----------------------------------------------------------------------------
+// PROJECT INVOICE — purpose-built invoice linking a proposal to a Bachs payment
+// Bridges ProjectProposal → BachsInvoice without modifying the payment engine.
+// Payment webhook fulfillment remains HMAC-SHA256 verified and RLS-protected.
+// -----------------------------------------------------------------------------
+
+model ProjectInvoice {
+  id               String         @id @default(cuid())
+  invoiceNumber    String         @unique // e.g. CC-INV-PR-XXXX
+
+  projectRequestId String
+  projectRequest   ProjectRequest @relation(fields: [projectRequestId], references: [id], onDelete: Cascade)
+
+  // Mirror of approved proposal financials (locked at time of acceptance)
+  totalAmount      Decimal        @db.Decimal(14, 2)
+  currency         String         @default("NGN")
+
+  // Bachs payment gateway integration fields
+  bachsCheckoutId  String?        @unique
+  bachsCheckoutUrl String?
+  bachsChargeId    String?
+
+  status           String         @default("ISSUED") // ISSUED, PAID, REFUNDED, CANCELLED
+  paidAt           DateTime?
+  
+  // The organization responsible for payment
+  organizationId   String
+  organization     Organization   @relation("OrgProjectInvoices", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Linked proposal (source of truth for scope and pricing)
+  proposal         ProjectProposal?
+
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@index([projectRequestId])
+  @@index([organizationId])
+  @@index([status])
+  @@index([bachsCheckoutId])
+}
+
+// -----------------------------------------------------------------------------
+// PROJECT MILESTONE — ordered delivery stages per project
+// Partners upload proof; clients sign off per milestone.
+// Human approval required at each stage — AI never auto-approves.
+// -----------------------------------------------------------------------------
+
+model ProjectMilestone {
+  id               String          @id @default(cuid())
+  projectRequestId String
+  projectRequest   ProjectRequest  @relation(fields: [projectRequestId], references: [id], onDelete: Cascade)
+
+  // The service category this milestone belongs to
+  serviceType      GrowthServiceType
+
+  title            String
+  description      String?         @db.Text
+  sequenceOrder    Int             @default(1) // Ordered delivery sequence
+
+  status           MilestoneStatus @default(PENDING)
+
+  // Partner deliverable submission
+  proofUrl         String?         // Link to asset, shared folder, or Loom review
+  submittedAt      DateTime?
+
+  // Client/operator review
+  reviewNotes      String?
+  reviewedByUserId String?
+  clientFeedback   String?
+  clientApproved   Boolean         @default(false)
+  completedAt      DateTime?
+
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([projectRequestId, status])
+  @@index([serviceType])
+  @@index([sequenceOrder])
 }
 
 // -----------------------------------------------------------------------------
