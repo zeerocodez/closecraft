@@ -28,6 +28,7 @@ export default function OperatorDashboardClient({
   staffProfiles = [],
   deliveryTasks = [],
   clientServices = [],
+  growthProjects = [],
   performanceMetrics = {
     totalWonDeals: 0,
     totalClosedRevenue: 0,
@@ -46,9 +47,10 @@ export default function OperatorDashboardClient({
   staffProfiles?: any[];
   deliveryTasks?: any[];
   clientServices?: any[];
+  growthProjects?: any[];
   performanceMetrics?: any;
 }) {
-  const [activeTab, setActiveTab] = useState<'workforce' | 'serviceRequests' | 'qualifications' | 'requests' | 'engagements' | 'professionals' | 'finance'>('workforce');
+  const [activeTab, setActiveTab] = useState<'growthProjects' | 'workforce' | 'serviceRequests' | 'qualifications' | 'requests' | 'engagements' | 'professionals' | 'finance'>('growthProjects');
 
   // Service Requests state
   const [selectedServiceRequest, setSelectedServiceRequest] = useState<any | null>(null);
@@ -369,6 +371,24 @@ export default function OperatorDashboardClient({
       {/* Tabs */}
       <div className="flex flex-wrap items-center gap-2 border-b border-outline-variant/20 pb-2">
         <button
+          onClick={() => setActiveTab('growthProjects')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === 'growthProjects'
+              ? 'bg-primary-container text-primary-fixed'
+              : 'text-on-surface-variant hover:bg-surface-container-high'
+          }`}
+        >
+          <Icon name="Layers" size={16} />
+          <span>Growth Concierge</span>
+          <span className="text-xs px-1.5 py-0.2 rounded-full bg-surface-container-highest">
+            {growthProjects.length}
+          </span>
+          {growthProjects.some((gp: any) => gp.status === 'PENDING_ASSIGNMENT' && !gp.assignedPartnerId) && (
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" title="Pending partner assignments" />
+          )}
+        </button>
+
+        <button
           onClick={() => setActiveTab('workforce')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-sm font-medium transition-colors ${
             activeTab === 'workforce'
@@ -473,6 +493,119 @@ export default function OperatorDashboardClient({
           </span>
         </button>
       </div>
+
+      {/* Tab: Growth Concierge Projects */}
+      {activeTab === 'growthProjects' && (
+        <div className="space-y-6 animate-in fade-in duration-150">
+          {/* Header Stats */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30">
+              <span className="text-xs text-on-surface-variant font-medium">Total Requests</span>
+              <p className="text-2xl font-bold font-mono text-on-surface mt-1">{growthProjects.length}</p>
+            </div>
+            <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30">
+              <span className="text-xs text-on-surface-variant font-medium">Pending Assignment</span>
+              <p className="text-2xl font-bold font-mono text-amber-400 mt-1">
+                {growthProjects.filter((gp: any) => gp.status === 'PENDING_ASSIGNMENT').length}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30">
+              <span className="text-xs text-on-surface-variant font-medium">In Delivery</span>
+              <p className="text-2xl font-bold font-mono text-primary mt-1">
+                {growthProjects.filter((gp: any) => gp.status === 'IN_DELIVERY').length}
+              </p>
+            </div>
+            <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30">
+              <span className="text-xs text-on-surface-variant font-medium">Completed</span>
+              <p className="text-2xl font-bold font-mono text-emerald-400 mt-1">
+                {growthProjects.filter((gp: any) => gp.status === 'COMPLETED').length}
+              </p>
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-lowest overflow-hidden">
+            <div className="p-4 border-b border-outline-variant/20 flex items-center justify-between">
+              <h3 className="font-semibold text-sm text-on-surface">Client Growth Concierge Requests</h3>
+              <a
+                href="/api/growth/sla"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-mono text-primary hover:underline flex items-center gap-1"
+              >
+                <span>30-Min SLA Audit Endpoint</span>
+                <Icon name="ExternalLink" size={12} />
+              </a>
+            </div>
+
+            {growthProjects.length === 0 ? (
+              <div className="p-8 text-center text-xs text-on-surface-variant">
+                No growth service project requests submitted yet.
+              </div>
+            ) : (
+              <div className="divide-y divide-outline-variant/20 overflow-x-auto">
+                {growthProjects.map((proj: any) => {
+                  const minutesAgo = Math.floor((Date.now() - new Date(proj.createdAt).getTime()) / 60000);
+                  const isPending = proj.status === 'PENDING_ASSIGNMENT';
+                  const isSlaBreached = isPending && minutesAgo > 30;
+
+                  return (
+                    <div key={proj.id} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs hover:bg-surface-container-low transition-colors">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-bold text-primary">{proj.reference}</span>
+                          <span className="text-on-surface font-semibold">{proj.brief?.businessName || proj.organization?.name}</span>
+                          <span className="px-2 py-0.5 rounded-full bg-surface-container text-[10px] font-mono font-bold text-on-surface-variant">
+                            {proj.status}
+                          </span>
+                          {isSlaBreached && (
+                            <span className="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-400 font-bold text-[10px] border border-rose-500/40 animate-pulse">
+                              SLA BREACHED ({minutesAgo}m)
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2 flex-wrap text-on-surface-variant text-[11px]">
+                          <span>Services: {proj.services.map((s: string) => s.replace(/_/g, ' ')).join(', ')}</span>
+                          <span>·</span>
+                          <span>Urgency: {proj.brief?.urgency || 'STANDARD'}</span>
+                          <span>·</span>
+                          <span>Submitted {new Date(proj.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        {proj.assignedPartner && (
+                          <span className="text-[11px] text-on-surface-variant font-medium">
+                            Partner: <strong className="text-on-surface">{proj.assignedPartner.fullName}</strong>
+                          </span>
+                        )}
+
+                        {proj.whatsappThreadUrl && (
+                          <a
+                            href={proj.whatsappThreadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-lg bg-[#25D366]/20 text-[#25D366] hover:bg-[#25D366]/30 font-bold text-xs flex items-center gap-1 border border-[#25D366]/40 transition-colors"
+                          >
+                            <span>WhatsApp</span>
+                          </a>
+                        )}
+
+                        <a
+                          href={`/growth/projects/${proj.reference}`}
+                          className="px-3.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-medium text-xs transition-colors"
+                        >
+                          View Project Hub
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Tab: Remote Operations & Workforce */}
       {activeTab === 'workforce' && (

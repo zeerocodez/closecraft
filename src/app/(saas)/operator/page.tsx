@@ -34,6 +34,19 @@ export default async function OperatorPage() {
     }
   });
 
+  // Fetch Growth Concierge Project Requests
+  const growthProjects = await db.projectRequest.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: {
+      brief: true,
+      assignedPartner: true,
+      organization: { select: { id: true, name: true } },
+      proposals: { orderBy: { createdAt: 'desc' } },
+      milestones: { orderBy: { sequenceOrder: 'asc' } },
+      projectInvoices: { orderBy: { createdAt: 'desc' } },
+    },
+  });
+
   // Fetch all pilot engagements
   const engagements = await db.pilotEngagement.findMany({
     orderBy: { createdAt: 'desc' },
@@ -166,6 +179,7 @@ export default async function OperatorPage() {
         staffProfiles={staffProfiles as any}
         deliveryTasks={deliveryTasks as any}
         clientServices={clientServices as any}
+        growthProjects={growthProjects as any}
         performanceMetrics={{
           totalWonDeals,
           totalClosedRevenue,
