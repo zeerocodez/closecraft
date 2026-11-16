@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { BookOpen, Users, Settings, Plus, BarChart2, CheckSquare, PlayCircle, BrainCircuit } from 'lucide-react';
+import { BookOpen, Users, Settings, Plus, BarChart2, CheckSquare, PlayCircle, BrainCircuit, GripVertical } from 'lucide-react';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
@@ -133,7 +133,7 @@ export default async function DSSAdminPage() {
  <div key={mod.id} className="bg-[#0a0d12] border border-white/5 rounded-xl overflow-hidden">
  <div className="p-4 border-b border-white/5 flex items-center justify-between group cursor-pointer hover:bg-white/5 transition-colors">
  <div className="flex items-center gap-3">
- <span className="material-symbols-outlined text-gray-600 group-hover:text-gray-400 transition-colors">drag_indicator</span>
+ <GripVertical size={16} className="text-gray-600 group-hover:text-gray-400 transition-colors" />
  <h4 className="font-bold text-white text-sm">Module {index + 1}: {mod.title}</h4>
  </div>
  <span className="text-xs text-gray-500">{mod.lessons.length} Lessons</span>
