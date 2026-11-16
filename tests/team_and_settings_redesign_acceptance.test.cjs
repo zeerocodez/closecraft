@@ -105,3 +105,4 @@ describe('CloseCraft HQ Phase 10: Settings, Team Management & User Roles Accepta
     assert.match(content, /updateMemberCommission/, 'Commission update action');
   });
 });
+
