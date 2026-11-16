@@ -427,3 +427,4 @@ export function buildWhatsAppConsultationLink(
 
   return `https://wa.me/${officialNumber}?text=${encodeURIComponent(text)}`;
 }
+

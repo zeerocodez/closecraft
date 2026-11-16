@@ -191,3 +191,4 @@ describe('CloseCraft Growth Platform Phase 2: Service Selection & Project Brief 
     assert.match(landingContent, /#services-catalogue/);
   });
 });
+
