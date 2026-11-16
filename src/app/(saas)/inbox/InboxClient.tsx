@@ -3,345 +3,685 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
+import { 
+  MessageSquare, 
+  Send, 
+  Sparkles, 
+  Clock, 
+  User, 
+  Phone, 
+  Mail, 
+  Globe, 
+  Building2, 
+  CheckCircle2, 
+  AlertCircle, 
+  ArrowRight, 
+  ExternalLink, 
+  FileText, 
+  Calendar, 
+  DollarSign, 
+  Layers, 
+  Bot, 
+  UserCheck, 
+  Play, 
+  Pause, 
+  Flame,
+  Search,
+  Check
+} from 'lucide-react';
 
-export default function InboxClient({ initialLeads }: { initialLeads: any[] }) {
- const router = useRouter();
- const [activeFilter, setActiveFilter] = useState<'ALL' | 'HANDOFF' | 'HOT'>('ALL');
- const [activeLeadId, setActiveLeadId] = useState(initialLeads[0]?.id || null);
- const [isSending, setIsSending] = useState(false);
- 
- // Filter leads based on the active queue
- const filteredLeads = initialLeads.filter(lead => {
- if (activeFilter === 'HOT') return lead.buyingIntent && lead.buyingIntent > 90;
- 
- if (activeFilter === 'HANDOFF') {
- // Check if there is an unresolved human handoff or if the last message is from the prospect
- const latestMsg = lead.conversations?.[0]?.messages?.[0];
- const needsHuman = lead.status === 'ENGAGED' || latestMsg?.senderType === 'PROSPECT';
- return needsHuman;
- }
- 
- return true;
- });
+interface InboxClientProps {
+  initialLeads: any[];
+}
 
- // Ensure activeLeadId is valid within the filtered list, otherwise default to the first
- let currentActiveId = activeLeadId;
- if (!filteredLeads.find(l => l.id === currentActiveId)) {
- currentActiveId = filteredLeads[0]?.id || null;
- }
+export default function InboxClient({ initialLeads }: InboxClientProps) {
+  const router = useRouter();
 
- const activeLead = filteredLeads.find(l => l.id === currentActiveId);
- const activeDeal = activeLead?.deals?.[0];
- const activeDealAmount = activeDeal ? `₦${(activeDeal.amount / 1000000).toFixed(1)}M ACV` : 'No Deal';
+  // Filters & State
+  const [activeChannelFilter, setActiveChannelFilter] = useState<'ALL' | 'WHATSAPP' | 'EMAIL' | 'WEB' | 'HANDOFF' | 'HOT'>('ALL');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeLeadId, setActiveLeadId] = useState<string | null>(initialLeads[0]?.id || null);
+  const [composerText, setComposerText] = useState('');
+  const [isSending, setIsSending] = useState(false);
+  const [mobileTab, setMobileTab] = useState<'LIST' | 'CHAT' | 'CONTEXT'>('LIST');
 
- // For the MVP, we just render the first conversation of the active lead
- const activeConversation = activeLead?.conversations?.[0];
- const messages = activeConversation?.messages || [];
- 
- const activeNextAction = activeLead?.revenueActions?.[0];
+  // Human Takeover / AI Pause state per conversation
+  const [pausedAiLeads, setPausedAiLeads] = useState<Record<string, boolean>>({});
 
- return (
- <div className="grid grid-cols-12 gap-3 flex-1 overflow-hidden pb-4 h-[calc(100vh-140px)]">
- 
- {/* PANE 1: Conversation List (28% ~ col-span-3) */}
- <section className="col-span-12 lg:col-span-4 xl:col-span-3 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container overflow-hidden h-full">
- <div className="p-3 bg-surface-container-lowest border-b border-surface-container">
- <div className="flex items-center justify-between mb-2">
- <span className="text-xs font-semibold uppercase uppercase text-on-surface-variant">Live Triage</span>
- <span className="text-xs font-semibold uppercase px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">{filteredLeads.length} Queued</span>
- </div>
- <div className="flex items-center gap-1 overflow-x-auto pb-1 scrollbar-none text-nowrap">
- <button 
- onClick={() => setActiveFilter('ALL')}
- className={`px-2.5 py-1 rounded-lg text-xs font-semibold uppercase font-bold transition-all shadow-sm ${activeFilter === 'ALL' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'}`}
- >
- All ({initialLeads.length})
- </button>
- <button 
- onClick={() => setActiveFilter('HANDOFF')}
- className={`px-2.5 py-1 rounded-lg text-xs font-semibold uppercase font-bold transition-all shadow-sm ${activeFilter === 'HANDOFF' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'}`}
- >
- Human Handoff ({initialLeads.filter(l => l.status === 'ENGAGED' || l.conversations?.[0]?.messages?.[0]?.senderType === 'PROSPECT').length})
- </button>
- <button 
- onClick={() => setActiveFilter('HOT')}
- className={`px-2.5 py-1 rounded-lg text-xs font-semibold uppercase font-bold transition-all shadow-sm flex items-center gap-1 ${activeFilter === 'HOT' ? 'bg-error-container text-on-error-container' : 'bg-surface-container text-on-surface-variant'}`}
- >
- <span className={`w-1.5 h-1.5 rounded-full ${activeFilter === 'HOT' ? 'bg-error' : 'bg-on-surface-variant'}`}></span>
- Hot ({initialLeads.filter(l => l.buyingIntent && l.buyingIntent > 90).length})
- </button>
- </div>
- </div>
- 
- <div className="flex-1 overflow-y-auto divide-y divide-surface-container-high/40 p-2 space-y-1 bg-surface-container-low">
- {filteredLeads.map((lead) => {
- const latestMsg = lead.conversations?.[0]?.messages?.[0];
- const deal = lead.deals?.[0];
- const dealAmount = deal ? `₦${(deal.amount / 1000000).toFixed(1)}M` : 'No Deal';
- const isActive = lead.id === currentActiveId;
- const isHot = lead.buyingIntent && lead.buyingIntent > 90;
+  // Quick Response Presets
+  const quickTemplates = [
+    { label: 'Book Demo 📅', text: 'Hi! Let’s schedule a brief 15-minute walkthrough to review your revenue targets. What time works best for you this week?' },
+    { label: 'Send Scoped Quote 📄', text: 'Thanks for clarifying your requirements. I have prepared our verified scope and proposal for your review. Would you like me to share the link here?' },
+    { label: 'Diagnose Objection 🎯', text: 'Completely understand your perspective. To make sure we address your exact hesitation, is your primary concern around implementation timeline or ROI velocity?' },
+    { label: 'Request WhatsApp Call 📞', text: 'Are you available for a quick 5-minute WhatsApp audio call right now to align on next steps?' }
+  ];
 
- return (
- <article 
- key={lead.id} 
- onClick={() => setActiveLeadId(lead.id)}
- className={`p-2.5 rounded-lg ${isActive ? 'bg-surface-container-lowest shadow-sm border-l-4 border-primary relative overflow-hidden' : 'bg-surface-container-lowest/60 hover:bg-surface-container-lowest cursor-pointer border border-transparent'}`}
- >
- <div className="flex items-start justify-between gap-1">
- <div className="flex items-center gap-1 min-w-0">
- {isHot && <span className="w-2 h-2 rounded-full bg-error shrink-0"></span>}
- <span className="font-medium text-sm text-on-surface font-bold truncate">{lead.name}</span>
- </div>
- {latestMsg && (
- <span className="text-xs font-semibold uppercase text-outline shrink-0">
- {new Date(latestMsg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
- </span>
- )}
- </div>
- <div className="flex items-center justify-between text-on-surface-variant text-sm text-[11px] mt-0.5">
- <span className={`truncate ${isActive ? 'font-semibold text-on-surface' : ''}`}>{lead.phone || lead.email}</span>
- <span className={`text-xs font-semibold uppercase ${isActive ? 'px-1 py-0.5 rounded bg-surface-container text-primary font-bold' : ''}`}>{dealAmount}</span>
- </div>
- {isActive && latestMsg && (
- <p className="text-sm text-[11px] text-on-surface-variant mt-1 line-clamp-2 leading-tight">
- &quot;{latestMsg.content}&quot;
- </p>
- )}
- </article>
- );
- })}
- {filteredLeads.length === 0 && (
- <div className="p-4 text-center text-sm text-on-surface-variant">No conversations in this queue.</div>
- )}
- </div>
- </section>
+  // 1. Filter Leads
+  const filteredLeads = initialLeads.filter(lead => {
+    // Channel filter
+    const primaryChannel = lead.conversations?.[0]?.channel || (lead.phone ? 'WHATSAPP' : 'EMAIL');
+    if (activeChannelFilter === 'WHATSAPP' && primaryChannel !== 'WHATSAPP') return false;
+    if (activeChannelFilter === 'EMAIL' && primaryChannel !== 'EMAIL') return false;
+    if (activeChannelFilter === 'WEB' && primaryChannel !== 'WEB') return false;
+    if (activeChannelFilter === 'HOT') {
+      const intent = lead.buyingIntent || 0;
+      if (intent < 70) return false;
+    }
+    if (activeChannelFilter === 'HANDOFF') {
+      const latestMsg = lead.conversations?.[0]?.messages?.[0];
+      const needsHuman = lead.status === 'ENGAGED' || latestMsg?.senderType === 'PROSPECT';
+      if (!needsHuman) return false;
+    }
 
- {/* PANE 2: Composer (44% ~ col-span-6) */}
- <section className="col-span-12 lg:col-span-8 xl:col-span-6 flex flex-col bg-surface-container-lowest rounded-xl shadow-sm border border-surface-container overflow-hidden h-full">
- {activeLead && (
- <>
- <header className="p-3 bg-surface-container-low border-b border-surface-container flex flex-col gap-2 shrink-0">
- <div className="flex items-center justify-between">
- <div className="flex items-center gap-3">
- <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-medium text-sm text-on-primary font-bold">
- {activeLead.name.substring(0,2).toUpperCase()}
- </div>
- <div>
- <div className="flex items-center gap-2">
- <h2 className="font-headline-lg text-lg text-on-surface font-bold">{activeLead.name}</h2>
- <span className="text-xs font-semibold uppercase px-2 py-0.5 rounded bg-surface-container-highest text-on-surface font-semibold">{activeLead.phone || activeLead.email}</span>
- </div>
- <div className="flex items-center gap-2 text-on-surface-variant text-sm text-[11px]">
- <span>{activeLead.source || 'WhatsApp'}</span>
- <span>•</span>
- <span>WhatsApp API</span>
- </div>
- </div>
- </div>
- </div>
- </header>
- 
- <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-surface flex flex-col-reverse">
- {messages.map((msg: any) => {
- const isProspect = msg.senderType === 'PROSPECT';
- return (
- <div key={msg.id} className={`flex flex-col max-w-[85%] mt-4 ${isProspect ? 'items-start self-start' : 'items-end self-end'}`}>
- <div className="flex items-center gap-2 mb-1">
- <span className="text-xs font-semibold uppercase text-outline">
- {new Date(msg.createdAt).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
- </span>
- </div>
- <div className={`p-3 rounded-2xl border shadow-sm ${isProspect ? 'rounded-tl-sm bg-surface-container-lowest border-surface-container text-on-surface' : 'rounded-tr-sm bg-primary border-primary text-on-primary'}`}>
- <p className="font-body-md text-sm whitespace-pre-wrap">{msg.content}</p>
- </div>
- </div>
- );
- })}
- {messages.length === 0 && (
- <div className="flex-1 flex items-center justify-center text-on-surface-variant text-sm">
- No messages yet.
- </div>
- )}
- </div>
+    // Search query
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchName = lead.name?.toLowerCase().includes(q);
+      const matchPhone = lead.phone?.toLowerCase().includes(q);
+      const matchEmail = lead.email?.toLowerCase().includes(q);
+      if (!matchName && !matchPhone && !matchEmail) return false;
+    }
 
- <div className="p-3 bg-surface-container-lowest border-t border-surface-container shrink-0">
- <div className="flex items-center justify-between mb-2">
- <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
- <span className="material-symbols-outlined text-[15px] text-emerald-400">chat</span>
- <span>Direct WhatsApp Outreach</span>
- </div>
- {activeLead.phone && (
- <span className="text-[10px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
- wa.me ready
- </span>
- )}
- </div>
+    return true;
+  });
 
- <form 
- onSubmit={async (e) => {
- e.preventDefault();
- const form = e.target as HTMLFormElement;
- const input = form.elements.namedItem('content') as HTMLTextAreaElement;
- const content = input.value.trim();
- 
- if (!content || !activeConversation || isSending) return;
- 
- setIsSending(true);
- try {
- const res = await fetch('/api/messages', {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- conversationId: activeConversation.id,
- content,
- senderType: 'HUMAN',
- isManuallySent: false
- })
- });
- 
- if (res.ok) {
- input.value = '';
- router.refresh();
- }
- } catch (error) {
- console.error('Failed to send message:', error);
- } finally {
- setIsSending(false);
- }
- }}
- >
- <textarea 
- name="content"
- id="inbox-composer-input"
- disabled={isSending}
- className="w-full bg-surface-container-low text-on-surface placeholder:text-outline-variant font-body-md text-sm p-3 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary resize-none border border-surface-container disabled:opacity-50" 
- placeholder="Type WhatsApp response or click 'Open in WhatsApp' to chat directly..." 
- rows={2}
- />
- <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
- <div className="flex items-center gap-2">
- {activeLead.nextStepsRecommendation && (
- <button
- type="button"
- onClick={() => {
- const lines = String(activeLead.nextStepsRecommendation).split('\n');
- const openerLine = lines.find((l: string) => l.includes('Prescribed WhatsApp Opener') || l.includes('Prescribed Opener'));
- const textarea = document.getElementById('inbox-composer-input') as HTMLTextAreaElement;
- if (openerLine && textarea) {
- const cleaned = openerLine.replace(/^[^:]*:\s*"?/, '').replace(/"?$/, '');
- textarea.value = cleaned;
- textarea.focus();
- }
- }}
- className="text-xs text-primary font-semibold hover:underline flex items-center gap-1 bg-primary/10 px-2 py-1 rounded cursor-pointer"
- >
- <span className="material-symbols-outlined text-[14px]">auto_awesome</span>
- <span>Load AI Opener</span>
- </button>
- )}
- </div>
+  // Ensure active lead exists
+  let currentActiveId = activeLeadId;
+  if (!filteredLeads.find(l => l.id === currentActiveId)) {
+    currentActiveId = filteredLeads[0]?.id || null;
+  }
 
- <div className="flex items-center gap-2">
- {activeLead.phone && (
- <button
- type="button"
- onClick={async () => {
- const textarea = document.getElementById('inbox-composer-input') as HTMLTextAreaElement;
- const draft = (textarea?.value || '').trim() || `Hi ${activeLead.name}, thanks for reaching out. Let's discuss your requirements.`;
- const url = formatWhatsAppUrl(activeLead.phone, draft);
- if (url) window.open(url, '_blank', 'noopener,noreferrer');
+  const activeLead = filteredLeads.find(l => l.id === currentActiveId);
+  const activeConversation = activeLead?.conversations?.[0];
+  const messages = activeConversation?.messages ? [...activeConversation.messages].reverse() : [];
+  const activeDeal = activeLead?.deals?.[0];
+  const activeDealAmount = activeDeal 
+    ? `₦${(activeDeal.amount).toLocaleString()}` 
+    : (activeLead?.estimatedValue ? `₦${activeLead.estimatedValue.toLocaleString()}` : 'No Deal Linked');
+  const activeNextAction = activeLead?.revenueActions?.[0];
 
- if (activeConversation) {
- try {
- await fetch('/api/messages', {
- method: 'POST',
- headers: { 'Content-Type': 'application/json' },
- body: JSON.stringify({
- conversationId: activeConversation.id,
- content: draft,
- senderType: 'HUMAN',
- isManuallySent: true
- })
- });
- if (textarea) textarea.value = '';
- router.refresh();
- } catch (e) {
- console.error('Failed to log WhatsApp send:', e);
- }
- }
- }}
- className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-500 shadow-sm transition-all cursor-pointer"
- >
- <span className="material-symbols-outlined text-[16px]">chat</span>
- <span>Open in WhatsApp</span>
- </button>
- )}
+  const isAiPaused = activeLead ? Boolean(pausedAiLeads[activeLead.id]) : false;
 
- <button 
- type="submit" 
- disabled={isSending} 
- className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold shadow-sm disabled:opacity-50 cursor-pointer"
- >
- <span className="material-symbols-outlined text-[16px]">save</span>
- <span>{isSending ? 'Saving...' : 'Log in App'}</span>
- </button>
- </div>
- </div>
- </form>
- </div>
- </>
- )}
- {!activeLead && (
- <div className="flex-1 flex items-center justify-center bg-surface">
- <p className="font-body-md text-on-surface-variant">Select a conversation to start triaging.</p>
- </div>
- )}
- </section>
+  const toggleAiHandoff = () => {
+    if (!activeLead) return;
+    setPausedAiLeads(prev => ({
+      ...prev,
+      [activeLead.id]: !prev[activeLead.id]
+    }));
+  };
 
- {/* PANE 3: Context (28% ~ col-span-3) */}
- <section className="col-span-12 xl:col-span-3 flex flex-col gap-3 overflow-y-auto h-full">
- {activeLead && (
- <>
- <div className="p-3 rounded-xl bg-surface-container-lowest shadow-sm border border-surface-container flex flex-col gap-2">
- <div className="flex items-center justify-between">
- <span className="text-xs font-semibold uppercase uppercase text-on-surface-variant font-bold">Commercial Snapshot</span>
- </div>
- <div className="grid grid-cols-2 gap-2 mt-1">
- <div className="p-2 rounded-lg bg-surface-container-low border border-surface-container">
- <span className="text-xs font-semibold uppercase text-outline block">Est. ACV</span>
- <span className="font-metric-numeral-md text-lg text-on-surface font-bold">{activeDealAmount}</span>
- </div>
- <div className="p-2 rounded-lg bg-surface-container-low border border-surface-container">
- <span className="text-xs font-semibold uppercase text-outline block">Propensity</span>
- <span className="font-metric-numeral-md text-lg text-primary font-bold">{activeLead.buyingIntent || 50}</span>
- </div>
- </div>
- </div>
+  const handleSelectLead = (id: string) => {
+    setActiveLeadId(id);
+    setMobileTab('CHAT');
+  };
 
- {activeNextAction && (
- <div className="p-3 rounded-xl bg-primary-container text-on-primary-container shadow-sm border border-primary/20 flex flex-col gap-2 mt-2">
- <div className="flex items-center gap-1.5 text-xs font-semibold uppercase uppercase font-bold tracking-wider">
- <span className="material-symbols-outlined text-[16px]">priority</span>
- <span>Next Best Action</span>
- </div>
- <div className="flex flex-col mt-1">
- <span className="font-medium text-sm font-bold">{activeNextAction.type.replace(/_/g, ' ')}</span>
- <p className="text-sm text-[11px] opacity-90 mt-1 leading-tight">{activeNextAction.reason}</p>
- </div>
- <div className="flex items-center justify-between mt-2 pt-2 border-t border-primary/20">
- <span className="font-semibold text-[10px] uppercase font-bold tracking-widest opacity-80">Actor: {activeNextAction.recommendedActor}</span>
- {activeNextAction.recommendedActor === 'HUMAN' && (
- <button className="h-6 px-2 bg-primary text-on-primary rounded text-[10px] font-bold uppercase hover:bg-primary-fixed hover:text-on-primary-fixed transition-colors">
- Execute Now
- </button>
- )}
- </div>
- </div>
- )}
- </>
- )}
- </section>
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!composerText.trim() || !activeConversation || isSending) return;
 
- </div>
- );
+    setIsSending(true);
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conversationId: activeConversation.id,
+          content: composerText.trim(),
+          senderType: 'HUMAN',
+          isManuallySent: false
+        })
+      });
+
+      if (res.ok) {
+        setComposerText('');
+        router.refresh();
+      }
+    } catch (err) {
+      console.error('Failed to send message:', err);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  const handleDirectWhatsAppOutreach = async () => {
+    if (!activeLead?.phone) return;
+    const draft = composerText.trim() || `Hi ${activeLead.name}, this is your sales advisor from CloseCraft. Let's discuss your requirements.`;
+    const url = formatWhatsAppUrl(activeLead.phone, draft);
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+
+    if (activeConversation) {
+      try {
+        await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            conversationId: activeConversation.id,
+            content: draft,
+            senderType: 'HUMAN',
+            isManuallySent: true
+          })
+        });
+        setComposerText('');
+        router.refresh();
+      } catch (err) {
+        console.error('Failed to log WhatsApp outreach:', err);
+      }
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-[calc(100vh-120px)] bg-[#0f1214] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
+      {/* Mobile Screen Switcher Bar */}
+      <div className="lg:hidden flex border-b border-white/5 bg-[#0a0d12] text-xs font-bold shrink-0">
+        <button
+          type="button"
+          onClick={() => setMobileTab('LIST')}
+          className={`flex-1 py-3 text-center transition-colors border-b-2 ${
+            mobileTab === 'LIST' 
+              ? 'text-[#45bfae] border-[#45bfae] bg-[#248277]/10' 
+              : 'text-gray-400 border-transparent hover:text-white'
+          }`}
+        >
+          Conversations ({filteredLeads.length})
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab('CHAT')}
+          disabled={!activeLead}
+          className={`flex-1 py-3 text-center transition-colors border-b-2 ${
+            mobileTab === 'CHAT' 
+              ? 'text-[#45bfae] border-[#45bfae] bg-[#248277]/10' 
+              : 'text-gray-400 border-transparent hover:text-white disabled:opacity-40'
+          }`}
+        >
+          Active Thread
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab('CONTEXT')}
+          disabled={!activeLead}
+          className={`flex-1 py-3 text-center transition-colors border-b-2 ${
+            mobileTab === 'CONTEXT' 
+              ? 'text-[#45bfae] border-[#45bfae] bg-[#248277]/10' 
+              : 'text-gray-400 border-transparent hover:text-white disabled:opacity-40'
+          }`}
+        >
+          Lead Intel
+        </button>
+      </div>
+
+      <div className="grid grid-cols-12 flex-1 overflow-hidden">
+        {/* =========================================================================
+            PANE 1: Conversation List (Triage Stream)
+            ========================================================================= */}
+        <section 
+          className={`col-span-12 lg:col-span-4 xl:col-span-3 border-r border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-hidden ${
+            mobileTab !== 'LIST' ? 'hidden lg:flex' : 'flex'
+          }`}
+        >
+          {/* Search & Channel Filters */}
+          <div className="p-4 border-b border-white/5 space-y-3 shrink-0">
+            {/* Search Box */}
+            <div className="relative">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <input
+                type="text"
+                placeholder="Search conversations..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-[#161a1d] border border-white/10 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#45bfae] transition-colors"
+              />
+            </div>
+
+            {/* Channel Filters */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('ALL')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  activeChannelFilter === 'ALL'
+                    ? 'bg-[#45bfae] text-[#0f1214]'
+                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                }`}
+              >
+                All ({initialLeads.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('HANDOFF')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  activeChannelFilter === 'HANDOFF'
+                    ? 'bg-[#45bfae] text-[#0f1214]'
+                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                }`}
+              >
+                Handoff
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('HOT')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                  activeChannelFilter === 'HOT'
+                    ? 'bg-amber-500 text-black'
+                    : 'bg-white/5 hover:bg-white/10 text-amber-400'
+                }`}
+              >
+                <Flame size={12} /> Hot
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('WHATSAPP')}
+                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                  activeChannelFilter === 'WHATSAPP'
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                }`}
+              >
+                WhatsApp
+              </button>
+            </div>
+          </div>
+
+          {/* Conversation Cards */}
+          <div className="flex-1 overflow-y-auto divide-y divide-white/5 p-2 space-y-1">
+            {filteredLeads.length === 0 ? (
+              <div className="p-8 text-center text-xs text-gray-500">
+                No active conversations matching criteria.
+              </div>
+            ) : (
+              filteredLeads.map((lead) => {
+                const latestMsg = lead.conversations?.[0]?.messages?.[0];
+                const isSelected = lead.id === currentActiveId;
+                const isHot = lead.buyingIntent && lead.buyingIntent >= 70;
+                const channel = lead.conversations?.[0]?.channel || (lead.phone ? 'WHATSAPP' : 'EMAIL');
+                const deal = lead.deals?.[0];
+                const dealVal = deal ? `₦${(deal.amount / 1000).toFixed(0)}k` : null;
+
+                return (
+                  <article
+                    key={lead.id}
+                    onClick={() => handleSelectLead(lead.id)}
+                    className={`p-3 rounded-xl cursor-pointer transition-all ${
+                      isSelected
+                        ? 'bg-[#121c1a] border border-[#248277]/50 shadow-lg shadow-[#248277]/10'
+                        : 'bg-white/[0.02] hover:bg-white/5 border border-transparent'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-[#248277]/20 border border-[#248277]/30 flex items-center justify-center text-[#45bfae] font-bold text-xs shrink-0">
+                          {lead.name?.substring(0, 2).toUpperCase() || 'LD'}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-white text-xs truncate">{lead.name}</span>
+                            {isHot && (
+                              <span title="High Intent Lead">
+                                <Flame size={12} className="text-amber-400 fill-amber-400 shrink-0" />
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-gray-500 truncate">
+                            {lead.phone || lead.email}
+                          </div>
+                        </div>
+                      </div>
+
+                      {latestMsg && (
+                        <span className="text-[10px] text-gray-500 shrink-0 font-mono">
+                          {new Date(latestMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Latest Message Preview */}
+                    {latestMsg && (
+                      <p className="text-[11px] text-gray-400 line-clamp-1 mb-2 leading-relaxed">
+                        <strong className="text-gray-300 font-medium">
+                          {latestMsg.senderType === 'PROSPECT' ? 'Buyer: ' : latestMsg.senderType === 'AI' ? 'AI: ' : 'You: '}
+                        </strong>
+                        {latestMsg.content}
+                      </p>
+                    )}
+
+                    {/* Badges Strip */}
+                    <div className="flex items-center justify-between text-[10px] pt-1 border-t border-white/5">
+                      <span className={`px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
+                        channel === 'WHATSAPP' 
+                          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                          : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                      }`}>
+                        {channel}
+                      </span>
+                      {dealVal && (
+                        <span className="font-mono text-gray-300 font-semibold">
+                          {dealVal}
+                        </span>
+                      )}
+                    </div>
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </section>
+
+        {/* =========================================================================
+            PANE 2: Omnichannel Conversation Thread & Composer
+            ========================================================================= */}
+        <section 
+          className={`col-span-12 lg:col-span-8 xl:col-span-6 flex flex-col bg-[#0f1214] h-full overflow-hidden ${
+            mobileTab !== 'CHAT' ? 'hidden lg:flex' : 'flex'
+          }`}
+        >
+          {activeLead ? (
+            <>
+              {/* Conversation Header */}
+              <header className="p-4 bg-[#0a0d12] border-b border-white/5 flex items-center justify-between shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#248277]/20 border border-[#248277]/40 flex items-center justify-center text-[#45bfae] font-bold text-sm shadow-md">
+                    {activeLead.name?.substring(0, 2).toUpperCase() || 'LD'}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="font-serif font-bold text-white text-base md:text-lg">{activeLead.name}</h2>
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10">
+                        {activeLead.status}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-gray-400">
+                      <span>{activeLead.phone || activeLead.email}</span>
+                      <span>•</span>
+                      <span className="text-[#45bfae] font-medium">{activeLead.source || 'Website Inbound'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {/* AI Auto-Pilot Toggle Button */}
+                  <button
+                    type="button"
+                    onClick={toggleAiHandoff}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
+                      isAiPaused
+                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
+                        : 'bg-[#248277]/15 text-[#45bfae] border-[#248277]/30'
+                    }`}
+                    title={isAiPaused ? 'Resume AI Auto-Pilot' : 'Pause AI and Take Over'}
+                  >
+                    {isAiPaused ? <Pause size={13} /> : <Bot size={13} />}
+                    <span>{isAiPaused ? 'Human Took Over' : 'AI Active'}</span>
+                  </button>
+
+                  {/* Direct WhatsApp Web Button */}
+                  {activeLead.phone && (
+                    <button
+                      type="button"
+                      onClick={handleDirectWhatsAppOutreach}
+                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-950/40"
+                    >
+                      <Phone size={13} />
+                      <span className="hidden sm:inline">WhatsApp</span>
+                    </button>
+                  )}
+                </div>
+              </header>
+
+              {/* AI Auto-Pilot Warning Banner */}
+              {isAiPaused && (
+                <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-300 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <UserCheck size={14} />
+                    <span>AI auto-responder paused. You are communicating directly with this prospect.</span>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={toggleAiHandoff} 
+                    className="underline text-[11px] font-bold hover:text-white"
+                  >
+                    Resume AI
+                  </button>
+                </div>
+              )}
+
+              {/* Message Thread Scroll Area */}
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 flex flex-col">
+                {messages.length === 0 ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-gray-500 text-xs text-center space-y-2">
+                    <MessageSquare size={32} className="opacity-40" />
+                    <p>No messages exchanged yet.</p>
+                    <p className="text-gray-600 max-w-xs">
+                      Send a message below or click Open in WhatsApp to begin outreach.
+                    </p>
+                  </div>
+                ) : (
+                  messages.map((msg: any) => {
+                    const isProspect = msg.senderType === 'PROSPECT';
+                    const isAi = msg.senderType === 'AI';
+
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`flex flex-col max-w-[85%] ${
+                          isProspect ? 'items-start self-start' : 'items-end self-end'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1 px-1">
+                          <span className="text-[10px] text-gray-500 font-mono">
+                            {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                          <span className={`text-[10px] uppercase font-bold tracking-wider ${
+                            isProspect ? 'text-gray-400' : isAi ? 'text-[#45bfae]' : 'text-emerald-400'
+                          }`}>
+                            {isProspect ? 'Buyer' : isAi ? 'AI Support' : 'You (Sales Rep)'}
+                          </span>
+                        </div>
+
+                        <div
+                          className={`p-3.5 rounded-2xl text-xs md:text-sm leading-relaxed shadow-md ${
+                            isProspect
+                              ? 'bg-[#161a1d] border border-white/5 text-gray-200 rounded-tl-sm'
+                              : isAi
+                              ? 'bg-[#121c1a] border border-[#248277]/30 text-white rounded-tr-sm'
+                              : 'bg-[#248277] text-white rounded-tr-sm shadow-[#248277]/20'
+                          }`}
+                        >
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+
+              {/* Smart Composer & Presets */}
+              <div className="p-4 bg-[#0a0d12] border-t border-white/5 shrink-0 space-y-3">
+                {/* AI Preset Chips */}
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mr-1 flex items-center gap-1">
+                    <Sparkles size={11} className="text-[#45bfae]" /> Templates:
+                  </span>
+                  {quickTemplates.map((t, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setComposerText(t.text)}
+                      className="px-2.5 py-1 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-[11px] font-medium transition-colors border border-white/5"
+                    >
+                      {t.label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Composer Form */}
+                <form onSubmit={handleSendMessage} className="space-y-2">
+                  <textarea
+                    rows={3}
+                    placeholder="Type an omnichannel reply, or choose a verified template..."
+                    value={composerText}
+                    onChange={(e) => setComposerText(e.target.value)}
+                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl p-3 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-[#45bfae] transition-colors resize-none"
+                  />
+
+                  <div className="flex items-center justify-between">
+                    <div className="text-[11px] text-gray-500">
+                      Channel: <strong className="text-gray-300">{activeLead.phone ? 'WhatsApp Cloud API' : 'Email'}</strong>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {activeLead.phone && (
+                        <button
+                          type="button"
+                          onClick={handleDirectWhatsAppOutreach}
+                          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md"
+                        >
+                          <ExternalLink size={13} />
+                          <span>Dispatch via WhatsApp</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="submit"
+                        disabled={isSending || !composerText.trim()}
+                        className="px-4 py-2 rounded-xl bg-[#45bfae] hover:bg-[#5cd4c3] text-[#0f1214] font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md disabled:opacity-40"
+                      >
+                        <Send size={13} />
+                        <span>{isSending ? 'Sending...' : 'Log & Send'}</span>
+                      </button>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-500 text-sm">
+              Select a conversation to start triaging.
+            </div>
+          )}
+        </section>
+
+        {/* =========================================================================
+            PANE 3: Omnichannel Lead Context Inspector
+            ========================================================================= */}
+        <section 
+          className={`col-span-12 xl:col-span-3 border-l border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-y-auto p-4 space-y-4 ${
+            mobileTab !== 'CONTEXT' ? 'hidden xl:flex' : 'flex'
+          }`}
+        >
+          {activeLead ? (
+            <>
+              {/* Header */}
+              <div className="border-b border-white/5 pb-3">
+                <span className="text-[10px] font-bold uppercase tracking-widest text-[#45bfae] block mb-1">
+                  Lead Intelligence
+                </span>
+                <h3 className="font-serif font-bold text-white text-base truncate">{activeLead.name}</h3>
+              </div>
+
+              {/* Commercial Snapshot Card */}
+              <div className="p-4 rounded-xl bg-[#121c1a] border border-[#248277]/30 space-y-3">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  Opportunity Snapshot
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                    <span className="text-[10px] text-gray-400 block">Est. Deal Value</span>
+                    <span className="text-sm font-bold text-white font-mono mt-0.5 block truncate">
+                      {activeDealAmount}
+                    </span>
+                  </div>
+                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                    <span className="text-[10px] text-gray-400 block">Propensity</span>
+                    <span className="text-sm font-bold text-[#45bfae] font-mono mt-0.5 block">
+                      {activeLead.buyingIntent || 50}%
+                    </span>
+                  </div>
+                </div>
+                <div className="text-[11px] text-gray-400 flex items-center justify-between pt-1">
+                  <span>Pipeline Stage:</span>
+                  <span className="font-bold text-white">{activeDeal?.stage || 'OPPORTUNITY'}</span>
+                </div>
+              </div>
+
+              {/* Next Best Action Card */}
+              {activeNextAction && (
+                <div className="p-4 rounded-xl bg-gradient-to-br from-[#121c1a] to-[#0f1214] border border-[#45bfae]/30 space-y-3 shadow-lg">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-[#45bfae]">
+                    <span className="flex items-center gap-1">
+                      <Sparkles size={12} /> Next Best Action
+                    </span>
+                    <span className="px-1.5 py-0.5 rounded bg-[#45bfae]/20 text-[#45bfae]">
+                      {activeNextAction.recommendedActor || 'HUMAN'}
+                    </span>
+                  </div>
+
+                  <div>
+                    <div className="font-bold text-white text-xs">
+                      {activeNextAction.type?.replace(/_/g, ' ')}
+                    </div>
+                    <p className="text-[11px] text-gray-300 mt-1 leading-relaxed">
+                      {activeNextAction.reason}
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px]">
+                    <span className="text-gray-400">Priority Score:</span>
+                    <span className="font-bold font-mono text-[#45bfae]">{activeNextAction.priority}%</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Contact Information */}
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-3">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  Contact Information
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Phone size={14} className="text-[#45bfae] shrink-0" />
+                    <span className="truncate">{activeLead.phone || 'No phone recorded'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Mail size={14} className="text-[#45bfae] shrink-0" />
+                    <span className="truncate">{activeLead.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Globe size={14} className="text-[#45bfae] shrink-0" />
+                    <span className="truncate">Source: {activeLead.source || 'Website'}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CloseCraft Growth Services Brief (If applicable) */}
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/5 space-y-2 text-xs">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                  Growth Services Engagement
+                </div>
+                <p className="text-gray-400 text-[11px] leading-relaxed">
+                  Linked to CloseCraft 5 Core Services (Ads, Creatives, AI Video, Landing Page, VSL).
+                </p>
+                <div className="pt-2">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/pipeline`)}
+                    className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-bold text-xs transition-colors border border-white/10 flex items-center justify-center gap-1.5"
+                  >
+                    <span>View in Pipeline</span>
+                    <ArrowRight size={13} />
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-xs text-gray-500 text-center py-8">
+              No lead selected.
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  );
 }
