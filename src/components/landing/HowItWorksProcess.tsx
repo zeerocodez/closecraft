@@ -196,3 +196,4 @@ export default function HowItWorksProcess({ onOpenServiceBrief }: HowItWorksProc
     </section>
   );
 }
+

@@ -201,3 +201,4 @@ test('CloseCraft HQ Phase 4: Complete Landing Page Redesign Acceptance Tests', a
     assert.ok(landingContent.includes('+234 902 636 5853'));
   });
 });
+

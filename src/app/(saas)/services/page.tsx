@@ -1,9 +1,9 @@
 import React, { Suspense } from 'react';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { redirect } from 'next/navigation';
 import { getServiceCatalogue } from '@/lib/services/catalogue';
 import ServicesClient from './ServicesClient';
+import ServicesDirectoryClient from '@/components/growth/ServicesDirectoryClient';
 
 export const metadata = {
   title: 'Services & Growth Operations | Closecraft',
@@ -12,10 +12,12 @@ export const metadata = {
 
 export default async function ServicesPage() {
   const session = await auth();
-  if (!session?.user?.id) redirect('/login');
+  const organizationId = (session as any)?.organizationId;
 
-  const organizationId = (session as any).organizationId;
-  if (!organizationId) redirect('/login');
+  // If unauthenticated or no organization, render public marketing Services Directory
+  if (!session?.user?.id || !organizationId) {
+    return <ServicesDirectoryClient />;
+  }
 
   // Fetch available self-service catalogue
   const packages = await getServiceCatalogue();

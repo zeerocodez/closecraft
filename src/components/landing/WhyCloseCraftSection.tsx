@@ -100,3 +100,4 @@ export default function WhyCloseCraftSection() {
     </section>
   );
 }
+
