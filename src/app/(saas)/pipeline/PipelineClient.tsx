@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useTransition } from 'react';
 import { DealCard } from './DealCard';
 import { NewDealModal } from './NewDealModal';
 import { Badge } from '@/components/ui/Badge';
 import { ResponsiveTable } from '@/components/ui/ResponsiveTable';
+import { seedSampleWorkspaceAction, clearSampleWorkspaceAction } from '@/app/(saas)/actions';
 import {
   KanbanSquare,
   List,
@@ -15,6 +16,9 @@ import {
   AlertTriangle,
   Clock,
   ArrowRight,
+  Database,
+  Sparkles,
+  Trash2,
 } from 'lucide-react';
 
 interface DealRecord {
@@ -56,6 +60,37 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
   const [viewMode, setViewMode] = useState<'KANBAN' | 'LIST'>('KANBAN');
   const [searchQuery, setSearchQuery] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('ALL');
+  const [isSeeding, startSeedTransition] = useTransition();
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 4000);
+  };
+
+  const handleSeedWorkspace = () => {
+    startSeedTransition(async () => {
+      try {
+        await seedSampleWorkspaceAction();
+        showToast('🚀 Seeded 3 realistic demo leads & pipeline deals!');
+      } catch (err: any) {
+        showToast(err.message || 'Failed to seed demo workspace');
+      }
+    });
+  };
+
+  const handleClearWorkspace = () => {
+    startSeedTransition(async () => {
+      try {
+        await clearSampleWorkspaceAction();
+        showToast('🧹 Cleaned up sample demo deals from workspace.');
+      } catch (err: any) {
+        showToast(err.message || 'Failed to clear sample workspace');
+      }
+    });
+  };
+
+  const hasDemoSeed = deals.some((d) => d.title?.includes('[DEMO_SEED]'));
 
   const filteredDeals = deals.filter((deal) => {
     if (stageFilter !== 'ALL' && deal.stage !== stageFilter) return false;
@@ -141,7 +176,61 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
         </div>
       </div>
 
-      {/* Summary KPI Strip */}
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-surface-container-highest border border-primary/30 text-on-surface shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
+          <span className="material-symbols-outlined text-primary text-[20px]">task_alt</span>
+          <span className="text-sm font-medium">{toastMessage}</span>
+        </div>
+      )}
+
+      {/* Demo Workspace Active Banner */}
+      {hasDemoSeed && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              <strong className="text-amber-300 font-semibold">Demo Pipeline Active:</strong> Showing realistic sample deals across stages.
+            </span>
+          </div>
+          <button
+            onClick={handleClearWorkspace}
+            disabled={isSeeding}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container text-amber-300 hover:text-white hover:bg-red-500/20 border border-amber-500/30 font-semibold text-xs transition-all shrink-0 self-start sm:self-auto"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>{isSeeding ? 'Clearing...' : 'Clear Demo Deals'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* Day-0 Empty State when workspace has no deals */}
+      {deals.length === 0 ? (
+        <div className="p-8 sm:p-12 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 text-center max-w-2xl mx-auto space-y-6 my-6 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto">
+            <Database className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-on-surface">Your Sales Pipeline is Ready</h3>
+            <p className="text-sm text-on-surface-variant max-w-lg mx-auto leading-relaxed">
+              No active deals in your pipeline yet. Add your first deal manually or seed 3 realistic demo deals to test Kanban drag-and-drop progression, revenue forecasting, and closer assignments.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              onClick={handleSeedWorkspace}
+              disabled={isSeeding}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-on-primary font-bold text-xs shadow-md hover:brightness-110 active:scale-[0.98] transition-all"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>{isSeeding ? 'Seeding Demo Pipeline...' : 'Seed 3 Realistic Demo Deals'}</span>
+            </button>
+            <NewDealModal leads={availableLeads} />
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Summary KPI Strip */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-1">
           <p className="text-[11px] font-medium text-on-surface-variant">Total Pipeline</p>
@@ -336,6 +425,8 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
             ]}
           />
         </div>
+      )}
+      </>
       )}
     </div>
   );

@@ -590,9 +590,9 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                 <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
                   <Link
                     href={`/audit/results?${new URLSearchParams({
-                      volume: auditLeadVolume,
-                      leak: auditEstimatedLeak,
-                      speed: auditResponseTime,
+                      volume: calculatorData?.leadVolume || '100',
+                      leak: calculatorData?.monthlyLeak || '2500000',
+                      speed: calculatorData?.responseTime || '2-4 hours',
                     }).toString()}`}
                     className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center inline-flex items-center justify-center gap-1.5"
                     onClick={() => setShowAuditModal(false)}

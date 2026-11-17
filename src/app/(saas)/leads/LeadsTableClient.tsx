@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useTransition } from 'react';
-import { claimLead, assignLeadToUser, claimRevenueAction } from '@/app/(saas)/actions';
+import { claimLead, assignLeadToUser, claimRevenueAction, seedSampleWorkspaceAction, clearSampleWorkspaceAction } from '@/app/(saas)/actions';
 import { LeadAiAssessmentModal } from '@/components/revenue-engine/LeadAiAssessmentModal';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
+import { Database, Sparkles, ArrowRight, Trash2 } from 'lucide-react';
 
 interface AssignedUser {
   id: string;
@@ -37,6 +38,7 @@ interface LeadRecord {
   claimedAt?: Date | null;
   aiAssessment?: string | null;
   nextStepsRecommendation?: string | null;
+  nextActionDueAt?: Date | string | null;
   assignedUser?: AssignedUser | null;
   deals: Array<{ id: string; amount: number; stage: string; currency: string }>;
   revenueActions: Array<{ id: string; type: string; reason?: string | null; priority: number; recommendedActor: string; status: string }>;
@@ -60,6 +62,7 @@ export default function LeadsTableClient({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLeadForAi, setSelectedLeadForAi] = useState<LeadRecord | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isSeeding, startSeedTransition] = useTransition();
   const [copiedScript, setCopiedScript] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -67,6 +70,30 @@ export default function LeadsTableClient({
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
   };
+
+  const handleSeedWorkspace = () => {
+    startSeedTransition(async () => {
+      try {
+        await seedSampleWorkspaceAction();
+        showToast('🚀 Seeded 3 realistic demo leads with AI SLA protocols!');
+      } catch (err: any) {
+        showToast(err.message || 'Failed to seed demo workspace');
+      }
+    });
+  };
+
+  const handleClearWorkspace = () => {
+    startSeedTransition(async () => {
+      try {
+        await clearSampleWorkspaceAction();
+        showToast('🧹 Cleaned up sample demo leads from workspace.');
+      } catch (err: any) {
+        showToast(err.message || 'Failed to clear sample workspace');
+      }
+    });
+  };
+
+  const hasDemoSeed = leads.some((l) => l.message?.includes('[DEMO_SEED]'));
 
   const handleClaim = (leadId: string, leadName: string) => {
     startTransition(async () => {
@@ -101,6 +128,9 @@ export default function LeadsTableClient({
   const myLeads = leads.filter(l => l.assignedUserId === currentUserId);
   const openPoolLeads = leads.filter(l => !l.assignedUserId);
   const qualifiedLeads = leads.filter(l => (l.buyingIntent && l.buyingIntent >= 70) || l.status === 'OPPORTUNITY');
+  const overdueCount = leads.filter(
+    (l) => l.nextActionDueAt && new Date(l.nextActionDueAt).getTime() < Date.now()
+  ).length;
 
   const filteredLeads = leads.filter(lead => {
     // Tab filter
@@ -130,7 +160,83 @@ export default function LeadsTableClient({
         </div>
       )}
 
-      {/* Filter Tabs & Search Controls */}
+      {/* Demo Workspace Active Banner */}
+      {hasDemoSeed && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs shadow-sm">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-amber-400 shrink-0" />
+            <span>
+              <strong className="text-amber-300 font-semibold">Demo Workspace Active:</strong> Showing 3 realistic sample leads with AI SLA triggers.
+            </span>
+          </div>
+          <button
+            onClick={handleClearWorkspace}
+            disabled={isSeeding}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-surface-container text-amber-300 hover:text-white hover:bg-red-500/20 border border-amber-500/30 font-semibold text-xs transition-all shrink-0 self-start sm:self-auto"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>{isSeeding ? 'Clearing...' : 'Clear Demo Leads'}</span>
+          </button>
+        </div>
+      )}
+
+      {/* DSS Workforce Bridge Alert for Overdue Leads */}
+      {overdueCount > 0 && (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-purple-200 text-xs shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-[22px] text-purple-400 shrink-0">school</span>
+            <div>
+              <p className="font-bold text-white text-xs">
+                {overdueCount} {overdueCount === 1 ? 'lead is' : 'leads are'} overdue for follow-up
+              </p>
+              <p className="text-purple-300/80 text-[11px] mt-0.5">
+                Stalled follow-ups lose over 70% conversion velocity. Deploy a vetted Digital Sales School (DSS) Remote Appointment Setter to clear your backlog.
+              </p>
+            </div>
+          </div>
+          <a
+            href="/operator"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow-md transition-all shrink-0 self-start sm:self-auto"
+          >
+            <span>Request DSS Appointment Setter</span>
+            <span className="material-symbols-outlined text-[15px]">arrow_forward</span>
+          </a>
+        </div>
+      )}
+
+      {/* Day-0 Empty State when workspace has no leads */}
+      {leads.length === 0 ? (
+        <div className="p-8 sm:p-12 rounded-3xl bg-surface-container-lowest border border-outline-variant/30 text-center max-w-2xl mx-auto space-y-6 my-6 shadow-sm">
+          <div className="w-16 h-16 rounded-2xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mx-auto">
+            <Database className="w-8 h-8" />
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-xl font-bold text-on-surface">Your Lead Pipeline is Ready for Activation</h3>
+            <p className="text-sm text-on-surface-variant max-w-lg mx-auto leading-relaxed">
+              You have no leads in your workspace yet. Connect incoming channels (Website Widget, Meta Ads, WhatsApp) or seed 3 realistic demo leads to test AI qualification, SLA scoring, and team assignment immediately.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <button
+              onClick={handleSeedWorkspace}
+              disabled={isSeeding}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-on-primary font-bold text-xs shadow-md hover:brightness-110 active:scale-[0.98] transition-all"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>{isSeeding ? 'Seeding Demo Leads...' : 'Seed 3 Realistic Demo Leads'}</span>
+            </button>
+            <a
+              href="/settings"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-surface-container text-on-surface font-semibold text-xs border border-outline-variant/40 hover:bg-surface-container-high transition-all"
+            >
+              <span>Embed Capture Widget</span>
+              <ArrowRight className="w-4 h-4 text-secondary" />
+            </a>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Filter Tabs & Search Controls */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-surface-container-lowest p-2.5 rounded-2xl border border-outline-variant/30 shadow-sm">
         <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
           {/* All */}
@@ -393,7 +499,16 @@ export default function LeadsTableClient({
                               {lead.email || (lead.phone ? 'WhatsApp / Phone Lead' : 'No contact address')}
                             </span>
                             {lead.phone && (
-                              <span className="text-[10px] text-secondary font-mono">{lead.phone}</span>
+                              <a
+                                href={formatWhatsAppUrl(lead.phone, `Hello ${lead.name}, following up regarding your enquiry with CloseCraft.`) || undefined}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] text-emerald-400 hover:text-emerald-300 font-mono transition-colors"
+                                title="1-Click WhatsApp Follow-up"
+                              >
+                                <span className="material-symbols-outlined text-[13px] text-emerald-400">chat</span>
+                                <span>{lead.phone}</span>
+                              </a>
                             )}
                           </div>
                         </div>
@@ -518,6 +633,8 @@ export default function LeadsTableClient({
           </table>
         </div>
       </div>
+      </>
+      )}
 
       {/* AI Assessment & Prescriptive Next Steps Modal */}
       {selectedLeadForAi && (

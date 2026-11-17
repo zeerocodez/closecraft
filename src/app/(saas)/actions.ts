@@ -1236,10 +1236,12 @@ export async function seedSampleWorkspaceAction() {
       currency: 'NGN',
       nextAction: 'Execute WhatsApp Discovery Call',
       nextActionDueAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
+      aiAssessment: 'Enterprise lead with 12 outbound reps. High buying velocity with budget allocated for Q4 revenue systems upgrade.',
+      nextStepsRecommendation: 'Initiate WhatsApp outreach within 30 minutes to lock discovery call before competitor demo.',
     }
   });
 
-  await db.lead.create({
+  const lead2 = await db.lead.create({
     data: {
       organizationId,
       name: 'Dr. Amara Okafor',
@@ -1253,10 +1255,12 @@ export async function seedSampleWorkspaceAction() {
       currency: 'NGN',
       nextAction: 'Confirm Pricing Sheet Review',
       nextActionDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      aiAssessment: 'Multi-branch healthcare enquiry triage. Needs HIPAA/NDPR-compliant automated appointment reminders.',
+      nextStepsRecommendation: 'Send customized pricing tier breakdown and video walkthrough.',
     }
   });
 
-  await db.lead.create({
+  const lead3 = await db.lead.create({
     data: {
       organizationId,
       name: 'Ibrahim Musa',
@@ -1270,6 +1274,65 @@ export async function seedSampleWorkspaceAction() {
       currency: 'NGN',
       nextAction: 'Escalate to Human Closer (Custom Terms)',
       nextActionDueAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      aiAssessment: 'Mid-sized logistics firm requiring flexible quarterly terms. High likelihood of stalled deal if SLA exceeds 4 hours.',
+      nextStepsRecommendation: 'Senior closer assignment required to approve milestone-based invoice terms.',
+    }
+  });
+
+  // Seed Deals
+  await db.deal.create({
+    data: {
+      organizationId,
+      leadId: lead1.id,
+      title: '[DEMO_SEED] 30-Day Sales Ops Pilot - TechCorp',
+      amount: 1200000,
+      currency: 'NGN',
+      stage: 'NEGOTIATION',
+    }
+  });
+
+  await db.deal.create({
+    data: {
+      organizationId,
+      leadId: lead3.id,
+      title: '[DEMO_SEED] Fleet Logistics Dispatch - Northline',
+      amount: 850000,
+      currency: 'NGN',
+      stage: 'PROPOSAL',
+    }
+  });
+
+  // Seed Revenue Signals
+  await db.revenueSignal.createMany({
+    data: [
+      { organizationId, leadId: lead1.id, type: 'INTENT', value: 92, evidence: 'Enterprise budget confirmed', source: 'AI' },
+      { organizationId, leadId: lead2.id, type: 'INTENT', value: 78, evidence: 'High feature interest', source: 'AI' },
+      { organizationId, leadId: lead3.id, type: 'INTENT', value: 65, evidence: 'Pricing negotiation ongoing', source: 'AI' },
+    ]
+  });
+
+  // Seed Revenue Actions
+  await db.revenueAction.create({
+    data: {
+      organizationId,
+      leadId: lead1.id,
+      type: 'EXECUTE_WHATSAPP_DISCOVERY',
+      reason: 'High buying intent (92/100). WhatsApp discovery call requested for 12 outbound reps.',
+      priority: 92,
+      recommendedActor: 'HUMAN',
+      status: 'PENDING',
+    }
+  });
+
+  await db.revenueAction.create({
+    data: {
+      organizationId,
+      leadId: lead3.id,
+      type: 'ESCALATE_TO_CLOSER',
+      reason: 'Overdue follow-up SLA breach: Requested custom quarterly billing terms.',
+      priority: 85,
+      recommendedActor: 'CLOSER',
+      status: 'PENDING',
     }
   });
 
@@ -1322,6 +1385,92 @@ export async function clearSampleWorkspaceAction() {
   revalidatePath('/appointments');
 
   return { success: true, deletedCount: deleted.count };
+}
+
+export async function overrideNextBestAction(data: {
+  leadId: string;
+  actionId?: string;
+  newActionType: string;
+  overrideReason: string;
+}) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  const organizationId = (session as any)?.organizationId;
+  if (!userId || !organizationId) throw new Error("Unauthorized");
+  if (!data.overrideReason || data.overrideReason.trim().length < 5) {
+    throw new Error("A valid operational override reason is required (minimum 5 characters).");
+  }
+
+  // Find current lead and active action
+  const lead = await db.lead.findFirst({
+    where: { id: data.leadId, organizationId },
+    include: { revenueActions: { where: { status: 'PENDING' } } }
+  });
+  if (!lead) throw new Error("Lead not found");
+
+  const currentAction = lead.revenueActions[0];
+  const originalActionType = currentAction ? currentAction.type : lead.nextAction || 'UNKNOWN';
+
+  // Mark current action CANCELLED with human override note (never erase original AI decision)
+  if (currentAction) {
+    await db.revenueAction.update({
+      where: { id: currentAction.id },
+      data: {
+        status: 'CANCELLED',
+        cancellationReason: `Human override by ${session.user.name || session.user.email}: ${data.overrideReason}`,
+      }
+    });
+  }
+
+  // Create replacement action retaining audit trail
+  const newAction = await db.revenueAction.create({
+    data: {
+      organizationId,
+      leadId: data.leadId,
+      type: data.newActionType,
+      recommendedActor: 'HUMAN',
+      priority: 95,
+      reason: `Human Override (Replaced ${originalActionType}): ${data.overrideReason}`,
+      status: 'PENDING',
+      assignedUserId: userId,
+    }
+  });
+
+  // Update lead
+  await db.lead.update({
+    where: { id: data.leadId },
+    data: {
+      nextAction: data.newActionType,
+      message: `${lead.message || ''}\n[Human Override by ${session.user.name || session.user.email}]: Replaced AI Next Action "${originalActionType}" with "${data.newActionType}". Reason: ${data.overrideReason}`,
+    }
+  });
+
+  // Create audit log
+  await db.auditLog.create({
+    data: {
+      organizationId,
+      actorId: userId,
+      actorType: 'USER',
+      action: 'revenue_action.override',
+      resourceType: 'Lead',
+      resourceId: data.leadId,
+      reason: data.overrideReason,
+      oldState: originalActionType,
+      newState: data.newActionType,
+      metadata: JSON.stringify({
+        previousAction: originalActionType,
+        newAction: data.newActionType,
+        overrideReason: data.overrideReason,
+      })
+    }
+  });
+
+  revalidatePath('/dashboard');
+  revalidatePath('/leads');
+  revalidatePath('/pipeline');
+  revalidatePath('/today');
+
+  return { success: true, action: newAction };
 }
 
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
+import { overrideNextBestAction } from '@/app/(saas)/actions';
 
 export interface LeadAiModalData {
   id: string;
@@ -38,11 +39,42 @@ export function LeadAiAssessmentModal({
   isPending = false,
 }: LeadAiAssessmentModalProps) {
   const [copiedScript, setCopiedScript] = useState(false);
+  const [showOverride, setShowOverride] = useState(false);
+  const [overrideType, setOverrideType] = useState('SCHEDULE_DEMO');
+  const [overrideReason, setOverrideReason] = useState('');
+  const [isOverriding, setIsOverriding] = useState(false);
+  const [overrideSuccess, setOverrideSuccess] = useState(false);
+  const [overrideError, setOverrideError] = useState<string | null>(null);
 
   const handleCopyScript = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedScript(true);
     setTimeout(() => setCopiedScript(false), 2000);
+  };
+
+  const handleOverrideSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!overrideReason.trim() || overrideReason.trim().length < 5) {
+      setOverrideError('A valid operational override reason is required (minimum 5 characters).');
+      return;
+    }
+    setIsOverriding(true);
+    setOverrideError(null);
+    try {
+      await overrideNextBestAction({
+        leadId: lead.id,
+        newActionType: overrideType,
+        overrideReason: overrideReason.trim(),
+      });
+      setOverrideSuccess(true);
+      setTimeout(() => {
+        onClose();
+      }, 1500);
+    } catch (err: any) {
+      setOverrideError(err.message || 'Failed to submit human override');
+    } finally {
+      setIsOverriding(false);
+    }
   };
 
   const intentScore = lead.buyingIntent || 50;
@@ -161,6 +193,80 @@ export function LeadAiAssessmentModal({
             <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-on-surface whitespace-pre-wrap leading-relaxed font-sans">
               {protocolText}
             </div>
+          </div>
+
+          {/* Human-in-the-Loop Override Accordion */}
+          <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-[16px] text-amber-400">admin_panel_settings</span>
+                <span className="text-xs font-bold text-on-surface">Human Authority &amp; Protocol Override</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowOverride(!showOverride)}
+                className="text-xs font-semibold text-primary hover:underline"
+              >
+                {showOverride ? 'Cancel' : 'Override AI Action'}
+              </button>
+            </div>
+
+            {showOverride && (
+              <form onSubmit={handleOverrideSubmit} className="space-y-3 pt-2 border-t border-outline-variant/20">
+                <p className="text-[11px] text-on-surface-variant">
+                  Deterministic Human Control: The original AI protocol will remain auditable in logs. Enter your replacement action and justification.
+                </p>
+
+                {overrideError && (
+                  <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
+                    {overrideError}
+                  </div>
+                )}
+
+                {overrideSuccess && (
+                  <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-[16px]">check_circle</span>
+                    <span>Override recorded and auditable trail created!</span>
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-on-surface">Replacement Action</label>
+                  <select
+                    value={overrideType}
+                    onChange={(e) => setOverrideType(e.target.value)}
+                    className="w-full h-9 px-3 rounded-lg bg-surface-container text-on-surface text-xs border border-outline-variant/30 focus:outline-none focus:border-primary"
+                  >
+                    <option value="SCHEDULE_DEMO">Schedule Discovery / Demo Meeting</option>
+                    <option value="EXECUTE_PHONE_CALL">Direct Phone Call (High Urgency)</option>
+                    <option value="REASSIGN_CLOSER">Reassign to Senior Human Closer</option>
+                    <option value="SEND_CUSTOM_QUOTE">Send Custom Commercial Quote</option>
+                    <option value="PAUSE_AUTOMATION_HIGH_VALUE">Pause Automation (High Stakes Deal)</option>
+                    <option value="MARK_UNQUALIFIED">Mark Disqualified / Dead Lead</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-on-surface">Override Justification (Auditable) *</label>
+                  <textarea
+                    rows={2}
+                    value={overrideReason}
+                    onChange={(e) => setOverrideReason(e.target.value)}
+                    placeholder="e.g. Lead called back directly on personal line and requested bespoke payment terms."
+                    className="w-full p-2.5 rounded-lg bg-surface-container text-on-surface text-xs border border-outline-variant/30 focus:outline-none focus:border-primary placeholder:text-outline"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isOverriding || overrideSuccess}
+                  className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shadow-sm transition-all disabled:opacity-50 inline-flex items-center gap-1.5"
+                >
+                  <span className="material-symbols-outlined text-[15px]">verified</span>
+                  <span>{isOverriding ? 'Recording Override...' : 'Confirm Human Override'}</span>
+                </button>
+              </form>
+            )}
           </div>
 
           {/* Quick Communication & Scheduling Actions */}

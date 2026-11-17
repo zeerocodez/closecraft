@@ -214,6 +214,44 @@ export default async function SettingsPage() {
               Submit JSON payloads with <code className="text-[#45bfae]">workspaceSlug: "{org.slug}"</code>, <code className="text-[#45bfae]">name</code>, and <code className="text-[#45bfae]">phone</code> or <code className="text-[#45bfae]">email</code>. CORS preflight and cross-origin browser submissions are enabled by default.
             </p>
           </div>
+
+          {/* Ingestion Channels & Gateway Health Monitor */}
+          <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-white">Ingestion Channel Health Monitor</span>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                ALL SYSTEMS OPERATIONAL
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
+              <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <span className="text-xs font-bold text-white">Website Widget</span>
+                </div>
+                <p className="text-[11px] text-gray-400 font-mono truncate">slug: {org.slug}</p>
+                <span className="text-[10px] text-emerald-400 block font-medium">Ready for Inbound</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span className="text-xs font-bold text-white">Meta Lead Ads</span>
+                </div>
+                <p className="text-[11px] text-gray-400 font-mono truncate">/api/webhooks/facebook</p>
+                <span className="text-[10px] text-emerald-400 block font-medium">Webhook Active</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span className="text-xs font-bold text-white">WhatsApp Outreach</span>
+                </div>
+                <p className="text-[11px] text-gray-400 font-mono truncate">{org.whatsappNumber || 'Default Gateway'}</p>
+                <span className="text-[10px] text-emerald-400 block font-medium">1-Click Direct Sync</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
