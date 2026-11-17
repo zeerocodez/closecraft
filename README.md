@@ -117,3 +117,20 @@ The production build generates Prisma Client before compiling Next.js. Prisma CL
 The tenant-page tests verify login redirects, reject missing organisation IDs before database access, and check that page queries use the session organisation. They use mocked sessions and database calls; they do not establish complete authentication or database isolation coverage.
 
 The login and marketing form currently simulate submission, and several views contain demo content. A successful build verifies compilation, not production readiness. Do not run `prisma/seed.ts` against existing data: the seed deletes all records before creating demo accounts.
+
+## AI Startup Challenge Application — November 2026
+
+CloseCraft is being presented as an **AI-powered revenue recovery and sales execution platform**. The core problem is the revenue lost when businesses fail to respond to, qualify, assign, and consistently follow up with inbound prospects.
+
+The application evidence pack is maintained in [docs/AI_STARTUP_CHALLENGE.md](docs/AI_STARTUP_CHALLENGE.md). It documents the product proposition, implemented architecture, verified capabilities, current limitations, recommended demo sequence, and claims that must not be made without further validation.
+
+### Application positioning
+
+Lead with the Revenue Engine: tenant-specific lead qualification, explainable intent/fit/urgency signals, next-best-action recommendations, lead ownership, and human-supervised sales workflows. Treat managed sales delivery, sales enablement, and DSS as supporting ecosystem capabilities rather than the primary product proposition.
+
+### Accuracy and demo safeguards
+
+Do not describe WhatsApp outbound AI messaging or unattended follow-up dispatch as production-ready based only on the current repository. The current WhatsApp webhook contains a mocked outbound response path and a pilot follow-up route that does not dispatch messages to a live provider. Do not present generated or default pipeline estimates as realised revenue. Verify all integrations, environment configuration, tenant routing, and live demo behaviour before making production-readiness claims.
+
+The README's existing build and test caveats remain in force: a successful build does not prove production readiness, and some interfaces still contain demo content or simulated submission behaviour.
+
