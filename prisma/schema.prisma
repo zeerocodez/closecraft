@@ -2672,3 +2672,11 @@ model BlogPost {
   @@index([category])
   @@index([publishedAt])
 }
+
+// Internal abuse counters; keys are hashed and never exposed to clients.
+model SecurityRateLimit {
+  key       String   @id
+  count     Int
+  expiresAt DateTime
+  @@index([expiresAt])
+}

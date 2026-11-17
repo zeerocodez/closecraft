@@ -19,76 +19,83 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const profile = await db.affiliateProfile.findUnique({
-      where: { userId: session.user.id },
-      include: {
-        commissions: true,
-        payouts: true,
-      },
-    });
-
-    if (!profile) {
-      return NextResponse.json({ error: 'No active affiliate profile found.' }, { status: 404 });
-    }
-
-    if (profile.status !== 'APPROVED') {
-      return NextResponse.json({ error: 'Your affiliate account is currently pending or suspended.' }, { status: 403 });
-    }
-
-    // Calculate cleared available commission
-    const totalEarned = profile.commissions
-      .filter((c) => c.status === 'APPROVED' || c.status === 'PAYABLE')
-      .reduce((sum, c) => sum + c.amount, 0);
-
-    const totalPaidOrRequested = profile.payouts
-      .filter((p) => p.status !== 'REJECTED')
-      .reduce((sum, p) => sum + p.amount, 0);
-
-    const availableNgn = Math.max(0, totalEarned - totalPaidOrRequested);
-
-    if (availableNgn < MINIMUM_PAYOUT_NGN) {
-      return NextResponse.json(
-        { error: `Minimum payout threshold is ₦10,000. Your available balance is ₦${availableNgn.toLocaleString()}.` },
-        { status: 400 }
-      );
-    }
-
     const body = await req.json().catch(() => ({}));
-    const requestedNgn = parseFloat(body.amountNgn || availableNgn);
+    return await db.$transaction(async (tx) => {
+      // Serialize reservations for this affiliate before reading the available balance.
+      await tx.$queryRaw`SELECT id FROM "AffiliateProfile" WHERE "userId" = ${session.user!.id} FOR UPDATE`;
+      const profile = await tx.affiliateProfile.findUnique({
+        where: { userId: session.user.id },
+        include: {
+          commissions: true,
+          payouts: true,
+        },
+      });
 
-    if (requestedNgn > availableNgn) {
-      return NextResponse.json(
-        { error: 'Requested amount exceeds your available cleared commission balance.' },
-        { status: 400 }
-      );
-    }
+      if (!profile) {
+        return NextResponse.json({ error: 'No active affiliate profile found.' }, { status: 404 });
+      }
 
-    if (requestedNgn < MINIMUM_PAYOUT_NGN) {
-      return NextResponse.json(
-        { error: 'Minimum payout withdrawal is ₦10,000.' },
-        { status: 400 }
-      );
-    }
+      if (profile.status !== 'APPROVED') {
+        return NextResponse.json({ error: 'Your affiliate account is currently pending or suspended.' }, { status: 403 });
+      }
 
-    const payoutRef = `PAYOUT-CC-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
-    const bankSnapshot = `${profile.bankName || ''} - ${profile.bankAccountNumber || ''} (${profile.bankAccountName || ''})`;
+      // Calculate cleared available commission
+      const totalEarned = profile.commissions
+        .filter((c) => c.status === 'APPROVED' || c.status === 'PAYABLE')
+        .reduce((sum, c) => sum + c.amount, 0);
 
-    const payout = await db.affiliatePayout.create({
-      data: {
-        affiliateId: profile.id,
-        amount: requestedNgn,
-        status: 'REQUESTED',
-        reference: payoutRef,
-        bankDetails: bankSnapshot,
-      },
-    });
+      const totalPaidOrRequested = profile.payouts
+        .filter((p) => p.status !== 'REJECTED')
+        .reduce((sum, p) => sum + p.amount, 0);
 
-    return NextResponse.json({
-      success: true,
-      payoutReference: payout.reference,
-      amountNgn: payout.amount,
-      message: 'Payout request received. Bank transfers are cleared within 24 to 48 business hours.',
-    });
+      const availableNgn = Math.max(0, totalEarned - totalPaidOrRequested);
+
+      if (availableNgn < MINIMUM_PAYOUT_NGN) {
+        return NextResponse.json(
+          { error: `Minimum payout threshold is ₦10,000. Your available balance is ₦${availableNgn.toLocaleString()}.` },
+          { status: 400 }
+        );
+      }
+
+      const requestedNgn = body.amountNgn === undefined ? availableNgn : Number(body.amountNgn);
+      if (!Number.isFinite(requestedNgn)) {
+        return NextResponse.json({ error: 'A finite payout amount is required.' }, { status: 400 });
+      }
+
+      if (requestedNgn > availableNgn) {
+        return NextResponse.json(
+          { error: 'Requested amount exceeds your available cleared commission balance.' },
+          { status: 400 }
+        );
+      }
+
+      if (requestedNgn < MINIMUM_PAYOUT_NGN) {
+        return NextResponse.json(
+          { error: 'Minimum payout withdrawal is ₦10,000.' },
+          { status: 400 }
+        );
+      }
+
+      const payoutRef = `PAYOUT-CC-${crypto.randomBytes(3).toString('hex').toUpperCase()}`;
+      const bankSnapshot = `${profile.bankName || ''} - ${profile.bankAccountNumber || ''} (${profile.bankAccountName || ''})`;
+
+      const payout = await tx.affiliatePayout.create({
+        data: {
+          affiliateId: profile.id,
+          amount: requestedNgn,
+          status: 'REQUESTED',
+          reference: payoutRef,
+          bankDetails: bankSnapshot,
+        },
+      });
+
+      return NextResponse.json({
+        success: true,
+        payoutReference: payout.reference,
+        amountNgn: payout.amount,
+        message: 'Payout request received. Bank transfers are cleared within 24 to 48 business hours.',
+      });
+    }, { isolationLevel: 'ReadCommitted' });
   } catch (error: any) {
     console.error('[Affiliate Payout Error]', error);
     return NextResponse.json(

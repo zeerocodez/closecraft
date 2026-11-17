@@ -70,34 +70,22 @@ test('CloseCraft HQ Phase 15: Embeddable Website Lead Capture Widget & Public In
     assert.equal(optRes.headers.get('Access-Control-Allow-Origin'), '*');
 
     // 2. Missing workspaceSlug
-    const reqNoSlug = {
-      json: async () => ({ name: 'Test Contact', email: 'test@example.com' }),
-      headers: new Headers(),
-    };
+    const reqNoSlug = new Request('http://local.test/api/leads/embed', { method: 'POST', body: JSON.stringify({ name: 'Test Contact', email: 'test@example.com' }) });
     const resNoSlug = await POST(reqNoSlug);
     assert.equal(resNoSlug.status, 400);
 
     // 3. Unknown workspaceSlug
-    const reqBadSlug = {
-      json: async () => ({ workspaceSlug: 'non-existent-slug-xyz', name: 'Test Contact', email: 'test@example.com' }),
-      headers: new Headers(),
-    };
+    const reqBadSlug = new Request('http://local.test/api/leads/embed', { method: 'POST', body: JSON.stringify({ workspaceSlug: 'non-existent-slug-xyz', name: 'Test Contact', email: 'test@example.com' }) });
     const resBadSlug = await POST(reqBadSlug);
     assert.equal(resBadSlug.status, 404);
 
     // 4. Missing name
-    const reqNoName = {
-      json: async () => ({ workspaceSlug: testOrg.slug, email: 'test@example.com' }),
-      headers: new Headers(),
-    };
+    const reqNoName = new Request('http://local.test/api/leads/embed', { method: 'POST', body: JSON.stringify({ workspaceSlug: testOrg.slug, email: 'test@example.com' }) });
     const resNoName = await POST(reqNoName);
     assert.equal(resNoName.status, 400);
 
     // 5. Missing both email and phone
-    const reqNoContact = {
-      json: async () => ({ workspaceSlug: testOrg.slug, name: 'Contact Without Email Or Phone' }),
-      headers: new Headers(),
-    };
+    const reqNoContact = new Request('http://local.test/api/leads/embed', { method: 'POST', body: JSON.stringify({ workspaceSlug: testOrg.slug, name: 'Contact Without Email Or Phone' }) });
     const resNoContact = await POST(reqNoContact);
     assert.equal(resNoContact.status, 400);
   });
@@ -114,10 +102,10 @@ test('CloseCraft HQ Phase 15: Embeddable Website Lead Capture Widget & Public In
       estimatedValue: 750000,
     };
 
-    const reqValid = {
-      json: async () => validPayload,
-      headers: new Headers({ 'x-forwarded-for': '197.210.64.1' }),
-    };
+    const reqValid = new Request('http://local.test/api/leads/embed', {
+      method: 'POST', body: JSON.stringify(validPayload),
+      headers: { 'x-forwarded-for': '197.210.64.1' },
+    });
 
     const res = await POST(reqValid);
     assert.equal(res.status, 201);

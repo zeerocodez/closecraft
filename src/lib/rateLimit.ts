@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+import { db } from "./db";
 import { NextRequest } from "next/server";
 
 interface RateLimitRecord {
@@ -69,4 +71,28 @@ export async function rateLimit(
     remaining: limit - record.count,
     reset: record.resetAt,
   };
+}
+
+/** Shared fixed-window limiter. Database failures fail closed at the caller. */
+export async function sharedRateLimit(key: string, limit: number, windowMs: number) {
+  const now = Date.now();
+  const expiresAt = new Date(now + windowMs);
+  const bucketKey = createHash('sha256').update(key).digest('hex');
+  const rows = await db.$queryRaw<{ count: number }[]>`
+    INSERT INTO "SecurityRateLimit" ("key", "count", "expiresAt")
+    VALUES (${bucketKey}, 1, ${expiresAt})
+    ON CONFLICT ("key") DO UPDATE SET
+      "count" = CASE WHEN "SecurityRateLimit"."expiresAt" <= NOW() THEN 1
+                     ELSE LEAST("SecurityRateLimit"."count" + 1, ${limit + 1}) END,
+      "expiresAt" = CASE WHEN "SecurityRateLimit"."expiresAt" <= NOW() THEN ${expiresAt}
+                         ELSE "SecurityRateLimit"."expiresAt" END
+    RETURNING "count"
+  `;
+  // Bound stale storage without removing active counters.
+  if (Math.random() < 0.01) {
+    await db.$executeRaw`DELETE FROM "SecurityRateLimit" WHERE "key" IN (
+      SELECT "key" FROM "SecurityRateLimit" WHERE "expiresAt" < NOW() LIMIT 1000
+    )`;
+  }
+  return { allowed: rows[0].count <= limit };
 }

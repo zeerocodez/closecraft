@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { sharedRateLimit, clientIp } from '@/lib/rateLimit';
+import { z } from 'zod';
+
+const payloadSchema = z.object({
+  workspaceSlug: z.string().trim().min(1).max(200),
+  name: z.string().trim().min(1).max(120),
+  email: z.string().trim().email().max(254).optional(),
+  phone: z.string().trim().min(1).max(40).optional(),
+  message: z.string().trim().max(2000).optional(),
+  estimatedValue: z.coerce.number().finite().nonnegative().max(1e12).optional(),
+}).refine(data => data.email || data.phone, 'A contact method is required');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +24,26 @@ export async function OPTIONS() {
 
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const ipLimit = await sharedRateLimit(`widget-ip:${clientIp(req)}`, 50, 60 * 60 * 1000);
+    if (!ipLimit.allowed) return NextResponse.json({ error: 'Too many submissions.' }, { status: 429, headers: corsHeaders });
+    const reader = req.body?.getReader();
+    if (!reader) return NextResponse.json({ error: 'Missing body.' }, { status: 400, headers: corsHeaders });
+    const chunks: Uint8Array[] = [];
+    let size = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      size += value.byteLength;
+      if (size > 16384) {
+        await reader.cancel();
+        return NextResponse.json({ error: 'Payload too large.' }, { status: 413, headers: corsHeaders });
+      }
+      chunks.push(value);
+    }
+    const text = Buffer.concat(chunks).toString('utf8');
+    const parsed = payloadSchema.safeParse(JSON.parse(text));
+    if (!parsed.success) return NextResponse.json({ error: 'Invalid submission.' }, { status: 400, headers: corsHeaders });
+    const body = parsed.data;
 
     const {
       workspaceSlug,
@@ -63,8 +93,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Rate-limiting safeguard: max 50 submissions per IP/hour in production
-    const clientIp = req.headers.get('x-forwarded-for')?.split(',')[0] || '127.0.0.1';
+    const workspaceLimit = await sharedRateLimit(`widget-org:${org.id}`, 500, 60 * 60 * 1000);
+    if (!workspaceLimit.allowed) return NextResponse.json({ error: 'Too many submissions.' }, { status: 429, headers: corsHeaders });
 
     // Parse and sanitize payload
     const cleanName = name.trim();
@@ -103,7 +133,7 @@ export async function POST(req: NextRequest) {
   } catch (err: any) {
     console.error('Lead ingestion error:', err);
     return NextResponse.json(
-      { error: err.message || 'Internal server error processing lead submission.' },
+      { error: 'Unable to process submission.' },
       { status: 500, headers: corsHeaders }
     );
   }

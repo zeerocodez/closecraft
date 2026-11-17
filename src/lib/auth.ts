@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
 import bcrypt from "bcryptjs";
+import { sharedRateLimit, clientIp } from "./rateLimit";
 
 const googleClientId = process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_ID;
 const googleClientSecret = process.env.AUTH_GOOGLE_SECRET || process.env.GOOGLE_CLIENT_SECRET || process.env.GOOGLE_SECRET;
@@ -26,10 +27,16 @@ authProviders.push(
       email: { label: "Email", type: "email", placeholder: "you@example.com" },
       password: { label: "Password", type: "password" }
     },
-    async authorize(credentials) {
+    async authorize(credentials, request) {
       if (!credentials?.email || !credentials?.password) return null;
 
-      const email = (credentials.email as string).trim().toLowerCase();
+      if (typeof credentials.email !== 'string' || typeof credentials.password !== 'string' ||
+          credentials.email.length > 254 || credentials.password.length > 100) return null;
+      const email = credentials.email.trim().toLowerCase();
+      const ipLimit = await sharedRateLimit(`login-ip:${clientIp(request)}`, 30, 10 * 60 * 1000);
+      if (!ipLimit.allowed) return null;
+      const accountLimit = await sharedRateLimit(`login-account:${email}`, 10, 10 * 60 * 1000);
+      if (!accountLimit.allowed) return null;
 
       const user = await db.user.findUnique({
         where: { email },
