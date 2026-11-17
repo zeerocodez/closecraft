@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { db } from "./db";
 
 interface RateLimitRecord {
   count: number;
@@ -11,7 +12,7 @@ const memoryStore = new Map<string, RateLimitRecord>();
 const CLEANUP_INTERVAL = 60 * 1000;
 let lastCleanup = Date.now();
 
-function purgeExpired() {
+function purgeExpiredMemory() {
   const now = Date.now();
   if (now - lastCleanup < CLEANUP_INTERVAL) return;
   lastCleanup = now;
@@ -41,12 +42,67 @@ export async function rateLimit(
   limit: number = 20,
   windowMs: number = 60 * 1000
 ): Promise<{ allowed: boolean; remaining: number; reset: number }> {
-  purgeExpired();
-
   const now = Date.now();
-  const record = memoryStore.get(key);
+  const resetDate = new Date(now + windowMs);
 
-  if (!record || record.resetAt <= now) {
+  // 1. Attempt database-backed rate limiting for cross-instance consistency
+  try {
+    if (db && db.rateLimit) {
+      const record = await db.rateLimit.findUnique({
+        where: { key },
+      });
+
+      if (!record || record.resetAt.getTime() <= now) {
+        await db.rateLimit.upsert({
+          where: { key },
+          create: {
+            key,
+            count: 1,
+            resetAt: resetDate,
+          },
+          update: {
+            count: 1,
+            resetAt: resetDate,
+          },
+        });
+
+        return {
+          allowed: true,
+          remaining: limit - 1,
+          reset: resetDate.getTime(),
+        };
+      }
+
+      if (record.count >= limit) {
+        return {
+          allowed: false,
+          remaining: 0,
+          reset: record.resetAt.getTime(),
+        };
+      }
+
+      const updated = await db.rateLimit.update({
+        where: { key },
+        data: {
+          count: { increment: 1 },
+        },
+      });
+
+      return {
+        allowed: true,
+        remaining: Math.max(0, limit - updated.count),
+        reset: updated.resetAt.getTime(),
+      };
+    }
+  } catch {
+    // If DB is unreachable or during test mocks, gracefully fallback to memoryStore
+  }
+
+  // 2. Resilient in-memory fallback
+  purgeExpiredMemory();
+  const memRecord = memoryStore.get(key);
+
+  if (!memRecord || memRecord.resetAt <= now) {
     memoryStore.set(key, { count: 1, resetAt: now + windowMs });
     return {
       allowed: true,
@@ -55,18 +111,18 @@ export async function rateLimit(
     };
   }
 
-  if (record.count >= limit) {
+  if (memRecord.count >= limit) {
     return {
       allowed: false,
       remaining: 0,
-      reset: record.resetAt,
+      reset: memRecord.resetAt,
     };
   }
 
-  record.count += 1;
+  memRecord.count += 1;
   return {
     allowed: true,
-    remaining: limit - record.count,
-    reset: record.resetAt,
+    remaining: limit - memRecord.count,
+    reset: memRecord.resetAt,
   };
 }

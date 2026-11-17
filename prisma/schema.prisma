@@ -2672,3 +2672,18 @@ model BlogPost {
   @@index([category])
   @@index([publishedAt])
 }
+
+// -----------------------------------------------------------------------------
+// RATE LIMITING & SECURITY THROTTLING
+// -----------------------------------------------------------------------------
+
+model RateLimit {
+  key       String   @id
+  count     Int      @default(1)
+  resetAt   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+}
+

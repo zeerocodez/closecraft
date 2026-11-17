@@ -3,6 +3,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
+import { rateLimit } from "./rateLimit";
 import bcrypt from "bcryptjs";
 
 const googleClientId = process.env.AUTH_GOOGLE_ID || process.env.GOOGLE_CLIENT_ID || process.env.GOOGLE_ID;
@@ -26,10 +27,26 @@ authProviders.push(
       email: { label: "Email", type: "email", placeholder: "you@example.com" },
       password: { label: "Password", type: "password" }
     },
-    async authorize(credentials) {
+    async authorize(credentials, req) {
       if (!credentials?.email || !credentials?.password) return null;
 
       const email = (credentials.email as string).trim().toLowerCase();
+
+      // Application brute-force safeguard: limit failed attempts per account and IP
+      const accountLimit = await rateLimit(`auth-login-account:${email}`, 10, 15 * 60 * 1000);
+      if (!accountLimit.allowed) {
+        console.warn(`[auth] Account brute-force limit exceeded for: ${email}`);
+        return null;
+      }
+
+      const headers = (req as any)?.headers;
+      const forwarded = typeof headers?.get === "function" ? headers.get("x-forwarded-for") : (headers?.["x-forwarded-for"] as string | undefined);
+      const clientIp = forwarded ? forwarded.split(",")[0]?.trim() : "127.0.0.1";
+      const ipLimit = await rateLimit(`auth-login-ip:${clientIp}`, 30, 15 * 60 * 1000);
+      if (!ipLimit.allowed) {
+        console.warn(`[auth] IP brute-force limit exceeded for: ${clientIp}`);
+        return null;
+      }
 
       const user = await db.user.findUnique({
         where: { email },
