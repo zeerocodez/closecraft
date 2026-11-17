@@ -19,7 +19,9 @@ import {
   Lock,
   Download,
   AlertTriangle,
-  BadgeCheck
+  BadgeCheck,
+  Globe,
+  Code2,
 } from 'lucide-react';
 
 export const metadata = {
@@ -173,6 +175,46 @@ export default async function SettingsPage() {
         </div>
 
         <SettingsForm initialPolicy={org.qualificationPolicy || ""} />
+      </section>
+
+      {/* Section 3.B: Embeddable Website Lead Capture Widget */}
+      <section className="p-6 md:p-8 rounded-3xl bg-[#0f1214] border border-white/5 shadow-xl space-y-6">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#248277]/10 px-2.5 py-0.5 rounded-full border border-[#248277]/20">
+              Inbound Capture
+            </span>
+          </div>
+          <h2 className="font-serif text-lg font-bold text-white flex items-center gap-2">
+            <Globe size={18} className="text-[#45bfae]" />
+            <span>Website Lead Capture Widget &amp; Ingestion API</span>
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Embed CloseCraft's zero-dependency script into your external website (WordPress, Webflow, Shopify, or custom HTML) to capture leads directly into your Revenue Engine.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-2">
+            <span className="text-xs font-semibold text-white block">HTML Embed Code (Paste before &lt;/body&gt;):</span>
+            <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 font-mono text-xs text-[#45bfae] overflow-x-auto select-all">
+              {`<script src="https://app.closecraft.com/closecraft.js" data-workspace="${org.slug}" defer></script>`}
+            </div>
+            <p className="text-[11px] text-gray-400">
+              Automatically attaches a floating "Talk to Sales" modal to your website. Inquiries are instantly attributed to your workspace slug (<strong className="text-white font-mono">{org.slug}</strong>).
+            </p>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-2">
+            <span className="text-xs font-semibold text-white block">Headless API Endpoint (For Custom Forms):</span>
+            <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 font-mono text-xs text-slate-300 overflow-x-auto select-all">
+              POST /api/leads/embed
+            </div>
+            <p className="text-[11px] text-gray-400">
+              Submit JSON payloads with <code className="text-[#45bfae]">workspaceSlug: "{org.slug}"</code>, <code className="text-[#45bfae]">name</code>, and <code className="text-[#45bfae]">phone</code> or <code className="text-[#45bfae]">email</code>. CORS preflight and cross-origin browser submissions are enabled by default.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Section 4: Commercial Plan & Billing Overview */}
