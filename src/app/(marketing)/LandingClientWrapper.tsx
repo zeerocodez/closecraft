@@ -255,8 +255,9 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors ml-1"
-              aria-label="Toggle navigation menu"
+              className="lg:hidden p-2 text-white hover:bg-white/10 rounded-lg transition-colors ml-1 cursor-pointer"
+              aria-label={mobileMenuOpen ? "Close navigation menu" : "Open navigation menu"}
+              aria-expanded={mobileMenuOpen}
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
