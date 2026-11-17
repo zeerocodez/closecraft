@@ -3,6 +3,7 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import OperatorDashboardClient from '@/components/operator/OperatorDashboardClient';
+import { getCertifiedGraduates } from '@/lib/dss/bridge';
 
 export const metadata = {
   title: 'Operator Command Centre | Closecraft',
@@ -166,6 +167,9 @@ export default async function OperatorPage() {
     where: { status: { in: ['QUALIFIED', 'OPPORTUNITY', 'WON'] } }
   });
 
+  // Fetch DSS Certified Graduates for Workforce Bridge
+  const certifiedGraduates = await getCertifiedGraduates();
+
   return (
     <div className="flex-1 overflow-y-auto">
       <OperatorDashboardClient
@@ -180,6 +184,7 @@ export default async function OperatorPage() {
         deliveryTasks={deliveryTasks as any}
         clientServices={clientServices as any}
         growthProjects={growthProjects as any}
+        certifiedGraduates={certifiedGraduates as any}
         performanceMetrics={{
           totalWonDeals,
           totalClosedRevenue,

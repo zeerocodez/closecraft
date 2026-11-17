@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { calculateQuoteEconomics, checkActivationPrerequisites, activateEngagement } from '@/lib/pilot/pilotService';
 
 // Ensure caller is an authorized operator
-async function assertOperator() {
+export async function assertOperator() {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
 
@@ -590,3 +590,14 @@ export async function convertServiceRequestToPilotAction(data: {
   revalidatePath('/today');
   return { success: true, engagementId: engagement.id };
 }
+
+export async function promoteStudentToTalentPoolAction(data: {
+  studentId: string;
+  weeklyAvailabilityHours?: number;
+  bioOverride?: string;
+  experienceSummary?: string;
+}) {
+  const { promoteStudentToTalentPoolAction: bridgeAction } = await import('@/lib/dss/bridge');
+  return bridgeAction(data);
+}
+

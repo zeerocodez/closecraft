@@ -31,6 +31,7 @@ import {
   updateServiceRequestStageAction,
   updateCampaignMetricsAction,
   convertServiceRequestToPilotAction,
+  promoteStudentToTalentPoolAction,
 } from '@/app/(saas)/operator/actions';
 import QualificationReviewQueue from '@/components/operator/QualificationReviewQueue';
 import RemoteWorkforceSection from '@/components/operator/RemoteWorkforceSection';
@@ -47,6 +48,7 @@ export default function OperatorDashboardClient({
   deliveryTasks = [],
   clientServices = [],
   growthProjects = [],
+  certifiedGraduates = [],
   performanceMetrics = {
     totalWonDeals: 0,
     totalClosedRevenue: 0,
@@ -66,6 +68,7 @@ export default function OperatorDashboardClient({
   deliveryTasks?: any[];
   clientServices?: any[];
   growthProjects?: any[];
+  certifiedGraduates?: any[];
   performanceMetrics?: any;
 }) {
   const [activeTab, setActiveTab] = useState<'growthProjects' | 'workforce' | 'serviceRequests' | 'qualifications' | 'requests' | 'engagements' | 'professionals' | 'finance'>('growthProjects');
@@ -134,6 +137,20 @@ export default function OperatorDashboardClient({
   // Payout confirmation
   const [payoutTargetId, setPayoutTargetId] = useState<string | null>(null);
   const [payoutRef, setPayoutRef] = useState('');
+
+  const [promotingStudentId, setPromotingStudentId] = useState<string | null>(null);
+  const handlePromoteGraduate = async (studentId: string) => {
+    setPromotingStudentId(studentId);
+    try {
+      await promoteStudentToTalentPoolAction({ studentId });
+      alert('Student successfully promoted to approved Professional Talent Pool!');
+      window.location.reload();
+    } catch (err: any) {
+      alert(err.message || 'Failed to promote graduate');
+    } finally {
+      setPromotingStudentId(null);
+    }
+  };
 
   const handleAssessmentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1054,6 +1071,65 @@ export default function OperatorDashboardClient({
                 </div>
               </div>
             ))}
+          </div>
+        
+          {/* Certified DSS Graduates Pipeline */}
+          <div className="mt-8 pt-6 border-t border-white/5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="font-heading font-semibold text-base text-white">Certified DSS Graduates Pipeline</h4>
+                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#248277]/10 text-[#45bfae] border border-[#248277]/20">
+                    Workforce Bridge
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Digital Sales School students who completed curriculum and passed certification exams, ready for 1-click promotion to the talent pool.
+                </p>
+              </div>
+            </div>
+
+            {certifiedGraduates.length === 0 ? (
+              <div className="p-6 rounded-2xl bg-[#0f1214] border border-white/5 text-center text-xs text-slate-400">
+                No certified graduates pending review. When DSS students pass their certification exams, they appear here.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {certifiedGraduates.map((grad: any) => (
+                  <div key={grad.studentId} className="p-4 rounded-xl bg-[#0f1214] border border-white/10 space-y-3 text-xs">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <span className="font-heading font-bold text-sm text-white">{grad.fullName}</span>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                          <span className="font-mono text-[#45bfae] font-semibold">{grad.track || 'GENERAL'} Track</span>
+                          <span>•</span>
+                          <span>{grad.competencyCount} Competencies</span>
+                          <span>•</span>
+                          <span>{grad.portfolioCount} Artifacts</span>
+                        </div>
+                      </div>
+                      {grad.isAlreadyEnrolled ? (
+                        <span className="px-2 py-0.5 rounded-md font-semibold text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          Enrolled in Talent Pool
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => handlePromoteGraduate(grad.studentId)}
+                          disabled={promotingStudentId === grad.studentId}
+                          className="px-3 py-1.5 bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-semibold rounded-xl transition disabled:opacity-50"
+                        >
+                          {promotingStudentId === grad.studentId ? 'Enrolling...' : 'Approve & Enrol in Talent Pool'}
+                        </button>
+                      )}
+                    </div>
+                    <div className="text-[11px] text-slate-400 flex items-center justify-between border-t border-white/5 pt-2">
+                      <span>Email: {grad.email}</span>
+                      <span>Certified: {grad.certifiedAt ? new Date(grad.certifiedAt).toLocaleDateString() : 'Verified'}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
