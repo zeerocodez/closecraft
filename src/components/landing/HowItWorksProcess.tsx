@@ -20,6 +20,7 @@ export default function HowItWorksProcess({ onOpenServiceBrief }: HowItWorksProc
   const stages = [
     {
       number: '01',
+      stepLabel: '01. ATTRACT',
       tag: 'ACQUISITION',
       title: 'ATTRACT',
       tagline: 'Bring potential customers in.',
@@ -38,6 +39,7 @@ export default function HowItWorksProcess({ onOpenServiceBrief }: HowItWorksProc
     },
     {
       number: '02',
+      stepLabel: '02. CAPTURE & RESPOND',
       tag: 'ENGAGEMENT',
       title: 'CAPTURE & RESPOND',
       tagline: 'Give every enquiry a place.',
@@ -56,6 +58,7 @@ export default function HowItWorksProcess({ onOpenServiceBrief }: HowItWorksProc
     },
     {
       number: '03',
+      stepLabel: '03. FOLLOW UP & CONVERT',
       tag: 'EXECUTION',
       title: 'FOLLOW UP & CONVERT',
       tagline: 'Give every lead a next action.',
@@ -74,6 +77,7 @@ export default function HowItWorksProcess({ onOpenServiceBrief }: HowItWorksProc
     },
     {
       number: '04',
+      stepLabel: '04. BUILD SALES CAPABILITY',
       tag: 'CAPABILITY',
       title: 'BUILD SALES CAPABILITY',
       tagline: 'Develop your revenue talent.',

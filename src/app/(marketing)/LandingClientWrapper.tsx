@@ -331,6 +331,10 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                 CloseCraft helps you capture enquiries, respond faster, follow up consistently and convert more prospects into paying customers.
               </p>
 
+              <p className="text-xs sm:text-sm font-semibold text-[#45bfae] italic">
+                &ldquo;Every enquiry deserves a follow-up. Every opportunity deserves a clear next step.&rdquo;
+              </p>
+
               {/* Dual CTAs */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                 <button
