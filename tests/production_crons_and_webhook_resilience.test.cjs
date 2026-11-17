@@ -24,7 +24,12 @@ test('CloseCraft HQ Phase 16: Production Background Cron Automation & Webhook Re
     assert.ok(paths.includes('/api/cron/engine'), 'Must schedule /api/cron/engine');
 
     for (const cron of config.crons) {
-      assert.ok(cron.schedule, `Cron ${cron.path} must define standard cron schedule`);
+      // Hobby rejects schedules that run more often than daily.
+      const fields = cron.schedule.trim().split(/\s+/);
+      assert.equal(fields.length, 5, 'Must use a five-field cron expression');
+      assert.match(fields[0], /^(?:[0-9]|[1-5][0-9])$/, 'One minute per day');
+      assert.match(fields[1], /^(?:[0-9]|1[0-9]|2[0-3])$/, 'One hour per day');
+      assert.deepEqual(fields.slice(2), ['*', '*', '*'], 'Jobs must run daily');
     }
   });
 
