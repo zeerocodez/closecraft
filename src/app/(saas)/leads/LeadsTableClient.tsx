@@ -93,7 +93,7 @@ export default function LeadsTableClient({
     });
   };
 
-  const hasDemoSeed = leads.some((l) => l.message?.includes('[DEMO_SEED]'));
+  const hasDemoSeed = leads.some((l) => l.message?.includes('[DEMO_SEED]') || l.message?.includes('[Demo') || l.email?.endsWith('@example.com'));
 
   const handleClaim = (leadId: string, leadName: string) => {
     startTransition(async () => {

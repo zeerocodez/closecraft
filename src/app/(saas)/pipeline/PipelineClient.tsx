@@ -90,7 +90,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
     });
   };
 
-  const hasDemoSeed = deals.some((d) => d.title?.includes('[DEMO_SEED]'));
+  const hasDemoSeed = deals.some((d) => d.title?.includes('[DEMO_SEED]') || d.title?.includes('[Demo') || d.lead.email?.endsWith('@example.com'));
 
   const filteredDeals = deals.filter((deal) => {
     if (stageFilter !== 'ALL' && deal.stage !== stageFilter) return false;

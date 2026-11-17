@@ -1367,14 +1367,22 @@ export async function clearSampleWorkspaceAction() {
   await db.appointment.deleteMany({
     where: {
       organizationId,
-      notes: { contains: '[DEMO_SEED]' }
+      OR: [
+        { notes: { contains: '[DEMO_SEED]' } },
+        { notes: { contains: '[Demo' } },
+      ]
     }
   });
 
   const deleted = await db.lead.deleteMany({
     where: {
       organizationId,
-      message: { contains: '[DEMO_SEED]' }
+      OR: [
+        { message: { contains: '[DEMO_SEED]' } },
+        { message: { contains: '[Demo' } },
+        { email: { endsWith: '@example.com' } },
+        { email: { contains: 'testcompany.com' } },
+      ]
     }
   });
 

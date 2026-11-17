@@ -78,3 +78,4 @@ test('CloseCraft Growth Enhancements Phase 1: Diagnostic Scorecard & Multi-Curre
     assert.ok(sitemapContent.includes('/audit/results'));
   });
 });
+

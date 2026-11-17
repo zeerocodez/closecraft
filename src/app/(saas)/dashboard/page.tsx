@@ -165,7 +165,16 @@ export default async function DashboardPage() {
     getDashboardMetrics(organizationId, thirtyDaysAgo, now, 'NGN'),
     // 7. Lead count and demo seed status for onboarding
     db.lead.count({ where: { organizationId } }),
-    db.lead.findFirst({ where: { organizationId, message: { contains: '[DEMO_SEED]' } } }),
+    db.lead.findFirst({
+      where: {
+        organizationId,
+        OR: [
+          { message: { contains: '[DEMO_SEED]' } },
+          { message: { contains: '[Demo' } },
+          { email: { endsWith: '@example.com' } },
+        ]
+      }
+    }),
     db.workspaceQualification.findFirst({ where: { organizationId } }),
   ]);
 

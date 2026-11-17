@@ -61,3 +61,4 @@ test('CloseCraft Growth Enhancements Phase 2 & 3: Day-0 Activation & Channel Hea
     assert.ok(settingsContent.includes('/api/webhooks/facebook'));
   });
 });
+
