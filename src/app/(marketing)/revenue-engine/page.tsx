@@ -14,6 +14,8 @@ import {
   Bot 
 } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
+import JsonLd from '@/components/seo/JsonLd';
+import { getSoftwareApplicationJsonLd } from '@/lib/seo/schema';
 
 export const metadata: Metadata = {
   title: "Revenue Engine — Sales Operations & Next Best Action Allocation",
@@ -45,8 +47,16 @@ export const metadata: Metadata = {
 };
 
 export default function RevenueEnginePage() {
+  const jsonLd = getSoftwareApplicationJsonLd({
+    name: 'CloseCraft Revenue Engine',
+    url: 'https://www.closecrafthq.com/revenue-engine',
+    description: 'Turn more enquiries into managed sales opportunities. Explainable priority scoring, deterministic Next Best Action allocation, and visual pipeline management.',
+    applicationCategory: 'SalesOperations',
+  });
+
   return (
     <div className="min-h-screen bg-[#000000] text-white selection:bg-[#248277] selection:text-white font-sans antialiased">
+      <JsonLd data={jsonLd} />
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-xl border-b border-[#1f1f1f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">

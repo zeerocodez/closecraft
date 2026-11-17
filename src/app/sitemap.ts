@@ -12,15 +12,26 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'always' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'never';
   }> = [
     { url: '', priority: 1.0, changeFrequency: 'weekly' },
+    { url: '/platform', priority: 0.95, changeFrequency: 'weekly' },
+    { url: '/revenue-engine', priority: 0.95, changeFrequency: 'weekly' },
+    { url: '/dss', priority: 0.95, changeFrequency: 'weekly' },
+    { url: '/calculator', priority: 0.9, changeFrequency: 'weekly' },
+    { url: '/audit', priority: 0.9, changeFrequency: 'weekly' },
     { url: '/early-access', priority: 0.95, changeFrequency: 'weekly' },
     { url: '/pricing', priority: 0.9, changeFrequency: 'weekly' },
     { url: '/solutions', priority: 0.85, changeFrequency: 'monthly' },
-    { url: '/revenue-engine', priority: 0.85, changeFrequency: 'monthly' },
-    { url: '/platform', priority: 0.85, changeFrequency: 'monthly' },
     { url: '/about', priority: 0.8, changeFrequency: 'monthly' },
     { url: '/contact', priority: 0.8, changeFrequency: 'monthly' },
     { url: '/affiliate', priority: 0.85, changeFrequency: 'weekly' },
     { url: '/blog', priority: 0.85, changeFrequency: 'daily' },
+
+    // Professional Growth Services (Stage 1: Attract)
+    { url: '/services', priority: 0.9, changeFrequency: 'weekly' },
+    { url: '/services/ads-management', priority: 0.9, changeFrequency: 'weekly' },
+    { url: '/services/ai-flyers', priority: 0.85, changeFrequency: 'weekly' },
+    { url: '/services/ai-video', priority: 0.85, changeFrequency: 'weekly' },
+    { url: '/services/landing-pages', priority: 0.85, changeFrequency: 'weekly' },
+    { url: '/services/vsl-design', priority: 0.85, changeFrequency: 'weekly' },
 
     // Public Service Landing Pages
     { url: '/services/sales-outsourcing', priority: 0.9, changeFrequency: 'weekly' },

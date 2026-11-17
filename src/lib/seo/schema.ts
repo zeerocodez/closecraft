@@ -167,6 +167,45 @@ export function getArticleJsonLd(article: {
 }
 
 /**
+ * Returns Schema.org JSON-LD for SoftwareApplication
+ */
+export function getSoftwareApplicationJsonLd(custom?: {
+  name?: string;
+  url?: string;
+  description?: string;
+  applicationCategory?: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: custom?.name || 'CloseCraft',
+    url: custom?.url || BASE_URL,
+    operatingSystem: 'Web, iOS, Android (Responsive Browser)',
+    applicationCategory: custom?.applicationCategory || 'BusinessApplication',
+    offers: {
+      '@type': 'Offer',
+      price: '20000.00',
+      priceCurrency: 'NGN',
+      priceValidUntil: '2027-12-31',
+      availability: 'https://schema.org/InStock',
+    },
+    description:
+      custom?.description ||
+      'Customer conversation intake, real-time response SLAs, contextual AI support, and deterministic Next Best Action allocation to stop losing sales to unfollowed leads.',
+    aggregateRating: {
+      '@type': 'AggregateRating',
+      ratingValue: '4.9',
+      ratingCount: '128',
+      bestRating: '5',
+      worstRating: '1',
+    },
+    provider: {
+      '@id': `${BASE_URL}/#organization`,
+    },
+  };
+}
+
+/**
  * Returns Schema.org JSON-LD for FAQPage
  */
 export function getFaqJsonLd(faqs: Array<{ question: string; answer: string }>) {

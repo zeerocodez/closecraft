@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import FullDiagnosticAuditClient from '@/components/tools/FullDiagnosticAuditClient';
+import JsonLd from '@/components/seo/JsonLd';
+import { getSoftwareApplicationJsonLd } from '@/lib/seo/schema';
 
 export const metadata: Metadata = {
   title: 'Interactive Follow-Up Diagnostic Audit — CloseCraft HQ',
@@ -21,6 +23,18 @@ export const metadata: Metadata = {
 };
 
 export default function AuditPage() {
-  return <FullDiagnosticAuditClient />;
+  const jsonLd = getSoftwareApplicationJsonLd({
+    name: 'CloseCraft Follow-Up Diagnostic Audit',
+    url: 'https://www.closecrafthq.com/audit',
+    description: 'Identify where your sales follow-up process breaks down and calculate your monthly revenue at risk across our 4 connected growth stages.',
+    applicationCategory: 'AssessmentApplication',
+  });
+
+  return (
+    <>
+      <JsonLd data={jsonLd} />
+      <FullDiagnosticAuditClient />
+    </>
+  );
 }
 

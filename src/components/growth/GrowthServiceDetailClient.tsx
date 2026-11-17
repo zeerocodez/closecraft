@@ -21,6 +21,8 @@ import {
 import Logo from '@/components/ui/Logo';
 import { GROWTH_SERVICES, GrowthServiceKey, GrowthServiceDefinition } from '@/lib/growth/services';
 import ProjectBriefModal from '@/components/growth/ProjectBriefModal';
+import JsonLd from '@/components/seo/JsonLd';
+import { getServiceJsonLd } from '@/lib/seo/schema';
 
 interface GrowthServiceDetailClientProps {
   serviceKey: GrowthServiceKey;
@@ -42,6 +44,14 @@ export default function GrowthServiceDetailClient({
   const [modalOpen, setModalOpen] = useState(false);
   const service = GROWTH_SERVICES[serviceKey];
 
+  const serviceJsonLd = getServiceJsonLd({
+    name: service.name,
+    description: service.outcomeDescription,
+    url: `/services/${serviceKey.toLowerCase().replace(/_/g, '-')}`,
+    serviceType: service.badge,
+    category: 'Commercial Growth Services',
+  });
+
   function getIcon(key: GrowthServiceKey) {
     switch (key) {
       case 'ADS_MANAGEMENT':
@@ -59,6 +69,7 @@ export default function GrowthServiceDetailClient({
 
   return (
     <div className="min-h-screen bg-[#000000] text-white selection:bg-[#248277] selection:text-white font-sans antialiased">
+      <JsonLd data={serviceJsonLd} />
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-xl border-b border-[#1f1f1f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">

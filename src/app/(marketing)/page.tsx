@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
 import LandingClientWrapper from "./LandingClientWrapper";
+import JsonLd from "@/components/seo/JsonLd";
+import { getSoftwareApplicationJsonLd, getFaqJsonLd } from "@/lib/seo/schema";
+import { HOMEPAGE_FAQS } from "@/lib/data/homepage-faqs";
 
 export const revalidate = 300;
 
@@ -40,5 +43,15 @@ export const metadata: Metadata = {
 };
 
 export default async function MarketingPage() {
-  return <LandingClientWrapper eco={null} flags={null} />;
+  const jsonLdData = [
+    getSoftwareApplicationJsonLd(),
+    getFaqJsonLd(HOMEPAGE_FAQS.map((faq) => ({ question: faq.q, answer: faq.a }))),
+  ];
+
+  return (
+    <>
+      <JsonLd data={jsonLdData} />
+      <LandingClientWrapper eco={null} flags={null} />
+    </>
+  );
 }

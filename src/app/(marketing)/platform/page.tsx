@@ -15,6 +15,8 @@ import {
   Users 
 } from 'lucide-react';
 import Logo from '@/components/ui/Logo';
+import JsonLd from '@/components/seo/JsonLd';
+import { getSoftwareApplicationJsonLd } from '@/lib/seo/schema';
 
 export const metadata: Metadata = {
   title: "CloseCraft Platform — Customer Engagement & Follow-Up System",
@@ -46,8 +48,16 @@ export const metadata: Metadata = {
 };
 
 export default function PlatformPage() {
+  const jsonLd = getSoftwareApplicationJsonLd({
+    name: 'CloseCraft Platform',
+    url: 'https://www.closecrafthq.com/platform',
+    description: 'Never lose track of an important customer conversation. Multichannel intake, strict response SLAs, and approved contextual AI assistance.',
+    applicationCategory: 'CustomerRelationshipManagement',
+  });
+
   return (
     <div className="min-h-screen bg-[#000000] text-white selection:bg-[#248277] selection:text-white font-sans antialiased">
+      <JsonLd data={jsonLd} />
       {/* Header */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-[#000000]/90 backdrop-blur-xl border-b border-[#1f1f1f]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
