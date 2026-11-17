@@ -1,5 +1,5 @@
 import crypto from 'crypto';
-import { db } from '@/lib/db';
+import { db, withTenantContext } from '@/lib/db';
 
 export function getBachsApiBase(): string {
   if (process.env.BACHS_API_BASE) {
@@ -499,15 +499,17 @@ export async function processBachsWebhookEvent(event: any): Promise<{
     const targetOrgId = invoice.organizationId;
     const now = new Date();
 
-    // 1. Mark invoice as PAID
-    await db.bachsInvoice.update({
-      where: { id: invoice.id },
-      data: {
-        status: 'PAID',
-        bachsChargeId: chargeId || invoice.bachsChargeId,
-        paidAt: now,
-        fundsAvailableAt: now,
-      }
+    // 1. Mark invoice as PAID under verified service-role context (bypasses RLS payment webhook trigger)
+    await withTenantContext({ isServiceRole: true, organizationId: targetOrgId }, async (tx) => {
+      await tx.bachsInvoice.update({
+        where: { id: invoice.id },
+        data: {
+          status: 'PAID',
+          bachsChargeId: chargeId || invoice.bachsChargeId,
+          paidAt: now,
+          fundsAvailableAt: now,
+        }
+      });
     });
 
     // 2. Mark payment attempt as SUCCEEDED
