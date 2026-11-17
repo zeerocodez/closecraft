@@ -1209,4 +1209,120 @@ export async function updateOrganizationIdentity(name: string, whatsappNumber: s
   return { success: true, organization: updatedOrg };
 }
 
+export async function seedSampleWorkspaceAction() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error('Organization required');
+
+  const existingDemo = await db.lead.findFirst({
+    where: { organizationId, message: { contains: '[DEMO_SEED]' } }
+  });
+  if (existingDemo) {
+    return { success: true, message: 'Demo workspace already seeded.' };
+  }
+
+  const lead1 = await db.lead.create({
+    data: {
+      organizationId,
+      name: 'Tunde Balogun',
+      email: `tunde.balogun.${Date.now()}@techcorplagos.ng`,
+      phone: '+2348031234567',
+      message: '[DEMO_SEED] High-intent enterprise lead seeking 30-day sales operations pilot for 12 outbound reps.',
+      source: 'META_LEAD_AD',
+      status: 'QUALIFIED',
+      buyingIntent: 92,
+      estimatedValue: 1200000,
+      currency: 'NGN',
+      nextAction: 'Execute WhatsApp Discovery Call',
+      nextActionDueAt: new Date(Date.now() + 4 * 60 * 60 * 1000),
+    }
+  });
+
+  await db.lead.create({
+    data: {
+      organizationId,
+      name: 'Dr. Amara Okafor',
+      email: `amara.okafor.${Date.now()}@apexclinics.com`,
+      phone: '+2348059876543',
+      message: '[DEMO_SEED] Requires multi-location patient enquiry triage and automated WhatsApp reminders.',
+      source: 'WEBSITE',
+      status: 'CONTACTED',
+      buyingIntent: 78,
+      estimatedValue: 450000,
+      currency: 'NGN',
+      nextAction: 'Confirm Pricing Sheet Review',
+      nextActionDueAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    }
+  });
+
+  await db.lead.create({
+    data: {
+      organizationId,
+      name: 'Ibrahim Musa',
+      email: `ibrahim.musa.${Date.now()}@northlinelogistics.com`,
+      phone: '+2348123456789',
+      message: '[DEMO_SEED] Overdue follow-up trigger: Requested custom quarterly billing schedule.',
+      source: 'WHATSAPP',
+      status: 'NEW',
+      buyingIntent: 65,
+      estimatedValue: 850000,
+      currency: 'NGN',
+      nextAction: 'Escalate to Human Closer (Custom Terms)',
+      nextActionDueAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+    }
+  });
+
+  await db.appointment.create({
+    data: {
+      organizationId,
+      leadId: lead1.id,
+      title: 'Commercial Demo with Tunde Balogun (TechCorp)',
+      scheduledAt: new Date(Date.now() + 48 * 60 * 60 * 1000),
+      durationMinutes: 30,
+      status: 'CONFIRMED',
+      meetingUrl: 'https://meet.google.com/closecraft-demo-bridge',
+      notes: '[DEMO_SEED] Automated demo meeting bridge seeded for trial onboarding.',
+    }
+  });
+
+  revalidatePath('/dashboard');
+  revalidatePath('/leads');
+  revalidatePath('/pipeline');
+  revalidatePath('/inbox');
+  revalidatePath('/appointments');
+
+  return { success: true, count: 3 };
+}
+
+export async function clearSampleWorkspaceAction() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+  const organizationId = (session as any)?.organizationId;
+  if (!organizationId) throw new Error('Organization required');
+
+  await db.appointment.deleteMany({
+    where: {
+      organizationId,
+      notes: { contains: '[DEMO_SEED]' }
+    }
+  });
+
+  const deleted = await db.lead.deleteMany({
+    where: {
+      organizationId,
+      message: { contains: '[DEMO_SEED]' }
+    }
+  });
+
+  revalidatePath('/dashboard');
+  revalidatePath('/leads');
+  revalidatePath('/pipeline');
+  revalidatePath('/inbox');
+  revalidatePath('/appointments');
+
+  return { success: true, deletedCount: deleted.count };
+}
+
+
 

@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import Link from 'next/link';
 import { getDashboardMetrics } from '@/lib/revenue-engine/dashboardService';
+import OnboardingChecklistCard from '@/components/dashboard/OnboardingChecklistCard';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -75,7 +76,6 @@ export default async function DashboardPage() {
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
-  // Fetch tenant details and core operational records in parallel
   const [
     org,
     pendingProposals,
@@ -84,6 +84,9 @@ export default async function DashboardPage() {
     activeProjects,
     activeSubscriptions,
     revMetrics,
+    leadCount,
+    demoLead,
+    workspaceQual,
   ] = await Promise.all([
     db.organization.findUnique({
       where: { id: organizationId },
@@ -160,6 +163,10 @@ export default async function DashboardPage() {
     }),
     // 6. High-level Revenue Engine metrics
     getDashboardMetrics(organizationId, thirtyDaysAgo, now, 'NGN'),
+    // 7. Lead count and demo seed status for onboarding
+    db.lead.count({ where: { organizationId } }),
+    db.lead.findFirst({ where: { organizationId, message: { contains: '[DEMO_SEED]' } } }),
+    db.workspaceQualification.findFirst({ where: { organizationId } }),
   ]);
 
   const totalActionCount =
@@ -188,20 +195,20 @@ export default async function DashboardPage() {
   return (
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto pb-16">
       {/* Top Welcome Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-outline-variant/30">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/5">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#248277]/10 text-[#45bfae] border border-[#248277]/20">
               CLOSECRAFT HQ
             </span>
-            <span className="text-xs text-on-surface-variant font-medium">
+            <span className="text-xs text-slate-400 font-medium">
               {org?.name || 'Workspace'}
             </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-on-surface">
+          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
             Customer Growth &amp; Deliverables
           </h1>
-          <p className="text-sm text-on-surface-variant mt-0.5">
+          <p className="text-sm text-slate-400 mt-0.5">
             Overview of active growth projects, proposals requiring review, and delivery milestones.
           </p>
         </div>
@@ -209,7 +216,7 @@ export default async function DashboardPage() {
         <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
           <Link
             href="/services"
-            className="px-4 py-2.5 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs flex items-center gap-2 shadow-sm transition-all"
+            className="px-4 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs flex items-center gap-2 shadow-sm shadow-[#248277]/20 transition-all"
           >
             <Plus size={15} />
             <span>Select Growth Services</span>
@@ -226,6 +233,15 @@ export default async function DashboardPage() {
           </a>
         </div>
       </div>
+
+      {/* Onboarding & Trial Activation Checklist */}
+      <OnboardingChecklistCard
+        organizationName={org?.name || 'Workspace'}
+        leadCount={leadCount}
+        hasDemoSeed={!!demoLead}
+        isProfileComplete={!!org?.name}
+        isPolicyConfigured={!!workspaceQual}
+      />
 
       {/* ========================================================================= */}
       {/* 1. WHAT REQUIRES ATTENTION RIGHT NOW? (Immediate Action Queue)           */}
