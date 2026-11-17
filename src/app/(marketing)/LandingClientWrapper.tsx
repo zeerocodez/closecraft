@@ -36,6 +36,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
   const [modalFormType, setModalFormType] = useState<'AUDIT' | 'MANAGED_SALES' | 'SERVICE_ENQUIRY'>('AUDIT');
+  const [calculatorData, setCalculatorData] = useState<{ leadVolume: string; monthlyLeak: string; responseTime: string } | null>(null);
   const [auditBusy, setAuditBusy] = useState(false);
   const [auditSuccess, setAuditSuccess] = useState<string | null>(null);
   const [auditError, setAuditError] = useState<string | null>(null);
@@ -54,8 +55,14 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
     needDescription: '',
   });
 
-  const openAudit = (type: 'AUDIT' | 'MANAGED_SALES' = 'AUDIT') => {
+  const openAudit = (
+    type: 'AUDIT' | 'MANAGED_SALES' = 'AUDIT',
+    calcData?: { leadVolume: string; monthlyLeak: string; responseTime: string }
+  ) => {
     setModalFormType(type);
+    if (calcData) {
+      setCalculatorData(calcData);
+    }
     setMobileMenuOpen(false);
     setAuditSuccess(null);
     setAuditError(null);
@@ -371,7 +378,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
         <HowItWorksProcess />
 
         {/* SECTION 4 & 5: THE HIDDEN REVENUE LEAK & THE COST OF POOR FOLLOW-UP */}
-        <RevenueLeakSection onOpenAuditModal={() => openAudit('AUDIT')} />
+        <RevenueLeakSection onOpenAuditModal={(calcData?: { leadVolume: string; monthlyLeak: string; responseTime: string }) => openAudit('AUDIT', calcData)} />
 
         {/* SECTION 6 & 7: THE CLOSECRAFT SOLUTION & PRODUCTS THAT POWER THE SYSTEM */}
         <ProductsShowcaseSection />
@@ -741,6 +748,17 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               </form>
             ) : (
               <form onSubmit={handleAuditSubmit} className="space-y-4">
+                {calculatorData && (
+                  <div className="p-3.5 rounded-2xl bg-[#0c1815] border border-[#248277]/50 text-xs text-zinc-300 space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold text-[#45bfae]">
+                      <span>Calculated Leakage Estimate</span>
+                    </div>
+                    <p className="text-[11px] text-zinc-300 leading-relaxed">
+                      Based on your calculator inputs ({calculatorData.leadVolume}, {calculatorData.responseTime}), your business is losing an estimated <strong className="text-red-400 font-mono font-bold">{calculatorData.monthlyLeak}/month</strong> to delayed follow-up.
+                    </p>
+                  </div>
+                )}
+
                 {auditError && (
                   <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs">
                     {auditError}

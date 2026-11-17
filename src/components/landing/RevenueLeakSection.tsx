@@ -15,9 +15,10 @@ import {
   ArrowRight,
   ShieldAlert
 } from 'lucide-react';
+import RevenueLeakageCalculator from './RevenueLeakageCalculator';
 
 interface RevenueLeakSectionProps {
-  onOpenAuditModal?: () => void;
+  onOpenAuditModal?: (data?: { leadVolume: string; monthlyLeak: string; responseTime: string }) => void;
 }
 
 export default function RevenueLeakSection({ onOpenAuditModal }: RevenueLeakSectionProps) {
@@ -127,6 +128,11 @@ export default function RevenueLeakSection({ onOpenAuditModal }: RevenueLeakSect
               </p>
             </div>
           </div>
+
+          {/* Interactive Follow-Up Revenue Leakage ROI Calculator */}
+          <div className="pt-4">
+            <RevenueLeakageCalculator onOpenAuditModal={onOpenAuditModal} />
+          </div>
         </div>
 
         {/* SECTION 5: THE COST OF POOR FOLLOW-UP */}
@@ -215,7 +221,7 @@ export default function RevenueLeakSection({ onOpenAuditModal }: RevenueLeakSect
               </div>
               <button
                 type="button"
-                onClick={onOpenAuditModal}
+                onClick={() => onOpenAuditModal?.()}
                 className="mt-3 w-full py-2.5 px-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold inline-flex items-center justify-center gap-2 transition-all cursor-pointer shadow-md"
               >
                 <span>Check Your Follow-Up Health</span>
