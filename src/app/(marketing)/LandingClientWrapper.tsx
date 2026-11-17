@@ -581,19 +581,33 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
             </div>
 
             {auditSuccess ? (
-              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm space-y-2">
+              <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs sm:text-sm space-y-3">
                 <div className="flex items-center gap-2 font-bold text-white">
                   <CheckCircle2 size={18} className="text-emerald-400" />
                   <span>Request Received</span>
                 </div>
                 <p>{auditSuccess}</p>
-                <button
-                  type="button"
-                  onClick={() => setShowAuditModal(false)}
-                  className="mt-2 px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all cursor-pointer"
-                >
-                  Close
-                </button>
+                <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
+                  <Link
+                    href={`/audit/results?${new URLSearchParams({
+                      volume: auditLeadVolume,
+                      leak: auditEstimatedLeak,
+                      speed: auditResponseTime,
+                    }).toString()}`}
+                    className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-bold transition-all text-center inline-flex items-center justify-center gap-1.5"
+                    onClick={() => setShowAuditModal(false)}
+                  >
+                    <span>View Instant Scorecard</span>
+                    <ArrowRight size={13} />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowAuditModal(false)}
+                    className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white/10 text-white text-xs font-bold hover:bg-white/20 transition-all cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
               </div>
             ) : modalFormType === 'SERVICE_ENQUIRY' ? (
               <form onSubmit={handleServiceSubmit} className="space-y-4">

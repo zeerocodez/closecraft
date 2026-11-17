@@ -1,11 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import Logo from '@/components/ui/Logo';
 
-export default function SignupPage() {
+function SignupFormContent() {
+  const searchParams = useSearchParams();
+  const defaultName = searchParams.get('name') || '';
+  const defaultCompany = searchParams.get('companyName') || searchParams.get('business') || searchParams.get('company') || '';
+  const defaultEmail = searchParams.get('email') || '';
+  const defaultPhone = searchParams.get('whatsappNumber') || searchParams.get('phone') || '';
+  const auditScore = searchParams.get('score');
+  const auditLeak = searchParams.get('leak');
+
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -95,7 +104,7 @@ export default function SignupPage() {
         </div>
 
         {/* 7-Day Free Trial Badge */}
-        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container mb-6 shadow-sm">
+        <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-surface-container mb-4 shadow-sm">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
             <span className="text-xs font-semibold uppercase text-primary tracking-wider">7-DAY FREE TRIAL</span>
@@ -105,6 +114,17 @@ export default function SignupPage() {
             <span className="text-xs font-semibold uppercase">No Card Required</span>
           </div>
         </div>
+
+        {/* Personalized Diagnostic Banner if coming from audit/scorecard */}
+        {auditScore && (
+          <div className="flex items-center justify-between p-3.5 mb-4 rounded-xl bg-primary/10 border border-primary/30 text-xs text-on-surface animate-in fade-in">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+              <span><strong>Pre-configured Setup:</strong> Score {auditScore}/100</span>
+            </div>
+            {auditLeak && <span className="font-mono text-primary font-bold">{auditLeak} Leaked</span>}
+          </div>
+        )}
 
         {/* Brand Header */}
         <div className="flex flex-col items-center text-center mb-6">
@@ -155,6 +175,7 @@ export default function SignupPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all"
                   id="name"
                   name="name"
+                  defaultValue={defaultName}
                   placeholder="e.g. Sarah Jenkins"
                   required
                   type="text"
@@ -174,6 +195,7 @@ export default function SignupPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all"
                   id="companyName"
                   name="companyName"
+                  defaultValue={defaultCompany}
                   placeholder="e.g. Acme Operations"
                   required
                   type="text"
@@ -193,6 +215,7 @@ export default function SignupPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all"
                   id="email"
                   name="email"
+                  defaultValue={defaultEmail}
                   placeholder="sarah@example.com"
                   required
                   type="email"
@@ -212,6 +235,7 @@ export default function SignupPage() {
                   className="w-full h-11 pl-10 pr-3 rounded bg-surface-container-low text-on-surface font-body-md text-body-md placeholder:text-outline focus:outline-none focus:bg-surface-container-lowest focus:ring-1 focus:ring-primary transition-all font-mono"
                   id="whatsappNumber"
                   name="whatsappNumber"
+                  defaultValue={defaultPhone}
                   placeholder="e.g. 0810 326 2248 or +234..."
                   required
                   type="tel"
@@ -360,5 +384,17 @@ export default function SignupPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <SignupFormContent />
+    </Suspense>
   );
 }

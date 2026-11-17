@@ -208,6 +208,27 @@ Estimated Monthly Leak: ${result.monthlyLeakEstimate}`,
   );
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
+  // Direct scorecard & pre-filled signup destinations
+  const scorecardParams = new URLSearchParams({
+    business: businessName,
+    name: contactName,
+    email: contactEmail,
+    phone: contactPhone,
+    bottleneck,
+    volume: leadVolume,
+    dealValue,
+    tool: currentTool,
+  });
+  const scorecardUrl = `/audit/results?${scorecardParams.toString()}`;
+
+  const signupParams = new URLSearchParams({
+    name: contactName,
+    companyName: businessName,
+    email: contactEmail,
+    whatsappNumber: contactPhone,
+  });
+  const signupUrl = `/signup?${signupParams.toString()}`;
+
   return (
     <div className="min-h-screen bg-[#000000] text-white selection:bg-[#248277] selection:text-white font-sans antialiased">
       {/* Header */}
@@ -657,19 +678,27 @@ Estimated Monthly Leak: ${result.monthlyLeakEstimate}`,
                 </div>
 
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+                  <Link
+                    href={scorecardUrl}
+                    className="w-full sm:w-auto py-3.5 px-6 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-extrabold text-xs sm:text-sm shadow-xl shadow-[#248277]/25 transition-all inline-flex items-center justify-center gap-2"
+                  >
+                    <span>View Instant Diagnostic Scorecard</span>
+                    <ArrowRight size={16} />
+                  </Link>
+
                   <a
                     href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="w-full sm:w-auto py-3.5 px-6 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-black font-bold text-xs sm:text-sm shadow-xl transition-all inline-flex items-center justify-center gap-2"
+                    className="w-full sm:w-auto py-3.5 px-5 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-black font-bold text-xs sm:text-sm shadow-xl transition-all inline-flex items-center justify-center gap-2"
                   >
                     <MessageSquare size={16} />
                     <span>Discuss Findings on WhatsApp</span>
                   </a>
 
                   <Link
-                    href="/signup"
-                    className="w-full sm:w-auto py-3.5 px-6 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs sm:text-sm shadow-lg shadow-[#248277]/20 inline-flex items-center justify-center gap-2"
+                    href={signupUrl}
+                    className="w-full sm:w-auto py-3.5 px-5 rounded-xl bg-[#141416] hover:bg-[#1f1f22] text-zinc-200 border border-white/10 font-bold text-xs sm:text-sm transition-all inline-flex items-center justify-center gap-2"
                   >
                     <span>Launch 7-Day Free Trial</span>
                     <ArrowRight size={15} />

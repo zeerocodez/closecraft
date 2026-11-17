@@ -13,18 +13,21 @@ import {
   Sparkles,
   HelpCircle
 } from 'lucide-react';
+import { CurrencyCode, CURRENCY_CONFIGS, formatCurrencyAmount } from '@/lib/tools/diagnostic-scoring';
 
 interface RevenueLeakageCalculatorProps {
   onOpenAuditModal?: (initialData?: {
     leadVolume: string;
     monthlyLeak: string;
     responseTime: string;
+    currency?: string;
   }) => void;
 }
 
 type ResponseTimeSpeed = 'UNDER_15_MINS' | 'HOURS_1_TO_4' | 'HOURS_24_PLUS' | 'DAYS_LATER';
 
 export default function RevenueLeakageCalculator({ onOpenAuditModal }: RevenueLeakageCalculatorProps) {
+  const [currency, setCurrency] = useState<CurrencyCode>('NGN');
   const [monthlyEnquiries, setMonthlyEnquiries] = useState<number>(150);
   const [averageDealValue, setAverageDealValue] = useState<number>(120000);
   const [responseTime, setResponseTime] = useState<ResponseTimeSpeed>('HOURS_1_TO_4');
@@ -87,15 +90,16 @@ export default function RevenueLeakageCalculator({ onOpenAuditModal }: RevenueLe
   }, [monthlyEnquiries, averageDealValue, responseTime]);
 
   function formatNGN(amount: number): string {
-    return '₦' + amount.toLocaleString('en-NG');
+    return formatCurrencyAmount(amount, currency);
   }
 
   function handleTriggerAudit() {
     if (onOpenAuditModal) {
       onOpenAuditModal({
         leadVolume: `${monthlyEnquiries} monthly enquiries`,
-        monthlyLeak: formatNGN(results.monthlyLeak),
+        monthlyLeak: formatCurrencyAmount(results.monthlyLeak, currency),
         responseTime: benchmarkRates[responseTime].label,
+        currency,
       });
     }
   }
@@ -117,7 +121,23 @@ export default function RevenueLeakageCalculator({ onOpenAuditModal }: RevenueLe
           </p>
         </div>
 
-        <div className="shrink-0">
+        <div className="shrink-0 flex items-center gap-3">
+          {/* Currency Toggle */}
+          <div className="flex items-center bg-[#141416] p-1 rounded-xl border border-white/10 text-xs font-mono font-bold">
+            {(['NGN', 'USD', 'GBP'] as CurrencyCode[]).map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => setCurrency(c)}
+                className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
+                  currency === c ? 'bg-[#248277] text-white shadow-sm' : 'text-zinc-400 hover:text-white'
+                }`}
+              >
+                {CURRENCY_CONFIGS[c].symbol} {c}
+              </button>
+            ))}
+          </div>
+
           <span className="text-[11px] font-mono px-3 py-1.5 rounded-xl bg-zinc-900 border border-white/10 text-zinc-400">
             *Illustrative Benchmark Model
           </span>
@@ -179,10 +199,10 @@ export default function RevenueLeakageCalculator({ onOpenAuditModal }: RevenueLe
               aria-label="Average Revenue Per Closed Customer"
             />
             <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-              <span>₦25,000</span>
-              <span>₦250,000</span>
-              <span>₦750,000</span>
-              <span>₦1,500,000</span>
+              <span>{formatCurrencyAmount(25000, currency)}</span>
+              <span>{formatCurrencyAmount(250000, currency)}</span>
+              <span>{formatCurrencyAmount(750000, currency)}</span>
+              <span>{formatCurrencyAmount(1500000, currency)}</span>
             </div>
           </div>
 

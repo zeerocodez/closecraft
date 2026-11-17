@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: '/dss', priority: 0.95, changeFrequency: 'weekly' },
     { url: '/calculator', priority: 0.9, changeFrequency: 'weekly' },
     { url: '/audit', priority: 0.9, changeFrequency: 'weekly' },
+    { url: '/audit/results', priority: 0.85, changeFrequency: 'weekly' },
     { url: '/early-access', priority: 0.95, changeFrequency: 'weekly' },
     { url: '/pricing', priority: 0.9, changeFrequency: 'weekly' },
     { url: '/solutions', priority: 0.85, changeFrequency: 'monthly' },
