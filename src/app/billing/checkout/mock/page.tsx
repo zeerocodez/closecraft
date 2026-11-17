@@ -2,9 +2,8 @@ import React from 'react';
 import { db } from '@/lib/db';
 import { processBachsWebhookEvent } from '@/lib/payments/bachs';
 import { auth } from '@/lib/auth';
-import { notFound } from 'next/navigation';
-import { redirect } from 'next/navigation';
-import { Icon } from '@/components/ui/Icon';
+import { notFound, redirect } from 'next/navigation';
+import { CreditCard, ShieldCheck, CheckCircle2, AlertTriangle, ArrowRight, Lock } from 'lucide-react';
 
 export const metadata = {
   title: 'Bachs Sandbox Checkout Simulator | Closecraft',
@@ -104,39 +103,40 @@ export default async function MockCheckoutPage({
     : 'Closecraft Workspace Access (1 Calendar Month)';
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white flex flex-col justify-center items-center p-4">
-      <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6">
+    <div className="min-h-screen bg-[#0a0d12] text-white flex flex-col justify-center items-center p-4">
+      <div className="max-w-md w-full bg-[#0f1214] border border-white/10 rounded-3xl p-8 shadow-2xl space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white text-sm">
-              B
+        <div className="flex items-center justify-between border-b border-white/5 pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#248277]/10 border border-[#248277]/20 flex items-center justify-center font-bold text-[#45bfae] text-sm">
+              <CreditCard className="w-5 h-5 text-[#45bfae]" />
             </div>
             <div>
               <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Bachs Hosted Checkout</div>
-              <div className="text-xs text-indigo-400 font-medium">Sandbox Mode (Dev Simulation)</div>
+              <div className="text-xs text-[#45bfae] font-medium">Sandbox Mode (Dev Simulation)</div>
             </div>
           </div>
-          <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold">
-            Test Environment
+          <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-semibold flex items-center gap-1">
+            <AlertTriangle className="w-3 h-3" />
+            Sandbox
           </span>
         </div>
 
         {/* Invoice Summary */}
-        <div className="bg-slate-950/60 rounded-2xl p-5 border border-slate-800/80 space-y-3">
+        <div className="bg-[#13171a] rounded-2xl p-5 border border-white/5 space-y-3">
           <div className="text-xs text-slate-400 font-medium">{orgName}</div>
-          <div className="text-base font-bold text-white">{typeLabel}</div>
+          <div className="text-base font-bold text-white tracking-tight">{typeLabel}</div>
           
-          <div className="pt-2 border-t border-slate-800 flex items-baseline justify-between">
+          <div className="pt-2 border-t border-white/5 flex items-baseline justify-between">
             <span className="text-xs text-slate-400">Total Due</span>
             <div className="text-2xl font-black text-white">
               {currency} {amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
           </div>
 
-          <div className="text-xs text-slate-500 flex justify-between">
+          <div className="text-xs text-slate-400 flex justify-between">
             <span>Invoice Reference:</span>
-            <span className="font-mono text-slate-300">{invoiceNumber}</span>
+            <span className="font-mono text-[#45bfae]">{invoiceNumber}</span>
           </div>
         </div>
 
@@ -151,9 +151,9 @@ export default async function MockCheckoutPage({
             
             <button
               type="submit"
-              className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+              className="w-full py-3.5 bg-[#248277] hover:bg-[#1f6f65] text-white font-bold rounded-xl shadow-lg shadow-[#248277]/20 transition flex items-center justify-center gap-2 text-sm"
             >
-              <Icon name="check-circle" size={18} />
+              <CheckCircle2 className="w-4 h-4" />
               Simulate Successful Settlement
             </button>
           </form>
@@ -169,8 +169,8 @@ export default async function MockCheckoutPage({
         </div>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-slate-800 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
-          <Icon name="shield" size={14} className="text-emerald-400" />
+        <div className="pt-4 border-t border-white/5 text-center text-xs text-slate-500 flex items-center justify-center gap-2">
+          <ShieldCheck className="w-4 h-4 text-[#45bfae]" />
           Server-enforced settlement & webhook idempotency verified.
         </div>
       </div>

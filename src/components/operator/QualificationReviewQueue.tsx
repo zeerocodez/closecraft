@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Icon } from '@/components/ui/Icon';
+import { Compass, X } from 'lucide-react';
 import { overrideQualificationAction } from '@/app/(saas)/qualification-actions';
 
 interface QualificationReviewQueueProps {
@@ -81,13 +81,13 @@ export default function QualificationReviewQueue({
   return (
     <div className="space-y-5">
       {/* Filters Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-outline-variant/30">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
         <div>
-          <h3 className="font-heading font-semibold text-lg text-on-surface flex items-center gap-2">
-            <Icon name="Compass" size={18} className="text-primary" />
+          <h3 className="font-heading font-semibold text-lg text-white flex items-center gap-2">
+            <Compass className="w-4 h-4 text-[#45bfae]" />
             <span>Workspace Qualification Review Queue</span>
           </h3>
-          <p className="text-xs text-on-surface-variant mt-0.5">
+          <p className="text-xs text-slate-400 mt-0.5">
             Transparent explainable classifications. Review reported workload and document human overrides.
           </p>
         </div>
@@ -106,8 +106,8 @@ export default function QualificationReviewQueue({
               onClick={() => setFilter(tab.id as any)}
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 filter === tab.id
-                  ? 'bg-primary text-on-primary shadow-sm'
-                  : 'bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30'
+                  ? 'bg-[#248277] text-white shadow-sm'
+                  : 'bg-[#13171a] text-slate-400 hover:text-white border border-white/10'
               }`}
             >
               {tab.label}
@@ -119,7 +119,7 @@ export default function QualificationReviewQueue({
       {/* Review Cards Grid */}
       <div className="grid grid-cols-1 gap-3.5">
         {filtered.length === 0 ? (
-          <div className="p-8 text-center bg-surface-container-low rounded-2xl border border-outline-variant/30 text-on-surface-variant text-xs">
+          <div className="p-8 text-center bg-[#0f1214] rounded-2xl border border-white/10 text-slate-400 text-xs">
             No qualification records matching your current filter.
           </div>
         ) : (
@@ -132,24 +132,24 @@ export default function QualificationReviewQueue({
             return (
               <div
                 key={q.id}
-                className={`p-4 rounded-2xl bg-surface-container-low border transition-all space-y-3.5 ${
+                className={`p-4 rounded-2xl bg-[#0f1214] border transition-all space-y-3.5 ${
                   isPriority
-                    ? 'border-primary/40 bg-primary/[0.02]'
+                    ? 'border-[#248277]/40 bg-[#248277]/[0.02]'
                     : isContextNeeded
                       ? 'border-amber-500/30'
-                      : 'border-outline-variant/30'
+                      : 'border-white/10'
                 }`}
               >
                 {/* Header Row */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5">
-                    <span className="font-heading font-bold text-base text-on-surface">
+                    <span className="font-heading font-bold text-base text-white">
                       {q.organization?.name || 'Workspace'}
                     </span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-surface-container-high text-secondary border border-outline-variant/30">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-secondary border border-white/10">
                       Rules v{q.rulesVersion || '2026.1'}
                     </span>
-                    <span className="text-[10px] text-on-surface-variant font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono">
                       {new Date(q.createdAt).toLocaleDateString()}
                     </span>
                     {isOverridden && (
@@ -162,13 +162,13 @@ export default function QualificationReviewQueue({
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => setSelectedQual(q)}
-                      className="px-3 py-1.5 rounded-xl bg-surface-container-high border border-outline-variant/40 text-xs font-semibold text-on-surface hover:bg-surface-container-highest"
+                      className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs font-semibold text-white hover:bg-white/10"
                     >
                       Inspect Answers
                     </button>
                     <button
                       onClick={() => handleOpenOverride(q)}
-                      className="px-3 py-1.5 rounded-xl bg-primary/20 text-primary border border-primary/30 text-xs font-bold hover:bg-primary hover:text-on-primary transition-all"
+                      className="px-3 py-1.5 rounded-xl bg-[#248277]/20 text-[#45bfae] border border-[#248277]/30 text-xs font-bold hover:bg-[#248277] hover:text-white transition-all"
                     >
                       Override
                     </button>
@@ -177,23 +177,23 @@ export default function QualificationReviewQueue({
 
                 {/* Classification Badges */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                  <div className="p-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
-                    <span className="text-[10px] text-on-surface-variant block uppercase font-mono">Software Fit</span>
-                    <strong className="text-on-surface text-xs mt-0.5 block">
+                  <div className="p-2.5 rounded-xl bg-[#13171a] border border-white/5">
+                    <span className="text-[10px] text-slate-400 block uppercase font-mono">Software Fit</span>
+                    <strong className="text-white text-xs mt-0.5 block">
                       {q.softwareFit?.replace(/_/g, ' ') || 'UNASSESSED'}
                     </strong>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
-                    <span className="text-[10px] text-on-surface-variant block uppercase font-mono">Service Recommendation</span>
-                    <strong className="text-primary text-xs mt-0.5 block">
+                  <div className="p-2.5 rounded-xl bg-[#13171a] border border-white/5">
+                    <span className="text-[10px] text-slate-400 block uppercase font-mono">Service Recommendation</span>
+                    <strong className="text-[#45bfae] text-xs mt-0.5 block">
                       {q.serviceRecommendation?.replace(/_/g, ' ') || 'NONE'}
                     </strong>
                   </div>
 
-                  <div className="p-2.5 rounded-xl bg-surface-container border border-outline-variant/20">
-                    <span className="text-[10px] text-on-surface-variant block uppercase font-mono">Reported Workload</span>
-                    <span className="text-xs text-on-surface font-medium mt-0.5 block">
+                  <div className="p-2.5 rounded-xl bg-[#13171a] border border-white/5">
+                    <span className="text-[10px] text-slate-400 block uppercase font-mono">Reported Workload</span>
+                    <span className="text-xs text-white font-medium mt-0.5 block">
                       {q.newEnquiries30dExact !== null ? `${q.newEnquiries30dExact} exact` : q.newEnquiries30dRange || 'Not sure'} enquiries / mo
                     </span>
                   </div>
@@ -201,13 +201,13 @@ export default function QualificationReviewQueue({
 
                 {/* Rationale Snippet */}
                 <div className="text-xs space-y-1">
-                  <p className="text-on-surface-variant leading-relaxed">
-                    <strong className="text-on-surface">Classification Rationale: </strong>
+                  <p className="text-slate-400 leading-relaxed">
+                    <strong className="text-white">Classification Rationale: </strong>
                     {q.softwareFitReason}
                   </p>
                   {q.serviceRecommendationReason && (
-                    <p className="text-on-surface-variant leading-relaxed">
-                      <strong className="text-on-surface">Service Scoping: </strong>
+                    <p className="text-slate-400 leading-relaxed">
+                      <strong className="text-white">Service Scoping: </strong>
                       {q.serviceRecommendationReason}
                     </p>
                   )}
@@ -226,57 +226,57 @@ export default function QualificationReviewQueue({
       {/* Inspect Answers Drawer / Modal */}
       {selectedQual && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-2xl bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+          <div className="w-full max-w-2xl bg-[#0f1214] border border-white/10 rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div>
-                <h3 className="font-heading font-semibold text-lg text-on-surface">
+                <h3 className="font-heading font-semibold text-lg text-white">
                   Qualification Submission: {selectedQual.organization?.name}
                 </h3>
-                <span className="text-xs text-on-surface-variant font-mono">
+                <span className="text-xs text-slate-400 font-mono">
                   Submitted {new Date(selectedQual.createdAt).toLocaleString()}
                 </span>
               </div>
               <button
                 onClick={() => setSelectedQual(null)}
-                className="p-1.5 text-on-surface-variant hover:text-on-surface rounded-lg"
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg"
               >
-                <Icon name="X" size={20} />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/20 space-y-1">
-                <span className="font-bold text-on-surface">Primary Help Need:</span>
-                <p className="text-on-surface-variant">{selectedQual.primaryNeed}</p>
+              <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                <span className="font-bold text-white">Primary Help Need:</span>
+                <p className="text-slate-400">{selectedQual.primaryNeed}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/20 space-y-1">
-                  <span className="font-bold text-on-surface">30d New Enquiries:</span>
-                  <p className="text-on-surface-variant font-mono">
+                <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                  <span className="font-bold text-white">30d New Enquiries:</span>
+                  <p className="text-slate-400 font-mono">
                     {selectedQual.newEnquiries30dExact !== null ? `${selectedQual.newEnquiries30dExact} (Exact)` : `${selectedQual.newEnquiries30dRange} (Range)`}
                   </p>
                 </div>
-                <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/20 space-y-1">
-                  <span className="font-bold text-on-surface">Older Pipeline:</span>
-                  <p className="text-on-surface-variant font-mono">
+                <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                  <span className="font-bold text-white">Older Pipeline:</span>
+                  <p className="text-slate-400 font-mono">
                     {selectedQual.olderOpportunitiesCount !== null ? `${selectedQual.olderOpportunitiesCount} (Exact)` : `${selectedQual.olderOpportunitiesRange || '0'} (Range)`}
                   </p>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/20 space-y-1">
-                <span className="font-bold text-on-surface">Who Follows Up & How Checked:</span>
-                <p className="text-on-surface-variant">Owner: {selectedQual.whoFollowsUp || 'Unspecified'}</p>
-                <p className="text-on-surface-variant">Tracking: {selectedQual.howFollowUpChecked}</p>
+              <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                <span className="font-bold text-white">Who Follows Up & How Checked:</span>
+                <p className="text-slate-400">Owner: {selectedQual.whoFollowsUp || 'Unspecified'}</p>
+                <p className="text-slate-400">Tracking: {selectedQual.howFollowUpChecked}</p>
               </div>
 
               {selectedQual.forgottenEnquiryNarrative && (
-                <div className="p-3 rounded-xl bg-surface-container border border-outline-variant/20 space-y-1">
-                  <span className="font-bold text-on-surface">Forgotten Enquiry Narrative:</span>
-                  <p className="text-on-surface-variant italic">"{selectedQual.forgottenEnquiryNarrative}"</p>
+                <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
+                  <span className="font-bold text-white">Forgotten Enquiry Narrative:</span>
+                  <p className="text-slate-400 italic">"{selectedQual.forgottenEnquiryNarrative}"</p>
                   {selectedQual.forgottenEnquiryAftermath && (
-                    <p className="text-on-surface-variant"><strong>Aftermath:</strong> {selectedQual.forgottenEnquiryAftermath}</p>
+                    <p className="text-slate-400"><strong>Aftermath:</strong> {selectedQual.forgottenEnquiryAftermath}</p>
                   )}
                 </div>
               )}
@@ -284,20 +284,20 @@ export default function QualificationReviewQueue({
               {selectedQual.estimatedContribution !== null && (
                 <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 space-y-1">
                   <span className="font-bold text-emerald-400">Screened Economics:</span>
-                  <p className="text-on-surface-variant">
+                  <p className="text-slate-400">
                     Estimated Contribution: <strong>₦{selectedQual.estimatedContribution?.toLocaleString()}</strong> ({selectedQual.currency})
                   </p>
-                  <p className="text-[11px] text-on-surface-variant">
+                  <p className="text-[11px] text-slate-400">
                     Total Cost: ₦{selectedQual.totalEngagementCost?.toLocaleString()} • Attributable Sales: {selectedQual.expectedAttributableSales}
                   </p>
                 </div>
               )}
             </div>
 
-            <div className="flex justify-end pt-3 border-t border-outline-variant/20">
+            <div className="flex justify-end pt-3 border-t border-white/5">
               <button
                 onClick={() => setSelectedQual(null)}
-                className="px-4 py-2 rounded-xl bg-surface-container-high text-xs text-on-surface font-semibold"
+                className="px-4 py-2 rounded-xl bg-white/5 text-xs text-white font-semibold"
               >
                 Close
               </button>
@@ -309,16 +309,16 @@ export default function QualificationReviewQueue({
       {/* Operator Override Modal */}
       {isOverrideModalOpen && targetQualForOverride && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="w-full max-w-lg bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-2xl p-6 space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
+          <div className="w-full max-w-lg bg-[#0f1214] border border-white/10 rounded-2xl shadow-2xl p-6 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
               <div>
-                <h3 className="font-heading font-semibold text-lg text-on-surface">Record Human Override</h3>
-                <p className="text-xs text-on-surface-variant">
+                <h3 className="font-heading font-semibold text-lg text-white">Record Human Override</h3>
+                <p className="text-xs text-slate-400">
                   Workspace: {targetQualForOverride.organization?.name} • Rules v{targetQualForOverride.rulesVersion}
                 </p>
               </div>
-              <button onClick={() => setIsOverrideModalOpen(false)} className="p-1.5 text-on-surface-variant hover:text-on-surface">
-                <Icon name="X" size={18} />
+              <button onClick={() => setIsOverrideModalOpen(false)} className="p-1.5 text-slate-400 hover:text-white">
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -330,11 +330,11 @@ export default function QualificationReviewQueue({
 
             <form onSubmit={handleOverrideSubmit} className="space-y-3.5 text-xs">
               <div>
-                <label className="font-medium text-on-surface block mb-1">Adjusted Software Fit</label>
+                <label className="font-medium text-white block mb-1">Adjusted Software Fit</label>
                 <select
                   value={overrideSoftwareFit}
                   onChange={(e) => setOverrideSoftwareFit(e.target.value)}
-                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl border border-outline-variant/40 text-on-surface"
+                  className="w-full bg-white/5 px-3 py-2 rounded-xl border border-white/10 text-white"
                 >
                   <option value="PRIORITY_SOFTWARE_FIT">Priority Software Fit</option>
                   <option value="POTENTIAL_SOFTWARE_FIT">Potential Software Fit</option>
@@ -344,11 +344,11 @@ export default function QualificationReviewQueue({
               </div>
 
               <div>
-                <label className="font-medium text-on-surface block mb-1">Adjusted Service Recommendation</label>
+                <label className="font-medium text-white block mb-1">Adjusted Service Recommendation</label>
                 <select
                   value={overrideServiceRec}
                   onChange={(e) => setOverrideServiceRec(e.target.value)}
-                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl border border-outline-variant/40 text-on-surface"
+                  className="w-full bg-white/5 px-3 py-2 rounded-xl border border-white/10 text-white"
                 >
                   <option value="READY_FOR_SERVICE_REVIEW">Ready for Service Review</option>
                   <option value="WORKLOAD_OR_ECONOMICS_NEED_REVIEW">Workload or Economics Need Review</option>
@@ -360,52 +360,52 @@ export default function QualificationReviewQueue({
               </div>
 
               <div>
-                <label className="font-medium text-on-surface block mb-1">Override Reason (Auditable justification) *</label>
+                <label className="font-medium text-white block mb-1">Override Reason (Auditable justification) *</label>
                 <textarea
                   rows={2}
                   required
                   value={overrideReason}
                   onChange={(e) => setOverrideReason(e.target.value)}
                   placeholder="Explain why the automated classification is being adjusted..."
-                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl border border-outline-variant/40 text-on-surface"
+                  className="w-full bg-white/5 px-3 py-2 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
               <div>
-                <label className="font-medium text-on-surface block mb-1">Supporting Evidence *</label>
+                <label className="font-medium text-white block mb-1">Supporting Evidence *</label>
                 <input
                   type="text"
                   required
                   value={overrideEvidence}
                   onChange={(e) => setOverrideEvidence(e.target.value)}
                   placeholder="e.g. Discovery call confirmed active CRM backlog of 40 opportunities"
-                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl border border-outline-variant/40 text-on-surface"
+                  className="w-full bg-white/5 px-3 py-2 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
               <div>
-                <label className="font-medium text-on-surface block mb-1">Private Operator Notes (Strictly internal)</label>
+                <label className="font-medium text-white block mb-1">Private Operator Notes (Strictly internal)</label>
                 <textarea
                   rows={2}
                   value={reviewerNotes}
                   onChange={(e) => setReviewerNotes(e.target.value)}
                   placeholder="Internal notes visible only to authorised Closecraft operators..."
-                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl border border-outline-variant/40 text-on-surface"
+                  className="w-full bg-white/5 px-3 py-2 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-outline-variant/20">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/5">
                 <button
                   type="button"
                   onClick={() => setIsOverrideModalOpen(false)}
-                  className="px-4 py-2 text-on-surface-variant hover:text-on-surface"
+                  className="px-4 py-2 text-slate-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingOverride}
-                  className="px-5 py-2 rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-[#248277] text-white font-bold hover:opacity-90 disabled:opacity-50"
                 >
                   {isSubmittingOverride ? 'Saving...' : 'Confirm Override'}
                 </button>

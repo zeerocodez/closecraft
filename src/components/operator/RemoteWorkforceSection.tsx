@@ -297,7 +297,7 @@ export default function RemoteWorkforceSection({
       case 'BLOCKED':
         return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/20 text-rose-400 border border-rose-500/30 flex items-center gap-1"><Icon name="AlertCircle" size={12} /> Blocked</span>;
       default:
-        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-surface-container-high text-on-surface-variant flex items-center gap-1"><Icon name="Clock" size={12} /> Todo</span>;
+        return <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-white/5 text-slate-400 flex items-center gap-1"><Icon name="Clock" size={12} /> Todo</span>;
     }
   };
 
@@ -305,32 +305,32 @@ export default function RemoteWorkforceSection({
     <div className="space-y-6">
       {/* Top Banner & KPI Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#0f1214] border border-white/10 flex items-center justify-between">
           <div>
-            <p className="text-xs text-on-surface-variant font-medium">Active Remote Staff</p>
-            <p className="text-2xl font-bold text-on-surface mt-1">{activeStaffCount}</p>
+            <p className="text-xs text-slate-400 font-medium">Active Remote Staff</p>
+            <p className="text-2xl font-bold text-white mt-1">{activeStaffCount}</p>
             <p className="text-[11px] text-emerald-400 mt-0.5 font-medium">Distributed Team</p>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+          <div className="w-10 h-10 rounded-xl bg-[#248277]/10 text-[#45bfae] flex items-center justify-center">
             <Icon name="Users" size={20} />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#0f1214] border border-white/10 flex items-center justify-between">
           <div>
-            <p className="text-xs text-on-surface-variant font-medium">Active Deliverables</p>
-            <p className="text-2xl font-bold text-on-surface mt-1">{openTasks}</p>
-            <p className="text-[11px] text-primary mt-0.5 font-medium">{inReviewTasks} In Review</p>
+            <p className="text-xs text-slate-400 font-medium">Active Deliverables</p>
+            <p className="text-2xl font-bold text-white mt-1">{openTasks}</p>
+            <p className="text-[11px] text-[#45bfae] mt-0.5 font-medium">{inReviewTasks} In Review</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
             <Icon name="Layers" size={20} />
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#0f1214] border border-white/10 flex items-center justify-between">
           <div>
-            <p className="text-xs text-on-surface-variant font-medium">Completed Milestones</p>
-            <p className="text-2xl font-bold text-on-surface mt-1">{completedTasks}</p>
+            <p className="text-xs text-slate-400 font-medium">Completed Milestones</p>
+            <p className="text-2xl font-bold text-white mt-1">{completedTasks}</p>
             <p className="text-[11px] text-emerald-400 mt-0.5 font-medium">Verified Delivery</p>
           </div>
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
@@ -338,10 +338,10 @@ export default function RemoteWorkforceSection({
           </div>
         </div>
 
-        <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-[#0f1214] border border-white/10 flex items-center justify-between">
           <div>
-            <p className="text-xs text-on-surface-variant font-medium">Delivery SLA Rate</p>
-            <p className="text-2xl font-bold text-on-surface mt-1">{fleetSlaRate}%</p>
+            <p className="text-xs text-slate-400 font-medium">Delivery SLA Rate</p>
+            <p className="text-2xl font-bold text-white mt-1">{fleetSlaRate}%</p>
             <p className={`text-[11px] font-medium mt-0.5 ${overdueTasks > 0 ? 'text-amber-400' : 'text-emerald-400'}`}>
               {overdueTasks > 0 ? `${overdueTasks} Overdue Tasks` : '100% On Time'}
             </p>
@@ -353,17 +353,17 @@ export default function RemoteWorkforceSection({
       </div>
 
       {/* Sub-Tabs Navigation */}
-      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-outline-variant/30 pb-3">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 pb-3">
         <div className="flex items-center gap-2">
           <button
             onClick={() => setSubTab('tasks')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              subTab === 'tasks' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container'
+              subTab === 'tasks' ? 'bg-[#248277] text-white shadow-sm' : 'text-slate-400 hover:bg-[#13171a]'
             }`}
           >
             <Icon name="CheckSquare" size={14} />
             <span>Task Allocation & Delivery</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-highest">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10">
               {deliveryTasks.length}
             </span>
           </button>
@@ -371,12 +371,12 @@ export default function RemoteWorkforceSection({
           <button
             onClick={() => setSubTab('staff')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              subTab === 'staff' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container'
+              subTab === 'staff' ? 'bg-[#248277] text-white shadow-sm' : 'text-slate-400 hover:bg-[#13171a]'
             }`}
           >
             <Icon name="Users" size={14} />
             <span>Staff Roster & Roles</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-highest">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10">
               {staffProfiles.length}
             </span>
           </button>
@@ -384,12 +384,12 @@ export default function RemoteWorkforceSection({
           <button
             onClick={() => setSubTab('clients')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              subTab === 'clients' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container'
+              subTab === 'clients' ? 'bg-[#248277] text-white shadow-sm' : 'text-slate-400 hover:bg-[#13171a]'
             }`}
           >
             <Icon name="Briefcase" size={14} />
             <span>Client Assignment & Services</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-surface-container-highest">
+            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10">
               {clientServices.length}
             </span>
           </button>
@@ -397,7 +397,7 @@ export default function RemoteWorkforceSection({
           <button
             onClick={() => setSubTab('performance')}
             className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
-              subTab === 'performance' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:bg-surface-container'
+              subTab === 'performance' ? 'bg-[#248277] text-white shadow-sm' : 'text-slate-400 hover:bg-[#13171a]'
             }`}
           >
             <Icon name="TrendingUp" size={14} />
@@ -410,7 +410,7 @@ export default function RemoteWorkforceSection({
           {subTab === 'tasks' && (
             <button
               onClick={() => setShowNewTaskModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold flex items-center gap-1.5 shadow-sm hover:opacity-90"
+              className="px-3.5 py-1.5 rounded-xl bg-[#248277] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm hover:opacity-90"
             >
               <Icon name="Plus" size={14} />
               <span>Allocate Delivery Task</span>
@@ -420,7 +420,7 @@ export default function RemoteWorkforceSection({
           {subTab === 'staff' && (
             <button
               onClick={() => setShowNewStaffModal(true)}
-              className="px-3.5 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold flex items-center gap-1.5 shadow-sm hover:opacity-90"
+              className="px-3.5 py-1.5 rounded-xl bg-[#248277] text-white text-xs font-bold flex items-center gap-1.5 shadow-sm hover:opacity-90"
             >
               <Icon name="UserPlus" size={14} />
               <span>Add Remote Staff</span>
@@ -435,15 +435,15 @@ export default function RemoteWorkforceSection({
       {subTab === 'tasks' && (
         <div className="space-y-4">
           {/* Filters Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-surface-container-low border border-outline-variant/30">
+          <div className="flex flex-wrap items-center justify-between gap-3 p-3 rounded-2xl bg-[#0f1214] border border-white/10">
             <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-              <Icon name="Search" size={16} className="text-on-surface-variant" />
+              <Icon name="Search" size={16} className="text-slate-400" />
               <input
                 type="text"
                 placeholder="Search by task title, client, or assignee..."
                 value={taskSearch}
                 onChange={(e) => setTaskSearch(e.target.value)}
-                className="w-full bg-transparent text-xs text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none"
+                className="w-full bg-transparent text-xs text-white placeholder:text-slate-400/50 focus:outline-none"
               />
             </div>
 
@@ -451,7 +451,7 @@ export default function RemoteWorkforceSection({
               <select
                 value={taskFilterStatus}
                 onChange={(e) => setTaskFilterStatus(e.target.value)}
-                className="bg-surface-container px-3 py-1.5 rounded-xl text-xs text-on-surface font-medium border border-outline-variant/30 focus:outline-none"
+                className="bg-[#13171a] px-3 py-1.5 rounded-xl text-xs text-white font-medium border border-white/10 focus:outline-none"
               >
                 <option value="ALL">All Statuses</option>
                 <option value="TODO">To Do</option>
@@ -464,7 +464,7 @@ export default function RemoteWorkforceSection({
               <select
                 value={taskFilterCategory}
                 onChange={(e) => setTaskFilterCategory(e.target.value)}
-                className="bg-surface-container px-3 py-1.5 rounded-xl text-xs text-on-surface font-medium border border-outline-variant/30 focus:outline-none"
+                className="bg-[#13171a] px-3 py-1.5 rounded-xl text-xs text-white font-medium border border-white/10 focus:outline-none"
               >
                 <option value="ALL">All Categories</option>
                 <option value="LEAD_GENERATION">Lead Generation</option>
@@ -478,10 +478,10 @@ export default function RemoteWorkforceSection({
 
           {/* Tasks Table / Cards */}
           {filteredTasks.length === 0 ? (
-            <div className="p-12 text-center rounded-3xl bg-surface-container-low border border-outline-variant/30">
-              <Icon name="CheckSquare" size={32} className="mx-auto text-on-surface-variant/40 mb-3" />
-              <p className="text-sm font-bold text-on-surface">No delivery tasks found</p>
-              <p className="text-xs text-on-surface-variant mt-1">
+            <div className="p-12 text-center rounded-3xl bg-[#0f1214] border border-white/10">
+              <Icon name="CheckSquare" size={32} className="mx-auto text-slate-400/40 mb-3" />
+              <p className="text-sm font-bold text-white">No delivery tasks found</p>
+              <p className="text-xs text-slate-400 mt-1">
                 Allocate your first task to remote specialists to kick off service delivery.
               </p>
             </div>
@@ -492,11 +492,11 @@ export default function RemoteWorkforceSection({
                 return (
                   <div
                     key={task.id}
-                    className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 hover:border-outline-variant/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    className="p-4 rounded-2xl bg-[#0f1214] border border-white/10 hover:border-white/10/60 transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
                   >
                     <div className="space-y-1.5 flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#45bfae]">
                           {task.category.replace(/_/g, ' ')}
                         </span>
                         {getPriorityBadge(task.priority)}
@@ -513,16 +513,16 @@ export default function RemoteWorkforceSection({
                         )}
                       </div>
 
-                      <h4 className="text-sm font-bold text-on-surface">{task.title}</h4>
+                      <h4 className="text-sm font-bold text-white">{task.title}</h4>
                       {task.description && (
-                        <p className="text-xs text-on-surface-variant line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                           {task.description}
                         </p>
                       )}
 
-                      <div className="flex flex-wrap items-center gap-4 text-[11px] text-on-surface-variant pt-1">
-                        <span className="flex items-center gap-1 font-medium text-on-surface">
-                          <Icon name="Building" size={13} className="text-primary" />
+                      <div className="flex flex-wrap items-center gap-4 text-[11px] text-slate-400 pt-1">
+                        <span className="flex items-center gap-1 font-medium text-white">
+                          <Icon name="Building" size={13} className="text-[#45bfae]" />
                           {task.organization?.name || 'Client Workspace'}
                         </span>
 
@@ -547,7 +547,7 @@ export default function RemoteWorkforceSection({
                             href={task.deliverableUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1 text-primary font-bold hover:underline"
+                            className="flex items-center gap-1 text-[#45bfae] font-bold hover:underline"
                           >
                             <Icon name="ExternalLink" size={13} />
                             View Deliverable
@@ -600,7 +600,7 @@ export default function RemoteWorkforceSection({
                             });
                           }
                         }}
-                        className="p-1.5 rounded-lg text-on-surface-variant hover:text-rose-400 hover:bg-surface-container"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-[#13171a]"
                         title="Delete Task"
                       >
                         <Icon name="Trash2" size={15} />
@@ -628,17 +628,17 @@ export default function RemoteWorkforceSection({
               return (
                 <div
                   key={staff.id}
-                  className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between shadow-sm space-y-4"
+                  className="p-5 rounded-3xl bg-[#0f1214] border border-white/10 flex flex-col justify-between shadow-sm space-y-4"
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+                        <div className="w-10 h-10 rounded-2xl bg-[#248277]/10 text-[#45bfae] font-bold flex items-center justify-center text-sm">
                           {staff.user?.name ? staff.user.name.charAt(0).toUpperCase() : 'S'}
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-on-surface">{staff.user?.name || 'Staff Member'}</h4>
-                          <p className="text-xs text-on-surface-variant">{staff.user?.email}</p>
+                          <h4 className="text-sm font-bold text-white">{staff.user?.name || 'Staff Member'}</h4>
+                          <p className="text-xs text-slate-400">{staff.user?.email}</p>
                         </div>
                       </div>
 
@@ -651,31 +651,31 @@ export default function RemoteWorkforceSection({
                       </span>
                     </div>
 
-                    <div className="p-3 rounded-2xl bg-surface-container/60 border border-outline-variant/20 space-y-1 text-xs">
+                    <div className="p-3 rounded-2xl bg-[#13171a]/60 border border-white/5 space-y-1 text-xs">
                       <div className="flex items-center justify-between">
-                        <span className="text-on-surface-variant font-medium">Role:</span>
-                        <span className="font-bold text-primary">{getStaffRoleLabel(staff.role)}</span>
+                        <span className="text-slate-400 font-medium">Role:</span>
+                        <span className="font-bold text-[#45bfae]">{getStaffRoleLabel(staff.role)}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-on-surface-variant font-medium">Department:</span>
-                        <span className="text-on-surface font-semibold">{staff.department}</span>
+                        <span className="text-slate-400 font-medium">Department:</span>
+                        <span className="text-white font-semibold">{staff.department}</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-on-surface-variant font-medium">Capacity:</span>
-                        <span className="text-on-surface">{staff.weeklyCapacity}h / week</span>
+                        <span className="text-slate-400 font-medium">Capacity:</span>
+                        <span className="text-white">{staff.weeklyCapacity}h / week</span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-on-surface-variant font-medium">Active Tasks:</span>
+                        <span className="text-slate-400 font-medium">Active Tasks:</span>
                         <span className="font-bold text-sky-400">{activeTasks} tasks</span>
                       </div>
                     </div>
 
                     {staff.skills && staff.skills.length > 0 && (
                       <div className="space-y-1">
-                        <span className="text-[11px] font-semibold text-on-surface-variant">Core Skills:</span>
+                        <span className="text-[11px] font-semibold text-slate-400">Core Skills:</span>
                         <div className="flex flex-wrap gap-1">
                           {staff.skills.map((skill, idx) => (
-                            <span key={idx} className="px-2 py-0.5 rounded-lg bg-surface-container-high text-[10px] text-on-surface">
+                            <span key={idx} className="px-2 py-0.5 rounded-lg bg-white/5 text-[10px] text-white">
                               {skill}
                             </span>
                           ))}
@@ -684,8 +684,8 @@ export default function RemoteWorkforceSection({
                     )}
                   </div>
 
-                  <div className="pt-2 border-t border-outline-variant/20 flex items-center justify-between text-xs">
-                    <span className="text-[11px] text-on-surface-variant">TZ: {staff.timezone}</span>
+                  <div className="pt-2 border-t border-white/5 flex items-center justify-between text-xs">
+                    <span className="text-[11px] text-slate-400">TZ: {staff.timezone}</span>
                     <button
                       onClick={() => {
                         const newStatus = staff.status === 'ACTIVE' ? 'ON_LEAVE' : 'ACTIVE';
@@ -693,7 +693,7 @@ export default function RemoteWorkforceSection({
                           await updateStaffStatusAction({ staffId: staff.id, status: newStatus });
                         });
                       }}
-                      className="text-xs font-bold text-primary hover:underline"
+                      className="text-xs font-bold text-[#45bfae] hover:underline"
                     >
                       Set to {staff.status === 'ACTIVE' ? 'On Leave' : 'Active'}
                     </button>
@@ -714,11 +714,11 @@ export default function RemoteWorkforceSection({
             {clientServices.map((service) => (
               <div
                 key={service.id}
-                className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 flex flex-col justify-between space-y-4 shadow-sm"
+                className="p-5 rounded-3xl bg-[#0f1214] border border-white/10 flex flex-col justify-between space-y-4 shadow-sm"
               >
                 <div className="space-y-3">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[11px] font-bold uppercase tracking-wider text-primary">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-[#45bfae]">
                       {service.category.replace(/_/g, ' ')}
                     </span>
                     <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
@@ -727,20 +727,20 @@ export default function RemoteWorkforceSection({
                   </div>
 
                   <div>
-                    <h4 className="text-base font-bold text-on-surface">{service.name}</h4>
-                    <p className="text-xs text-on-surface-variant flex items-center gap-1 mt-0.5">
-                      <Icon name="Building" size={13} className="text-primary" />
-                      Client: <span className="font-semibold text-on-surface">{service.organization.name}</span>
+                    <h4 className="text-base font-bold text-white">{service.name}</h4>
+                    <p className="text-xs text-slate-400 flex items-center gap-1 mt-0.5">
+                      <Icon name="Building" size={13} className="text-[#45bfae]" />
+                      Client: <span className="font-semibold text-white">{service.organization.name}</span>
                     </p>
                   </div>
 
                   {/* Progress Bar */}
                   <div className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-on-surface-variant font-medium">Service Delivery Completion</span>
-                      <span className="text-primary font-bold">{service.progressPercent}%</span>
+                      <span className="text-slate-400 font-medium">Service Delivery Completion</span>
+                      <span className="text-[#45bfae] font-bold">{service.progressPercent}%</span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-primary to-emerald-400 rounded-full transition-all duration-500"
                         style={{ width: `${service.progressPercent}%` }}
@@ -749,11 +749,11 @@ export default function RemoteWorkforceSection({
                   </div>
 
                   {/* Assigned Account Manager */}
-                  <div className="p-3 rounded-2xl bg-surface-container/60 border border-outline-variant/20 flex items-center justify-between text-xs">
+                  <div className="p-3 rounded-2xl bg-[#13171a]/60 border border-white/5 flex items-center justify-between text-xs">
                     <div>
-                      <p className="text-[11px] text-on-surface-variant font-medium">Assigned Delivery Team</p>
-                      <p className="font-bold text-on-surface">{service.assignedTeamMember || 'CloseCraft Operations Lead'}</p>
-                      <p className="text-[11px] text-on-surface-variant">{service.accountManagerEmail || 'sales@closecrafthq.com'}</p>
+                      <p className="text-[11px] text-slate-400 font-medium">Assigned Delivery Team</p>
+                      <p className="font-bold text-white">{service.assignedTeamMember || 'CloseCraft Operations Lead'}</p>
+                      <p className="text-[11px] text-slate-400">{service.accountManagerEmail || 'sales@closecrafthq.com'}</p>
                     </div>
 
                     <button
@@ -762,14 +762,14 @@ export default function RemoteWorkforceSection({
                         setAssignTeamName(service.assignedTeamMember || '');
                         setAssignEmail(service.accountManagerEmail || 'sales@closecrafthq.com');
                       }}
-                      className="px-3 py-1.5 rounded-xl bg-surface-container-high text-on-surface text-xs font-bold hover:bg-surface-container-highest border border-outline-variant/30"
+                      className="px-3 py-1.5 rounded-xl bg-white/5 text-white text-xs font-bold hover:bg-white/10 border border-white/10"
                     >
                       Assign Team
                     </button>
                   </div>
                 </div>
 
-                <div className="pt-2 border-t border-outline-variant/20 flex items-center justify-between text-[11px] text-on-surface-variant">
+                <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400">
                   <span>Started {new Date(service.startDate).toLocaleDateString()}</span>
                   <span className="text-emerald-400 font-semibold">Delivery On-Track</span>
                 </div>
@@ -786,27 +786,27 @@ export default function RemoteWorkforceSection({
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {/* 1. Appointment Setters Card */}
-            <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#0f1214] border border-white/10 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-primary uppercase tracking-wider">Appointment Setters</span>
-                <Icon name="PhoneCall" size={18} className="text-primary" />
+                <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider">Appointment Setters</span>
+                <Icon name="PhoneCall" size={18} className="text-[#45bfae]" />
               </div>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Total Inbound Leads:</span>
-                  <span className="font-bold text-on-surface">{performanceMetrics.totalLeads}</span>
+                  <span className="text-slate-400">Total Inbound Leads:</span>
+                  <span className="font-bold text-white">{performanceMetrics.totalLeads}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Qualified Leads:</span>
+                  <span className="text-slate-400">Qualified Leads:</span>
                   <span className="font-bold text-emerald-400">{performanceMetrics.qualifiedLeads}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Appointments Booked:</span>
+                  <span className="text-slate-400">Appointments Booked:</span>
                   <span className="font-bold text-sky-400">{performanceMetrics.totalAppointments}</span>
                 </div>
-                <div className="flex items-center justify-between pt-1 border-t border-outline-variant/20">
-                  <span className="text-on-surface-variant font-medium">Qualification Rate:</span>
-                  <span className="font-bold text-primary">
+                <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                  <span className="text-slate-400 font-medium">Qualification Rate:</span>
+                  <span className="font-bold text-[#45bfae]">
                     {performanceMetrics.totalLeads > 0
                       ? Math.round((performanceMetrics.qualifiedLeads / performanceMetrics.totalLeads) * 100)
                       : 0}%
@@ -816,28 +816,28 @@ export default function RemoteWorkforceSection({
             </div>
 
             {/* 2. Sales Closers Card */}
-            <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#0f1214] border border-white/10 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Sales Closers</span>
                 <Icon name="DollarSign" size={18} className="text-emerald-400" />
               </div>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Discovery Calls / Deals:</span>
-                  <span className="font-bold text-on-surface">{performanceMetrics.totalAppointments}</span>
+                  <span className="text-slate-400">Discovery Calls / Deals:</span>
+                  <span className="font-bold text-white">{performanceMetrics.totalAppointments}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Won Closed Deals:</span>
+                  <span className="text-slate-400">Won Closed Deals:</span>
                   <span className="font-bold text-emerald-400">{performanceMetrics.totalWonDeals}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Total Closed Revenue:</span>
+                  <span className="text-slate-400">Total Closed Revenue:</span>
                   <span className="font-bold text-emerald-400">
                     ₦{performanceMetrics.totalClosedRevenue.toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center justify-between pt-1 border-t border-outline-variant/20">
-                  <span className="text-on-surface-variant font-medium">Closing Win Rate:</span>
+                <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                  <span className="text-slate-400 font-medium">Closing Win Rate:</span>
                   <span className="font-bold text-emerald-400">
                     {performanceMetrics.totalAppointments > 0
                       ? Math.round((performanceMetrics.totalWonDeals / performanceMetrics.totalAppointments) * 100)
@@ -848,56 +848,56 @@ export default function RemoteWorkforceSection({
             </div>
 
             {/* 3. Marketing Specialists Card */}
-            <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#0f1214] border border-white/10 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-sky-400 uppercase tracking-wider">Marketing Specialists</span>
                 <Icon name="Target" size={18} className="text-sky-400" />
               </div>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Active Ad Campaigns:</span>
-                  <span className="font-bold text-on-surface">
+                  <span className="text-slate-400">Active Ad Campaigns:</span>
+                  <span className="font-bold text-white">
                     {clientServices.filter((s) => s.category === 'LEAD_GENERATION').length}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Leads Delivered:</span>
+                  <span className="text-slate-400">Leads Delivered:</span>
                   <span className="font-bold text-sky-400">{performanceMetrics.totalLeads}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Marketing Tasks Done:</span>
+                  <span className="text-slate-400">Marketing Tasks Done:</span>
                   <span className="font-bold text-emerald-400">
                     {deliveryTasks.filter((t) => t.category === 'LEAD_GENERATION' && t.status === 'COMPLETED').length}
                   </span>
                 </div>
-                <div className="flex items-center justify-between pt-1 border-t border-outline-variant/20">
-                  <span className="text-on-surface-variant font-medium">Deliverable Accuracy:</span>
+                <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                  <span className="text-slate-400 font-medium">Deliverable Accuracy:</span>
                   <span className="font-bold text-sky-400">98.4%</span>
                 </div>
               </div>
             </div>
 
             {/* 4. Account Managers Card */}
-            <div className="p-5 rounded-3xl bg-surface-container-low border border-outline-variant/30 space-y-3">
+            <div className="p-5 rounded-3xl bg-[#0f1214] border border-white/10 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">Account Managers</span>
                 <Icon name="Briefcase" size={18} className="text-amber-400" />
               </div>
               <div className="space-y-1.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Client Accounts:</span>
-                  <span className="font-bold text-on-surface">{clientServices.length}</span>
+                  <span className="text-slate-400">Client Accounts:</span>
+                  <span className="font-bold text-white">{clientServices.length}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Deliverables Completed:</span>
+                  <span className="text-slate-400">Deliverables Completed:</span>
                   <span className="font-bold text-emerald-400">{completedTasks}</span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-on-surface-variant">Pending Review:</span>
+                  <span className="text-slate-400">Pending Review:</span>
                   <span className="font-bold text-purple-400">{inReviewTasks}</span>
                 </div>
-                <div className="flex items-center justify-between pt-1 border-t border-outline-variant/20">
-                  <span className="text-on-surface-variant font-medium">Delivery SLA Adherence:</span>
+                <div className="flex items-center justify-between pt-1 border-t border-white/5">
+                  <span className="text-slate-400 font-medium">Delivery SLA Adherence:</span>
                   <span className="font-bold text-amber-400">{fleetSlaRate}%</span>
                 </div>
               </div>
@@ -905,10 +905,10 @@ export default function RemoteWorkforceSection({
           </div>
 
           {/* Operational Policy Note */}
-          <div className="p-4 rounded-2xl bg-surface-container/60 border border-outline-variant/20 flex items-start gap-3 text-xs text-on-surface-variant">
-            <Icon name="ShieldCheck" size={18} className="text-primary shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-[#13171a]/60 border border-white/5 flex items-start gap-3 text-xs text-slate-400">
+            <Icon name="ShieldCheck" size={18} className="text-[#45bfae] shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-on-surface">Privacy-Preserving Workforce Operations</p>
+              <p className="font-bold text-white">Privacy-Preserving Workforce Operations</p>
               <p className="mt-0.5 leading-relaxed">
                 CloseCraft coordinates remote teams using outcome-based deliverables, clear milestones, and verified client approvals. We do not use invasive keystroke logging or background surveillance.
               </p>
@@ -922,12 +922,12 @@ export default function RemoteWorkforceSection({
       {/* ========================================================================= */}
       {showNewTaskModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-surface-container-low border border-outline-variant/30 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+          <div className="bg-[#0f1214] border border-white/10 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface">Allocate Service Delivery Task</h3>
+              <h3 className="text-base font-bold text-white">Allocate Service Delivery Task</h3>
               <button
                 onClick={() => setShowNewTaskModal(false)}
-                className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container"
+                className="p-1 rounded-lg text-slate-400 hover:bg-[#13171a]"
               >
                 <Icon name="X" size={18} />
               </button>
@@ -935,7 +935,7 @@ export default function RemoteWorkforceSection({
 
             <form onSubmit={handleCreateTask} className="space-y-3 text-xs">
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Target Client Organization *</label>
+                <label className="block text-slate-400 font-medium mb-1">Target Client Organization *</label>
                 <select
                   required
                   value={newTaskOrgId}
@@ -944,7 +944,7 @@ export default function RemoteWorkforceSection({
                     const matchingService = clientServices.find((s) => s.organizationId === e.target.value);
                     if (matchingService) setNewTaskServiceId(matchingService.id);
                   }}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 >
                   <option value="">Select client workspace...</option>
                   {organizations.map((org) => (
@@ -956,24 +956,24 @@ export default function RemoteWorkforceSection({
               </div>
 
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Task Title *</label>
+                <label className="block text-slate-400 font-medium mb-1">Task Title *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Meta Ads Campaign Launch & Audience Setup"
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Category *</label>
+                  <label className="block text-slate-400 font-medium mb-1">Category *</label>
                   <select
                     value={newTaskCategory}
                     onChange={(e) => setNewTaskCategory(e.target.value)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   >
                     <option value="LEAD_GENERATION">Lead Generation</option>
                     <option value="LEAD_MANAGEMENT">Lead Management</option>
@@ -985,11 +985,11 @@ export default function RemoteWorkforceSection({
                 </div>
 
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Priority</label>
+                  <label className="block text-slate-400 font-medium mb-1">Priority</label>
                   <select
                     value={newTaskPriority}
                     onChange={(e) => setNewTaskPriority(e.target.value as any)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   >
                     <option value="LOW">Low</option>
                     <option value="MEDIUM">Medium</option>
@@ -1001,11 +1001,11 @@ export default function RemoteWorkforceSection({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Assign Staff Member</label>
+                  <label className="block text-slate-400 font-medium mb-1">Assign Staff Member</label>
                   <select
                     value={newTaskStaffId}
                     onChange={(e) => setNewTaskStaffId(e.target.value)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   >
                     <option value="">Leave Unassigned</option>
                     {staffProfiles.map((s) => (
@@ -1017,24 +1017,24 @@ export default function RemoteWorkforceSection({
                 </div>
 
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Target Due Date</label>
+                  <label className="block text-slate-400 font-medium mb-1">Target Due Date</label>
                   <input
                     type="date"
                     value={newTaskDueDate}
                     onChange={(e) => setNewTaskDueDate(e.target.value)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Description / Deliverable Criteria</label>
+                <label className="block text-slate-400 font-medium mb-1">Description / Deliverable Criteria</label>
                 <textarea
                   rows={3}
                   placeholder="Provide instructions and deliverables required for approval..."
                   value={newTaskDesc}
                   onChange={(e) => setNewTaskDesc(e.target.value)}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
@@ -1042,14 +1042,14 @@ export default function RemoteWorkforceSection({
                 <button
                   type="button"
                   onClick={() => setShowNewTaskModal(false)}
-                  className="px-4 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container text-xs font-bold"
+                  className="px-4 py-2 rounded-xl text-slate-400 hover:bg-[#13171a] text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-[#248277] text-white text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50"
                 >
                   {isPending ? 'Allocating...' : 'Allocate Task'}
                 </button>
@@ -1064,12 +1064,12 @@ export default function RemoteWorkforceSection({
       {/* ========================================================================= */}
       {showNewStaffModal && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-surface-container-low border border-outline-variant/30 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+          <div className="bg-[#0f1214] border border-white/10 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface">Add Remote Staff Member</h3>
+              <h3 className="text-base font-bold text-white">Add Remote Staff Member</h3>
               <button
                 onClick={() => setShowNewStaffModal(false)}
-                className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container"
+                className="p-1 rounded-lg text-slate-400 hover:bg-[#13171a]"
               >
                 <Icon name="X" size={18} />
               </button>
@@ -1078,37 +1078,37 @@ export default function RemoteWorkforceSection({
             <form onSubmit={handleCreateStaff} className="space-y-3 text-xs">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Full Name *</label>
+                  <label className="block text-slate-400 font-medium mb-1">Full Name *</label>
                   <input
                     type="text"
                     required
                     placeholder="e.g. Samuel Adekunle"
                     value={newStaffName}
                     onChange={(e) => setNewStaffName(e.target.value)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Work Email *</label>
+                  <label className="block text-slate-400 font-medium mb-1">Work Email *</label>
                   <input
                     type="email"
                     required
                     placeholder="samuel@closecrafthq.com"
                     value={newStaffEmail}
                     onChange={(e) => setNewStaffEmail(e.target.value)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Role Permission *</label>
+                  <label className="block text-slate-400 font-medium mb-1">Role Permission *</label>
                   <select
                     value={newStaffRole}
                     onChange={(e) => setNewStaffRole(e.target.value as StaffRole)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   >
                     <option value="ACCOUNT_MANAGER">Account Manager</option>
                     <option value="MARKETING_SPECIALIST">Marketing Specialist</option>
@@ -1123,11 +1123,11 @@ export default function RemoteWorkforceSection({
                 </div>
 
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Department</label>
+                  <label className="block text-slate-400 font-medium mb-1">Department</label>
                   <select
                     value={newStaffDept}
                     onChange={(e) => setNewStaffDept(e.target.value)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   >
                     <option value="OPERATIONS">Operations</option>
                     <option value="SALES">Sales</option>
@@ -1140,37 +1140,37 @@ export default function RemoteWorkforceSection({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Weekly Capacity (Hours)</label>
+                  <label className="block text-slate-400 font-medium mb-1">Weekly Capacity (Hours)</label>
                   <input
                     type="number"
                     min="10"
                     max="60"
                     value={newStaffCapacity}
                     onChange={(e) => setNewStaffCapacity(Number(e.target.value))}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-on-surface-variant font-medium mb-1">Phone Number</label>
+                  <label className="block text-slate-400 font-medium mb-1">Phone Number</label>
                   <input
                     type="tel"
                     placeholder="+234 800 000 0000"
                     value={newStaffPhone}
                     onChange={(e) => setNewStaffPhone(e.target.value)}
-                    className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                    className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Skills (Comma-separated)</label>
+                <label className="block text-slate-400 font-medium mb-1">Skills (Comma-separated)</label>
                 <input
                   type="text"
                   placeholder="e.g. Meta Ads, Lead Qualification, Objection Handling, CRM Setup"
                   value={newStaffSkills}
                   onChange={(e) => setNewStaffSkills(e.target.value)}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
@@ -1178,14 +1178,14 @@ export default function RemoteWorkforceSection({
                 <button
                   type="button"
                   onClick={() => setShowNewStaffModal(false)}
-                  className="px-4 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container text-xs font-bold"
+                  className="px-4 py-2 rounded-xl text-slate-400 hover:bg-[#13171a] text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-[#248277] text-white text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50"
                 >
                   {isPending ? 'Saving...' : 'Add Staff Member'}
                 </button>
@@ -1200,28 +1200,28 @@ export default function RemoteWorkforceSection({
       {/* ========================================================================= */}
       {reviewingTask && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-surface-container-low border border-outline-variant/30 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+          <div className="bg-[#0f1214] border border-white/10 rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface">Review Deliverable Submission</h3>
+              <h3 className="text-base font-bold text-white">Review Deliverable Submission</h3>
               <button
                 onClick={() => setReviewingTask(null)}
-                className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container"
+                className="p-1 rounded-lg text-slate-400 hover:bg-[#13171a]"
               >
                 <Icon name="X" size={18} />
               </button>
             </div>
 
             <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-2xl bg-surface-container/60 border border-outline-variant/20 space-y-1">
-                <p className="font-bold text-on-surface">{reviewingTask.title}</p>
-                <p className="text-on-surface-variant">Client: {reviewingTask.organization?.name}</p>
+              <div className="p-3 rounded-2xl bg-[#13171a]/60 border border-white/5 space-y-1">
+                <p className="font-bold text-white">{reviewingTask.title}</p>
+                <p className="text-slate-400">Client: {reviewingTask.organization?.name}</p>
                 {reviewingTask.deliverableUrl && (
                   <p className="pt-1">
                     <a
                       href={reviewingTask.deliverableUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-primary font-bold hover:underline inline-flex items-center gap-1"
+                      className="text-[#45bfae] font-bold hover:underline inline-flex items-center gap-1"
                     >
                       <Icon name="ExternalLink" size={13} />
                       {reviewingTask.deliverableUrl}
@@ -1229,20 +1229,20 @@ export default function RemoteWorkforceSection({
                   </p>
                 )}
                 {reviewingTask.completionNotes && (
-                  <p className="text-on-surface-variant mt-1 text-[11px] leading-relaxed">
+                  <p className="text-slate-400 mt-1 text-[11px] leading-relaxed">
                     Notes: {reviewingTask.completionNotes}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Feedback / Quality Assessment</label>
+                <label className="block text-slate-400 font-medium mb-1">Feedback / Quality Assessment</label>
                 <textarea
                   rows={3}
                   placeholder="Optional notes or change requests..."
                   value={reviewFeedback}
                   onChange={(e) => setReviewFeedback(e.target.value)}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
@@ -1274,12 +1274,12 @@ export default function RemoteWorkforceSection({
       {/* ========================================================================= */}
       {assigningService && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-surface-container-low border border-outline-variant/30 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
+          <div className="bg-[#0f1214] border border-white/10 rounded-3xl max-w-md w-full p-6 space-y-4 shadow-xl">
             <div className="flex items-center justify-between">
-              <h3 className="text-base font-bold text-on-surface">Assign Delivery Team</h3>
+              <h3 className="text-base font-bold text-white">Assign Delivery Team</h3>
               <button
                 onClick={() => setAssigningService(null)}
-                className="p-1 rounded-lg text-on-surface-variant hover:bg-surface-container"
+                className="p-1 rounded-lg text-slate-400 hover:bg-[#13171a]"
               >
                 <Icon name="X" size={18} />
               </button>
@@ -1287,13 +1287,13 @@ export default function RemoteWorkforceSection({
 
             <form onSubmit={handleAssignTeam} className="space-y-3 text-xs">
               <div>
-                <p className="text-on-surface-variant mb-1 font-medium">Service Package</p>
-                <p className="font-bold text-on-surface">{assigningService.name}</p>
-                <p className="text-[11px] text-on-surface-variant">Client: {assigningService.organization.name}</p>
+                <p className="text-slate-400 mb-1 font-medium">Service Package</p>
+                <p className="font-bold text-white">{assigningService.name}</p>
+                <p className="text-[11px] text-slate-400">Client: {assigningService.organization.name}</p>
               </div>
 
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Select Account Manager</label>
+                <label className="block text-slate-400 font-medium mb-1">Select Account Manager</label>
                 <select
                   value={assignStaffId}
                   onChange={(e) => {
@@ -1304,7 +1304,7 @@ export default function RemoteWorkforceSection({
                       setAssignEmail(selected.user.email);
                     }
                   }}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 >
                   <option value="">Choose from Staff Directory...</option>
                   {staffProfiles.map((s) => (
@@ -1316,25 +1316,25 @@ export default function RemoteWorkforceSection({
               </div>
 
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Assigned Team Member Display Name *</label>
+                <label className="block text-slate-400 font-medium mb-1">Assigned Team Member Display Name *</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Emmanuel - Dedicated Account Manager"
                   value={assignTeamName}
                   onChange={(e) => setAssignTeamName(e.target.value)}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
               <div>
-                <label className="block text-on-surface-variant font-medium mb-1">Contact Email</label>
+                <label className="block text-slate-400 font-medium mb-1">Contact Email</label>
                 <input
                   type="email"
                   placeholder="sales@closecrafthq.com"
                   value={assignEmail}
                   onChange={(e) => setAssignEmail(e.target.value)}
-                  className="w-full bg-surface-container p-2.5 rounded-xl border border-outline-variant/30 text-on-surface"
+                  className="w-full bg-[#13171a] p-2.5 rounded-xl border border-white/10 text-white"
                 />
               </div>
 
@@ -1342,14 +1342,14 @@ export default function RemoteWorkforceSection({
                 <button
                   type="button"
                   onClick={() => setAssigningService(null)}
-                  className="px-4 py-2 rounded-xl text-on-surface-variant hover:bg-surface-container text-xs font-bold"
+                  className="px-4 py-2 rounded-xl text-slate-400 hover:bg-[#13171a] text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50"
+                  className="px-5 py-2 rounded-xl bg-[#248277] text-white text-xs font-bold shadow-md hover:opacity-90 disabled:opacity-50"
                 >
                   {isPending ? 'Assigning...' : 'Confirm Assignment'}
                 </button>

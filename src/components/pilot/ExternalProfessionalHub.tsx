@@ -1,7 +1,27 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Icon } from '@/components/ui/Icon';
+import {
+  Clock,
+  AlertCircle,
+  ShieldCheck,
+  CheckCircle2,
+  MessageCircle,
+  Phone,
+  Mail,
+  FileText,
+  AlertTriangle,
+  Calendar,
+  ChevronRight,
+  Plus,
+  X,
+  Layers,
+  Send,
+  Check,
+  ExternalLink,
+  Briefcase,
+  User,
+} from 'lucide-react';
 import { updateLeadFollowUp, saveClientBlocker, logPilotEffort } from '@/app/(saas)/actions';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
 
@@ -98,17 +118,17 @@ export default function ExternalProfessionalHub({
   if (!engagement || engagement.status !== 'ACTIVE') {
     return (
       <div className="p-8 max-w-4xl mx-auto">
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-8 text-center">
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-8 text-center backdrop-blur-sm">
           <div className="w-12 h-12 bg-amber-500/20 text-amber-400 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Icon name="alert-triangle" size={24} />
+            <AlertTriangle className="w-6 h-6" />
           </div>
-          <h2 className="text-xl font-bold text-white mb-2">Restricted Access: No Active Pilot Engagement</h2>
+          <h2 className="text-xl font-bold text-white mb-2 tracking-tight">Restricted Access: No Active Pilot Engagement</h2>
           <p className="text-slate-400 text-sm max-w-lg mx-auto mb-6">
             External sales professionals can only access client opportunities during an active, authorized engagement.
             {engagement ? ` This engagement is currently in ${engagement.status.replace('_', ' ')} state.` : ' No pilot engagement is assigned.'}
           </p>
-          <div className="inline-flex items-center gap-2 text-xs text-slate-500 bg-slate-900/60 px-4 py-2 rounded-xl border border-slate-800">
-            <Icon name="shield" size={14} className="text-emerald-400" />
+          <div className="inline-flex items-center gap-2 text-xs text-slate-400 bg-[#0f1214] px-4 py-2 rounded-xl border border-white/5">
+            <ShieldCheck className="w-4 h-4 text-[#45bfae]" />
             Tenant data isolation enforced server-side.
           </div>
         </div>
@@ -201,13 +221,13 @@ export default function ExternalProfessionalHub({
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-6">
       {/* Top Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-[#0f1214] border border-white/5 rounded-2xl p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-[#248277]/10 text-[#45bfae] border border-[#248277]/20">
               Active Pilot
             </span>
-            <span className="text-xs text-slate-500">Representing {engagement.organization?.name}</span>
+            <span className="text-xs text-slate-400">Representing {engagement.organization?.name}</span>
           </div>
           <h1 className="text-2xl font-bold text-white tracking-tight">{engagement.title}</h1>
           <p className="text-sm text-slate-400 mt-1">
@@ -218,9 +238,9 @@ export default function ExternalProfessionalHub({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setIsLoggingWork(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 bg-[#248277] hover:bg-[#1f6f65] text-white text-sm font-semibold rounded-xl transition shadow-sm shadow-[#248277]/20"
           >
-            <Icon name="clock" size={16} />
+            <Clock className="w-4 h-4" />
             Log Work Effort
           </button>
           <button
@@ -230,36 +250,35 @@ export default function ExternalProfessionalHub({
               setWhoMustRespond('');
               setRequiredDate('');
               setAffectedAction('');
-              // open modal
               setBlockerLead({} as any);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-sm font-medium rounded-xl border border-slate-700 transition"
+            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-200 text-sm font-medium rounded-xl border border-white/10 transition"
           >
-            <Icon name="alert-circle" size={16} className="text-amber-400" />
+            <AlertCircle className="w-4 h-4 text-amber-400" />
             Raise Client Blocker
           </button>
         </div>
       </div>
 
       {/* Engagement Capacity Bar */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
+      <div className="bg-[#0f1214] border border-white/5 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-400 flex items-center justify-center font-bold">
+          <div className="w-9 h-9 rounded-xl bg-[#248277]/10 text-[#45bfae] border border-[#248277]/20 flex items-center justify-center font-bold text-sm">
             {capacityPercent}%
           </div>
           <div>
-            <div className="text-slate-300 font-semibold">
+            <div className="text-white font-semibold">
               Capacity: {totalHoursLogged.toFixed(1)} / {engagement.agreedCapacity} {engagement.capacityUnit.toLowerCase()}
             </div>
-            <div className="text-slate-500">
+            <div className="text-slate-400">
               Agreed schedule: {engagement.workingDays} ({engagement.responseWindows})
             </div>
           </div>
         </div>
-        <div className="w-full sm:w-64 bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+        <div className="w-full sm:w-64 bg-[#13171a] rounded-full h-2 overflow-hidden border border-white/5">
           <div
             className={`h-full rounded-full transition-all ${
-              capacityPercent >= 90 ? 'bg-amber-500' : 'bg-indigo-500'
+              capacityPercent >= 90 ? 'bg-amber-500' : 'bg-[#248277]'
             }`}
             style={{ width: `${capacityPercent}%` }}
           />
@@ -267,49 +286,49 @@ export default function ExternalProfessionalHub({
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-800 gap-6">
+      <div className="flex border-b border-white/5 gap-6">
         <button
           onClick={() => setActiveTab('leads')}
           className={`pb-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition ${
             activeTab === 'leads'
-              ? 'border-indigo-500 text-white'
+              ? 'border-[#45bfae] text-white'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          <Icon name="inbox" size={16} />
+          <Briefcase className="w-4 h-4" />
           Assigned Opportunities ({assignedLeads.length})
         </button>
         <button
           onClick={() => setActiveTab('brief')}
           className={`pb-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition ${
             activeTab === 'brief'
-              ? 'border-indigo-500 text-white'
+              ? 'border-[#45bfae] text-white'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          <Icon name="file-text" size={16} />
+          <FileText className="w-4 h-4" />
           Approved Sales Brief & Boundaries
         </button>
         <button
           onClick={() => setActiveTab('worklogs')}
           className={`pb-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition ${
             activeTab === 'worklogs'
-              ? 'border-indigo-500 text-white'
+              ? 'border-[#45bfae] text-white'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          <Icon name="clock" size={16} />
+          <Clock className="w-4 h-4" />
           Effort Log ({engagement.workLogs.length})
         </button>
         <button
           onClick={() => setActiveTab('blockers')}
           className={`pb-3 text-sm font-semibold border-b-2 flex items-center gap-2 transition ${
             activeTab === 'blockers'
-              ? 'border-indigo-500 text-white'
+              ? 'border-[#45bfae] text-white'
               : 'border-transparent text-slate-400 hover:text-slate-200'
           }`}
         >
-          <Icon name="alert-circle" size={16} />
+          <AlertCircle className="w-4 h-4" />
           Open Blockers ({engagement.blockers.length})
         </button>
       </div>
@@ -318,14 +337,14 @@ export default function ExternalProfessionalHub({
       {activeTab === 'leads' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white">Your Assigned Opportunities</h2>
+            <h2 className="text-base font-bold text-white tracking-tight">Your Assigned Opportunities</h2>
             <span className="text-xs text-slate-400">
               Only opportunities specifically assigned to you under this pilot are listed.
             </span>
           </div>
 
           {assignedLeads.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12 text-center">
+            <div className="bg-[#0f1214] border border-white/5 rounded-2xl p-12 text-center">
               <p className="text-slate-400 text-sm">No opportunities currently assigned to your queue.</p>
               <p className="text-slate-500 text-xs mt-1">
                 Your Closecraft operator or workspace manager will allocate incoming qualified enquiries.
@@ -343,23 +362,23 @@ export default function ExternalProfessionalHub({
                 return (
                   <div
                     key={lead.id}
-                    className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-slate-700 transition"
+                    className="bg-[#0f1214] border border-white/5 rounded-2xl p-5 hover:border-white/10 transition"
                   >
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div>
                         <div className="flex items-center gap-2 mb-1">
                           <h3 className="text-base font-bold text-white">{lead.name}</h3>
-                          <span className="text-xs px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                          <span className="text-xs px-2 py-0.5 rounded bg-white/5 text-slate-300 border border-white/10">
                             {lead.status}
                           </span>
                           {isBlocked && (
                             <span className="text-xs px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 flex items-center gap-1">
-                              <Icon name="alert-triangle" size={12} />
+                              <AlertTriangle className="w-3 h-3" />
                               Waiting on client
                             </span>
                           )}
                           {lead.estimatedValue && (
-                            <span className="text-xs font-semibold text-emerald-400">
+                            <span className="text-xs font-semibold text-[#45bfae]">
                               {lead.currency || 'NGN'} {lead.estimatedValue.toLocaleString()}
                             </span>
                           )}
@@ -367,14 +386,14 @@ export default function ExternalProfessionalHub({
 
                         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 mt-2">
                           {lead.phone && (
-                            <span className="flex items-center gap-1">
-                              <Icon name="phone" size={13} className="text-slate-500" />
+                            <span className="flex items-center gap-1.5">
+                              <Phone className="w-3.5 h-3.5 text-slate-500" />
                               {lead.phone}
                             </span>
                           )}
                           {lead.email && (
-                            <span className="flex items-center gap-1">
-                              <Icon name="mail" size={13} className="text-slate-500" />
+                            <span className="flex items-center gap-1.5">
+                              <Mail className="w-3.5 h-3.5 text-slate-500" />
                               {lead.email}
                             </span>
                           )}
@@ -382,10 +401,10 @@ export default function ExternalProfessionalHub({
 
                         {lead.nextAction && (
                           <div className="mt-3 flex items-center gap-2 text-xs">
-                            <span className="text-slate-500 font-medium">Next Action:</span>
-                            <span className="text-indigo-400 font-semibold">{lead.nextAction}</span>
+                            <span className="text-slate-400 font-medium">Next Action:</span>
+                            <span className="text-[#45bfae] font-semibold">{lead.nextAction}</span>
                             {lead.nextActionDueAt && (
-                              <span className="text-slate-400">
+                              <span className="text-slate-500">
                                 (Due: {new Date(lead.nextActionDueAt).toLocaleDateString()})
                               </span>
                             )}
@@ -399,10 +418,10 @@ export default function ExternalProfessionalHub({
                             href={waLink}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-xs font-semibold rounded-xl border border-emerald-500/30 transition"
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#248277]/10 hover:bg-[#248277]/20 text-[#45bfae] text-xs font-semibold rounded-xl border border-[#248277]/30 transition"
                             title="Opens WhatsApp draft in a new tab. Does not automatically complete follow-up."
                           >
-                            <Icon name="message-circle" size={14} />
+                            <MessageCircle className="w-3.5 h-3.5" />
                             Open WhatsApp
                           </a>
                         )}
@@ -419,9 +438,9 @@ export default function ExternalProfessionalHub({
                                 : ''
                             );
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-semibold rounded-xl transition shadow-sm shadow-[#248277]/20"
                         >
-                          <Icon name="check-circle" size={14} />
+                          <CheckCircle2 className="w-3.5 h-3.5" />
                           Record Follow-up
                         </button>
 
@@ -435,9 +454,9 @@ export default function ExternalProfessionalHub({
                             );
                             setAffectedAction(lead.nextAction || '');
                           }}
-                          className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-xl border border-slate-700 transition"
+                          className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-medium rounded-xl border border-white/10 transition"
                         >
-                          <Icon name="alert-circle" size={14} className="text-amber-400" />
+                          <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
                           Blocker
                         </button>
                       </div>
@@ -452,9 +471,9 @@ export default function ExternalProfessionalHub({
 
       {/* Tab 2: Approved Sales Brief & Boundaries */}
       {activeTab === 'brief' && (
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
+        <div className="bg-[#0f1214] border border-white/5 rounded-2xl p-6 space-y-6">
           <div>
-            <h2 className="text-lg font-bold text-white mb-1">Approved Client Sales Brief & Boundaries</h2>
+            <h2 className="text-lg font-bold text-white mb-1 tracking-tight">Approved Client Sales Brief & Boundaries</h2>
             <p className="text-xs text-slate-400">
               Authorized commercial scope for {engagement.organization?.name}. Sales representatives must operate strictly within these boundaries.
             </p>
@@ -462,29 +481,29 @@ export default function ExternalProfessionalHub({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+              <div className="p-4 bg-[#13171a] rounded-xl border border-white/5">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Offer Being Represented</span>
                 <p className="text-sm text-slate-200 font-medium">{engagement.offerRepresented}</p>
               </div>
 
-              <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block mb-2">Activities Included</span>
+              <div className="p-4 bg-[#13171a] rounded-xl border border-white/5">
+                <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider block mb-2">Activities Included</span>
                 <ul className="space-y-1.5">
                   {engagement.activitiesIncluded.map((act, i) => (
                     <li key={i} className="flex items-center gap-2 text-xs text-slate-300">
-                      <Icon name="check" size={14} className="text-emerald-400" />
+                      <Check className="w-3.5 h-3.5 text-[#45bfae]" />
                       {act}
                     </li>
                   ))}
                 </ul>
               </div>
 
-              <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+              <div className="p-4 bg-[#13171a] rounded-xl border border-white/5">
                 <span className="text-xs font-bold text-rose-400 uppercase tracking-wider block mb-2">Activities Excluded (Strict Boundaries)</span>
                 <ul className="space-y-1.5">
                   {engagement.activitiesExcluded.map((act, i) => (
                     <li key={i} className="flex items-center gap-2 text-xs text-slate-300">
-                      <Icon name="x" size={14} className="text-rose-400" />
+                      <X className="w-3.5 h-3.5 text-rose-400" />
                       {act}
                     </li>
                   ))}
@@ -493,18 +512,18 @@ export default function ExternalProfessionalHub({
             </div>
 
             <div className="space-y-4">
-              <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
+              <div className="p-4 bg-[#13171a] rounded-xl border border-white/5">
                 <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Coverage & Schedule</span>
                 <div className="space-y-2 mt-2 text-xs">
-                  <div className="flex justify-between py-1 border-b border-slate-800">
+                  <div className="flex justify-between py-1 border-b border-white/5">
                     <span className="text-slate-400">Working Days</span>
                     <span className="text-white font-medium">{engagement.workingDays}</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-800">
+                  <div className="flex justify-between py-1 border-b border-white/5">
                     <span className="text-slate-400">Response Window</span>
                     <span className="text-white font-medium">{engagement.responseWindows}</span>
                   </div>
-                  <div className="flex justify-between py-1 border-b border-slate-800">
+                  <div className="flex justify-between py-1 border-b border-white/5">
                     <span className="text-slate-400">Communication Channels</span>
                     <span className="text-white font-medium">{engagement.communicationChannels}</span>
                   </div>
@@ -515,8 +534,8 @@ export default function ExternalProfessionalHub({
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-950/60 rounded-xl border border-slate-800">
-                <span className="text-xs font-bold text-indigo-400 uppercase tracking-wider block mb-1">Required Client Inputs & Materials</span>
+              <div className="p-4 bg-[#13171a] rounded-xl border border-white/5">
+                <span className="text-xs font-bold text-[#45bfae] uppercase tracking-wider block mb-1">Required Client Inputs & Materials</span>
                 <p className="text-xs text-slate-300 whitespace-pre-wrap">{engagement.requiredClientInputs}</p>
               </div>
 
@@ -535,21 +554,21 @@ export default function ExternalProfessionalHub({
       {activeTab === 'worklogs' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white">Work Effort & Capacity History</h2>
+            <h2 className="text-base font-bold text-white tracking-tight">Work Effort & Capacity History</h2>
             <button
               onClick={() => setIsLoggingWork(true)}
-              className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition"
+              className="px-3 py-1.5 bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-semibold rounded-xl transition shadow-sm shadow-[#248277]/20"
             >
               + Log New Work
             </button>
           </div>
 
           {engagement.workLogs.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-sm">
+            <div className="bg-[#0f1214] border border-white/5 rounded-2xl p-8 text-center text-slate-400 text-sm">
               No work logs recorded yet. Log your hours and handled opportunities daily.
             </div>
           ) : (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl divide-y divide-slate-800">
+            <div className="bg-[#0f1214] border border-white/5 rounded-2xl divide-y divide-white/5">
               {engagement.workLogs.map((log) => (
                 <div key={log.id} className="p-4 flex items-center justify-between text-xs">
                   <div>
@@ -559,7 +578,7 @@ export default function ExternalProfessionalHub({
                     <p className="text-slate-400 mt-0.5">{log.activitiesPerformed}</p>
                   </div>
                   <div className="text-right">
-                    <span className="px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">
+                    <span className="px-2 py-0.5 rounded bg-white/5 text-slate-300 border border-white/10">
                       {log.opportunitiesHandled} opps handled
                     </span>
                   </div>
@@ -574,20 +593,20 @@ export default function ExternalProfessionalHub({
       {activeTab === 'blockers' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-white">Active Client Blockers ("Waiting on client")</h2>
+            <h2 className="text-base font-bold text-white tracking-tight">Active Client Blockers ("Waiting on client")</h2>
             <span className="text-xs text-slate-400">
               Blockers track missing inputs without pausing the entire pilot engagement.
             </span>
           </div>
 
           {engagement.blockers.length === 0 ? (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center text-slate-400 text-sm">
+            <div className="bg-[#0f1214] border border-white/5 rounded-2xl p-8 text-center text-slate-400 text-sm">
               No active blockers. Work is proceeding without client impediment.
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-3">
               {engagement.blockers.map((b) => (
-                <div key={b.id} className="bg-slate-900 border border-amber-500/30 rounded-2xl p-4">
+                <div key={b.id} className="bg-[#0f1214] border border-amber-500/20 rounded-2xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                     <h3 className="text-sm font-bold text-white">{b.whatIsNeeded}</h3>
@@ -615,12 +634,12 @@ export default function ExternalProfessionalHub({
 
       {/* Modal: Record Follow-up */}
       {selectedLead && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-lg w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0f1214] border border-white/10 rounded-2xl max-w-lg w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Record Follow-up for {selectedLead.name}</h3>
-              <button onClick={() => setSelectedLead(null)} className="text-slate-400 hover:text-white">
-                <Icon name="x" size={18} />
+              <h3 className="text-lg font-bold text-white tracking-tight">Record Follow-up for {selectedLead.name}</h3>
+              <button onClick={() => setSelectedLead(null)} className="text-slate-400 hover:text-white transition">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -630,7 +649,7 @@ export default function ExternalProfessionalHub({
                 <select
                   value={followUpStatus}
                   onChange={(e) => setFollowUpStatus(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                 >
                   <option value="CONTACTED">Contacted (In discussion)</option>
                   <option value="QUALIFIED">Qualified (Clear intent & fit)</option>
@@ -648,7 +667,7 @@ export default function ExternalProfessionalHub({
                   placeholder="Summarize the discussion, objections addressed, and prospect sentiment..."
                   rows={3}
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                 />
               </div>
 
@@ -660,7 +679,7 @@ export default function ExternalProfessionalHub({
                     value={nextActionText}
                     onChange={(e) => setNextActionText(e.target.value)}
                     placeholder="e.g. Send formal quote"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                   />
                 </div>
                 <div>
@@ -669,7 +688,7 @@ export default function ExternalProfessionalHub({
                     type="date"
                     value={nextActionDue}
                     onChange={(e) => setNextActionDue(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                   />
                 </div>
               </div>
@@ -678,14 +697,14 @@ export default function ExternalProfessionalHub({
                 <button
                   type="button"
                   onClick={() => setSelectedLead(null)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold rounded-xl border border-white/10 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingFollowUp}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl disabled:opacity-50"
+                  className="px-4 py-2 bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-semibold rounded-xl disabled:opacity-50 transition shadow-sm shadow-[#248277]/20"
                 >
                   {isSubmittingFollowUp ? 'Saving...' : 'Save Follow-up'}
                 </button>
@@ -697,12 +716,12 @@ export default function ExternalProfessionalHub({
 
       {/* Modal: Log Work Effort */}
       {isLoggingWork && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0f1214] border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Log Work Effort</h3>
-              <button onClick={() => setIsLoggingWork(false)} className="text-slate-400 hover:text-white">
-                <Icon name="x" size={18} />
+              <h3 className="text-lg font-bold text-white tracking-tight">Log Work Effort</h3>
+              <button onClick={() => setIsLoggingWork(false)} className="text-slate-400 hover:text-white transition">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -716,7 +735,7 @@ export default function ExternalProfessionalHub({
                     value={logHours}
                     onChange={(e) => setLogHours(e.target.value)}
                     required
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                   />
                 </div>
                 <div>
@@ -726,7 +745,7 @@ export default function ExternalProfessionalHub({
                     value={logOpps}
                     onChange={(e) => setLogOpps(e.target.value)}
                     required
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                   />
                 </div>
               </div>
@@ -739,7 +758,7 @@ export default function ExternalProfessionalHub({
                   placeholder="WhatsApp follow-ups, triage of 3 enquiries, scheduled discovery call..."
                   rows={3}
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                 />
               </div>
 
@@ -747,14 +766,14 @@ export default function ExternalProfessionalHub({
                 <button
                   type="button"
                   onClick={() => setIsLoggingWork(false)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold rounded-xl border border-white/10 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingLog}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl disabled:opacity-50"
+                  className="px-4 py-2 bg-[#248277] hover:bg-[#1f6f65] text-white text-xs font-semibold rounded-xl disabled:opacity-50 transition shadow-sm shadow-[#248277]/20"
                 >
                   {isSubmittingLog ? 'Logging...' : 'Submit Log'}
                 </button>
@@ -766,12 +785,12 @@ export default function ExternalProfessionalHub({
 
       {/* Modal: Client Blocker */}
       {blockerLead && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-[#0f1214] border border-white/10 rounded-2xl max-w-md w-full p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-bold text-white">Raise Client Blocker ("Waiting on client")</h3>
-              <button onClick={() => setBlockerLead(null)} className="text-slate-400 hover:text-white">
-                <Icon name="x" size={18} />
+              <h3 className="text-lg font-bold text-white tracking-tight">Raise Client Blocker ("Waiting on client")</h3>
+              <button onClick={() => setBlockerLead(null)} className="text-slate-400 hover:text-white transition">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
@@ -784,7 +803,7 @@ export default function ExternalProfessionalHub({
                   placeholder="e.g. Need approval for custom 3-month payment terms or updated service spec"
                   rows={2}
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                 />
               </div>
 
@@ -796,7 +815,7 @@ export default function ExternalProfessionalHub({
                   onChange={(e) => setWhoMustRespond(e.target.value)}
                   placeholder="e.g. Agency owner / Founder"
                   required
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                 />
               </div>
 
@@ -808,7 +827,7 @@ export default function ExternalProfessionalHub({
                     value={requiredDate}
                     onChange={(e) => setRequiredDate(e.target.value)}
                     required
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                   />
                 </div>
                 <div>
@@ -818,7 +837,7 @@ export default function ExternalProfessionalHub({
                     value={affectedAction}
                     onChange={(e) => setAffectedAction(e.target.value)}
                     placeholder="e.g. Close deal"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-[#0a0d12] border border-white/10 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-[#45bfae]"
                   />
                 </div>
               </div>
@@ -827,14 +846,14 @@ export default function ExternalProfessionalHub({
                 <button
                   type="button"
                   onClick={() => setBlockerLead(null)}
-                  className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl"
+                  className="px-4 py-2 bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-semibold rounded-xl border border-white/10 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingBlocker}
-                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-xl disabled:opacity-50"
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold rounded-xl disabled:opacity-50 transition"
                 >
                   {isSubmittingBlocker ? 'Recording...' : 'Raise Blocker'}
                 </button>
