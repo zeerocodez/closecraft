@@ -160,22 +160,6 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
   }
 
   const getProductNav = (): { title: string; items: NavItem[] }[] => {
-    if (activeProduct === 'revenue') {
-      return [
-        {
-          title: 'Revenue Engine',
-          items: [
-            { href: '/dashboard/revenue-engine', icon: 'TrendingUp', label: 'Command Centre', exact: true },
-            { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
-            { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
-            { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
-            { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
-            { href: '/team', icon: 'UserCheck', label: 'Team Roster', visible: isManagerOrOwner },
-          ],
-        },
-      ];
-    }
-
     if (activeProduct === 'dss') {
       return [
         {
@@ -193,15 +177,24 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
       ];
     }
 
-    // Default: CloseCraft (Services & Client Experience)
+    // Unified CloseCraft Revenue Operating System
     return [
       {
-        title: 'CloseCraft',
+        title: 'Revenue Engine',
         items: [
-          { href: '/dashboard', icon: 'Layout', label: 'Overview', exact: true },
-          { href: '/growth/projects', icon: 'Layers', label: 'Growth Projects' },
+          { href: '/dashboard/revenue-engine', icon: 'TrendingUp', label: 'Command Centre', exact: true },
+          { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
+          { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
+          { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
+          { href: '/inbox', icon: 'Inbox', label: 'Unified Inbox' },
+          { href: '/team', icon: 'UserCheck', label: 'Team Roster', visible: isManagerOrOwner },
+        ],
+      },
+      {
+        title: 'Workspace & Growth',
+        items: [
+          { href: '/dashboard', icon: 'Layout', label: 'Deliverables & Projects' },
           { href: '/services', icon: 'Briefcase', label: 'Services Catalogue' },
-          { href: '/inbox', icon: 'Inbox', label: 'Enquiries Inbox' },
           { href: '/billing', icon: 'CreditCard', label: 'Billing & Invoices', visible: isManagerOrOwner },
           { href: '/settings', icon: 'Settings', label: 'Settings' },
         ],

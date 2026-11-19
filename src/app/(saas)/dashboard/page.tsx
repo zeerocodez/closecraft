@@ -36,6 +36,16 @@ export default async function DashboardPage() {
 
   const { organizationId } = session;
 
+  // Direct Evaluator Routing: For Apex Demo workspace, immediately display Sales Command Centre
+  const targetOrg = await db.organization.findUnique({
+    where: { id: organizationId },
+    select: { slug: true, name: true, plan: true }
+  });
+
+  if (targetOrg?.slug === 'apex-demo') {
+    redirect('/dashboard/revenue-engine');
+  }
+
   // Role-based dashboard isolation:
   const member = await db.organizationMember.findFirst({
     where: { userId: session.user.id, organizationId },

@@ -632,6 +632,31 @@ export async function seedApexDemoWorkspace() {
     },
   });
 
+  // 4. Provision completed Workspace Qualification
+  const ownerUser = teamUsers['OWNER_Babajide'] || teamUsers['OWNER_demo.owner'] || Object.values(teamUsers)[0];
+  if (ownerUser) {
+    await prisma.workspaceQualification.deleteMany({ where: { organizationId: org.id } });
+    await prisma.workspaceQualification.create({
+      data: {
+        organizationId: org.id,
+        userId: ownerUser.id,
+        status: 'COMPLETED',
+        softwareFit: 'EXCELLENT',
+        serviceRecommendation: 'SOFTWARE_ONLY',
+        primaryNeed: 'SOFTWARE_ORGANIZING',
+        newEnquiries30dExact: 120,
+        newEnquiries30dType: 'EXACT',
+        olderOpportunitiesCount: 45,
+        olderOpportunitiesType: 'EXACT',
+        whoFollowsUp: 'SEVERAL_PEOPLE',
+        howFollowUpChecked: '["INSPECTS_RECORDS","REVIEWS_OUTCOMES"]',
+        difficulties: '["SLOW_RESPONSE","INCONSISTENT_FOLLOW_UP"]',
+        completedAt: new Date(),
+      }
+    });
+    console.log('[Apex Demo Seed] Provisioned completed WorkspaceQualification for Apex.');
+  }
+
   console.log('[Apex Demo Seed] Demonstration workspace provisioning completed successfully!');
   return {
     organizationId: org.id,
