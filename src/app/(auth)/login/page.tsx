@@ -201,6 +201,29 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Quick Evaluator Access Pill */}
+          <div className="mb-5 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-2">
+            <div>
+              <p className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                AI Startup Challenge Evaluator?
+              </p>
+              <p className="text-[11px] text-slate-300">
+                1-click demo access to Apex Professional Services
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail('demo.owner@apexconsulting.ng');
+                setPassword('DemoAccess2026!');
+              }}
+              className="px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs shrink-0 transition-colors shadow-sm"
+            >
+              Autofill Demo
+            </button>
+          </div>
+
           <div className="flex items-center justify-between mb-5">
             <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">
               Sign In to Account

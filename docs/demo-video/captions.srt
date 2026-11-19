@@ -1,0 +1,103 @@
+1
+00:00:00,000 --> 00:00:05,200
+In high-ticket B2B sales, up to sixty-seven percent of commercial revenue leaks away
+
+2
+00:00:05,200 --> 00:00:08,800
+in unanswered chats, delayed first touches, and forgotten follow-ups.
+
+3
+00:00:08,800 --> 00:00:12,500
+When a four-million-naira prospect says, "I'll get back to you,"
+
+4
+00:00:12,500 --> 00:00:15,500
+most businesses leave the outcome to chance.
+
+5
+00:00:15,500 --> 00:00:19,200
+This is CloseCraft — the AI Revenue Operating System that turns lost enquiries into closed sales.
+
+6
+00:00:19,200 --> 00:00:24,000
+Enquiries enter directly through the official WhatsApp Business Platform, Meta Lead Ads, or website capture.
+
+7
+00:00:24,000 --> 00:00:28,800
+CloseCraft's multi-tenant architecture cryptographically verifies every payload,
+
+8
+00:00:28,800 --> 00:00:32,800
+strictly resolving the enquiry to the client's verified WhatsApp business number.
+
+9
+00:00:32,800 --> 00:00:36,500
+Unknown senders are quarantined — meaning zero data leakage across tenant workspaces.
+
+10
+00:00:36,500 --> 00:00:41,000
+Here, Dr. Adeleke's consulting enquiry is instantly ingested into Apex Professional Services.
+
+11
+00:00:41,000 --> 00:00:46,000
+Within seconds, our canonical AI qualification engine scores Intent, ICP Fit, and Urgency.
+
+12
+00:00:46,000 --> 00:00:50,500
+Crucially, CloseCraft never hallucinates. Stated budgets are captured accurately —
+
+13
+00:00:50,500 --> 00:00:55,200
+four point five million naira — while unstated timelines remain marked "Pending Discovery".
+
+14
+00:00:55,200 --> 00:00:59,800
+Meanwhile, unqualified or low-budget enquiries are automatically archived, protecting your sales team's calendar.
+
+15
+00:00:59,800 --> 00:01:04,500
+The Sales Command Centre answers the critical question: "What needs attention right now?"
+
+16
+00:01:04,500 --> 00:01:08,500
+Rather than an opaque score, CloseCraft generates an explainable Next Best Action.
+
+17
+00:01:08,500 --> 00:01:14,500
+It prescribes the exact opener and assigns human closer Chidi Okafor through fair, sequential round-robin routing.
+
+18
+00:01:14,500 --> 00:01:19,500
+When the discovery call is booked, Google Meet rooms are generated automatically.
+
+19
+00:01:19,500 --> 00:01:24,000
+And if a proposal ever stalls? CloseCraft's revenue leakage engine flags it immediately.
+
+20
+00:01:24,000 --> 00:01:29,200
+Here, Chief Okafor's six-million-naira deal is flagged after fourteen days of silence,
+
+21
+00:01:29,200 --> 00:01:34,500
+calculating exact revenue at risk and triggering an intervention.
+
+22
+00:01:34,500 --> 00:01:39,800
+Finally, financial transparency. CloseCraft strictly separates pipeline estimates,
+
+23
+00:01:39,800 --> 00:01:45,000
+signed contract values, and verified realised collections from Bachs and Paystack.
+
+24
+00:01:45,000 --> 00:01:49,500
+No fabricated numbers. Complete auditability.
+
+25
+00:01:49,500 --> 00:01:54,500
+One platform. One revenue loop. Every viable lead closed.
+
+26
+00:01:54,500 --> 00:02:00,000
+Experience CloseCraft today at closecrafthq.com/demo.

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { RevenueEngine } from '@/lib/revenue-engine/engine';
 import { inngest } from '@/lib/inngest/client';
+import { dispatchNotificationAlert } from '@/lib/notifications/router';
 import { timingSafeEqualString } from '@/lib/apiSecurity';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
 import crypto from 'crypto';
@@ -139,7 +141,7 @@ export async function POST(req: Request) {
     for (const entry of body.entry) {
       const pageId = String(entry.id || entry.page_id || '');
 
-      // Identify tenant organization by facebookPageId or active pilot engagement
+      // Identify tenant organization strictly by facebookPageId
       let org = null;
       if (pageId) {
         org = await db.organization.findFirst({
@@ -148,27 +150,18 @@ export async function POST(req: Request) {
       }
 
       if (!org) {
-        // Fallback: check if there's a managed lead generation pilot engagement
-        const pilot = await db.pilotEngagement.findFirst({
-          where: {
-            serviceType: 'MANAGED_LEAD_GENERATION',
-            status: { in: ['ACTIVE', 'ONBOARDING'] },
+        // Multi-tenant security: Never arbitrarily fall back to another client's workspace.
+        // Quarantine unmapped leads strictly to WebhookEvent.
+        console.warn(`[Facebook Webhook] Unmapped Facebook page ID ${pageId}. Quarantining to prevent cross-tenant contamination.`);
+        await db.webhookEvent.create({
+          data: {
+            eventId: `fb_unmapped_${pageId}_${Date.now()}`,
+            provider: 'FACEBOOK',
+            eventType: 'leadgen.quarantined',
+            status: 'IGNORED',
+            payload: JSON.stringify({ pageId, entryId: entry.id }),
           },
-          include: { organization: true },
-        });
-        org = pilot?.organization || null;
-      }
-
-      if (!org) {
-        // Fallback to primary workspace
-        org = await db.organization.findFirst({
-          where: { status: 'APPROVED' },
-          orderBy: { createdAt: 'asc' },
-        });
-      }
-
-      if (!org) {
-        console.warn(`[Facebook Webhook] No target organization found for page ${pageId}`);
+        }).catch(() => null);
         continue;
       }
 
@@ -222,23 +215,33 @@ export async function POST(req: Request) {
             },
           });
 
+          // Trigger Revenue Engine qualification & prescriptive routing
+          try {
+            await RevenueEngine.processNewLead(lead.id);
+          } catch (engineErr: any) {
+            console.error(`[Facebook Webhook] RevenueEngine evaluation error for lead ${lead.id}:`, engineErr.message);
+          }
+
           // Dispatch domain event to background engine for notifications / routing
-          await inngest.send({
-            name: 'revenue/lead.created',
-            data: {
-              leadId: lead.id,
-              organizationId: org.id,
-              name: lead.name,
-              email: lead.email,
-              phone: lead.phone,
-              source: 'FACEBOOK_LEAD_AD',
-              message: notes,
-            },
-          });
+          try {
+            await inngest.send({
+              name: 'revenue/lead.created',
+              data: {
+                leadId: lead.id,
+                organizationId: org.id,
+                name: lead.name,
+                email: lead.email,
+                phone: lead.phone,
+                source: 'FACEBOOK_LEAD_AD',
+                message: notes,
+              },
+            });
+          } catch (inngestErr: any) {
+            console.warn(`[Facebook Webhook] Inngest dispatch skipped or unconfigured:`, inngestErr.message);
+          }
 
           // Dispatch notification alert to Sales team (sales@closecrafthq.com, info@closecrafthq.com)
           try {
-            const { dispatchNotificationAlert } = await import('@/lib/notifications/router');
             await dispatchNotificationAlert({
               category: 'SALES',
               subject: `🎯 New Meta Ad Lead: ${lead.name} (${org.name})`,

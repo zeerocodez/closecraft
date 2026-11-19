@@ -57,6 +57,9 @@ model Organization {
   status              String    @default("PENDING") // PENDING, APPROVED, SUSPENDED
   plan                String    @default("STARTER") // e.g. STARTER, GROWTH, SCALE
   whatsappNumber      String?   // Organization official WhatsApp number for outreach & inbound routing
+  whatsappPhoneNumberId String? // WhatsApp Business Phone Number ID for multi-tenant webhook mapping
+  whatsappBusinessAccountId String? // WhatsApp Business Account (WABA) ID
+  whatsappAccessToken String?   // Scoped token for WhatsApp Cloud API outbound dispatch
   facebookPageId      String?   // Associated Meta/Facebook Page ID for lead ad ingestion
   metaAccessToken     String?   // Scoped Page Access Token for Meta Graph API lead retrieval
   qualificationPolicy String?   // Custom ICP/Qualification rules for this tenant
@@ -116,6 +119,9 @@ model Organization {
   practiceAssignments  PracticeAssignment[]
   salesPlaybooks       SalesPlaybook[]
   verifiableCredentials VerifiableCredential[]
+
+  @@index([whatsappPhoneNumberId])
+  @@index([facebookPageId])
 }
 
 model OrganizationMember {
@@ -180,6 +186,8 @@ model Lead {
   archiveReason  String?
   mergedIntoLeadId String?
   customStageId  String?
+  optedOutOfMarketing Boolean   @default(false)
+  optedOutAt     DateTime?
 
   // Relations
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -304,15 +312,21 @@ model Deal {
 }
 
 model Message {
-  id             String       @id @default(cuid())
-  content        String
-  senderType     String       // AI, HUMAN, PROSPECT
-  createdAt      DateTime     @default(now())
+  id                String       @id @default(cuid())
+  content           String
+  senderType        String       // AI, HUMAN, PROSPECT
+  status            String       @default("DELIVERED") // PENDING, PROCESSING, SENT, DELIVERED, FAILED, CANCELLED, DRY_RUN_LOGGED
+  providerMessageId String?
+  errorMessage      String?
+  deliveredAt       DateTime?
+  readAt            DateTime?
+  createdAt         DateTime     @default(now())
 
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  conversationId    String
+  conversation      Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@index([conversationId])
+  @@index([providerMessageId])
 }
 
 model AuditLog {

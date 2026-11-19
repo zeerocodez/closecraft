@@ -209,13 +209,22 @@ function deterministicAnalyze(
   const isCloserTier = intentScore >= 75 || fitScore >= 80 || (leadAmount && leadAmount >= 250000);
   const targetRole: 'CLOSER' | 'SETTER' = isCloserTier ? 'CLOSER' : 'SETTER';
 
-  const statedBudget = leadAmount ? `₦${leadAmount.toLocaleString()}` : (text.includes('budget') ? 'Stated in notes' : 'Pending verification');
-  const authorityRole = text.includes('founder') || text.includes('ceo') || text.includes('director') || text.includes('manager') ? 'Executive Decision Maker' : 'Evaluator';
+  const statedBudget = leadAmount ? `₦${leadAmount.toLocaleString()} (Prospect-Stated)` : 'Not yet established (Pending Discovery)';
+  const authorityRole = text.includes('founder') || text.includes('ceo') || text.includes('director') || text.includes('owner') || text.includes('managing partner')
+    ? 'Executive Decision Maker (Stated/Inferred)' 
+    : (text.includes('manager') || text.includes('lead') ? 'Evaluator / Manager (Inferred)' : 'Contact / Pending Discovery');
 
-  const aiAssessment = `Fit Score: ${fitScore}/100 • Intent: ${intentScore}/100 • Priority: ${priority}/100\n` +
-    `Authority: ${authorityRole} • Stated Budget: ${statedBudget}\n` +
-    `Identified Need: ${(message || 'Commercial requirements inquiry').slice(0, 100)}\n` +
-    `Deal Health: ${fitScore >= 75 && intentScore >= 70 ? '🟢 High Conversion Probability' : '🟡 Requires Qualification Discovery'}`;
+  const statedTimeline = urgencyScore >= 80 
+    ? 'Immediate (< 30 days) (Stated Urgency)' 
+    : (urgencyScore <= 35 ? 'Longer-term (> 90 days) (Inferred)' : '1-3 months (Pending Discovery)');
+
+  const aiAssessment = `[Analysis Mode: Deterministic Policy Fallback Engine]\n` +
+    `• ICP Fit: ${fitScore}/100 • Intent: ${intentScore}/100 • Urgency: ${urgencyScore}/100 • Priority: ${priority}/100\n` +
+    `• Decision Authority: ${authorityRole}\n` +
+    `• Stated Budget: ${statedBudget}\n` +
+    `• Commercial Need: ${(message || 'Commercial requirements inquiry').slice(0, 120)}\n` +
+    `• Purchase Timeline: ${statedTimeline}\n` +
+    `• Deal Health: ${fitScore >= 75 && intentScore >= 70 ? '🟢 High Conversion Probability' : '🟡 Discovery & Human Qualification Required'}`;
 
   const needSummary = message ? message.slice(0, 80) : 'your inquiry';
 
@@ -293,6 +302,12 @@ export async function extractLeadQualificationData(
 
 TENANT QUALIFICATION POLICY (MANDATORY - YOU MUST SCORE AND QUALIFY STRICTLY ACCORDING TO THIS POLICY):
 ${qualificationPolicy || 'Default: Score leads on intent, budget, authority, need, and urgency.'}
+
+CRITICAL ACCURACY GUIDELINES:
+1. Do NOT fabricate or assume budget figures. If the prospect did not mention a numerical budget or currency amount, set estimatedValue to 0 and leave budget undefined.
+2. Distinguish information explicitly stated by the prospect from facts inferred by context.
+3. If decision-making authority or purchase timeline cannot be determined from the message, state "Pending Discovery".
+4. Label your assessment with [Analysis Mode: AI Model Assessment (GPT-4o)].
 
 Lead Message / Inquiry:
 ${message}

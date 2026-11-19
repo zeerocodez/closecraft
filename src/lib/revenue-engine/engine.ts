@@ -1,4 +1,5 @@
 import { db } from '@/lib/db';
+import { extractLeadQualificationData } from '../ai/extractor';
 
 export const RevenueEngine = {
   
@@ -26,7 +27,6 @@ export const RevenueEngine = {
     }
 
     // 1. Generate Signals using AI Extractor (enforcing tenant qualificationPolicy)
-    const { extractLeadQualificationData } = await import('@/lib/ai/extractor');
     const aiData = await extractLeadQualificationData(
       lead.message || '', 
       lead.qualificationData?.customData,
