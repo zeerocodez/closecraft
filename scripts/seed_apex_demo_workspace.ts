@@ -20,7 +20,21 @@ export async function seedApexDemoWorkspace() {
   console.log('[Apex Demo Seed] Provisioning isolated demonstration workspace: "Apex Professional Services"...');
 
   const DEMO_ORG_SLUG = 'apex-demo';
-  const PASSWORD_HASH = await bcrypt.hash('ApexDemo2026!', 10);
+  const PASSWORD_HASH = await bcrypt.hash('DemoAccess2026!', 10);
+
+  // Clear any temporary auth rate-limits for demo accounts to guarantee evaluator access
+  try {
+    await prisma.rateLimit.deleteMany({
+      where: {
+        OR: [
+          { key: { contains: 'apexconsulting.ng' } },
+          { key: { contains: 'apexdemo.closecraft.com' } },
+        ]
+      }
+    });
+  } catch (e) {
+    // Ignore if table not ready
+  }
 
   // 1. Create or update Demo Organization
   const org = await prisma.organization.upsert({
@@ -71,8 +85,21 @@ export async function seedApexDemoWorkspace() {
   await prisma.conversation.deleteMany({ where: { organizationId: org.id } });
   await prisma.lead.deleteMany({ where: { organizationId: org.id } });
 
-  // 2. Provision 7 Team Members
+  // 2. Provision Team Members (Both evaluator accounts and named consultant profiles)
   const teamDefs = [
+    // Primary evaluator access accounts
+    { email: 'demo.owner@apexconsulting.ng', name: 'Babajide Adeleke (Owner)', role: 'OWNER' },
+    { email: 'demo.manager@apexconsulting.ng', name: 'Ngozi Eze (RevOps Lead)', role: 'MANAGER' },
+    { email: 'demo.closer1@apexconsulting.ng', name: 'Chidi Okafor (Senior Closer)', role: 'CLOSER' },
+    { email: 'demo.closer2@apexconsulting.ng', name: 'Zainab Ahmed (Closer)', role: 'CLOSER' },
+    { email: 'demo.closer3@apexconsulting.ng', name: 'Emeka Nwosu (Closer)', role: 'CLOSER' },
+    { email: 'demo.setter1@apexconsulting.ng', name: 'Tunde Bakare (Appointment Setter)', role: 'SETTER' },
+    { email: 'demo.setter2@apexconsulting.ng', name: 'Kemi Sowore (Appointment Setter)', role: 'SETTER' },
+    { email: 'demo.lead@apexconsulting.ng', name: 'Practice Director', role: 'MANAGER' },
+    { email: 'demo.legal@apexconsulting.ng', name: 'Legal Senior Partner', role: 'CLOSER' },
+    { email: 'demo.finance@apexconsulting.ng', name: 'Financial Services Partner', role: 'CLOSER' },
+
+    // Named consultant profiles
     { email: 'jide.adeleke@apexdemo.closecraft.com', name: 'Babajide Adeleke', role: 'OWNER' },
     { email: 'ngozi.eze@apexdemo.closecraft.com', name: 'Ngozi Eze', role: 'MANAGER' },
     { email: 'femi.adeyemi@apexdemo.closecraft.com', name: 'Femi Adeyemi', role: 'CLOSER' },
@@ -87,7 +114,11 @@ export async function seedApexDemoWorkspace() {
   for (const def of teamDefs) {
     const user = await prisma.user.upsert({
       where: { email: def.email },
-      update: { name: def.name, emailVerified: new Date() },
+      update: { 
+        name: def.name, 
+        passwordHash: PASSWORD_HASH,
+        emailVerified: new Date() 
+      },
       create: {
         email: def.email,
         name: def.name,

@@ -177,6 +177,10 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <Link href="/" className="px-3 py-1.5 text-sm font-medium text-white hover:text-[#45bfae] transition-colors">
                 Home
               </Link>
+              <Link href="/demo" className="px-3 py-1.5 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Live Demo</span>
+              </Link>
               <a href="#how-it-works" className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
                 How It Works
               </a>
@@ -237,7 +241,16 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Link 
+              href="/demo" 
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border border-emerald-500/30 text-xs sm:text-sm font-bold transition-all shadow-sm hover:border-emerald-400"
+              title="Interactive AI Startup Challenge Demonstration Workspace"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Live Demo</span>
+            </Link>
+
             <Link 
               href="/login" 
               className="hidden sm:inline-flex items-center px-3.5 py-2 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors"
@@ -269,6 +282,13 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
           <div className="lg:hidden bg-[#080808] border-b border-[#1f1f1f] px-6 py-5 flex flex-col gap-3 shadow-2xl animate-in slide-in-from-top-2 duration-150">
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="/">
               Home
+            </Link>
+            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg bg-emerald-500/15 text-emerald-400 font-bold text-sm flex items-center justify-between border border-emerald-500/30" href="/demo">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Live Demo & Evaluation</span>
+              </span>
+              <ChevronRight size={14} />
             </Link>
             <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="#how-it-works">
               How It Works
@@ -315,9 +335,18 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
             <div className="max-w-3xl space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider shadow-inner">
-                <span className="w-2 h-2 rounded-full bg-[#45bfae] animate-pulse" />
-                <span>REVENUE GROWTH PLATFORM</span>
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider shadow-inner">
+                  <span className="w-2 h-2 rounded-full bg-[#45bfae] animate-pulse" />
+                  <span>REVENUE GROWTH PLATFORM</span>
+                </div>
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/40 text-emerald-400 text-xs font-bold uppercase tracking-wider shadow-inner transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>AI Startup Challenge Demo &rarr;</span>
+                </Link>
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
@@ -336,20 +365,28 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                 &ldquo;Every enquiry deserves a follow-up. Every opportunity deserves a clear next step.&rdquo;
               </p>
 
-              {/* Dual CTAs */}
+              {/* CTAs */}
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
                 <button
                   type="button"
                   onClick={() => openAudit('AUDIT')}
-                  className="px-8 py-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#248277]/30 transition-all active:scale-95 text-center cursor-pointer group"
+                  className="px-7 py-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#248277]/30 transition-all active:scale-95 text-center cursor-pointer group"
                 >
                   <span>LET'S FIX YOUR FOLLOW-UP</span>
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
 
+                <Link
+                  href="/demo"
+                  className="px-6 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-emerald-400 border border-emerald-500/40 hover:border-emerald-400 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-lg shadow-emerald-500/10 active:scale-95"
+                >
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>EXPLORE LIVE DEMO</span>
+                </Link>
+
                 <a
                   href="#how-it-works"
-                  className="px-7 py-4 rounded-xl bg-[#101010] hover:bg-[#1a1a1a] text-white border border-[#1f1f1f] hover:border-white/20 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
+                  className="px-6 py-4 rounded-xl bg-[#101010] hover:bg-[#1a1a1a] text-zinc-300 hover:text-white border border-[#1f1f1f] hover:border-white/20 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
                 >
                   <span>SEE HOW IT WORKS</span>
                 </a>
@@ -486,6 +523,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <div className="space-y-3">
                 <h4 className="font-bold text-white text-xs uppercase tracking-wider">Products</h4>
                 <ul className="space-y-2">
+                  <li><Link href="/demo" className="text-emerald-400 font-bold hover:underline flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Live Demonstration</Link></li>
                   <li><Link href="/platform" className="hover:text-white transition-colors">CloseCraft Workspace</Link></li>
                   <li><Link href="/revenue-engine" className="hover:text-white transition-colors">Revenue Engine</Link></li>
                   <li><Link href="/dss" className="text-[#45bfae] font-semibold hover:underline">Digital Sales School</Link></li>
