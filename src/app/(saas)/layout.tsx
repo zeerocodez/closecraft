@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
+import EvaluatorBanner from '@/components/layout/EvaluatorBanner';
 import { getOrCreateWorkspaceSubscription } from '@/lib/payments/subscription';
 
 export default async function SaasLayout({ children }: { children: React.ReactNode }) {
@@ -43,27 +44,11 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
   return (
     <AppShell user={userWithRole}>
       {org.slug === 'apex-demo' && (
-        <div className="mb-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
-          <div className="flex items-center gap-2.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 animate-pulse" />
-            <div>
-              <p className="font-bold text-white text-xs flex items-center gap-2">
-                <span>🎯 Dedicated Evaluator Workspace: Apex Professional Services</span>
-                <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] uppercase font-mono tracking-wider">Evaluation Build</span>
-              </p>
-              <p className="text-emerald-300/80 text-[11px] mt-0.5">
-                Pre-seeded with 12 diverse lead scenarios, 7 sales reps, active WhatsApp triage, and real-time revenue leakage alerts.
-              </p>
-            </div>
-          </div>
-          <Link
-            href="/demo"
-            className="px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs shrink-0 self-start sm:self-auto inline-flex items-center gap-1.5 shadow-sm transition-colors"
-          >
-            <span>Walkthrough Guide</span>
-            <span className="material-symbols-outlined text-[14px]">open_in_new</span>
-          </Link>
-        </div>
+        <EvaluatorBanner
+          currentUserEmail={session.user.email ?? undefined}
+          currentUserName={session.user.name ?? undefined}
+          currentUserRole={member?.role ?? undefined}
+        />
       )}
 
       {subscription.status === 'TRIALING' && subscription.trialHoursLeft <= 72 && (

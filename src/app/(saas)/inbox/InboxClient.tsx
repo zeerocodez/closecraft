@@ -27,7 +27,8 @@ import {
   Pause, 
   Flame,
   Search,
-  Check
+  Check,
+  CheckCheck
 } from 'lucide-react';
 
 interface InboxClientProps {
@@ -489,6 +490,52 @@ export default function InboxClient({ initialLeads }: InboxClientProps) {
                           }`}
                         >
                           <p className="whitespace-pre-wrap">{msg.content}</p>
+
+                          {/* WhatsApp Delivery Receipt Indicators for Outbound Messages */}
+                          {!isProspect && (
+                            <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-end gap-2 text-[10px]">
+                              {msg.status === 'READ' || msg.readAt ? (
+                                <span className="inline-flex items-center gap-1 text-cyan-300 font-mono font-medium">
+                                  <CheckCheck size={12} className="text-cyan-300" /> Read
+                                </span>
+                              ) : msg.status === 'DELIVERED' || msg.deliveredAt ? (
+                                <span className="inline-flex items-center gap-1 text-emerald-200/90 font-mono">
+                                  <CheckCheck size={12} className="text-emerald-300" /> Delivered
+                                </span>
+                              ) : msg.status === 'SENT' ? (
+                                <span className="inline-flex items-center gap-1 text-emerald-200/80 font-mono">
+                                  <Check size={11} className="text-emerald-300" /> Sent
+                                </span>
+                              ) : msg.status === 'DRY_RUN_LOGGED' ? (
+                                <span
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-mono text-[9px] font-bold"
+                                  title="Logged safely in Pilot Dry-Run mode. Live external dispatch requires enabling unattended delivery in Settings."
+                                >
+                                  <Clock size={10} /> Pilot Dry-Run
+                                </span>
+                              ) : msg.status === 'FAILED' ? (
+                                <span
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 border border-rose-500/30 font-mono text-[9px] font-bold"
+                                  title={msg.errorMessage || 'Dispatch failed or outside messaging window'}
+                                >
+                                  <AlertCircle size={10} /> Failed
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-emerald-200/70 font-mono">
+                                  <CheckCheck size={12} /> Delivered
+                                </span>
+                              )}
+
+                              {msg.providerMessageId && (
+                                <span
+                                  className="text-[9px] font-mono text-white/50 bg-black/20 px-1 py-0.5 rounded truncate max-w-[110px]"
+                                  title={`Meta Provider Message ID: ${msg.providerMessageId}`}
+                                >
+                                  {msg.providerMessageId.replace('wamid.', '')}
+                                </span>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     );

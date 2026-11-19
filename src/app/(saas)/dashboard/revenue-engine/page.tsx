@@ -10,6 +10,8 @@ import { ImportLeadsModal } from '@/app/(saas)/leads/ImportLeadsModal';
 import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
 import { QualificationPolicyModal } from '@/components/revenue-engine/QualificationPolicyModal';
 import { RevenueEngineOnboardingGuide } from '@/components/revenue-engine/RevenueEngineOnboardingGuide';
+import { LiveLeadSimulatorModal } from '@/components/revenue-engine/LiveLeadSimulatorModal';
+import { RevenueLeakSection } from '@/components/revenue-engine/RevenueLeakSection';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import {
@@ -135,6 +137,7 @@ export default async function RevenueEnginePage({
         </div>
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
+          <LiveLeadSimulatorModal />
           <QualificationPolicyModal currentPolicy={org?.qualificationPolicy} />
           <ImportLeadsModal />
           <AddLeadModal />
@@ -272,75 +275,7 @@ export default async function RevenueEnginePage({
         </div>
 
         {/* Revenue at Risk Pod */}
-        <div className="p-5 sm:p-6 rounded-3xl bg-surface-container-low border border-outline-variant/40 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-outline-variant/30">
-            <div className="flex items-center gap-2">
-              <ShieldAlert size={18} className="text-rose-400" />
-              <h3 className="text-base font-bold text-on-surface">Revenue at Risk &amp; Leaks</h3>
-            </div>
-            <Link
-              href="/pipeline"
-              className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-            >
-              <span>Inspect Deals</span>
-              <ArrowRight size={13} />
-            </Link>
-          </div>
-
-          {openLeaks.length === 0 && stalledDeals.length === 0 ? (
-            <p className="text-xs text-on-surface-variant py-4 text-center">
-              Zero open revenue leaks. All active deals are moving within SLA.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {openLeaks.map((leak: any) => (
-                <div
-                  key={leak.id}
-                  className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/25 flex items-center justify-between gap-3 text-xs"
-                >
-                  <div className="min-w-0 space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">
-                        {leak.type.replace(/_/g, ' ')}
-                      </span>
-                      <span className="font-bold text-on-surface truncate">
-                        {leak.lead?.name || 'Unassigned Lead'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-rose-200/80 truncate">{leak.description}</p>
-                  </div>
-                  <span className="font-mono text-[10px] font-bold text-rose-400 uppercase shrink-0">
-                    {leak.severity}
-                  </span>
-                </div>
-              ))}
-
-              {stalledDeals.map((deal: any) => (
-                <div
-                  key={deal.id}
-                  className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-between gap-3 text-xs"
-                >
-                  <div className="min-w-0 space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">
-                        STALLED &gt; 7 DAYS
-                      </span>
-                      <span className="font-bold text-on-surface truncate">
-                        {deal.lead?.name || deal.title || 'Deal'}
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-amber-200/80 truncate">
-                      Stage: {deal.stage} • No updates in over a week
-                    </p>
-                  </div>
-                  <p className="font-mono font-bold text-xs text-primary shrink-0">
-                    ₦{Number(deal.amount).toLocaleString()}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <RevenueLeakSection openLeaks={openLeaks as any} stalledDeals={stalledDeals as any} />
       </div>
 
       {/* ========================================================================= */}
