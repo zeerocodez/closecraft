@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     const userRole = (session.user as any).role;
     const isPlatformStaff = ['OPERATOR', 'SUPER_ADMIN', 'ADMIN'].includes(userRole);
 
-    let whereClause: any = {};
+    const whereClause: any = {};
 
     if (projectRequestId) {
       whereClause.projectRequestId = projectRequestId;

@@ -80,7 +80,7 @@ export default function EvaluatorBanner({
       });
 
       if (result?.ok) {
-        window.location.href = persona.destination;
+        window.location.assign(persona.destination);
       } else {
         console.error('Failed to switch persona:', result?.error);
         setSwitchingTo(null);

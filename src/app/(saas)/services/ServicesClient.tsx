@@ -215,7 +215,7 @@ export default function ServicesClient({
         throw new Error(data.error || 'Failed to initialize checkout');
       }
 
-      window.location.href = data.checkoutUrl;
+      window.location.assign(data.checkoutUrl);
     } catch (err: any) {
       console.error('Purchase error:', err);
       setErrorMessage(err.message || 'Unable to start checkout. Please try again.');
