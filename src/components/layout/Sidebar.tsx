@@ -183,8 +183,10 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
         title: 'Revenue Engine',
         items: [
           { href: '/dashboard/revenue-engine', icon: 'TrendingUp', label: 'Command Centre', exact: true },
+          { href: '/recovery', icon: 'Sparkles', label: 'Lead Recovery Hub' },
           { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
           { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
+          { href: '/commitments', icon: 'CheckSquare', label: 'Promise Ledger' },
           { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
           { href: '/inbox', icon: 'Inbox', label: 'Unified Inbox' },
           { href: '/team', icon: 'UserCheck', label: 'Team Roster', visible: isManagerOrOwner },

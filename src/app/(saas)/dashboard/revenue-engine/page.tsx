@@ -25,6 +25,7 @@ import {
   Calendar,
   MessageCircle,
   ShieldAlert,
+  CheckSquare,
 } from 'lucide-react';
 
 export const metadata = {
@@ -137,9 +138,22 @@ export default async function RevenueEnginePage({
         </div>
 
         <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0 flex-wrap">
+          <Link
+            href="/recovery"
+            className="h-10 px-3.5 bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-colors"
+          >
+            <Sparkles size={14} />
+            <span>Lead Recovery Hub</span>
+          </Link>
+          <Link
+            href="/commitments"
+            className="h-10 px-3.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface border border-outline-variant/60 text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-colors"
+          >
+            <CheckSquare size={14} className="text-emerald-400" />
+            <span>Promise Ledger</span>
+          </Link>
           <LiveLeadSimulatorModal />
           <QualificationPolicyModal currentPolicy={org?.qualificationPolicy} />
-          <ImportLeadsModal />
           <AddLeadModal />
         </div>
       </div>

@@ -350,19 +350,19 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
-                Stop Losing Revenue to Unfollowed Leads.
+                Recover More Opportunities. Convert More Customers. Deliver What You Promise.
               </h1>
 
               <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed max-w-2xl">
-                You spend money getting potential customers interested in your business. But when enquiries go unanswered and follow-ups are forgotten, those opportunities can turn into lost sales.
+                You spend money getting potential customers interested in your business. But when enquiries go unanswered, cold leads are abandoned, and commitments are forgotten, revenue slips away.
               </p>
 
               <p className="text-sm sm:text-base font-medium text-zinc-300 border-l-2 border-[#248277] pl-3 py-0.5">
-                CloseCraft helps you capture enquiries, respond faster, follow up consistently and convert more prospects into paying customers.
+                CloseCraft connects inbound WhatsApp and ad enquiry triage, AI-driven lead reactivation, and post-sale commitment tracking into one unified revenue operations platform.
               </p>
 
               <p className="text-xs sm:text-sm font-semibold text-[#45bfae] italic">
-                &ldquo;Every enquiry deserves a follow-up. Every opportunity deserves a clear next step.&rdquo;
+                &ldquo;Every enquiry deserves a follow-up. Every promise deserves to be fulfilled.&rdquo;
               </p>
 
               {/* CTAs */}
