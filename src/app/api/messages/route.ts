@@ -21,10 +21,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-    const { conversationId, content, senderType = 'HUMAN' } = body;
+    const { conversationId, leadId, content, senderType = 'HUMAN' } = body;
 
-    if (!conversationId || typeof conversationId !== 'string' || !content || typeof content !== 'string') {
-      return NextResponse.json({ error: 'Missing required fields: valid conversationId and content are required' }, { status: 400 });
+    if ((!conversationId && !leadId) || !content || typeof content !== 'string') {
+      return NextResponse.json({ error: 'Missing required fields: valid conversationId or leadId, and content are required' }, { status: 400 });
     }
 
     const trimmedContent = content.trim();
@@ -36,9 +36,29 @@ export async function POST(request: Request) {
     const validSenderTypes = ['HUMAN', 'PROSPECT'];
     const safeSenderType = validSenderTypes.includes(senderType) ? senderType : 'HUMAN';
 
+    let effectiveConversationId = conversationId;
+
+    // If conversationId wasn't passed directly, find or initialize the conversation for this lead
+    if (!effectiveConversationId && leadId) {
+      let conv = await db.conversation.findFirst({
+        where: { leadId, organizationId: session.organizationId }
+      });
+      if (!conv) {
+        conv = await db.conversation.create({
+          data: {
+            leadId,
+            organizationId: session.organizationId,
+            channel: 'WHATSAPP',
+            status: 'OPEN'
+          }
+        });
+      }
+      effectiveConversationId = conv.id;
+    }
+
     // Verify conversation belongs to this organization
     const conversation = await db.conversation.findUnique({
-      where: { id: conversationId },
+      where: { id: effectiveConversationId },
       include: { lead: true }
     });
 
@@ -49,7 +69,7 @@ export async function POST(request: Request) {
     // Insert the message into the DB
     const message = await db.message.create({
       data: {
-        conversationId,
+        conversationId: effectiveConversationId,
         content: trimmedContent,
         senderType: safeSenderType
       }

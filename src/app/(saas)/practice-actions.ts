@@ -11,6 +11,14 @@ import { issueVerifiableCredential } from '@/lib/practice/credentials';
 import crypto from 'crypto';
 import { ApprovedOfferFacts, ServerBuyerFacts, BuyerPersona, RubricCriterionKey } from '@/lib/practice/types';
 
+function safeRevalidatePath(path: string) {
+  try {
+    revalidatePath(path);
+  } catch {
+    // In Next.js App Router, revalidatePath cannot be executed during GET SSR rendering
+  }
+}
+
 /**
  * Ensures user is authenticated and returns user details.
  */
@@ -68,7 +76,7 @@ export async function saveLearnerOnboardingPurpose(data: {
     },
   });
 
-  revalidatePath('/practice');
+  safeRevalidatePath('/practice');
   return { success: true, profile };
 }
 
@@ -170,7 +178,7 @@ export async function startPracticeSession(data: {
     },
   });
 
-  revalidatePath('/practice');
+  safeRevalidatePath('/practice');
   return {
     sessionId: session.id,
     scenario: projectStudentScenario(scenario),
@@ -482,9 +490,9 @@ export async function finishAndEvaluateSession(
       });
     }
 
-    revalidatePath('/practice');
-    revalidatePath('/practice/intelligence');
-    revalidatePath('/practice/coach');
+    safeRevalidatePath('/practice');
+    safeRevalidatePath('/practice/intelligence');
+    safeRevalidatePath('/practice/coach');
 
     return {
       success: true,
@@ -849,7 +857,7 @@ export async function submitTrainerReview(data: {
     },
   });
 
-  revalidatePath('/practice/readiness');
+  safeRevalidatePath('/practice/readiness');
   return { success: true, evaluation: updatedEval };
 }
 
@@ -876,7 +884,7 @@ export async function issueCredentialAction(data: {
     trackTitle: data.trackTitle,
   });
 
-  revalidatePath('/practice/readiness');
+  safeRevalidatePath('/practice/readiness');
   return { success: true, credential };
 }
 
@@ -915,7 +923,7 @@ export async function createSalesPlaybookAction(data: {
     },
   });
 
-  revalidatePath('/practice/playbooks');
+  safeRevalidatePath('/practice/playbooks');
   return { success: true, playbook };
 }
 
@@ -1019,7 +1027,7 @@ export async function submitForTrainerReview(sessionId: string) {
     },
   });
 
-  revalidatePath(`/dss/roleplay/review/${sessionId}`);
-  revalidatePath('/dss/roleplay');
+  safeRevalidatePath(`/dss/roleplay/review/${sessionId}`);
+  safeRevalidatePath('/dss/roleplay');
   return { success: true, session: updated };
 }

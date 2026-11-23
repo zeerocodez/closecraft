@@ -3,6 +3,7 @@
 import React, { useState, useTransition } from 'react';
 import { DealCard } from './DealCard';
 import { NewDealModal } from './NewDealModal';
+import { DealDetailsModal } from './DealDetailsModal';
 import { Badge } from '@/components/ui/Badge';
 import { ResponsiveTable } from '@/components/ui/ResponsiveTable';
 import { seedSampleWorkspaceAction, clearSampleWorkspaceAction } from '@/app/(saas)/actions';
@@ -60,6 +61,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
   const [viewMode, setViewMode] = useState<'KANBAN' | 'LIST'>('KANBAN');
   const [searchQuery, setSearchQuery] = useState('');
   const [stageFilter, setStageFilter] = useState<string>('ALL');
+  const [selectedDeal, setSelectedDeal] = useState<DealRecord | null>(null);
   const [isSeeding, startSeedTransition] = useTransition();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -242,10 +244,10 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
 
         <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-1">
           <p className="text-[11px] font-medium text-on-surface-variant">Open Value</p>
-          <p className="text-lg font-bold font-mono text-primary">
+          <p className="text-lg font-bold font-mono text-emerald-400">
             ₦{openValue.toLocaleString()}
           </p>
-          <span className="text-[10px] text-primary font-semibold block">{openDeals.length} active opportunities</span>
+          <span className="text-[10px] text-emerald-400 font-semibold block">{openDeals.length} active opportunities</span>
         </div>
 
         <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 space-y-1">
@@ -272,7 +274,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
             onClick={() => setStageFilter('ALL')}
             className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
               stageFilter === 'ALL'
-                ? 'bg-primary text-on-primary'
+                ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm shadow-emerald-950/20'
                 : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
             }`}
           >
@@ -286,7 +288,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
                 onClick={() => setStageFilter(st)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
                   stageFilter === st
-                    ? 'bg-primary text-on-primary'
+                    ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm shadow-emerald-950/20'
                     : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                 }`}
               >
@@ -303,7 +305,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
             placeholder="Search deals or prospects..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-3 rounded-xl bg-surface-container text-on-surface text-xs border border-outline-variant/30 focus:outline-none focus:border-primary placeholder:text-on-surface-variant/60"
+            className="w-full h-9 pl-9 pr-3 rounded-xl bg-surface-container text-on-surface text-xs border border-outline-variant/30 focus:outline-none focus:border-emerald-500 placeholder:text-on-surface-variant/60"
           />
         </div>
       </div>
@@ -331,7 +333,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
                         {stageDeals.length}
                       </span>
                     </div>
-                    <p className="font-mono font-extrabold text-xs text-primary">
+                    <p className="font-mono font-extrabold text-xs text-emerald-400">
                       ₦{stageVal.toLocaleString()}
                     </p>
                   </div>
@@ -344,7 +346,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
                       </div>
                     ) : (
                       stageDeals.map((deal) => (
-                        <DealCard key={deal.id} deal={deal as any} />
+                        <DealCard key={deal.id} deal={deal as any} onClick={() => setSelectedDeal(deal)} />
                       ))
                     )}
                   </div>
@@ -416,7 +418,7 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
                   const act = deal.lead.revenueActions?.[0];
                   if (!act) return <span className="text-xs text-on-surface-variant">—</span>;
                   return (
-                    <span className="text-xs font-mono text-primary font-semibold">
+                    <span className="text-xs font-mono text-emerald-400 font-semibold">
                       {act.type.replace(/_/g, ' ')}
                     </span>
                   );
@@ -427,6 +429,17 @@ export default function PipelineClient({ deals, availableLeads }: PipelineClient
         </div>
       )}
       </>
+      )}
+
+      {/* Interactive Deal Details Modal */}
+      {selectedDeal && (
+        <DealDetailsModal
+          deal={selectedDeal}
+          onClose={() => setSelectedDeal(null)}
+          onStageChange={(newStage) => {
+            setSelectedDeal((prev) => (prev ? { ...prev, stage: newStage } : null));
+          }}
+        />
       )}
     </div>
   );

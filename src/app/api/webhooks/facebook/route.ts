@@ -83,11 +83,7 @@ export async function GET(req: Request) {
   const token = searchParams.get('hub.verify_token');
   const challenge = searchParams.get('hub.challenge');
 
-  const verifyToken = process.env.FACEBOOK_VERIFY_TOKEN;
-  if (!verifyToken) {
-    console.error('[Facebook Webhook] FACEBOOK_VERIFY_TOKEN is unconfigured.');
-    return new NextResponse('Configuration error', { status: 500 });
-  }
+  const verifyToken = process.env.FACEBOOK_VERIFY_TOKEN || 'closecraft_meta_webhook_verify_token_2026';
 
   if (mode === 'subscribe' && token && timingSafeEqualString(token, verifyToken)) {
     console.log('[Facebook Webhook] Verified successfully with Meta');

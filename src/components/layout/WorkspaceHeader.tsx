@@ -81,7 +81,7 @@ export default function WorkspaceHeader({
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
         <Link
           href="/recovery"
-          className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C7F36B]/10 hover:bg-[#C7F36B]/20 text-[#C7F36B] border border-[#C7F36B]/30 text-xs font-bold transition-all shadow-sm select-none"
+          className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all shadow-sm select-none"
         >
           <Sparkles className="w-3.5 h-3.5" />
           <span>Recover Leads</span>
@@ -89,7 +89,7 @@ export default function WorkspaceHeader({
 
         <Link
           href="/leads?action=new"
-          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs font-extrabold transition-all shadow-sm shadow-[#C7F36B]/20 select-none active:scale-95"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold transition-all shadow-sm shadow-emerald-950/20 select-none active:scale-95"
         >
           <Plus className="w-4 h-4 stroke-[2.5]" />
           <span>New Enquiry</span>

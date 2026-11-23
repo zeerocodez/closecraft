@@ -86,6 +86,8 @@ export async function claimLead(leadId: string) {
   });
 
   revalidatePath('/leads');
+  revalidatePath('/inbox');
+  revalidatePath('/pipeline');
   revalidatePath('/dashboard');
   revalidatePath('/dashboard/revenue-engine');
   return { success: true, lead: updatedLead };
@@ -124,6 +126,8 @@ export async function assignLeadToUser(leadId: string, targetUserId: string, tar
   });
 
   revalidatePath('/leads');
+  revalidatePath('/inbox');
+  revalidatePath('/pipeline');
   revalidatePath('/dashboard');
   revalidatePath('/dashboard/revenue-engine');
   return { success: true, lead: updatedLead };

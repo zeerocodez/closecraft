@@ -21,53 +21,79 @@ export default async function InboxPage() {
     redirect("/login");
   }
 
-  // Fetch leads for this tenant with deals, conversations, and pending revenueActions
-  const leads = await db.lead.findMany({
-    where: { organizationId },
-    include: {
-      deals: true,
-      conversations: {
-        include: {
-          messages: {
-            orderBy: { createdAt: 'desc' }
+  // Fetch leads for this tenant with assignedUser, deals, conversations, and pending revenueActions
+  const [leads, members] = await Promise.all([
+    db.lead.findMany({
+      where: { organizationId },
+      include: {
+        assignedUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          }
+        },
+        deals: true,
+        conversations: {
+          include: {
+            messages: {
+              orderBy: { createdAt: 'desc' }
+            }
+          }
+        },
+        revenueActions: {
+          where: { status: 'PENDING' },
+          orderBy: { priority: 'desc' },
+          take: 1
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    }),
+    db.organizationMember.findMany({
+      where: { organizationId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           }
         }
       },
-      revenueActions: {
-        where: { status: 'PENDING' },
-        orderBy: { priority: 'desc' },
-        take: 1
-      }
-    },
-    orderBy: { updatedAt: 'desc' }
-  });
+      orderBy: { createdAt: 'asc' }
+    })
+  ]);
+
+  const teamMembers = members.map((m) => ({
+    id: m.userId,
+    name: m.user.name || m.user.email?.split('@')[0] || 'Team Member',
+    email: m.user.email,
+    role: m.role,
+  }));
 
   return (
-    <div className="flex flex-col gap-5 w-full h-full p-4 md:p-6 max-w-[1600px] mx-auto">
+    <div className="flex flex-col gap-3 w-full h-[calc(100vh-68px)] p-2 md:p-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/30 pb-4">
+      <div className="flex flex-row items-center justify-between gap-4 border-b border-outline-variant/30 pb-3 shrink-0">
         <div>
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#C7F36B] bg-[#C7F36B]/10 px-2.5 py-1 rounded-full border border-[#C7F36B]/25 mb-2 shadow-xs">
-            <MessageSquare size={13} />
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 mb-1 shadow-xs">
+            <MessageSquare size={12} />
             <span>Omnichannel Communications Hub</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-heading font-extrabold text-on-surface tracking-tight">
+          <h1 className="text-xl md:text-2xl font-heading font-extrabold text-on-surface tracking-tight">
             Unified Revenue Inbox
           </h1>
-          <p className="text-xs md:text-sm text-on-surface-variant mt-1">
-            Real-time prospect messaging across WhatsApp, email, and web chat with deterministic AI copilot triage.
-          </p>
         </div>
 
         {/* Security & Tenant Badge */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 self-start sm:self-center">
-          <ShieldCheck size={14} className="text-[#45bfae]" />
-          <span>Tenant Isolated &bull; WhatsApp Cloud API</span>
+        <div className="flex items-center gap-2 text-xs text-on-surface-variant font-mono">
+          <ShieldCheck size={14} className="text-emerald-400" />
+          <span className="hidden sm:inline">Tenant Isolated &bull; WhatsApp Cloud API</span>
         </div>
       </div>
 
       {/* Main Inbox 3-Pane Client */}
-      <InboxClient initialLeads={leads} />
+      <InboxClient initialLeads={leads} teamMembers={teamMembers} currentUserId={session.user.id} />
     </div>
   );
 }

@@ -276,7 +276,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                       title={!isExpanded && !isMobile ? item.label : undefined}
                       className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all group relative overflow-hidden ${
                         isActive
-                          ? 'bg-[#C7F36B]/15 text-[#C7F36B] font-bold border border-[#C7F36B]/35 shadow-sm shadow-[#C7F36B]/10'
+                          ? 'bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/35 shadow-sm shadow-emerald-500/10'
                           : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                       }`}
                     >
@@ -284,7 +284,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                         name={item.icon}
                         size={17}
                         className={`shrink-0 transition-colors ${
-                          isActive ? 'text-[#C7F36B]' : 'text-on-surface-variant group-hover:text-on-surface'
+                          isActive ? 'text-emerald-400' : 'text-on-surface-variant group-hover:text-on-surface'
                         }`}
                       />
                       <span
@@ -295,7 +295,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                         {item.label}
                       </span>
                       {item.badge && (isExpanded || isMobile) && (
-                        <span className="ml-auto text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#C7F36B]/20 text-[#C7F36B] border border-[#C7F36B]/30">
+                        <span className="ml-auto text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           {item.badge}
                         </span>
                       )}

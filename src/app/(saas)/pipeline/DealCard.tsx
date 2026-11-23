@@ -21,6 +21,8 @@ interface DealCardProps {
     title?: string | null;
     amount: number;
     stage: string;
+    currency?: string;
+    createdAt?: string | Date;
     updatedAt?: string | Date;
     closer?: {
       id: string;
@@ -41,9 +43,10 @@ interface DealCardProps {
       }>;
     };
   };
+  onClick?: () => void;
 }
 
-export function DealCard({ deal }: DealCardProps) {
+export function DealCard({ deal, onClick }: DealCardProps) {
   const [isPending, startTransition] = useTransition();
 
   const nextAction = deal.lead.revenueActions?.[0];
@@ -56,7 +59,8 @@ export function DealCard({ deal }: DealCardProps) {
     new Date().getTime() - new Date(deal.updatedAt).getTime() >
       7 * 24 * 60 * 60 * 1000;
 
-  function handleStageChange(newStage: string) {
+  function handleStageChange(newStage: string, e?: React.MouseEvent) {
+    if (e) e.stopPropagation();
     startTransition(async () => {
       try {
         await updateDealStage(deal.id, newStage);
@@ -83,12 +87,21 @@ export function DealCard({ deal }: DealCardProps) {
 
   return (
     <div
-      className={`p-4 rounded-2xl border transition-all space-y-3 shadow-xs ${
+      onClick={onClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onClick?.();
+        }
+      }}
+      className={`p-4 rounded-2xl border transition-all space-y-3 shadow-xs cursor-pointer text-left ${
         isPending
           ? 'opacity-50 pointer-events-none'
           : isStalled
           ? 'bg-rose-500/[0.03] border-rose-500/30 hover:border-rose-500/50'
-          : 'bg-surface-container-low border-outline-variant/40 hover:border-primary/40'
+          : 'bg-surface-container-low border-outline-variant/40 hover:border-emerald-500/50 hover:bg-surface-container'
       }`}
     >
       {/* Header: Lead Name & Deal Amount */}
@@ -96,9 +109,9 @@ export function DealCard({ deal }: DealCardProps) {
         <div className="min-w-0">
           <div className="flex items-center gap-1.5">
             {isHot && (
-              <Flame size={14} className="text-amber-400 shrink-0" />
+              <Flame size={14} className="text-amber-400 shrink-0 fill-amber-400" />
             )}
-            <h4 className="font-bold text-sm text-on-surface truncate" title={deal.lead.name}>
+            <h4 className="font-bold text-sm text-on-surface truncate hover:text-emerald-400 transition-colors" title={deal.lead.name}>
               {deal.lead.name}
             </h4>
           </div>
@@ -107,8 +120,8 @@ export function DealCard({ deal }: DealCardProps) {
           </p>
         </div>
 
-        <span className="font-mono font-extrabold text-xs text-primary shrink-0">
-          ₦{deal.amount.toLocaleString()}
+        <span className="font-mono font-extrabold text-xs text-emerald-400 shrink-0">
+          {deal.currency || '₦'}{deal.amount.toLocaleString()}
         </span>
       </div>
 
@@ -127,7 +140,7 @@ export function DealCard({ deal }: DealCardProps) {
 
         {deal.closer && (
           <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant flex items-center gap-1">
-            <User size={10} />
+            <User size={10} className="text-emerald-400" />
             {deal.closer.name || deal.closer.email?.split('@')[0]}
           </span>
         )}
@@ -139,7 +152,7 @@ export function DealCard({ deal }: DealCardProps) {
           <span className="truncate text-on-surface-variant font-medium">
             Action: <strong className="text-on-surface">{nextAction.type.replace(/_/g, ' ')}</strong>
           </span>
-          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-primary/10 text-primary font-bold shrink-0">
+          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold shrink-0">
             {nextAction.recommendedActor}
           </span>
         </div>
@@ -154,7 +167,7 @@ export function DealCard({ deal }: DealCardProps) {
         <div className="flex items-center gap-1.5 flex-wrap justify-end">
           {nextStage && (
             <button
-              onClick={() => handleStageChange(nextStage)}
+              onClick={(e) => handleStageChange(nextStage, e)}
               disabled={isPending}
               className="px-2.5 py-1 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface text-[11px] font-bold border border-outline-variant/30 flex items-center gap-1 transition-colors"
             >
@@ -166,7 +179,7 @@ export function DealCard({ deal }: DealCardProps) {
           {deal.stage !== 'WON' && deal.stage !== 'LOST' && (
             <>
               <button
-                onClick={() => handleStageChange('WON')}
+                onClick={(e) => handleStageChange('WON', e)}
                 disabled={isPending}
                 className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold flex items-center gap-1 transition-colors"
                 title="Mark Closed-Won"
@@ -176,7 +189,7 @@ export function DealCard({ deal }: DealCardProps) {
               </button>
 
               <button
-                onClick={() => handleStageChange('LOST')}
+                onClick={(e) => handleStageChange('LOST', e)}
                 disabled={isPending}
                 className="px-2 py-1 rounded-lg bg-surface-container hover:bg-rose-500/20 text-on-surface-variant hover:text-rose-300 text-[11px] font-semibold transition-colors"
                 title="Mark Lost"

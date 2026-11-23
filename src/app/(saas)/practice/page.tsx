@@ -45,7 +45,7 @@ export default async function PracticeStudioPage() {
             href="/practice/coach"
             className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-surface-container-high text-on-surface hover:bg-surface-container-highest transition-colors border border-outline-variant/30"
           >
-            <Icon name="Target" size={16} className="text-primary" />
+            <Icon name="Target" size={16} className="text-emerald-400" />
             Coach Plan
           </Link>
           <Link
@@ -64,7 +64,7 @@ export default async function PracticeStudioPage() {
           </Link>
           <Link
             href="/practice/scenarios"
-            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium rounded-lg bg-primary text-primary-contrast hover:bg-primary-hover transition-colors shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 hover:bg-emerald-400 transition-colors shadow-sm"
           >
             <Icon name="Compass" size={16} />
             All Scenarios
@@ -74,9 +74,9 @@ export default async function PracticeStudioPage() {
 
       {/* Onboarding Notice if Profile is empty */}
       {!profile && (
-        <div className="rounded-xl border border-primary/30 bg-primary/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0 mt-0.5">
+            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 shrink-0 mt-0.5">
               <Icon name="Sparkles" size={20} />
             </div>
             <div>
@@ -88,7 +88,7 @@ export default async function PracticeStudioPage() {
           </div>
           <Link
             href="/practice/onboarding"
-            className="px-4 py-2 text-xs font-semibold rounded-lg bg-primary text-primary-contrast hover:bg-primary-hover shrink-0 self-start sm:self-auto transition-colors"
+            className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-500 text-slate-950 hover:bg-emerald-400 shrink-0 self-start sm:self-auto transition-colors"
           >
             Configure Goal & Routine →
           </Link>
@@ -130,13 +130,13 @@ export default async function PracticeStudioPage() {
 
       {/* Next Best Action / Coach Recommendation Banner */}
       {recommendation && recommendation.suggestedScenario && (
-        <div className="rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-6 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+        <div className="rounded-2xl border border-emerald-500/20 bg-surface-container-lowest p-6 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
           
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 relative z-10">
             <div className="space-y-3 max-w-3xl">
               <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
                   <Icon name="Target" size={12} />
                   Next Best Move
                 </span>
@@ -173,14 +173,14 @@ export default async function PracticeStudioPage() {
             <div className="flex flex-col sm:flex-row lg:flex-col gap-2 shrink-0">
               <Link
                 href={`/practice/session/new?scenarioId=${recommendation.suggestedScenario.id}`}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-primary text-primary-contrast hover:bg-primary-hover font-semibold text-sm transition-all shadow-md active:scale-95"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold text-sm transition-all shadow-md active:scale-95"
               >
                 <Icon name="Play" size={16} />
                 Start This Exercise
               </Link>
               <Link
                 href="/practice/coach"
-                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs text-on-surface-variant hover:text-on-surface transition-colors"
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2 text-xs text-on-surface-variant hover:text-emerald-400 transition-colors"
               >
                 Inspect Evidence Behind Recommendation →
               </Link>
@@ -194,7 +194,7 @@ export default async function PracticeStudioPage() {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-bold text-on-surface flex items-center gap-2">
-              <Icon name="FileCheck2" size={18} className="text-primary" />
+              <Icon name="FileCheck2" size={18} className="text-emerald-400" />
               Assigned Work Due For Review
             </h2>
             <span className="text-xs text-on-surface-variant font-mono">
@@ -206,11 +206,11 @@ export default async function PracticeStudioPage() {
             {dueAssignments.map((a: any) => (
               <div
                 key={a.id}
-                className="p-5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest hover:border-primary/40 transition-colors flex flex-col justify-between"
+                className="p-5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest hover:border-emerald-500/40 transition-colors flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                       Assigned by {a.assignedBy}
                     </span>
                     {a.dueDate && (
@@ -231,7 +231,7 @@ export default async function PracticeStudioPage() {
                   </span>
                   <Link
                     href={`/practice/session/new?scenarioId=${a.scenario?.id}&assignmentId=${a.id}`}
-                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                    className="text-xs font-semibold text-emerald-400 hover:underline flex items-center gap-1"
                   >
                     Start Assignment →
                   </Link>
@@ -247,7 +247,7 @@ export default async function PracticeStudioPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-lg font-bold text-on-surface flex items-center gap-2">
-              <Icon name="BookOpen" size={20} className="text-primary" />
+              <Icon name="BookOpen" size={20} className="text-emerald-400" />
               DSS 4-Week Sprint Curriculum (12 Workshops)
             </h2>
             <p className="text-xs text-on-surface-variant mt-0.5">
@@ -256,7 +256,7 @@ export default async function PracticeStudioPage() {
           </div>
           <Link
             href="/practice/scenarios"
-            className="text-xs text-primary hover:underline font-semibold"
+            className="text-xs text-emerald-400 hover:underline font-semibold"
           >
             View Filterable Catalog →
           </Link>
@@ -282,7 +282,7 @@ export default async function PracticeStudioPage() {
                   </span>
                 </div>
 
-                <h3 className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors line-clamp-1">
+                <h3 className="text-sm font-bold text-on-surface group-hover:text-emerald-400 transition-colors line-clamp-1">
                   {s.title}
                 </h3>
                 <p className="text-xs text-on-surface-variant mt-1.5 line-clamp-2 leading-relaxed">
@@ -302,7 +302,7 @@ export default async function PracticeStudioPage() {
                 </span>
                 <Link
                   href={`/practice/session/new?scenarioId=${s.id}`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary-hover transition-colors"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-400 hover:text-emerald-300 transition-colors"
                 >
                   {s.isCapstone ? 'Take Capstone' : 'Practise'} →
                 </Link>
@@ -346,12 +346,12 @@ export default async function PracticeStudioPage() {
 
         <Link
           href="/practice/playbooks"
-          className="p-5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest hover:border-primary/40 transition-colors group"
+          className="p-5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest hover:border-emerald-500/40 transition-colors group"
         >
-          <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-3">
+          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center mb-3">
             <Icon name="BookOpen" size={20} />
           </div>
-          <h3 className="text-sm font-bold text-on-surface group-hover:text-primary transition-colors">
+          <h3 className="text-sm font-bold text-on-surface group-hover:text-emerald-400 transition-colors">
             Sales Playbooks & CRM Prep
           </h3>
           <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">

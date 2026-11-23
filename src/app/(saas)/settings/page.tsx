@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { getOrCreateWorkspaceSubscription } from '@/lib/payments/subscription';
 import { SettingsForm } from './SettingsForm';
 import { WorkspaceIdentityForm } from './WorkspaceIdentityForm';
+import { MetaAdsConfigCard } from './MetaAdsConfigCard';
 import { 
   Building2, 
   Sparkles, 
@@ -253,6 +254,11 @@ export default async function SettingsPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Section 3.C: Meta Ads Campaign Integration */}
+      <section className="p-6 md:p-8 rounded-3xl bg-[#0f1214] border border-white/5 shadow-xl space-y-6">
+        <MetaAdsConfigCard workspaceSlug={org.slug} />
       </section>
 
       {/* Section 4: Commercial Plan & Billing Overview */}

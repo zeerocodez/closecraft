@@ -78,7 +78,7 @@ export default async function ScenariosPage({
               href={`/practice/scenarios?${f.value ? `difficulty=${f.value}` : ''}`}
               className={`px-3 py-1.5 rounded-lg transition-colors font-medium ${
                 isActive
-                  ? 'bg-primary text-primary-contrast font-bold'
+                  ? 'bg-emerald-500 text-slate-950 font-bold'
                   : 'bg-surface-container-high text-on-surface-variant hover:text-on-surface'
               }`}
             >
@@ -98,7 +98,7 @@ export default async function ScenariosPage({
           </p>
           <Link
             href="/practice/scenarios"
-            className="inline-flex items-center gap-1 text-xs text-primary font-bold hover:underline"
+            className="inline-flex items-center gap-1 text-xs text-emerald-400 font-bold hover:underline"
           >
             Clear Filters
           </Link>
@@ -108,7 +108,7 @@ export default async function ScenariosPage({
           {scenarios.map((s) => (
             <div
               key={s.id}
-              className="p-6 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest hover:border-primary/50 transition-all flex flex-col justify-between space-y-4 group"
+              className="p-6 rounded-2xl border border-outline-variant/30 bg-surface-container-lowest hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-4 group"
             >
               <div className="space-y-3">
                 <div className="flex items-center justify-between gap-2">
@@ -124,7 +124,7 @@ export default async function ScenariosPage({
                   </span>
                 </div>
 
-                <h3 className="text-base font-bold text-on-surface group-hover:text-primary transition-colors leading-snug">
+                <h3 className="text-base font-bold text-on-surface group-hover:text-emerald-400 transition-colors leading-snug">
                   {s.title}
                 </h3>
 
