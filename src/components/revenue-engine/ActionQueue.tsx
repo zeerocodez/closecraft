@@ -48,11 +48,6 @@ export function ActionQueue({
   const [isPending, startTransition] = useTransition();
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const selectedAction = selectedActionId
     ? actions.find((a) => a.id === selectedActionId)
@@ -221,11 +216,9 @@ export function ActionQueue({
                   </span>
                 </div>
                 <span suppressHydrationWarning className="text-[10px] text-on-surface-variant font-mono">
-                  {mounted
-                    ? formatDistanceToNow(new Date(action.createdAt), {
-                        addSuffix: true,
-                      })
-                    : ''}
+                  {formatDistanceToNow(new Date(action.createdAt), {
+                    addSuffix: true,
+                  })}
                 </span>
               </div>
             </div>
