@@ -26,6 +26,7 @@ import WhyCloseCraftSection from '@/components/landing/WhyCloseCraftSection';
 import ProofAndTrustSection from '@/components/landing/ProofAndTrustSection';
 import HomepageFaqSection from '@/components/landing/HomepageFaqSection';
 import BrevoNewsletterSection from '@/components/marketing/BrevoNewsletterSection';
+import ExplainerVideoSection from '@/components/marketing/ExplainerVideoSection';
 
 interface LandingClientWrapperProps {
   eco?: any;
@@ -426,6 +427,9 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
             </div>
           </div>
         </section>
+
+        {/* DEMO VSL SECTION: REVENUE ENGINE WALKTHROUGH (Directly after Hero) */}
+        <ExplainerVideoSection onOpenAudit={() => openAudit('AUDIT')} />
 
         {/* SECTION 3: HOW IT WORKS (Directly after Hero) */}
         <HowItWorksProcess />
