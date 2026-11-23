@@ -431,7 +431,10 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
         {/* DEMO VSL SECTION: REVENUE ENGINE WALKTHROUGH (Directly after Hero) */}
         <ExplainerVideoSection onOpenAudit={() => openAudit('AUDIT')} />
 
-        {/* SECTION 3: HOW IT WORKS (Directly after Hero) */}
+        {/* INTRODUCTORY GROWTH SERVICES (Directly after VSL) */}
+        <GrowthServicesSection />
+
+        {/* SECTION 3: HOW IT WORKS */}
         <HowItWorksProcess />
 
         {/* SECTION 4 & 5: THE HIDDEN REVENUE LEAK & THE COST OF POOR FOLLOW-UP */}
@@ -439,9 +442,6 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
         {/* SECTION 6 & 7: THE CLOSECRAFT SOLUTION & PRODUCTS THAT POWER THE SYSTEM */}
         <ProductsShowcaseSection />
-
-        {/* SECTION 8: PROFESSIONAL SERVICES */}
-        <GrowthServicesSection />
 
         {/* SECTION 9: WHO WE HELP */}
         <WhoWeHelpSection />

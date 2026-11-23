@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import {
   Play,
@@ -175,11 +175,11 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
   return (
     <section
       id="demo-vsl"
-      className="relative py-14 sm:py-20 md:py-24 border-t border-[#263342]/60 bg-[#070B0E] overflow-hidden"
+      className="relative py-16 sm:py-24 border-t border-[#263342]/60 bg-[#070B0E] scroll-mt-24 overflow-hidden"
     >
       {/* Ambient background glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[600px] h-[350px] sm:h-[600px] bg-[#C7F36B]/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 right-10 w-[250px] sm:w-[450px] h-[250px] sm:h-[450px] bg-[#248277]/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[650px] h-[350px] sm:h-[650px] bg-[#C7F36B]/5 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[250px] sm:w-[450px] h-[250px] sm:h-[450px] bg-[#248277]/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8 sm:space-y-10">
         {/* Section Header */}
@@ -232,21 +232,21 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
             {/* Player Container */}
             <div
               ref={containerRef}
-              className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[#263342] bg-black shadow-2xl group transition-all"
+              className="relative rounded-2xl sm:rounded-3xl overflow-hidden border border-[#263342] bg-[#0A0E13] shadow-2xl transition-all"
             >
-              {/* Top Bar inside Player (Brand badge & sound indicator) */}
-              <div className="absolute top-0 left-0 right-0 z-20 px-3.5 sm:px-5 py-2.5 sm:py-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent flex items-center justify-between pointer-events-none">
+              {/* Clean External Header Bar (NO overlay covering the speaker) */}
+              <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 bg-[#0A0E13] border-b border-[#263342]/70 flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-[#C7F36B] animate-pulse" />
-                  <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-white uppercase drop-shadow">
+                  <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-white uppercase">
                     CloseCraft Revenue Engine Walkthrough
                   </span>
                 </div>
-                <div className="pointer-events-auto">
+                <div>
                   <button
                     type="button"
                     onClick={toggleMute}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 text-[11px] font-mono transition-colors cursor-pointer backdrop-blur-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#16202C] hover:bg-[#1E2C3D] text-white border border-[#263342] text-[11px] font-mono transition-colors cursor-pointer"
                     title={isMuted ? "Click to unmute sound" : "Sound on"}
                   >
                     {isMuted ? (
@@ -264,8 +264,8 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                 </div>
               </div>
 
-              {/* HTML5 Video Element */}
-              <div className="relative aspect-video w-full bg-[#05080A] flex items-center justify-center">
+              {/* Uncut Video Canvas (object-contain ensures complete frame visibility) */}
+              <div className="relative aspect-video w-full bg-black flex items-center justify-center overflow-hidden">
                 <video
                   ref={videoRef}
                   src="/videos/closecraft-onboarding.mp4"
@@ -278,14 +278,14 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                   onTimeUpdate={handleTimeUpdate}
                   onEnded={() => setIsPlaying(false)}
                   onClick={togglePlay}
-                  className="w-full h-full object-cover cursor-pointer"
+                  className="w-full h-full object-contain cursor-pointer"
                 />
 
                 {/* Big Center Play Overlay when paused */}
                 {!isPlaying && (
                   <div
                     onClick={togglePlay}
-                    className="absolute inset-0 bg-black/45 backdrop-blur-[2px] flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-black/35 z-10 px-4 text-center"
+                    className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-black/30 z-10 px-4 text-center"
                   >
                     <div className="relative flex items-center justify-center mb-3">
                       <span className="absolute w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-[#C7F36B]/30 animate-ping" />
@@ -293,7 +293,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                         <Play size={28} className="ml-1 fill-[#111827] sm:w-8 sm:h-8" />
                       </div>
                     </div>
-                    <span className="text-xs sm:text-sm font-extrabold text-white tracking-wide bg-black/75 px-4 py-1.5 rounded-full border border-white/20 shadow-lg">
+                    <span className="text-xs sm:text-sm font-extrabold text-white tracking-wide bg-black/80 px-4 py-1.5 rounded-full border border-white/20 shadow-lg">
                       Watch CloseCraft in Action (60s)
                     </span>
                     <span className="text-[11px] text-zinc-300 mt-1.5 font-medium hidden sm:inline-block">
@@ -551,44 +551,6 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
             <p className="text-xs text-[#94A3B8] leading-relaxed">
               Every deliverable and customer commitment made during the sale is tracked with evidence URLs and audit logging.
             </p>
-          </div>
-        </div>
-
-        {/* Bottom Call to Action Card */}
-        <div className="p-6 sm:p-8 rounded-2xl sm:rounded-3xl bg-[#111827] border border-[#263342] text-center space-y-4 shadow-xl">
-          <h3 className="text-lg sm:text-2xl font-heading font-extrabold text-white">
-            Ready to stop losing revenue to slow follow-up?
-          </h3>
-          <p className="text-xs sm:text-sm text-[#94A3B8] max-w-xl mx-auto leading-relaxed">
-            Test CloseCraft with your live inbound leads or explore the dedicated evaluation workspace pre-seeded with 12 real-world sales scenarios.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-1">
-            {onOpenAudit ? (
-              <button
-                type="button"
-                onClick={onOpenAudit}
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-[#C7F36B]/20 transition-all cursor-pointer"
-              >
-                <span>GET STARTED</span>
-                <ArrowRight size={16} />
-              </button>
-            ) : (
-              <Link
-                href="/signup"
-                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-xs sm:text-sm inline-flex items-center justify-center gap-2 shadow-lg shadow-[#C7F36B]/20 transition-all"
-              >
-                <span>GET STARTED</span>
-                <ArrowRight size={16} />
-              </Link>
-            )}
-
-            <Link
-              href="/demo"
-              className="w-full sm:w-auto px-6 py-3 rounded-xl bg-[#0D1117] hover:bg-[#16202C] text-white border border-[#263342] hover:border-white/20 font-bold text-xs sm:text-sm inline-flex items-center justify-center gap-2 transition-all"
-            >
-              <span className="w-2 h-2 rounded-full bg-[#C7F36B] animate-pulse" />
-              <span>Explore Interactive Demo</span>
-            </Link>
           </div>
         </div>
       </div>
