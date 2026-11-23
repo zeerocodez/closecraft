@@ -40,33 +40,22 @@ export default function AppShell({ children, user }: AppShellProps) {
       ];
     }
 
-    if (activeProduct === 'revenue') {
-      return [
-        { href: '/dashboard/revenue-engine', icon: 'TrendingUp', label: 'Command', exact: true },
-        { href: '/leads', icon: 'Users', label: 'Leads' },
-        { href: '/pipeline', icon: 'Layers', label: 'Pipeline' },
-        { href: '/appointments', icon: 'Calendar', label: 'Calls' },
-        { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
-      ];
-    }
-
     if (activeProduct === 'dss') {
       return [
         { href: '/dss/dashboard', icon: 'GraduationCap', label: 'Learning', exact: true },
         { href: '/dss/courses', icon: 'BookOpen', label: 'Courses' },
-        { href: '/dss/assignments', icon: 'FileText', label: 'Tasks' },
         { href: '/dss/roleplay', icon: 'PlayCircle', label: 'Roleplay' },
         { href: '/dss/certificates', icon: 'ShieldCheck', label: 'Certs' },
       ];
     }
 
-    // Default: CloseCraft
+    // CloseCraft Revenue Operating System: RECOVER • CONVERT • DELIVER
     return [
-      { href: '/dashboard', icon: 'Layout', label: 'Overview', exact: true },
-      { href: '/growth/projects', icon: 'Layers', label: 'Projects' },
-      { href: '/services', icon: 'Briefcase', label: 'Services' },
-      { href: '/billing', icon: 'CreditCard', label: 'Billing' },
-      { href: '/settings', icon: 'Settings', label: 'Settings' },
+      { href: '/dashboard', icon: 'TrendingUp', label: 'Command', exact: true },
+      { href: '/recovery', icon: 'Sparkles', label: 'Recover' },
+      { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
+      { href: '/pipeline', icon: 'Layers', label: 'Pipeline' },
+      { href: '/commitments', icon: 'CheckSquare', label: 'Deliver' },
     ];
   };
 

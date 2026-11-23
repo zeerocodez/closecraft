@@ -69,25 +69,55 @@ export default async function RevenueRecoveryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 flex items-center gap-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1.5 shadow-xs">
               <Sparkles size={12} />
-              <span>CORE REVENUE PILLAR</span>
+              <span>RECOVER PILLAR</span>
             </span>
             <span className="text-xs text-on-surface-variant font-medium">CloseCraft Revenue Operating System</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-on-surface">
-            AI Revenue Recovery &amp; Reactivation Hub
+            Your old enquiries could still become customers.
           </h1>
           <p className="text-xs sm:text-sm text-on-surface-variant mt-1 max-w-3xl leading-relaxed">
-            Businesses spend money acquiring leads but abandon 60%+ after initial friction. CloseCraft parses historical inquiries, classifies past objections, and deploys respectful, context-aware reactivation campaigns to revive dormant cash.
+            CloseCraft parses historical chats, spreadsheets, and inactive inquiries to identify previous intent, filter eligible contacts, and deploy personalized, consent-guarded reactivation campaigns to revive dormant cash.
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto shrink-0">
           <span className="px-3 py-1.5 rounded-xl bg-surface-container border border-outline-variant/30 text-xs font-mono text-on-surface flex items-center gap-1.5">
-            <ShieldCheck size={14} className="text-emerald-400" />
+            <ShieldCheck size={14} className="text-[#C7F36B]" />
             <span>Consent &amp; 24h Guard Active</span>
           </span>
+        </div>
+      </div>
+
+      {/* Campaign Lifecycle Step Flow Visual */}
+      <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/30 overflow-x-auto">
+        <div className="flex items-center justify-between min-w-[640px] text-xs">
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-[#C7F36B] text-[#111827] font-extrabold text-[11px] flex items-center justify-center">1</span>
+            <span className="font-bold text-on-surface">Choose Audience</span>
+          </div>
+          <span className="text-on-surface-variant/40">→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-[#C7F36B] text-[#111827] font-extrabold text-[11px] flex items-center justify-center">2</span>
+            <span className="font-bold text-on-surface">Verify Eligibility</span>
+          </div>
+          <span className="text-on-surface-variant/40">→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-[#C7F36B] text-[#111827] font-extrabold text-[11px] flex items-center justify-center">3</span>
+            <span className="font-bold text-on-surface">Context Message</span>
+          </div>
+          <span className="text-on-surface-variant/40">→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-[#C7F36B] text-[#111827] font-extrabold text-[11px] flex items-center justify-center">4</span>
+            <span className="font-bold text-on-surface">Preview &amp; Approve</span>
+          </div>
+          <span className="text-on-surface-variant/40">→</span>
+          <div className="flex items-center gap-2">
+            <span className="w-6 h-6 rounded-full bg-[#C7F36B] text-[#111827] font-extrabold text-[11px] flex items-center justify-center">5</span>
+            <span className="font-bold text-on-surface">Deploy &amp; Track</span>
+          </div>
         </div>
       </div>
 

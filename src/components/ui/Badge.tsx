@@ -35,9 +35,9 @@ export const Badge = ({
 
   const variantStyles = {
     default:
-      'bg-primary/15 text-primary-fixed border border-primary/30',
+      'bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30',
     primary:
-      'bg-primary/15 text-primary-fixed border border-primary/30',
+      'bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30 font-semibold',
     secondary:
       'bg-surface-container-high text-on-surface-variant border border-outline-variant/50',
     outline:
@@ -55,8 +55,8 @@ export const Badge = ({
   };
 
   const dotColors = {
-    default: 'bg-primary-fixed',
-    primary: 'bg-primary-fixed',
+    default: 'bg-[#C7F36B]',
+    primary: 'bg-[#C7F36B]',
     secondary: 'bg-on-surface-variant',
     outline: 'bg-on-surface',
     destructive: 'bg-error',

@@ -1,31 +1,44 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-canvas: #0B1117;
-  --color-surface: #0B1117;
-  --color-surface-container-lowest: #0D151D;
-  --color-surface-container: #111C26;
-  --color-surface-container-high: #172431;
-  --color-surface-container-highest: #1C2D3C;
-  --color-outline-variant: #293B4C;
+  --color-canvas: #0D1117;
+  --color-surface: #0F172A;
+  --color-surface-container-lowest: #0A0F1D;
+  --color-surface-container: #111827;
+  --color-surface-container-high: #1E293B;
+  --color-surface-container-highest: #334155;
+  --color-outline-variant: #263342;
   --color-outline: #64748B;
-  --color-on-surface: #F3F7FA;
-  --color-on-background: #F3F7FA;
-  --color-on-surface-variant: #A7B7C7;
-  --color-on-surface-muted: #8A9CAE;
-  --color-primary: #45BFAE;
-  --color-primary-fixed: #5CD4C3;
-  --color-on-primary: #08231F;
-  --color-primary-container: #15352F;
-  --color-success: #6AD6A7;
-  --color-warning: #F5BF65;
-  --color-error: #FF8F98;
-  --color-error-container: #93000A;
-  --color-on-error: #690005;
-  --color-info: #7AA2FF;
-  --color-focus: #87E8DA;
-  --color-inverse-surface: #F3F7FA;
-  --color-inverse-on-surface: #0B1117;
+  --color-on-surface: #F8FAFC;
+  --color-on-background: #F8FAFC;
+  --color-on-surface-variant: #94A3B8;
+  --color-on-surface-muted: #64748B;
+  
+  /* Brand Master Accent: Electric Lime */
+  --color-primary: #C7F36B;
+  --color-primary-fixed: #D9F99D;
+  --color-on-primary: #111827;
+  --color-primary-container: #1E2E16;
+  
+  /* Secondary Brand Accents */
+  --color-lime: #C7F36B;
+  --color-on-lime: #111827;
+  --color-teal: #45BFAE;
+  --color-on-teal: #08231F;
+  --color-deep-ink: #111827;
+  --color-charcoal: #1F2937;
+  --color-warm-white: #F8F8F5;
+  --color-muted-slate: #64748B;
+  
+  --color-success: #34D399;
+  --color-warning: #FBBF24;
+  --color-error: #F87171;
+  --color-error-container: #7F1D1D;
+  --color-on-error: #450A0A;
+  --color-info: #60A5FA;
+  --color-focus: #C7F36B;
+  --color-inverse-surface: #F8FAFC;
+  --color-inverse-on-surface: #0F172A;
   
   --font-sans: 'Inter', sans-serif;
   --font-heading: 'Plus Jakarta Sans', sans-serif;

@@ -73,17 +73,17 @@ export default async function CommitmentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/10 text-primary border border-primary/20 flex items-center gap-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1.5 shadow-xs">
               <CheckSquare size={12} />
-              <span>FULFILMENT REVENUE PILLAR</span>
+              <span>DELIVER PILLAR</span>
             </span>
             <span className="text-xs text-on-surface-variant font-medium">CloseCraft Revenue Operating System</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-on-surface">
-            Promise Ledger &amp; Fulfilment Tracker
+            Never lose track of what you promised a customer.
           </h1>
           <p className="text-xs sm:text-sm text-on-surface-variant mt-1 max-w-3xl leading-relaxed">
-            Businesses lose hard-won customers after making the sale because commitments are forgotten. CloseCraft extracts promised deadlines, discounts, and deliverables from customer chats to ensure every promise is fulfilled on time.
+            CloseCraft extracts promised deadlines, discounts, and custom deliverables from customer conversations, holding your team accountable so promises never fall through the cracks.
           </p>
         </div>
 

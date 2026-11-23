@@ -45,16 +45,16 @@ export default async function InboxPage() {
   return (
     <div className="flex flex-col gap-5 w-full h-full p-4 md:p-6 max-w-[1600px] mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/30 pb-4">
         <div>
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#248277]/10 px-2.5 py-1 rounded-full border border-[#248277]/20 mb-2">
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#C7F36B] bg-[#C7F36B]/10 px-2.5 py-1 rounded-full border border-[#C7F36B]/25 mb-2 shadow-xs">
             <MessageSquare size={13} />
             <span>Omnichannel Communications Hub</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-tight">
-            Revenue Inbox
+          <h1 className="text-2xl md:text-3xl font-heading font-extrabold text-on-surface tracking-tight">
+            Unified Revenue Inbox
           </h1>
-          <p className="text-xs md:text-sm text-gray-400 mt-1">
+          <p className="text-xs md:text-sm text-on-surface-variant mt-1">
             Real-time prospect messaging across WhatsApp, email, and web chat with deterministic AI copilot triage.
           </p>
         </div>

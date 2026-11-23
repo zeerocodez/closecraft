@@ -54,13 +54,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
     const variantStyles = {
       primary:
-        'bg-primary text-on-primary hover:bg-[#5cd4c3] shadow-sm hover:shadow-primary/20 border border-primary/40 font-semibold',
+        'bg-[#C7F36B] text-[#111827] hover:bg-[#d9f99d] shadow-sm hover:shadow-[#C7F36B]/20 border border-[#C7F36B]/60 font-bold tracking-tight',
       secondary:
-        'bg-surface-container-high text-on-surface hover:bg-surface-container-highest border border-outline-variant/60 shadow-sm',
+        'bg-surface-container-high text-on-surface hover:bg-surface-container-highest border border-outline-variant/60 shadow-sm font-medium',
       outline:
-        'border border-outline-variant hover:border-outline text-on-surface hover:bg-surface-container-high/60 bg-transparent',
+        'border border-outline-variant/80 hover:border-outline text-on-surface hover:bg-surface-container-high/60 bg-transparent font-medium',
       ghost:
-        'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/70 bg-transparent',
+        'text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high/70 bg-transparent font-medium',
       danger:
         'bg-error-container/30 text-error hover:bg-error-container/50 border border-error/40 font-semibold',
     };

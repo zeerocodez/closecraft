@@ -150,11 +150,12 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     );
   }
 
-  // 2. Product-Aware Navigation Items
+  // 2. Streamlined Global Navigation Sections
   interface NavItem {
     href: string;
     icon: string;
     label: string;
+    badge?: string;
     exact?: boolean;
     visible?: boolean;
   }
@@ -163,7 +164,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     if (activeProduct === 'dss') {
       return [
         {
-          title: 'Digital Sales School',
+          title: 'LEARNING',
           items: [
             { href: '/dss/dashboard', icon: 'GraduationCap', label: 'My Learning', exact: true },
             { href: '/dss/courses', icon: 'BookOpen', label: 'Courses & Syllabus' },
@@ -171,34 +172,56 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
             { href: '/dss/examinations', icon: 'Award', label: 'Examinations' },
             { href: '/dss/roleplay', icon: 'PlayCircle', label: 'AI Roleplay' },
             { href: '/dss/certificates', icon: 'ShieldCheck', label: 'Certificates' },
-            { href: '/dss/settings', icon: 'Settings', label: 'Student Settings' },
+            { href: '/dashboard', icon: 'ArrowLeft', label: 'Back to Revenue OS' },
           ],
         },
       ];
     }
 
-    // Unified CloseCraft Revenue Operating System
+    // Master CloseCraft Revenue Operating System
     return [
       {
-        title: 'Revenue Engine',
+        title: 'OVERVIEW',
         items: [
-          { href: '/dashboard/revenue-engine', icon: 'TrendingUp', label: 'Command Centre', exact: true },
-          { href: '/recovery', icon: 'Sparkles', label: 'Lead Recovery Hub' },
-          { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
-          { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
-          { href: '/commitments', icon: 'CheckSquare', label: 'Promise Ledger' },
-          { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
+          { href: '/dashboard', icon: 'TrendingUp', label: 'Command Centre', exact: true },
+        ],
+      },
+      {
+        title: 'REVENUE',
+        items: [
           { href: '/inbox', icon: 'Inbox', label: 'Unified Inbox' },
+          { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
+          { href: '/recovery', icon: 'Sparkles', label: 'Lead Recovery', badge: 'RECOVER' },
+          { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
+          { href: '/today', icon: 'Clock', label: 'Follow-ups' },
+          { href: '/commitments', icon: 'CheckSquare', label: 'Promise Ledger', badge: 'DELIVER' },
+        ],
+      },
+      {
+        title: 'INTELLIGENCE',
+        items: [
+          { href: '/practice', icon: 'Target', label: 'AI Practice Coach' },
+          { href: '/dashboard/analytics', icon: 'Activity', label: 'Revenue Analytics' },
+        ],
+      },
+      {
+        title: 'BUSINESS',
+        items: [
+          { href: '/services', icon: 'Briefcase', label: 'Growth Services' },
           { href: '/team', icon: 'UserCheck', label: 'Team Roster', visible: isManagerOrOwner },
         ],
       },
       {
-        title: 'Workspace & Growth',
+        title: 'LEARNING',
         items: [
-          { href: '/dashboard', icon: 'Layout', label: 'Deliverables & Projects' },
-          { href: '/services', icon: 'Briefcase', label: 'Services Catalogue' },
+          { href: '/dss/dashboard', icon: 'GraduationCap', label: 'Digital Sales School' },
+        ],
+      },
+      {
+        title: 'SETTINGS',
+        items: [
+          { href: '/settings', icon: 'Settings', label: 'Workspace' },
           { href: '/billing', icon: 'CreditCard', label: 'Billing & Invoices', visible: isManagerOrOwner },
-          { href: '/settings', icon: 'Settings', label: 'Settings' },
         ],
       },
     ];
@@ -251,17 +274,17 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                       href={item.href}
                       onClick={() => isMobile && setIsOpen(false)}
                       title={!isExpanded && !isMobile ? item.label : undefined}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group relative overflow-hidden ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all group relative overflow-hidden ${
                         isActive
-                          ? 'bg-primary/15 text-primary-fixed font-bold border border-primary/30'
-                          : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                          ? 'bg-[#C7F36B]/15 text-[#C7F36B] font-bold border border-[#C7F36B]/35 shadow-sm shadow-[#C7F36B]/10'
+                          : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                       }`}
                     >
                       <Icon
                         name={item.icon}
-                        size={18}
-                        className={`shrink-0 ${
-                          isActive ? 'text-primary-fixed' : 'text-on-surface-variant group-hover:text-on-surface'
+                        size={17}
+                        className={`shrink-0 transition-colors ${
+                          isActive ? 'text-[#C7F36B]' : 'text-on-surface-variant group-hover:text-on-surface'
                         }`}
                       />
                       <span
@@ -271,6 +294,11 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                       >
                         {item.label}
                       </span>
+                      {item.badge && (isExpanded || isMobile) && (
+                        <span className="ml-auto text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-[#C7F36B]/20 text-[#C7F36B] border border-[#C7F36B]/30">
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

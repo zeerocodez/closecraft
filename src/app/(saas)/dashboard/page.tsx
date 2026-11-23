@@ -3,601 +3,616 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import Link from 'next/link';
-import { getDashboardMetrics } from '@/lib/revenue-engine/dashboardService';
-import OnboardingChecklistCard from '@/components/dashboard/OnboardingChecklistCard';
+import { getRevenueActions, getDashboardMetrics } from '@/lib/revenue-engine/dashboardService';
+import { ActionQueue } from '@/components/revenue-engine/ActionQueue';
+import { RevenueLeakSection } from '@/components/revenue-engine/RevenueLeakSection';
+import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
+import { QualificationPolicyModal } from '@/components/revenue-engine/QualificationPolicyModal';
+import { LiveLeadSimulatorModal } from '@/components/revenue-engine/LiveLeadSimulatorModal';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
-import { EmptyState } from '@/components/ui/EmptyState';
 import {
   Sparkles,
-  ArrowRight,
-  Briefcase,
+  Flame,
+  AlertTriangle,
   Clock,
-  MessageCircle,
-  FileText,
-  DollarSign,
-  CheckCircle2,
+  ArrowRight,
   TrendingUp,
   UserCheck,
+  Calendar,
+  MessageCircle,
+  ShieldCheck,
+  CheckSquare,
   Plus,
+  Zap,
+  Target,
   Layers,
-  ChevronRight,
+  ArrowUpRight,
+  Inbox,
+  History,
+  FileText
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'CloseCraft Dashboard | Closecraft HQ',
-  description: 'Manage active customer growth projects, review proposals, pay invoices, and track delivery milestones.',
+  title: 'Revenue Command Centre | CloseCraft HQ',
+  description: 'Recover overlooked opportunities, convert active prospects, and deliver customer promises.',
 };
 
-export default async function DashboardPage() {
+export default async function CommandCentrePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ tab?: string }>;
+}) {
   const session = await auth();
   if (!session?.user) redirect('/login');
   if (!session.organizationId) redirect('/login');
 
   const { organizationId } = session;
-
-  // Direct Evaluator Routing: For Apex Demo workspace, immediately display Sales Command Centre
-  const targetOrg = await db.organization.findUnique({
-    where: { id: organizationId },
-    select: { slug: true, name: true, plan: true }
-  });
-
-  if (targetOrg?.slug === 'apex-demo') {
-    redirect('/dashboard/revenue-engine');
-  }
-
-  // Role-based dashboard isolation:
-  const member = await db.organizationMember.findFirst({
-    where: { userId: session.user.id, organizationId },
-    select: { role: true },
-  });
-
-  const userRole = member?.role || 'MEMBER';
-  if (userRole === 'CLOSER' || userRole === 'SETTER' || userRole === 'EXTERNAL_PROFESSIONAL') {
-    redirect('/rep');
-  }
-  if (userRole === 'MANAGER') {
-    redirect('/team');
-  }
-
-  // Enforce email verification
-  if (!(session.user as any)?.emailVerified) {
-    const dbUser = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: { emailVerified: true },
-    });
-    if (!dbUser?.emailVerified) {
-      redirect('/verify-email');
-    }
-  }
-
-  // Business owner onboarding check
-  const isOwnerOrAdmin = userRole === 'OWNER' || userRole === 'ADMIN';
-  if (isOwnerOrAdmin) {
-    const qual = await db.workspaceQualification.findFirst({
-      where: { organizationId },
-      orderBy: { createdAt: 'desc' },
-    });
-    if (!qual || qual.status === 'DRAFT') {
-      redirect('/onboarding');
-    }
-  }
+  const resolvedParams = searchParams ? await searchParams : {};
+  const currentTab = typeof resolvedParams?.tab === 'string' ? resolvedParams.tab : 'needs_attention';
+  const filter =
+    currentTab === 'needs_attention'
+      ? 'needs_attention'
+      : currentTab === 'my_actions'
+      ? 'my_actions'
+      : 'all';
 
   const now = new Date();
   const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+  const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+  // Time-aware greeting
+  const hour = now.getHours();
+  const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const firstName = session.user.name?.split(' ')[0] || 'Partner';
 
   const [
     org,
-    pendingProposals,
-    pendingInvoices,
-    pendingMilestones,
-    activeProjects,
-    activeSubscriptions,
-    revMetrics,
-    leadCount,
-    demoLead,
-    workspaceQual,
+    metrics,
+    actions,
+    hotLeads,
+    overdueCommitments,
+    overlookedLeads,
+    openLeaks,
+    stalledDeals,
+    recentAudits,
+    recoveredCount,
+    unreadInboxCount
   ] = await Promise.all([
     db.organization.findUnique({
       where: { id: organizationId },
-      select: { name: true, plan: true },
+      select: { name: true, plan: true, slug: true, qualificationPolicy: true },
     }),
-    // 1. Pending Proposals awaiting client approval
-    db.projectProposal.findMany({
-      where: {
-        projectRequest: { organizationId },
-        status: 'SENT',
-      },
-      include: {
-        projectRequest: { select: { reference: true, services: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 3,
-    }),
-    // 2. Pending Invoices awaiting Bachs payment
-    db.projectInvoice.findMany({
-      where: {
-        projectRequest: { organizationId },
-        status: 'ISSUED',
-      },
-      include: {
-        projectRequest: { select: { reference: true } },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 3,
-    }),
-    // 3. Deliverables awaiting client sign-off
-    db.projectMilestone.findMany({
-      where: {
-        projectRequest: { organizationId },
-        status: 'SUBMITTED',
-        clientApproved: false,
-      },
-      include: {
-        projectRequest: { select: { reference: true } },
-      },
-      orderBy: { sequenceOrder: 'asc' },
-      take: 3,
-    }),
-    // 4. Active Growth Projects
-    db.projectRequest.findMany({
+    getDashboardMetrics(organizationId, thirtyDaysAgo, now, 'NGN'),
+    getRevenueActions(organizationId, filter, session.user.id),
+    // Hot Leads requiring attention
+    db.lead.findMany({
       where: {
         organizationId,
-        status: { notIn: ['COMPLETED', 'CANCELLED'] },
+        OR: [
+          { buyingIntent: { gte: 70 } },
+          { status: { in: ['QUALIFYING', 'OPPORTUNITY', 'ENGAGED'] } },
+        ],
       },
       include: {
-        brief: { select: { businessName: true, primaryGoal: true } },
-        assignedPartner: {
-          select: { id: true, fullName: true, bio: true },
-        },
-        milestones: {
-          select: { id: true, status: true, clientApproved: true },
-        },
+        deals: { select: { amount: true, stage: true } },
+        revenueActions: { where: { status: 'PENDING' }, take: 1 },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ buyingIntent: 'desc' }, { createdAt: 'desc' }],
       take: 4,
     }),
-    // 5. Active Subscriptions
-    db.clientService.findMany({
+    // Active or overdue commitments from Promise Ledger
+    db.customerCommitment.findMany({
       where: {
         organizationId,
-        status: 'ACTIVE',
+        status: { in: ['PENDING', 'IN_PROGRESS', 'OVERDUE'] },
+      },
+      include: {
+        lead: { select: { id: true, name: true } },
+        assignedUser: { select: { name: true } },
+      },
+      orderBy: [{ isOverdue: 'desc' }, { dueDate: 'asc' }],
+      take: 4,
+    }),
+    // Overlooked Leads ready for reactivation (created > 24 hours ago, still NEW or UNANSWERED)
+    db.lead.findMany({
+      where: {
+        organizationId,
+        status: 'NEW',
+        createdAt: { lt: oneDayAgo },
       },
       select: {
         id: true,
         name: true,
-        progressPercent: true,
-        paidThroughDate: true,
+        buyingIntent: true,
+        estimatedValue: true,
+        currency: true,
+        createdAt: true,
+        source: true,
       },
+      orderBy: { buyingIntent: 'desc' },
       take: 3,
     }),
-    // 6. High-level Revenue Engine metrics
-    getDashboardMetrics(organizationId, thirtyDaysAgo, now, 'NGN'),
-    // 7. Lead count and demo seed status for onboarding
-    db.lead.count({ where: { organizationId } }),
-    db.lead.findFirst({
+    // Open Revenue Leaks
+    db.revenueLeak.findMany({
+      where: { organizationId, status: 'OPEN' },
+      include: {
+        lead: { select: { id: true, name: true, phone: true } },
+      },
+      orderBy: [{ severity: 'desc' }, { createdAt: 'desc' }],
+      take: 3,
+    }),
+    // Stalled Deals in Pipeline (> 7 days without update)
+    db.deal.findMany({
       where: {
         organizationId,
-        OR: [
-          { message: { contains: '[DEMO_SEED]' } },
-          { message: { contains: '[Demo' } },
-          { email: { endsWith: '@example.com' } },
-        ]
-      }
+        stage: { in: ['OPPORTUNITY', 'PROPOSAL', 'NEGOTIATION'] },
+        updatedAt: { lt: sevenDaysAgo },
+      },
+      include: {
+        lead: { select: { id: true, name: true, phone: true } },
+      },
+      orderBy: { amount: 'desc' },
+      take: 3,
     }),
-    db.workspaceQualification.findFirst({ where: { organizationId } }),
+    // Immutable Tenant Audit Activity
+    db.auditLog.findMany({
+      where: { organizationId },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+    }),
+    // Total Recovered Prospects
+    db.lead.count({
+      where: {
+        organizationId,
+        source: 'RECOVERY_CAMPAIGN',
+      },
+    }),
+    // Unread Inbound Messages
+    db.conversation.count({
+      where: {
+        organizationId,
+        status: 'ACTIVE',
+      },
+    }),
   ]);
 
-  const totalActionCount =
-    pendingProposals.length + pendingInvoices.length + pendingMilestones.length;
+  const tabs = [
+    { id: 'needs_attention', label: 'Needs Attention' },
+    { id: 'my_actions', label: 'My Assigned Actions' },
+    { id: 'all', label: 'All Actions' },
+  ];
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'IN_DELIVERY':
-        return <Badge variant="success" dot>In Delivery</Badge>;
-      case 'PROPOSAL_SENT':
-        return <Badge variant="warning" dot>Proposal Sent</Badge>;
-      case 'INVOICED':
-        return <Badge variant="warning" dot>Awaiting Payment</Badge>;
-      case 'PAID':
-        return <Badge variant="success">Paid</Badge>;
-      case 'ASSIGNED':
-      case 'CONSULTING':
-        return <Badge variant="info">Partner Assigned</Badge>;
-      case 'PENDING_ASSIGNMENT':
-        return <Badge variant="info" dot>Matching Specialist</Badge>;
-      default:
-        return <Badge variant="neutral">{status.replace(/_/g, ' ')}</Badge>;
-    }
-  };
+  // Urgent attention count
+  const attentionItemsCount =
+    hotLeads.length + overdueCommitments.filter((c) => c.isOverdue).length + stalledDeals.length;
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-7xl mx-auto pb-16">
-      {/* Top Welcome Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-white/5">
+      {/* ========================================================================= */}
+      {/* 1. TOP HEADER & PERSONALISED GREETING                                     */}
+      {/* ========================================================================= */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-outline-variant/30">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#248277]/10 text-[#45bfae] border border-[#248277]/20">
-              CLOSECRAFT HQ
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1.5 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] animate-pulse" />
+              <span>REVENUE COMMAND CENTRE</span>
             </span>
-            <span className="text-xs text-slate-400 font-medium">
+            <span className="text-xs text-on-surface-variant font-medium">
               {org?.name || 'Workspace'}
             </span>
+            <span className="text-xs text-on-surface-variant/60">·</span>
+            <span className="text-xs text-on-surface-variant font-mono">
+              Last 30 Days
+            </span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
-            Customer Growth &amp; Deliverables
+
+          <h1 className="text-2xl sm:text-3xl font-heading font-extrabold tracking-tight text-on-surface">
+            {timeGreeting}, {firstName}. Here&apos;s where your revenue stands.
           </h1>
-          <p className="text-sm text-slate-400 mt-0.5">
-            Overview of active growth projects, proposals requiring review, and delivery milestones.
+          <p className="text-xs sm:text-sm text-on-surface-variant mt-1 max-w-2xl">
+            Recover overlooked sales, keep customer conversations moving, and fulfill every promise on time.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
+        {/* 1-Click Fast Primary Controls */}
+        <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
           <Link
-            href="/services"
-            className="px-4 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-bold text-xs flex items-center gap-2 shadow-sm shadow-[#248277]/20 transition-all"
+            href="/recovery"
+            className="h-9 px-3 rounded-xl bg-[#C7F36B]/15 hover:bg-[#C7F36B]/25 text-[#C7F36B] border border-[#C7F36B]/35 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
+            title="Launch Lead Recovery Campaign"
           >
-            <Plus size={15} />
-            <span>Select Growth Services</span>
+            <Sparkles size={14} />
+            <span>Recover Leads</span>
           </Link>
 
-          <a
-            href="https://wa.me/2349026365853"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="p-2.5 rounded-xl bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25 border border-emerald-500/30 transition-colors"
-            title="Official WhatsApp Concierge Desk"
+          <Link
+            href="/commitments"
+            className="h-9 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/60 text-xs font-semibold flex items-center gap-1.5 transition-all"
+            title="Open Customer Promise Ledger"
           >
-            <MessageCircle size={18} />
-          </a>
+            <CheckSquare size={14} className="text-[#C7F36B]" />
+            <span>Promise Ledger</span>
+          </Link>
+
+          <LiveLeadSimulatorModal />
+          <AddLeadModal />
         </div>
       </div>
 
-      {/* Onboarding & Trial Activation Checklist */}
-      <OnboardingChecklistCard
-        organizationName={org?.name || 'Workspace'}
-        leadCount={leadCount}
-        hasDemoSeed={!!demoLead}
-        isProfileComplete={!!org?.name}
-        isPolicyConfigured={!!workspaceQual}
-      />
-
       {/* ========================================================================= */}
-      {/* 1. WHAT REQUIRES ATTENTION RIGHT NOW? (Immediate Action Queue)           */}
+      {/* 2. REVENUE SNAPSHOT (FOUR COMPACT TRUTHFUL METRICS)                        */}
       {/* ========================================================================= */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h2 className="text-lg font-bold text-on-surface">Needs Your Attention</h2>
-            {totalActionCount > 0 ? (
-              <Badge variant="warning">{totalActionCount} pending</Badge>
-            ) : (
-              <Badge variant="success">All caught up</Badge>
-            )}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Metric 1: Verified Cash Collected */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-[#C7F36B]/40 transition-colors">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+              Revenue Collected
+            </span>
+            <span className="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              VERIFIED CASH
+            </span>
           </div>
-          <span className="text-xs text-on-surface-variant">
-            Proposals, Bachs payments &amp; milestone approvals
-          </span>
+          <p className="text-2xl sm:text-3xl font-mono font-extrabold text-on-surface tracking-tight">
+            ₦{metrics.verifiedRealisedRevenue.toLocaleString()}
+          </p>
+          <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
+            <span>Paid bank deposits</span>
+            <span className="text-emerald-400 font-semibold">{metrics.closedWon} deals won</span>
+          </div>
         </div>
 
-        {totalActionCount === 0 ? (
-          <Card className="p-6 text-center border-outline-variant/30 bg-surface-container-low">
-            <div className="flex flex-col items-center justify-center space-y-2 py-2">
-              <div className="w-10 h-10 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                <CheckCircle2 size={20} />
-              </div>
-              <p className="text-sm font-bold text-on-surface">No pending actions required</p>
-              <p className="text-xs text-on-surface-variant max-w-md">
-                All proposals are approved, invoices are fulfilled, and deliverable sign-offs are up to date.
-              </p>
-            </div>
-          </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Proposals Awaiting Review */}
-            {pendingProposals.map((prop: any) => (
-              <Card
-                key={prop.id}
-                className="p-5 border-amber-500/40 bg-surface-container-low flex flex-col justify-between shadow-sm"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold border border-amber-500/30">
-                      PROPOSAL AWAITING REVIEW
-                    </span>
-                    <span className="text-xs font-mono text-on-surface-variant">
-                      {prop.proposalNumber}
-                    </span>
-                  </div>
-
-                  <h3 className="text-sm font-bold text-on-surface">
-                    {prop.title || 'Growth Services Proposal'}
-                  </h3>
-
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-mono font-extrabold text-on-surface">
-                      ₦{Number(prop.totalAmount).toLocaleString()}
-                    </span>
-                    <span className="text-xs text-on-surface-variant font-medium">
-                      {prop.currency}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-4 mt-3 border-t border-outline-variant/30">
-                  <Link
-                    href={`/growth/projects/${prop.projectRequest.reference}`}
-                    className="w-full py-2 px-3 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                  >
-                    <span>Review &amp; Approve</span>
-                    <ArrowRight size={13} />
-                  </Link>
-                </div>
-              </Card>
-            ))}
-
-            {/* Invoices Awaiting Payment */}
-            {pendingInvoices.map((inv: any) => (
-              <Card
-                key={inv.id}
-                className="p-5 border-amber-500/40 bg-surface-container-low flex flex-col justify-between shadow-sm"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 font-bold border border-amber-500/30">
-                      INVOICE AWAITING PAYMENT
-                    </span>
-                    <span className="text-xs font-mono text-on-surface-variant">
-                      {inv.invoiceNumber}
-                    </span>
-                  </div>
-
-                  <h3 className="text-sm font-bold text-on-surface">
-                    Project Invoice for {inv.projectRequest.reference}
-                  </h3>
-
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-lg font-mono font-extrabold text-primary">
-                      ₦{Number(inv.totalAmount).toLocaleString()}
-                    </span>
-                    <span className="text-xs text-on-surface-variant font-medium">
-                      {inv.currency}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="pt-4 mt-3 border-t border-outline-variant/30">
-                  <Link
-                    href={`/growth/projects/${inv.projectRequest.reference}`}
-                    className="w-full py-2 px-3 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs flex items-center justify-center gap-1.5 transition-all"
-                  >
-                    <DollarSign size={13} />
-                    <span>Pay with Bachs</span>
-                  </Link>
-                </div>
-              </Card>
-            ))}
-
-            {/* Milestones Awaiting Review */}
-            {pendingMilestones.map((ms: any) => (
-              <Card
-                key={ms.id}
-                className="p-5 border-blue-500/40 bg-surface-container-low flex flex-col justify-between shadow-sm"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/15 text-blue-400 font-bold border border-blue-500/30">
-                      DELIVERABLE READY FOR REVIEW
-                    </span>
-                    <span className="text-xs font-mono text-on-surface-variant">
-                      {ms.projectRequest.reference}
-                    </span>
-                  </div>
-
-                  <h3 className="text-sm font-bold text-on-surface">{ms.title}</h3>
-                  <p className="text-xs text-on-surface-variant">
-                    Your specialist has submitted proof for client verification.
-                  </p>
-                </div>
-
-                <div className="pt-4 mt-3 border-t border-outline-variant/30">
-                  <Link
-                    href={`/growth/projects/${ms.projectRequest.reference}`}
-                    className="w-full py-2 px-3 rounded-xl bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-bold text-xs flex items-center justify-center gap-1.5 transition-colors border border-outline-variant/40"
-                  >
-                    <span>Inspect &amp; Sign Off</span>
-                    <ArrowRight size={13} />
-                  </Link>
-                </div>
-              </Card>
-            ))}
+        {/* Metric 2: Active Open Pipeline */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-blue-500/40 transition-colors">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+              Active Opportunities
+            </span>
+            <span className="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-blue-500/15 text-blue-400 border border-blue-500/30">
+              OPEN PIPELINE
+            </span>
           </div>
-        )}
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 2. WHAT IS HAPPENING? (Active Projects & Subscriptions)                   */}
-      {/* ========================================================================= */}
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-on-surface">Active Growth Projects</h2>
-            <p className="text-xs text-on-surface-variant">
-              Ongoing customer acquisition, creative production, and live deliverables.
-            </p>
-          </div>
-
-          <Link
-            href="/growth/projects"
-            className="text-xs font-bold text-primary hover:underline flex items-center gap-1"
-          >
-            <span>View All ({activeProjects.length})</span>
-            <ChevronRight size={14} />
-          </Link>
-        </div>
-
-        {activeProjects.length === 0 ? (
-          <EmptyState
-            title="No active growth projects"
-            description="You do not have any active creative or advertising projects. Select from our 5 introductory services to begin."
-            action={{
-              label: 'Explore Growth Services',
-              href: '/services',
-            }}
-          />
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {activeProjects.map((project: any) => {
-              const approvedCount = project.milestones.filter(
-                (m: any) => m.status === 'APPROVED' || m.clientApproved
-              ).length;
-              const totalCount = project.milestones.length;
-              const progressPct =
-                totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0;
-
-              return (
-                <Card
-                  key={project.id}
-                  className="p-5 sm:p-6 bg-surface-container-low border-outline-variant/40 hover:border-primary/40 transition-all flex flex-col justify-between shadow-sm"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-mono text-xs font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-                        {project.reference}
-                      </span>
-                      {getStatusBadge(project.status)}
-                    </div>
-
-                    <div>
-                      <h3 className="text-base font-bold text-on-surface">
-                        {project.brief?.businessName || 'Growth Project'}
-                      </h3>
-                      <p className="text-xs text-on-surface-variant mt-0.5 line-clamp-1">
-                        Goal: {project.brief?.primaryGoal || 'Commercial expansion'}
-                      </p>
-                    </div>
-
-                    {/* Progress Bar */}
-                    {totalCount > 0 && (
-                      <div className="space-y-1 pt-1">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="text-on-surface-variant">Milestone Completion</span>
-                          <span className="text-primary font-bold">{progressPct}%</span>
-                        </div>
-                        <div className="w-full h-1.5 rounded-full bg-surface-container-high overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all duration-300"
-                            style={{ width: `${progressPct}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Partner Info & Workspace Link */}
-                  <div className="pt-4 mt-4 border-t border-outline-variant/30 flex items-center justify-between gap-2">
-                    {project.assignedPartner ? (
-                      <div className="flex items-center gap-2 text-xs">
-                        <div className="w-7 h-7 rounded-full bg-primary/20 text-primary font-bold flex items-center justify-center text-[11px]">
-                          {project.assignedPartner.fullName.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="truncate">
-                          <p className="font-bold text-on-surface text-xs truncate">
-                            {project.assignedPartner.fullName}
-                          </p>
-                          <p className="text-[10px] text-on-surface-variant">
-                            Vetted Specialist
-                          </p>
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-[11px] text-on-surface-variant flex items-center gap-1">
-                        <Clock size={12} className="text-amber-400" />
-                        <span>Matching Specialist</span>
-                      </span>
-                    )}
-
-                    <Link
-                      href={`/growth/projects/${project.reference}`}
-                      className="px-3 py-1.5 rounded-xl bg-surface-container-highest hover:bg-surface-container-high text-on-surface font-bold text-xs flex items-center gap-1 transition-colors border border-outline-variant/30"
-                    >
-                      <span>Workspace</span>
-                      <ArrowRight size={12} />
-                    </Link>
-                  </div>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-      </section>
-
-      {/* ========================================================================= */}
-      {/* 3. REVENUE ENGINE SALES SNAPSHOT & CROSS-PRODUCT JUMP                    */}
-      {/* ========================================================================= */}
-      <section className="space-y-4 pt-2">
-        <div className="p-6 rounded-3xl bg-gradient-to-r from-surface-container-low via-surface-container to-surface-container-low border border-outline-variant/40 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
-          <div className="space-y-3 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-primary/15 text-primary border border-primary/25">
-                REVENUE ENGINE SNAPSHOT
-              </span>
-              <span className="text-xs text-on-surface-variant font-medium">
-                Sales Pipeline Operations
-              </span>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-bold text-on-surface">
-                Sales Pipeline &amp; Action Queue
-              </h3>
-              <p className="text-xs text-on-surface-variant max-w-xl mt-0.5">
-                Manage inbound enquiries, follow up on warm leads, and track closing performance in the dedicated Revenue Command Centre.
-              </p>
-            </div>
-
-            {/* Quick Metrics Strip */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
-              <div className="p-3 rounded-2xl bg-surface-container/70 border border-outline-variant/20">
-                <p className="text-[10px] text-on-surface-variant font-medium">Closed-Won</p>
-                <p className="text-base font-bold font-mono text-on-surface mt-0.5">
-                  ₦{revMetrics.closedWon.toLocaleString()}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-surface-container/70 border border-outline-variant/20">
-                <p className="text-[10px] text-on-surface-variant font-medium">Open Pipeline</p>
-                <p className="text-base font-bold font-mono text-primary mt-0.5">
-                  ₦{revMetrics.openPipeline.toLocaleString()}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-surface-container/70 border border-outline-variant/20">
-                <p className="text-[10px] text-on-surface-variant font-medium">Total Leads</p>
-                <p className="text-base font-bold font-mono text-on-surface mt-0.5">
-                  {revMetrics.newLeads}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-2xl bg-surface-container/70 border border-outline-variant/20">
-                <p className="text-[10px] text-on-surface-variant font-medium">Pending Rep Actions</p>
-                <p className="text-base font-bold font-mono text-amber-400 mt-0.5">
-                  {revMetrics.pendingHumanActions}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="shrink-0 self-start md:self-center">
-            <Link
-              href="/dashboard/revenue-engine"
-              className="px-5 py-3 rounded-xl bg-primary hover:bg-primary/90 text-on-primary font-bold text-xs inline-flex items-center gap-2 shadow-sm transition-all"
-            >
-              <span>Launch Revenue Command Centre</span>
-              <ArrowRight size={14} />
+          <p className="text-2xl sm:text-3xl font-mono font-extrabold text-[#C7F36B] tracking-tight">
+            ₦{metrics.openPipeline.toLocaleString()}
+          </p>
+          <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
+            <span>In negotiation / proposal</span>
+            <Link href="/pipeline" className="text-xs font-bold text-on-surface hover:text-[#C7F36B] flex items-center gap-0.5">
+              <span>View Pipeline</span>
+              <ArrowRight size={11} />
             </Link>
           </div>
         </div>
+
+        {/* Metric 3: Recovered Opportunities */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-[#C7F36B]/40 transition-colors">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+              Recovered Opportunities
+            </span>
+            <span className="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
+              RECOVER PILLAR
+            </span>
+          </div>
+          <p className="text-2xl sm:text-3xl font-mono font-extrabold text-on-surface tracking-tight">
+            {recoveredCount > 0 ? recoveredCount : metrics.newLeads}
+          </p>
+          <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
+            <span>Revived dormant leads</span>
+            <Link href="/recovery" className="text-xs font-bold text-on-surface hover:text-[#C7F36B] flex items-center gap-0.5">
+              <span>Recovery Hub</span>
+              <ArrowRight size={11} />
+            </Link>
+          </div>
+        </div>
+
+        {/* Metric 4: Outstanding Commitments */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
+              Customer Promises
+            </span>
+            <span className={`text-[10px] font-mono font-extrabold px-2 py-0.5 rounded border ${
+              overdueCommitments.some(c => c.isOverdue)
+                ? 'bg-rose-500/15 text-rose-400 border-rose-500/30'
+                : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+            }`}>
+              DELIVER PILLAR
+            </span>
+          </div>
+          <p className="text-2xl sm:text-3xl font-mono font-extrabold text-on-surface tracking-tight">
+            {overdueCommitments.length}
+          </p>
+          <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
+            <span>{overdueCommitments.filter(c => c.isOverdue).length} overdue SLA</span>
+            <Link href="/commitments" className="text-xs font-bold text-on-surface hover:text-[#C7F36B] flex items-center gap-0.5">
+              <span>Promise Ledger</span>
+              <ArrowRight size={11} />
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* 3. PRIORITY ACTION AREA: NEEDS YOUR ATTENTION                            */}
+      {/* ========================================================================= */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-[#C7F36B] animate-pulse" />
+            <h2 className="text-lg font-bold text-on-surface tracking-tight">
+              Needs Your Attention
+            </h2>
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
+              {attentionItemsCount} items
+            </span>
+          </div>
+          <span className="text-xs text-on-surface-variant hidden sm:inline">
+            Prioritised by revenue urgency and customer SLA
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Attention Card 1: Hot Leads Awaiting Rep Follow-up */}
+          <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-400 flex items-center gap-1.5">
+                  <Flame size={14} />
+                  <span>Hot Leads Waiting</span>
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                  {hotLeads.length} Available
+                </span>
+              </div>
+              {hotLeads.length > 0 ? (
+                <div>
+                  <p className="text-sm font-bold text-on-surface truncate">
+                    {hotLeads[0].name}
+                  </p>
+                  <p className="text-xs text-on-surface-variant line-clamp-2 mt-0.5">
+                    {hotLeads[0].revenueActions?.[0]?.reason || 'High intent prospect awaiting direct sales outreach.'}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-on-surface-variant py-2">
+                  All high-intent prospects currently have active rep follow-ups.
+                </p>
+              )}
+            </div>
+            <Link
+              href="/leads"
+              className="w-full h-8 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/50 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>Engage Next Hot Lead</span>
+              <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          {/* Attention Card 2: Outstanding Customer Commitments */}
+          <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-rose-400 flex items-center gap-1.5">
+                  <AlertTriangle size={14} />
+                  <span>Customer Promises SLA</span>
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-300 border border-rose-500/20">
+                  {overdueCommitments.filter(c => c.isOverdue).length} Overdue
+                </span>
+              </div>
+              {overdueCommitments.length > 0 ? (
+                <div>
+                  <p className="text-sm font-bold text-on-surface truncate">
+                    {overdueCommitments[0].title}
+                  </p>
+                  <p className="text-xs text-on-surface-variant line-clamp-2 mt-0.5">
+                    Client: {overdueCommitments[0].lead?.name || 'Customer'} · Due: {new Date(overdueCommitments[0].dueDate).toLocaleDateString()}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-on-surface-variant py-2">
+                  All customer promises and deliverables are within SLA window.
+                </p>
+              )}
+            </div>
+            <Link
+              href="/commitments"
+              className="w-full h-8 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/50 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>Review Promise Ledger</span>
+              <ArrowRight size={12} />
+            </Link>
+          </div>
+
+          {/* Attention Card 3: Stalled Pipeline Deals */}
+          <div className="p-4 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-3 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-blue-400 flex items-center gap-1.5">
+                  <Clock size={14} />
+                  <span>Stalled Deals (&gt;7 Days)</span>
+                </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                  {stalledDeals.length} Stalled
+                </span>
+              </div>
+              {stalledDeals.length > 0 ? (
+                <div>
+                  <p className="text-sm font-bold text-on-surface truncate">
+                    {stalledDeals[0].title}
+                  </p>
+                  <p className="text-xs text-on-surface-variant mt-0.5">
+                    Value: ₦{Number(stalledDeals[0].amount).toLocaleString()} · Stage: {stalledDeals[0].stage}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-xs text-on-surface-variant py-2">
+                  No deals currently stalled without salesperson momentum.
+                </p>
+              )}
+            </div>
+            <Link
+              href="/pipeline"
+              className="w-full h-8 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/50 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+            >
+              <span>Advance Stalled Deals</span>
+              <ArrowRight size={12} />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 4. OPPORTUNITY SPOTLIGHT: WHAT YOU MAY BE OVERLOOKING                    */}
+      {/* ========================================================================= */}
+      <section className="p-5 sm:p-6 rounded-3xl bg-surface-container-low border border-outline-variant/40 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-outline-variant/30">
+          <div>
+            <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
+              <Sparkles size={16} className="text-[#C7F36B]" />
+              <span>Opportunities You May Be Overlooking</span>
+            </h3>
+            <p className="text-xs text-on-surface-variant mt-0.5">
+              High-intent prospects with no activity in 24h, ready for instant reactivation.
+            </p>
+          </div>
+          <Link
+            href="/recovery"
+            className="text-xs font-bold text-[#C7F36B] hover:underline flex items-center gap-1 self-start sm:self-auto"
+          >
+            <span>Launch Recovery Wave</span>
+            <ArrowRight size={13} />
+          </Link>
+        </div>
+
+        {overlookedLeads.length === 0 ? (
+          <div className="py-6 text-center text-xs text-on-surface-variant">
+            <p className="font-semibold text-on-surface">No dormant leads currently overlooked.</p>
+            <p className="text-[11px] mt-0.5">All captured contacts have active follow-up schedules.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {overlookedLeads.map((lead) => (
+              <div
+                key={lead.id}
+                className="p-3.5 rounded-2xl bg-surface-container border border-outline-variant/30 space-y-2 flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-on-surface truncate max-w-[140px]">
+                      {lead.name}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
+                      {lead.buyingIntent ?? 80}% Fit
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-on-surface-variant mt-1">
+                    Value: ₦{(Number(lead.estimatedValue) || 250000).toLocaleString()} · Source: {lead.source}
+                  </p>
+                </div>
+                <Link
+                  href={`/inbox?leadId=${lead.id}`}
+                  className="w-full py-1.5 rounded-lg bg-[#C7F36B]/10 hover:bg-[#C7F36B]/20 text-[#C7F36B] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                >
+                  <span>Reactivate Enquiry</span>
+                  <ArrowRight size={11} />
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 5. NEXT BEST ACTION QUEUE (ACTION-ORIENTED TABLE)                         */}
+      {/* ========================================================================= */}
+      <section className="space-y-4">
+        {/* Tabs Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/30 pb-3">
+          <div className="flex items-center gap-4">
+            {tabs.map((tab) => {
+              const isActive = tab.id === currentTab;
+              return (
+                <Link
+                  key={tab.id}
+                  href={`/dashboard?tab=${tab.id}`}
+                  className={`relative pb-3 font-semibold text-xs transition-colors ${
+                    isActive
+                      ? 'text-[#C7F36B] font-bold'
+                      : 'text-on-surface-variant hover:text-on-surface'
+                  }`}
+                >
+                  {tab.label}
+                  {isActive && (
+                    <div className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-[#C7F36B] rounded-t-full shadow-[0_-2px_8px_rgba(199,243,107,0.4)]" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-on-surface-variant font-mono">
+              {actions.length} {actions.length === 1 ? 'Action' : 'Actions'} in Queue
+            </span>
+          </div>
+        </div>
+
+        {/* Action Queue Table & Inspector */}
+        <ActionQueue
+          actions={actions as any}
+          emptyStateTitle={
+            currentTab === 'needs_attention'
+              ? 'No human actions waiting.'
+              : currentTab === 'my_actions'
+              ? 'You have no assigned actions.'
+              : 'No actions recorded.'
+          }
+          emptyStateDesc={
+            currentTab === 'needs_attention'
+              ? 'New AI and deterministic sales recommendations will appear here when a prospect requires your attention.'
+              : 'Actions claimed by you will appear here.'
+          }
+        />
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 6. IMMUTABLE ACTIVITY & AUDIT TIMELINE                                    */}
+      {/* ========================================================================= */}
+      <section className="p-5 sm:p-6 rounded-3xl bg-surface-container-low border border-outline-variant/40 space-y-3">
+        <div className="flex items-center justify-between pb-2 border-b border-outline-variant/20">
+          <h3 className="text-sm font-bold text-on-surface flex items-center gap-2">
+            <History size={15} className="text-on-surface-variant" />
+            <span>Recent Revenue &amp; Fulfilment Activity</span>
+          </h3>
+          <span className="text-[11px] text-on-surface-variant font-mono">Immutable audit trail</span>
+        </div>
+
+        {recentAudits.length === 0 ? (
+          <p className="text-xs text-on-surface-variant py-3 text-center">
+            No audit events recorded for this workspace yet.
+          </p>
+        ) : (
+          <div className="divide-y divide-outline-variant/15 text-xs">
+            {recentAudits.map((event) => (
+              <div key={event.id} className="py-2.5 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] shrink-0" />
+                  <span className="font-semibold text-on-surface truncate">
+                    {event.reason || event.action}
+                  </span>
+                </div>
+                <span className="text-[11px] text-on-surface-variant font-mono shrink-0">
+                  {new Date(event.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
