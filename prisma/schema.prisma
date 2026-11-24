@@ -134,6 +134,13 @@ model Organization {
   salesPlaybooks       SalesPlaybook[]
   verifiableCredentials VerifiableCredential[]
 
+  // Native Meta Lead Ads Integration Relations
+  metaIntegration      MetaIntegration?
+  metaConnectedPages   MetaConnectedPage[]
+  metaAdAccounts       MetaAdAccount[]
+  metaLeadForms        MetaLeadForm[]
+  metaLeadSyncLogs     MetaLeadSyncLog[]
+
   @@index([whatsappPhoneNumberId])
   @@index([facebookPageId])
 }
@@ -203,6 +210,21 @@ model Lead {
   optedOutOfMarketing Boolean   @default(false)
   optedOutAt     DateTime?
 
+  // Meta Ads Campaign Attribution
+  metaLeadId           String?
+  metaPageId           String?
+  metaPageName         String?
+  metaAdAccountId      String?
+  metaCampaignId       String?
+  metaCampaignName     String?
+  metaAdSetId          String?
+  metaAdSetName        String?
+  metaAdId             String?
+  metaAdName           String?
+  metaFormId           String?
+  metaFormName         String?
+  metaRawSubmission    String?
+
   // Relations
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   assignedUser   User?         @relation("LeadAssignee", fields: [assignedUserId], references: [id], onDelete: SetNull)
@@ -234,6 +256,9 @@ model Lead {
   @@index([email])
   @@index([assignedUserId])
   @@index([pilotEngagementId])
+  @@index([metaLeadId])
+  @@index([metaCampaignId])
+  @@index([metaCampaignName])
 }
 
 model Conversation {
@@ -2934,3 +2959,127 @@ model RateLimit {
   @@index([resetAt])
 }
 
+
+// -----------------------------------------------------------------------------
+// NATIVE META LEAD ADS INTEGRATION (MULTI-TENANT)
+// -----------------------------------------------------------------------------
+
+model MetaIntegration {
+  id                    String              @id @default(cuid())
+  organizationId        String              @unique
+  organization          Organization        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  metaUserId            String?
+  metaUserName          String?
+  accessToken           String              // Secure Page / User Access Token
+  tokenExpiresAt        DateTime?
+  businessPortfolioId   String?
+  businessPortfolioName String?
+  status                String              @default("CONNECTED") // CONNECTED, PAUSED, ERROR, DISCONNECTED
+  lastSyncAt            DateTime?
+  lastError             String?
+  syncEnabled           Boolean             @default(true)
+  defaultPipelineStage  String              @default("OPPORTUNITY")
+  defaultAssigneeId     String?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  pages                 MetaConnectedPage[]
+  adAccounts            MetaAdAccount[]
+  forms                 MetaLeadForm[]
+  syncLogs              MetaLeadSyncLog[]
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model MetaConnectedPage {
+  id                String          @id @default(cuid())
+  organizationId    String
+  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  metaIntegrationId String
+  metaIntegration   MetaIntegration @relation(fields: [metaIntegrationId], references: [id], onDelete: Cascade)
+  pageId            String
+  pageName          String
+  pageAccessToken   String?         // Page-scoped token with leads_retrieval permission
+  isSubscribed      Boolean         @default(false)
+  subscribedAt      DateTime?
+  isActive          Boolean         @default(true)
+  leadAccessStatus  String          @default("ACTIVE") // ACTIVE, REVOKED, RESTRICTED
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  forms             MetaLeadForm[]
+
+  @@unique([organizationId, pageId])
+  @@index([pageId])
+  @@index([organizationId])
+}
+
+model MetaAdAccount {
+  id                String          @id @default(cuid())
+  organizationId    String
+  organization      Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  metaIntegrationId String
+  metaIntegration   MetaIntegration @relation(fields: [metaIntegrationId], references: [id], onDelete: Cascade)
+  adAccountId       String
+  name              String
+  currency          String          @default("USD")
+  accountStatus     Int             @default(1) // 1 = ACTIVE
+  isActive          Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@unique([organizationId, adAccountId])
+  @@index([organizationId])
+  @@index([adAccountId])
+}
+
+model MetaLeadForm {
+  id                String             @id @default(cuid())
+  organizationId    String
+  organization      Organization       @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  metaIntegrationId String
+  metaIntegration   MetaIntegration    @relation(fields: [metaIntegrationId], references: [id], onDelete: Cascade)
+  connectedPageId   String?
+  connectedPage     MetaConnectedPage? @relation(fields: [connectedPageId], references: [id], onDelete: SetNull)
+  formId            String
+  formName          String
+  pageId            String
+  pageName          String?
+  status            String             @default("ACTIVE")
+  leadsCount        Int                @default(0)
+  isActive          Boolean            @default(true)
+  customQuestions   String?            // JSON string of questions definitions
+  fieldMapping      String?            // JSON string: custom question to CloseCraft field mappings
+  targetStage       String?            // Optional stage override
+  targetAssigneeId  String?            // Optional closer override
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@unique([organizationId, formId])
+  @@index([formId])
+  @@index([pageId])
+  @@index([organizationId])
+}
+
+model MetaLeadSyncLog {
+  id                String           @id @default(cuid())
+  organizationId    String
+  organization      Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  metaIntegrationId String?
+  metaIntegration   MetaIntegration? @relation(fields: [metaIntegrationId], references: [id], onDelete: SetNull)
+  metaLeadId        String?
+  pageId            String?
+  formId            String?
+  adId              String?
+  campaignName      String?
+  leadId            String?
+  status            String           // SUCCESS, DUPLICATE_ATTACHED, FAILED, RETRYING
+  errorMessage      String?
+  rawPayload        String?          // JSON payload
+  createdAt         DateTime         @default(now())
+
+  @@index([organizationId])
+  @@index([metaLeadId])
+  @@index([status])
+}

@@ -221,6 +221,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
         title: 'SETTINGS',
         items: [
           { href: '/settings', icon: 'Settings', label: 'Workspace' },
+          { href: '/settings#meta-ads', icon: 'Share2', label: 'Meta Lead Ads' },
           { href: '/billing', icon: 'CreditCard', label: 'Billing & Invoices', visible: isManagerOrOwner },
         ],
       },
