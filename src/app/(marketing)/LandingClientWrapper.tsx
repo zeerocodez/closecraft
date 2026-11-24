@@ -12,7 +12,10 @@ import {
   Play, 
   HelpCircle, 
   ChevronRight, 
-  ChevronDown 
+  ChevronDown,
+  Download,
+  FileText,
+  BookOpen
 } from 'lucide-react';
 
 import Logo from '@/components/ui/Logo';
@@ -24,6 +27,7 @@ import GrowthServicesSection from '@/components/growth/GrowthServicesSection';
 import WhoWeHelpSection from '@/components/landing/WhoWeHelpSection';
 import WhyCloseCraftSection from '@/components/landing/WhyCloseCraftSection';
 import ProofAndTrustSection from '@/components/landing/ProofAndTrustSection';
+import UserGuideDownloadSection from '@/components/landing/UserGuideDownloadSection';
 import HomepageFaqSection from '@/components/landing/HomepageFaqSection';
 import BrevoNewsletterSection from '@/components/marketing/BrevoNewsletterSection';
 import ExplainerVideoSection from '@/components/marketing/ExplainerVideoSection';
@@ -236,6 +240,15 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <Link href="/dss" className="px-3 py-1.5 text-sm font-semibold text-[#45bfae] hover:underline transition-colors flex items-center gap-1">
                 <span>DSS Academy</span>
               </Link>
+              <a
+                href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-[#45bfae] transition-colors flex items-center gap-1.5"
+                title="Download Free 22-Page User Guide (PDF)"
+              >
+                <Download size={14} className="text-[#45bfae]" />
+                <span>User Guide</span>
+              </a>
               <Link href="/about" className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
                 About
               </Link>
@@ -304,6 +317,15 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <span>Digital Sales School</span>
               <ChevronRight size={14} />
             </Link>
+            <a 
+              onClick={() => setMobileMenuOpen(false)} 
+              className="px-3 py-2 text-[#45bfae] hover:bg-[#101010] rounded-lg text-sm font-medium flex items-center gap-2" 
+              href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+              download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+            >
+              <Download size={14} />
+              <span>Download User Guide (PDF)</span>
+            </a>
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="/about">
               About Us
             </Link>
@@ -331,54 +353,64 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
         {/* SECTION 2: HERO */}
         <section id="hero" className="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-[#000000]">
           {/* Ambient Lighting */}
-          <div className="absolute top-1/4 left-1/3 -translate-x-1/2 w-[500px] h-[500px] bg-[#248277]/10 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute top-1/2 right-10 w-[400px] h-[400px] bg-[#14A7F7]/5 rounded-full blur-[130px] pointer-events-none" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-[#248277]/12 rounded-full blur-[160px] pointer-events-none" />
+          <div className="absolute top-1/3 right-1/4 w-[450px] h-[450px] bg-[#14A7F7]/6 rounded-full blur-[140px] pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
-            <div className="max-w-3xl space-y-6">
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111827] border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner">
+            <div className="max-w-4xl mx-auto text-center space-y-7">
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#111827] border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner">
                   <span className="w-2 h-2 rounded-full bg-[#C7F36B] animate-pulse" />
                   <span>REVENUE OPERATIONS PLATFORM</span>
                 </div>
                 <Link
                   href="/demo"
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#C7F36B]/10 hover:bg-[#C7F36B]/20 border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#C7F36B]/10 hover:bg-[#C7F36B]/20 border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner transition-colors"
                 >
                   <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] animate-pulse" />
                   <span>Interactive Walkthrough &rarr;</span>
                 </Link>
+                <a
+                  href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#248277]/25 hover:bg-[#248277]/40 border border-[#45bfae]/50 text-[#45bfae] text-xs font-bold uppercase tracking-wider shadow-inner transition-all hover:scale-105"
+                >
+                  <Download size={13} className="text-[#45bfae]" />
+                  <span>Free 22-Page User Guide (PDF)</span>
+                </a>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold tracking-tight text-white leading-[1.1]">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold tracking-tight text-white leading-[1.12] max-w-4xl mx-auto">
                 Stop Losing Revenue to Unfollowed Leads.
               </h1>
 
-              <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed max-w-2xl">
+              <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed max-w-3xl mx-auto">
                 CloseCraft helps your business recover overlooked opportunities, manage customer conversations, follow up consistently and turn more enquiries into paying customers.
               </p>
 
-              <div className="flex flex-wrap items-center gap-3 py-1">
-                <span className="px-3 py-1 rounded-lg bg-[#111827] border border-outline-variant/40 text-xs font-bold text-white flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B]" />
+              <div className="flex flex-wrap items-center justify-center gap-3 py-1">
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
                   <span>RECOVER: Old Enquiries</span>
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-[#111827] border border-outline-variant/40 text-xs font-bold text-white flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B]" />
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
                   <span>CONVERT: Sales Momentum</span>
                 </span>
-                <span className="px-3 py-1 rounded-lg bg-[#111827] border border-outline-variant/40 text-xs font-bold text-white flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B]" />
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
                   <span>DELIVER: Customer Promises</span>
                 </span>
               </div>
 
-              <p className="text-sm sm:text-base font-medium text-zinc-300 border-l-2 border-[#C7F36B] pl-3 py-0.5">
-                CloseCraft connects inbound WhatsApp and ad enquiry triage, AI-driven lead reactivation, and customer commitment fulfilment into one unified revenue operations platform.
-              </p>
+              <div className="max-w-2xl mx-auto p-4 rounded-2xl bg-[#0d1716]/80 border border-[#248277]/40 shadow-inner">
+                <p className="text-sm sm:text-base font-medium text-zinc-300">
+                  CloseCraft connects inbound WhatsApp and ad enquiry triage, AI-driven lead reactivation, and customer commitment fulfilment into one unified revenue operations platform.
+                </p>
+              </div>
 
               {/* CTAs */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+              <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
                 <button
                   type="button"
                   onClick={() => openAudit('AUDIT')}
@@ -387,6 +419,15 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                   <span>GET STARTED</span>
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
+
+                <a
+                  href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  className="px-6 py-4 rounded-xl bg-[#08100f] hover:bg-[#0d1716] text-[#45bfae] border border-[#45bfae]/50 hover:border-[#45bfae] font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-lg shadow-[#248277]/10 active:scale-95 group"
+                >
+                  <Download size={18} className="text-[#45bfae] group-hover:translate-y-0.5 transition-transform" />
+                  <span>FREE USER GUIDE (PDF)</span>
+                </a>
 
                 <a
                   href="#how-it-works"
@@ -405,7 +446,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-[#71717a]">
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-xs text-[#71717a]">
                 <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck size={14} className="text-[#45bfae]" />
                   <span>No long-term lock-in</span>
@@ -451,6 +492,9 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
         {/* SECTION 11: PROOF AND TRUST */}
         <ProofAndTrustSection />
+
+        {/* SECTION: USER GUIDE (FROM ENQUIRY TO CUSTOMER) */}
+        <UserGuideDownloadSection />
 
         {/* SECTION 12: FREQUENTLY ASKED QUESTIONS */}
         <HomepageFaqSection />
@@ -543,6 +587,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                   <li><Link href="/revenue-engine" className="hover:text-white transition-colors">Revenue Engine</Link></li>
                   <li><Link href="/dss" className="text-[#45bfae] font-semibold hover:underline">Digital Sales School</Link></li>
                   <li><Link href="/pricing" className="hover:text-white transition-colors">Software Pricing</Link></li>
+                  <li><a href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf" download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf" className="text-[#45bfae] font-semibold hover:underline flex items-center gap-1.5"><Download size={13} />Free User Guide (22p PDF)</a></li>
                   <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                 </ul>
               </div>
