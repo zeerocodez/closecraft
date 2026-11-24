@@ -9,6 +9,11 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/',
           '/admin/',
+          '/dashboard/',
+          '/recovery/',
+          '/commitments/',
+          '/leads/',
+          '/appointments/',
           '/operator/',
           '/settings/',
           '/today',

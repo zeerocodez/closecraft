@@ -29,7 +29,7 @@ export const PRODUCTS: ProductDefinition[] = [
     key: 'revenue',
     name: 'Revenue Engine',
     tagline: 'Leads, Deal Pipeline & Closing',
-    href: '/leads',
+    href: '/dashboard/revenue-engine',
     icon: <TrendingUp className="w-4 h-4 text-emerald-400" />,
     activeColor: 'text-emerald-400',
   },
@@ -49,11 +49,12 @@ export function getActiveProduct(pathname: string): ProductKey {
     pathname.startsWith('/leads') ||
     pathname.startsWith('/pipeline') ||
     pathname.startsWith('/appointments') ||
-    pathname.startsWith('/revenue')
+    pathname.startsWith('/revenue') ||
+    pathname.startsWith('/dashboard/revenue-engine')
   ) {
     return 'revenue';
   }
-  return 'closecraft';
+  return 'revenue';
 }
 
 export interface ProductSwitcherProps {

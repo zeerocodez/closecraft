@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import { StatusBadge, ActorBadge } from './Badges';
 import { formatDistanceToNow } from 'date-fns';
 import { claimRevenueAction } from '@/app/(saas)/actions';
@@ -167,9 +167,11 @@ export function ActionQueue({
                       suppressHydrationWarning
                       className="px-5 py-4 text-right text-[11px] text-on-surface-variant font-mono whitespace-nowrap"
                     >
-                      {formatDistanceToNow(new Date(action.createdAt), {
-                        addSuffix: true,
-                      })}
+                      <span suppressHydrationWarning>
+                        {formatDistanceToNow(new Date(action.createdAt), {
+                          addSuffix: true,
+                        })}
+                      </span>
                     </td>
                   </tr>
                 );
@@ -213,7 +215,7 @@ export function ActionQueue({
                     P: {action.priority}
                   </span>
                 </div>
-                <span className="text-[10px] text-on-surface-variant font-mono">
+                <span suppressHydrationWarning className="text-[10px] text-on-surface-variant font-mono">
                   {formatDistanceToNow(new Date(action.createdAt), {
                     addSuffix: true,
                   })}

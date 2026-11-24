@@ -223,7 +223,7 @@
         message: document.getElementById('cc-message').value,
       };
 
-      var endpoint = (apiHost ? apiHost.replace(/\\/$/, '') : '') + '/api/leads/embed';
+      var endpoint = (apiHost ? apiHost.replace(/\/$/, '') : '') + '/api/leads/embed';
 
       fetch(endpoint, {
         method: 'POST',

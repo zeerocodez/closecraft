@@ -56,25 +56,25 @@ export default function GrowthServicesSection() {
 
   return (
     <>
-      <section id="services-catalogue" className="py-24 bg-[#080808] border-t border-[#1f1f1f] scroll-mt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+      <section id="services-catalogue" className="py-20 sm:py-24 bg-[#080C0F] border-t border-[#263342]/60 scroll-mt-24">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14 sm:space-y-16">
           {/* Header */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider">
-              <Layers size={12} />
-              INTRODUCTORY GROWTH SERVICES
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111827] border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner">
+              <Layers size={13} className="text-[#C7F36B]" />
+              <span>INTRODUCTORY GROWTH SERVICES</span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold text-white tracking-tight">
               Commercial execution to acquire and convert customers.
             </h2>
 
-            <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
-              From targeted customer acquisition to persuasive creatives and high-converting pages, our growth services help connect every stage of your sales funnel.
+            <p className="text-base sm:text-lg text-[#94A3B8] leading-relaxed">
+              From targeted customer acquisition to persuasive creatives and high-converting pages, our growth services connect every stage of your sales funnel.
             </p>
 
-            <div className="inline-flex items-center gap-2 text-xs text-[#71717a] pt-1">
-              <ShieldCheck size={14} className="text-[#45bfae]" />
+            <div className="inline-flex items-center gap-2 text-xs text-[#64748B] pt-1">
+              <ShieldCheck size={14} className="text-[#C7F36B]" />
               <span>
                 Consultation-based services. Scope and pricing are determined after reviewing your project brief.
               </span>
@@ -133,7 +133,7 @@ export default function GrowthServicesSection() {
                     <button
                       type="button"
                       onClick={() => handleOpenBrief(key)}
-                      className="w-full py-3 px-4 rounded-xl bg-[#181818] hover:bg-[#248277] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer group/btn shadow-md active:scale-95"
+                      className="w-full py-3 px-4 rounded-xl bg-[#16202C] hover:bg-[#C7F36B] hover:text-[#111827] text-white border border-[#263342] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer group/btn shadow-md active:scale-95"
                     >
                       <span>GET STARTED</span>
                       <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />

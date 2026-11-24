@@ -77,7 +77,7 @@ export default function LaunchDrillButton({
 
   const baseStyles = variant === 'dss'
     ? 'bg-[#45bfae] hover:bg-[#5cd4c3] text-[#0f1214] font-bold shadow-md shadow-[#248277]/20 border border-[#45bfae]/30'
-    : 'bg-primary hover:bg-primary-container text-on-primary font-semibold shadow-sm';
+    : 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold shadow-sm shadow-emerald-950/20';
 
   return (
     <div className="inline-flex flex-col">

@@ -12,7 +12,10 @@ import {
   Play, 
   HelpCircle, 
   ChevronRight, 
-  ChevronDown 
+  ChevronDown,
+  Download,
+  FileText,
+  BookOpen
 } from 'lucide-react';
 
 import Logo from '@/components/ui/Logo';
@@ -24,8 +27,10 @@ import GrowthServicesSection from '@/components/growth/GrowthServicesSection';
 import WhoWeHelpSection from '@/components/landing/WhoWeHelpSection';
 import WhyCloseCraftSection from '@/components/landing/WhyCloseCraftSection';
 import ProofAndTrustSection from '@/components/landing/ProofAndTrustSection';
+import UserGuideDownloadSection from '@/components/landing/UserGuideDownloadSection';
 import HomepageFaqSection from '@/components/landing/HomepageFaqSection';
 import BrevoNewsletterSection from '@/components/marketing/BrevoNewsletterSection';
+import ExplainerVideoSection from '@/components/marketing/ExplainerVideoSection';
 
 interface LandingClientWrapperProps {
   eco?: any;
@@ -177,6 +182,10 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <Link href="/" className="px-3 py-1.5 text-sm font-medium text-white hover:text-[#45bfae] transition-colors">
                 Home
               </Link>
+              <Link href="/demo" className="px-3 py-1.5 text-sm font-semibold text-emerald-400 hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Live Demo</span>
+              </Link>
               <a href="#how-it-works" className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
                 How It Works
               </a>
@@ -231,13 +240,31 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <Link href="/dss" className="px-3 py-1.5 text-sm font-semibold text-[#45bfae] hover:underline transition-colors flex items-center gap-1">
                 <span>DSS Academy</span>
               </Link>
+              <a
+                href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-[#45bfae] transition-colors flex items-center gap-1.5"
+                title="Download Free 22-Page User Guide (PDF)"
+              >
+                <Download size={14} className="text-[#45bfae]" />
+                <span>User Guide</span>
+              </a>
               <Link href="/about" className="px-3 py-1.5 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors">
                 About
               </Link>
             </nav>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <Link 
+              href="/demo" 
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C7F36B]/15 hover:bg-[#C7F36B]/25 text-[#C7F36B] border border-[#C7F36B]/30 text-xs sm:text-sm font-bold transition-all shadow-sm hover:border-[#C7F36B]"
+              title="Interactive AI Startup Challenge Demonstration Workspace"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] animate-pulse" />
+              <span>Live Demo</span>
+            </Link>
+
             <Link 
               href="/login" 
               className="hidden sm:inline-flex items-center px-3.5 py-2 text-sm font-medium text-[#a1a1aa] hover:text-white transition-colors"
@@ -248,9 +275,9 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
             <button
               type="button"
               onClick={() => openAudit('AUDIT')}
-              className="inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#248277]/25 transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs sm:text-sm font-extrabold shadow-lg shadow-[#C7F36B]/20 transition-all active:scale-95 cursor-pointer"
             >
-              LET'S FIX YOUR FOLLOW-UP
+              GET STARTED
             </button>
 
             <button
@@ -270,6 +297,13 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="/">
               Home
             </Link>
+            <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 rounded-lg bg-emerald-500/15 text-emerald-400 font-bold text-sm flex items-center justify-between border border-emerald-500/30" href="/demo">
+              <span className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span>Live Demo & Evaluation</span>
+              </span>
+              <ChevronRight size={14} />
+            </Link>
             <a onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="#how-it-works">
               How It Works
             </a>
@@ -283,6 +317,15 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <span>Digital Sales School</span>
               <ChevronRight size={14} />
             </Link>
+            <a 
+              onClick={() => setMobileMenuOpen(false)} 
+              className="px-3 py-2 text-[#45bfae] hover:bg-[#101010] rounded-lg text-sm font-medium flex items-center gap-2" 
+              href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+              download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+            >
+              <Download size={14} />
+              <span>Download User Guide (PDF)</span>
+            </a>
             <Link onClick={() => setMobileMenuOpen(false)} className="px-3 py-2 text-white hover:bg-[#101010] rounded-lg text-sm font-medium" href="/about">
               About Us
             </Link>
@@ -310,53 +353,100 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
         {/* SECTION 2: HERO */}
         <section id="hero" className="relative pt-12 pb-20 md:pt-20 md:pb-28 overflow-hidden bg-[#000000]">
           {/* Ambient Lighting */}
-          <div className="absolute top-1/4 left-1/3 -translate-x-1/2 w-[500px] h-[500px] bg-[#248277]/10 rounded-full blur-[140px] pointer-events-none" />
-          <div className="absolute top-1/2 right-10 w-[400px] h-[400px] bg-[#14A7F7]/5 rounded-full blur-[130px] pointer-events-none" />
+          <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-[#248277]/12 rounded-full blur-[160px] pointer-events-none" />
+          <div className="absolute top-1/3 right-1/4 w-[450px] h-[450px] bg-[#14A7F7]/6 rounded-full blur-[140px] pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
-            <div className="max-w-3xl space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#101010] border border-[#248277]/40 text-[#45bfae] text-xs font-bold uppercase tracking-wider shadow-inner">
-                <span className="w-2 h-2 rounded-full bg-[#45bfae] animate-pulse" />
-                <span>REVENUE GROWTH PLATFORM</span>
+            <div className="max-w-4xl mx-auto text-center space-y-7">
+              <div className="flex flex-wrap items-center justify-center gap-2.5">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#111827] border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B] animate-pulse" />
+                  <span>REVENUE OPERATIONS PLATFORM</span>
+                </div>
+                <Link
+                  href="/demo"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#C7F36B]/10 hover:bg-[#C7F36B]/20 border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner transition-colors"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] animate-pulse" />
+                  <span>Interactive Walkthrough &rarr;</span>
+                </Link>
+                <a
+                  href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-[#248277]/25 hover:bg-[#248277]/40 border border-[#45bfae]/50 text-[#45bfae] text-xs font-bold uppercase tracking-wider shadow-inner transition-all hover:scale-105"
+                >
+                  <Download size={13} className="text-[#45bfae]" />
+                  <span>Free 22-Page User Guide (PDF)</span>
+                </a>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.1]">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold tracking-tight text-white leading-[1.12] max-w-4xl mx-auto">
                 Stop Losing Revenue to Unfollowed Leads.
               </h1>
 
-              <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed max-w-2xl">
-                You spend money getting potential customers interested in your business. But when enquiries go unanswered and follow-ups are forgotten, those opportunities can turn into lost sales.
+              <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed max-w-3xl mx-auto">
+                CloseCraft helps your business recover overlooked opportunities, manage customer conversations, follow up consistently and turn more enquiries into paying customers.
               </p>
 
-              <p className="text-sm sm:text-base font-medium text-zinc-300 border-l-2 border-[#248277] pl-3 py-0.5">
-                CloseCraft helps you capture enquiries, respond faster, follow up consistently and convert more prospects into paying customers.
-              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3 py-1">
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span>RECOVER: Old Enquiries</span>
+                </span>
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span>CONVERT: Sales Momentum</span>
+                </span>
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span>DELIVER: Customer Promises</span>
+                </span>
+              </div>
 
-              <p className="text-xs sm:text-sm font-semibold text-[#45bfae] italic">
-                &ldquo;Every enquiry deserves a follow-up. Every opportunity deserves a clear next step.&rdquo;
-              </p>
+              <div className="max-w-2xl mx-auto p-4 rounded-2xl bg-[#0d1716]/80 border border-[#248277]/40 shadow-inner">
+                <p className="text-sm sm:text-base font-medium text-zinc-300">
+                  CloseCraft connects inbound WhatsApp and ad enquiry triage, AI-driven lead reactivation, and customer commitment fulfilment into one unified revenue operations platform.
+                </p>
+              </div>
 
-              {/* Dual CTAs */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 pt-2">
+              {/* CTAs */}
+              <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
                 <button
                   type="button"
                   onClick={() => openAudit('AUDIT')}
-                  className="px-8 py-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#248277]/30 transition-all active:scale-95 text-center cursor-pointer group"
+                  className="px-8 py-4 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#C7F36B]/20 transition-all active:scale-95 text-center cursor-pointer group"
                 >
-                  <span>LET'S FIX YOUR FOLLOW-UP</span>
+                  <span>GET STARTED</span>
                   <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
 
                 <a
+                  href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
+                  className="px-6 py-4 rounded-xl bg-[#08100f] hover:bg-[#0d1716] text-[#45bfae] border border-[#45bfae]/50 hover:border-[#45bfae] font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-lg shadow-[#248277]/10 active:scale-95 group"
+                >
+                  <Download size={18} className="text-[#45bfae] group-hover:translate-y-0.5 transition-transform" />
+                  <span>FREE USER GUIDE (PDF)</span>
+                </a>
+
+                <a
                   href="#how-it-works"
-                  className="px-7 py-4 rounded-xl bg-[#101010] hover:bg-[#1a1a1a] text-white border border-[#1f1f1f] hover:border-white/20 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
+                  className="px-6 py-4 rounded-xl bg-[#111827] hover:bg-[#1f2937] text-white border border-[#1f2937] hover:border-white/20 font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
                 >
                   <span>SEE HOW IT WORKS</span>
                 </a>
+
+                <Link
+                  href="/demo"
+                  className="px-6 py-4 rounded-xl bg-[#111827]/80 hover:bg-[#111827] text-[#C7F36B] border border-[#C7F36B]/30 hover:border-[#C7F36B] font-bold text-sm sm:text-base inline-flex items-center justify-center gap-2 transition-all text-center cursor-pointer shadow-sm active:scale-95"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B] animate-pulse" />
+                  <span>LIVE DEMO</span>
+                </Link>
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 pt-2 text-xs text-[#71717a]">
+              <div className="flex flex-wrap items-center justify-center gap-6 pt-2 text-xs text-[#71717a]">
                 <span className="inline-flex items-center gap-1.5">
                   <ShieldCheck size={14} className="text-[#45bfae]" />
                   <span>No long-term lock-in</span>
@@ -379,7 +469,13 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
           </div>
         </section>
 
-        {/* SECTION 3: HOW IT WORKS (Directly after Hero) */}
+        {/* DEMO VSL SECTION: REVENUE ENGINE WALKTHROUGH (Directly after Hero) */}
+        <ExplainerVideoSection onOpenAudit={() => openAudit('AUDIT')} />
+
+        {/* INTRODUCTORY GROWTH SERVICES (Directly after VSL) */}
+        <GrowthServicesSection />
+
+        {/* SECTION 3: HOW IT WORKS */}
         <HowItWorksProcess />
 
         {/* SECTION 4 & 5: THE HIDDEN REVENUE LEAK & THE COST OF POOR FOLLOW-UP */}
@@ -387,9 +483,6 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
         {/* SECTION 6 & 7: THE CLOSECRAFT SOLUTION & PRODUCTS THAT POWER THE SYSTEM */}
         <ProductsShowcaseSection />
-
-        {/* SECTION 8: PROFESSIONAL SERVICES */}
-        <GrowthServicesSection />
 
         {/* SECTION 9: WHO WE HELP */}
         <WhoWeHelpSection />
@@ -399,6 +492,9 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
         {/* SECTION 11: PROOF AND TRUST */}
         <ProofAndTrustSection />
+
+        {/* SECTION: USER GUIDE (FROM ENQUIRY TO CUSTOMER) */}
+        <UserGuideDownloadSection />
 
         {/* SECTION 12: FREQUENTLY ASKED QUESTIONS */}
         <HomepageFaqSection />
@@ -410,20 +506,20 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="p-10 sm:p-16 rounded-3xl bg-[#0d1716] border border-[#248277]/60 text-center space-y-6 shadow-2xl relative overflow-hidden">
               <div className="space-y-4 max-w-2xl mx-auto">
-                <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#248277]/20 text-[#45bfae] font-bold uppercase tracking-wider border border-[#248277]/40">
-                  STOP LOSING OPPORTUNITIES
+                <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#C7F36B]/20 text-[#C7F36B] font-bold uppercase tracking-wider border border-[#C7F36B]/40">
+                  REVENUE OS
                 </span>
 
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
-                  How Many Interested Customers Are You Losing Because Nobody Followed Up?
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-heading font-extrabold text-white tracking-tight leading-tight">
+                  Your Next Customer Shouldn&apos;t Be Lost in an Unanswered Message.
                 </h2>
 
                 <p className="text-base sm:text-lg text-[#a1a1aa] leading-relaxed">
-                  Your next customer may already have enquired. The question is whether your business has a reliable process to respond, follow up and move that opportunity towards a sale.
+                  Bring your leads, conversations, and follow-up process into one revenue operating system.
                 </p>
 
                 <p className="text-sm font-medium text-zinc-300">
-                  Stop allowing interested prospects to disappear into unanswered messages and forgotten callbacks. Build a better revenue process with CloseCraft.
+                  Stop allowing interested prospects to disappear into unanswered messages and forgotten callbacks. Build an accountable revenue process with CloseCraft.
                 </p>
                 <p className="sr-only">Give your next opportunity a clear next step.</p>
               </div>
@@ -432,18 +528,18 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                 <button
                   type="button"
                   onClick={() => openAudit('AUDIT')}
-                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#248277] hover:bg-[#1f6f65] text-white font-extrabold text-sm sm:text-base shadow-xl shadow-[#248277]/30 transition-all active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm sm:text-base shadow-xl shadow-[#C7F36B]/25 transition-all active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>LET'S FIX YOUR FOLLOW-UP</span>
+                  <span>GET STARTED</span>
                   <ArrowRight size={18} />
                 </button>
 
-                <a
-                  href="#how-it-works"
-                  className="w-full sm:w-auto px-7 py-4 rounded-xl bg-[#141416] hover:bg-[#1a1a1d] text-white border border-[#222226] font-bold text-sm sm:text-base transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
+                <Link
+                  href="/demo"
+                  className="w-full sm:w-auto px-7 py-4 rounded-xl bg-[#111827] hover:bg-[#1f2937] text-white border border-[#1f2937] hover:border-white/20 font-bold text-sm sm:text-base transition-all inline-flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>EXPLORE OUR SOLUTIONS</span>
-                </a>
+                  <span>EXPLORE THE PLATFORM</span>
+                </Link>
               </div>
             </div>
           </div>
@@ -486,10 +582,12 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               <div className="space-y-3">
                 <h4 className="font-bold text-white text-xs uppercase tracking-wider">Products</h4>
                 <ul className="space-y-2">
+                  <li><Link href="/demo" className="text-emerald-400 font-bold hover:underline flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />Live Demonstration</Link></li>
                   <li><Link href="/platform" className="hover:text-white transition-colors">CloseCraft Workspace</Link></li>
                   <li><Link href="/revenue-engine" className="hover:text-white transition-colors">Revenue Engine</Link></li>
                   <li><Link href="/dss" className="text-[#45bfae] font-semibold hover:underline">Digital Sales School</Link></li>
                   <li><Link href="/pricing" className="hover:text-white transition-colors">Software Pricing</Link></li>
+                  <li><a href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf" download="CloseCraft-From-Enquiry-To-Customer-Guide.pdf" className="text-[#45bfae] font-semibold hover:underline flex items-center gap-1.5"><Download size={13} />Free User Guide (22p PDF)</a></li>
                   <li><a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a></li>
                 </ul>
               </div>

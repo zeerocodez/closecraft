@@ -21,53 +21,79 @@ export default async function InboxPage() {
     redirect("/login");
   }
 
-  // Fetch leads for this tenant with deals, conversations, and pending revenueActions
-  const leads = await db.lead.findMany({
-    where: { organizationId },
-    include: {
-      deals: true,
-      conversations: {
-        include: {
-          messages: {
-            orderBy: { createdAt: 'desc' }
+  // Fetch leads for this tenant with assignedUser, deals, conversations, and pending revenueActions
+  const [leads, members] = await Promise.all([
+    db.lead.findMany({
+      where: { organizationId },
+      include: {
+        assignedUser: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          }
+        },
+        deals: true,
+        conversations: {
+          include: {
+            messages: {
+              orderBy: { createdAt: 'desc' }
+            }
+          }
+        },
+        revenueActions: {
+          where: { status: 'PENDING' },
+          orderBy: { priority: 'desc' },
+          take: 1
+        }
+      },
+      orderBy: { updatedAt: 'desc' }
+    }),
+    db.organizationMember.findMany({
+      where: { organizationId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
           }
         }
       },
-      revenueActions: {
-        where: { status: 'PENDING' },
-        orderBy: { priority: 'desc' },
-        take: 1
-      }
-    },
-    orderBy: { updatedAt: 'desc' }
-  });
+      orderBy: { createdAt: 'asc' }
+    })
+  ]);
+
+  const teamMembers = members.map((m) => ({
+    id: m.userId,
+    name: m.user.name || m.user.email?.split('@')[0] || 'Team Member',
+    email: m.user.email,
+    role: m.role,
+  }));
 
   return (
-    <div className="flex flex-col gap-5 w-full h-full p-4 md:p-6 max-w-[1600px] mx-auto">
+    <div className="flex flex-col gap-2 w-full h-[calc(100dvh-5rem)] max-h-[calc(100dvh-5rem)] p-2 sm:p-3 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
+      <div className="flex flex-row items-center justify-between gap-4 border-b border-outline-variant/30 pb-2.5 shrink-0">
         <div>
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-[#45bfae] bg-[#248277]/10 px-2.5 py-1 rounded-full border border-[#248277]/20 mb-2">
-            <MessageSquare size={13} />
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 mb-0.5 shadow-xs">
+            <MessageSquare size={12} />
             <span>Omnichannel Communications Hub</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-tight">
-            Revenue Inbox
+          <h1 className="text-lg md:text-xl font-heading font-extrabold text-on-surface tracking-tight">
+            Unified Revenue Inbox
           </h1>
-          <p className="text-xs md:text-sm text-gray-400 mt-1">
-            Real-time prospect messaging across WhatsApp, email, and web chat with deterministic AI copilot triage.
-          </p>
         </div>
 
         {/* Security & Tenant Badge */}
-        <div className="flex items-center gap-2 text-xs text-gray-500 self-start sm:self-center">
-          <ShieldCheck size={14} className="text-[#45bfae]" />
-          <span>Tenant Isolated &bull; WhatsApp Cloud API</span>
+        <div className="flex items-center gap-2 text-xs text-on-surface-variant font-mono">
+          <ShieldCheck size={14} className="text-emerald-400" />
+          <span className="hidden sm:inline">Tenant Isolated &bull; WhatsApp Cloud API</span>
         </div>
       </div>
 
       {/* Main Inbox 3-Pane Client */}
-      <InboxClient initialLeads={leads} />
+      <InboxClient initialLeads={leads} teamMembers={teamMembers} currentUserId={session.user.id} />
     </div>
   );
 }

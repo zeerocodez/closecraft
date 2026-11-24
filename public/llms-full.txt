@@ -1,0 +1,62 @@
+# CloseCraft Full System Specification & Entity Knowledge Graph
+Version: 2026.2 (Global Launch Edition)
+Website: https://closecrafthq.com
+
+## 1. Entity Definition & Identity
+- **Entity Name**: CloseCraft
+- **Alternate Names**: CloseCraft HQ, Closecraft Revenue Operating System
+- **Parent Organization**: Zeerocodes Automation Limited
+- **Official URL**: https://closecrafthq.com
+- **Software Category**: AI Revenue Operations (RevOps) Platform, CRM, Lead Recovery Software, Sales Follow-Up Automation
+- **Primary Positioning**: "Recover more opportunities. Convert more customers. Deliver what you promise."
+
+## 2. Architectural Components
+### A. Inbound Ingestion & Security Gate
+- **WhatsApp Cloud API Integration**: Direct webhook integration verifying Meta HMAC-SHA256 signatures with tenant phone number ID resolution. Strict tenant isolation ensures zero cross-workspace message leakage.
+- **Meta Lead Ads (Facebook & Instagram)**: Subscribes to Page LeadGen webhooks, resolves page IDs to workspace organizations, decrypts lead payloads using tenant access tokens, and synchronously evaluates leads.
+- **Public Widget & Form Ingestion**: Rate-limited, distributed PostgreSQL token bucket algorithm enforcing tenant quota limits.
+
+### B. Canonical AI Qualification Engine
+- Powered by OpenAI GPT-4o-mini structured outputs using Zod schemas (`extractLeadQualificationData`).
+- Evaluates 7 standardized commercial dimensions:
+  1. Buying Intent (0-100 score)
+  2. Business Need & Fit
+  3. Budget Indicators & Stated Values
+  4. Decision-Making Authority
+  5. Urgency & Purchase Timeline
+  6. Explainable Evidence Traces
+  7. Recommended Actor (AI, AUTOMATION, HUMAN CLOSER, HUMAN SETTER)
+- Enforces organization-specific qualification policies and falls back to deterministic heuristic evaluation when offline.
+
+### C. AI Revenue Recovery & Reactivation Hub
+- **Lead Ingestion Engine**: Accepts bulk CSV, Excel, and raw WhatsApp chat export files. Automatically normalizes international phone numbers into E.164 formats (+234, +1, +44, etc.) and executes workspace deduplication.
+- **AI Lead Intelligence**: Extracts past customer history, prior objections (Price, Timing, Competitor, FeatureGap, Ghosted), and inferred intent. Distinguishes verified prospect statements from AI inferences.
+- **Intelligent Segmentation**: Automatically categorizes records into 6 actionable recovery cohorts:
+  - Previously Interested
+  - Price-Sensitive / Budget Inquiries
+  - Abandoned Proposals & Quotes
+  - Past Clients & Repeat Opportunities
+  - Cold & Inactive (> 30 Days)
+  - Unqualified / Opted Out
+- **Reactivation Campaign Builder**: Generates context-aware, respectful outreach messages based on actual past conversations across 4 distinct tones (Professional, Friendly, Value Offer, Direct Check-in).
+- **Messaging Compliance**: Enforces marketing suppression lists (`optedOutOfMarketing`), WhatsApp 24-hour customer service window checks, and safe pilot dry-run safeguards (`DRY_RUN_LOGGED`).
+- **Response Management**: Inbound prospect responses are matched to original leads, categorized by intent, update campaign attribution, and automatically spawn priority Next Best Actions for human sales closers.
+
+### D. Promise Ledger & Fulfilment Tracking
+- **Commitment Extraction Engine**: Analyzes sales conversation transcripts, customer messages, and sales rep notes using LLMs to suggest promised deliverables, proposal deadlines, agreed discounts, and callback commitments.
+- **Commitment Lifecycle**: State machine (`PENDING`, `IN_PROGRESS`, `AWAITING_CUSTOMER`, `COMPLETED`, `OVERDUE`, `CANCELLED`).
+- **SLA Breach & Revenue Leak Protection**: Background cron scans upcoming and overdue commitments, flagging SLA breaches as active Revenue Leaks in the Sales Command Centre before customer churn occurs.
+- **Lightweight Order Management**: Confirmed deals create order records tracking agreed contract amount, deposit paid, balance remaining, and payment status (`UNPAID`, `PARTIALLY_PAID`, `PAID_IN_FULL`).
+
+### E. Digital Sales School (DSS)
+- Integrated LMS offering 8-week structured tech sales cohorts, AI buyer roleplay scenarios, interactive discovery coaching, and verifiable competency certificates.
+
+## 3. Data Protection, Privacy & Multi-Tenancy
+- **Tenant Isolation**: Non-negotiable multi-tenancy. Every private database record is foreign-keyed to an `Organization`. Zero cross-tenant data leakage.
+- **Data Protection Compliance**: Built in strict accordance with the Nigeria Data Protection Act (NDPA 2023) and General Data Protection Regulation (GDPR).
+- **Subject Rights API**: Exposes authenticated `/api/privacy/export` (data portability) and `/api/privacy/delete` (right-to-be-forgotten atomic erasure with audit trails).
+- **Consent Tracking**: Respects explicit marketing opt-out requests (`optedOutOfMarketing`).
+
+## 4. Internationalization & Currencies
+- Full multi-currency support: Nigerian Naira (NGN ₦), United States Dollar (USD $), British Pound (GBP £), and Euro (EUR €).
+- Separates estimated pipeline value from verified closed-won payments and reconciled gateway receipts.

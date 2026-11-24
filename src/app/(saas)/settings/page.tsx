@@ -6,6 +6,8 @@ import { redirect } from 'next/navigation';
 import { getOrCreateWorkspaceSubscription } from '@/lib/payments/subscription';
 import { SettingsForm } from './SettingsForm';
 import { WorkspaceIdentityForm } from './WorkspaceIdentityForm';
+import { MetaAdsConfigCard } from './MetaAdsConfigCard';
+import { MetaLeadAdsDashboard } from '@/components/integrations/MetaLeadAdsDashboard';
 import { 
   Building2, 
   Sparkles, 
@@ -253,6 +255,16 @@ export default async function SettingsPage() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* Section 3.C: Native Meta Lead Ads Integration & Attribution */}
+      <section id="meta-ads" className="space-y-6">
+        <MetaLeadAdsDashboard 
+          teamMembers={org.members.map(m => ({
+            id: m.user.id,
+            name: m.user.name || m.user.email?.split('@')[0] || 'Team Closer'
+          }))} 
+        />
       </section>
 
       {/* Section 4: Commercial Plan & Billing Overview */}

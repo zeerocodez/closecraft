@@ -48,12 +48,12 @@ export default async function CoachPlanPage() {
 
       {/* Main Focus Card */}
       {recommendation ? (
-        <div className="rounded-2xl border border-primary/30 bg-surface-container-lowest p-6 sm:p-8 space-y-6 shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-2xl pointer-events-none" />
+        <div className="rounded-2xl border border-emerald-500/20 bg-surface-container-lowest p-6 sm:p-8 space-y-6 shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none" />
 
           <div className="space-y-4 relative z-10">
             <div className="flex items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 uppercase tracking-wider">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
                 <Icon name="Target" size={13} />
                 Active Development Focus
               </span>
@@ -107,7 +107,7 @@ export default async function CoachPlanPage() {
 
                 <Link
                   href={`/practice/session/new?scenarioId=${recommendation.suggestedScenario.id}`}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-primary-contrast hover:bg-primary-hover font-bold text-xs shrink-0 shadow-sm transition-all active:scale-95"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-500 text-slate-950 hover:bg-emerald-400 font-bold text-xs shrink-0 shadow-sm transition-all active:scale-95"
                 >
                   <Icon name="Play" size={15} />
                   Start Exercise Now
@@ -125,7 +125,7 @@ export default async function CoachPlanPage() {
       {/* Due Assignments */}
       <div className="space-y-4">
         <h2 className="text-lg font-bold text-on-surface flex items-center gap-2">
-          <Icon name="CalendarCheck" size={20} className="text-primary" />
+          <Icon name="CalendarCheck" size={20} className="text-emerald-400" />
           Scheduled & Cohort Assignments
         </h2>
 
@@ -138,11 +138,11 @@ export default async function CoachPlanPage() {
             {dueAssignments.map((a: any) => (
               <div
                 key={a.id}
-                className="p-5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest hover:border-primary/40 transition-colors flex flex-col justify-between"
+                className="p-5 rounded-xl border border-outline-variant/30 bg-surface-container-lowest hover:border-emerald-500/40 transition-colors flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary/10 px-2 py-0.5 rounded border border-primary/20">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
                       Assigned by {a.assignedBy}
                     </span>
                     {a.dueDate && (
@@ -163,7 +163,7 @@ export default async function CoachPlanPage() {
                   </span>
                   <Link
                     href={`/practice/session/new?scenarioId=${a.scenario?.id}&assignmentId=${a.id}`}
-                    className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                    className="text-xs font-semibold text-emerald-400 hover:underline flex items-center gap-1"
                   >
                     Start Assignment →
                   </Link>

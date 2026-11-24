@@ -1,0 +1,31 @@
+# CloseCraft (https://closecrafthq.com)
+> AI-powered Revenue Operations, Lead Recovery, and Fulfilment Operating System for customer-facing businesses.
+
+## Overview
+CloseCraft is an AI-powered revenue operations platform that helps businesses recover overlooked sales opportunities, manage customer enquiries across WhatsApp, social media, and web channels, improve sales follow-up accountability, and track customer commitments from initial interest through fulfilment.
+
+## Core Problem We Solve
+Businesses spend money acquiring leads through advertising and inbound marketing, but lose over 60% of potential sales because:
+1. Inquiries are scattered across WhatsApp, Instagram, Facebook Messenger, and web forms.
+2. Sales representatives forget or delay follow-up.
+3. Old inquiries and cold leads are abandoned without systematic reactivation.
+4. Promises made to customers (delivery dates, proposal deadlines, discounts) slip through the cracks post-sale.
+
+## Product Pillars
+- **Inbound Triage & Omnichannel Command Centre**: Real-time WhatsApp Cloud API, Meta Lead Ads, and web chat routing with deterministic AI qualification and sales rep allocation.
+- **AI Revenue Recovery Hub**: Ingests historical leads (CSV, Excel, WhatsApp chat exports), extracts past customer objections, segments prospects into actionable cohorts (Previously Interested, Price-Sensitive, Abandoned, Repeat Buyer), and deploys compliant, context-aware reactivation campaigns.
+- **Promise Ledger & Fulfilment Tracking**: Automatically identifies promised deliverables, delivery dates, and commercial concessions from conversations, tracks order payment balances, and alerts managers to overdue commitments before SLA breaches occur.
+- **Digital Sales School (DSS)**: Enterprise sales enablement and simulated buyer roleplay environment training appointment setters and closers.
+
+## Target Markets
+International B2B and B2C service businesses, SMEs, digital marketing agencies, technology companies, real estate developers, and education providers across Africa, the UK, Europe, and North America.
+
+## Key Links & Resources
+- Homepage: https://closecrafthq.com
+- Revenue Engine Overview: https://closecrafthq.com/revenue-engine
+- Platform Capabilities: https://closecrafthq.com/platform
+- Lead Recovery Calculator: https://closecrafthq.com/calculator
+- Interactive Walkthrough Demo: https://closecrafthq.com/demo
+- Privacy & NDPA Compliance: https://closecrafthq.com/privacy
+- Terms of Service: https://closecrafthq.com/terms
+- Complete LLM Specification: https://closecrafthq.com/llms-full.txt

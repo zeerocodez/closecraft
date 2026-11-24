@@ -33,9 +33,9 @@ function AuthStatusBanner() {
       <div className="mb-5 p-3.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-left flex items-start gap-3">
         <AlertCircle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
         <div className="text-xs space-y-1">
-          <p className="font-semibold text-amber-200">Authentication Configuration</p>
+          <p className="font-semibold text-amber-200">Single Sign-On Notice</p>
           <p className="text-slate-300 leading-relaxed text-[11px]">
-            Single sign-on provider configuration error. Please sign in using your work email and password below, or contact your workspace administrator.
+            Google SSO is registered for production domains. For local evaluation, please use the <strong>1-Click Sign In</strong> button below to access the Apex Professional Services workspace.
           </p>
         </div>
       </div>
@@ -133,6 +133,28 @@ export default function LoginPage() {
     }
   };
 
+  const handleDirectDemoSignIn = async () => {
+    setEmail('demo.owner@apexconsulting.ng');
+    setPassword('DemoAccess2026!');
+    setIsLoading(true);
+    setFormError(null);
+
+    const res = await signIn('credentials', {
+      redirect: false,
+      email: 'demo.owner@apexconsulting.ng',
+      password: 'DemoAccess2026!',
+    });
+
+    if (res?.error) {
+      setFormError('Demo access error. Please try again.');
+      setIsLoading(false);
+    } else {
+      const searchParams = new URLSearchParams(window.location.search);
+      const callback = searchParams.get('callbackUrl') || '/dashboard';
+      window.location.href = callback;
+    }
+  };
+
   return (
     <div className="flex flex-col w-full px-4 md:px-8 pb-12 pt-8 min-h-screen justify-center items-center bg-surface">
       <div className="w-full max-w-md mx-auto flex flex-col pt-4">
@@ -201,6 +223,27 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Quick Evaluator Access Pill */}
+          <div className="mb-5 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                AI Startup Challenge Evaluator?
+              </p>
+              <p className="text-[11px] text-slate-300">
+                1-click demo access to Apex Professional Services
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleDirectDemoSignIn}
+              disabled={isLoading}
+              className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shrink-0 transition-all shadow-md cursor-pointer active:scale-95 disabled:opacity-50"
+            >
+              {isLoading ? 'Signing in...' : '1-Click Sign In →'}
+            </button>
+          </div>
+
           <div className="flex items-center justify-between mb-5">
             <span className="text-xs font-semibold uppercase text-on-surface-variant tracking-wider">
               Sign In to Account
@@ -217,7 +260,7 @@ export default function LoginPage() {
                 name="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="operator@company.com"
+                placeholder="demo.owner@apexconsulting.ng"
                 required
                 type="email"
                 autoFocus

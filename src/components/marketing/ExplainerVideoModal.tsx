@@ -77,12 +77,12 @@ export default function ExplainerVideoModal({
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#0e1620] border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#45bfae] animate-pulse" />
+            <div className="w-2.5 h-2.5 rounded-full bg-[#C7F36B] animate-pulse" />
             <span id="explainer-video-title" className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
-              Lead Generation to Sales Closing Walkthrough
+              CloseCraft Revenue Engine Walkthrough
             </span>
-            <span className="hidden sm:inline-block text-[11px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] border border-[#248277]/40">
-              60s Growth Engine
+            <span className="hidden sm:inline-block text-[11px] font-mono px-2 py-0.5 rounded bg-[#C7F36B]/20 text-[#C7F36B] border border-[#C7F36B]/40">
+              60s Walkthrough
             </span>
           </div>
           <button
@@ -111,10 +111,10 @@ export default function ExplainerVideoModal({
           {!isPlaying && (
             <button
               onClick={togglePlay}
-              className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#248277]/90 text-white flex items-center justify-center shadow-xl hover:scale-105 transition-transform"
+              className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#C7F36B] text-[#111827] flex items-center justify-center shadow-xl hover:scale-105 transition-transform cursor-pointer"
               aria-label="Play video"
             >
-              <Play size={32} className="ml-1 fill-white" />
+              <Play size={32} className="ml-1 fill-[#111827]" />
             </button>
           )}
 
@@ -123,21 +123,21 @@ export default function ExplainerVideoModal({
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={togglePlay}
-                className="p-1.5 text-white hover:text-[#45bfae] transition-colors"
+                className="p-1.5 text-white hover:text-[#C7F36B] transition-colors"
                 aria-label={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? <Pause size={18} /> : <Play size={18} />}
               </button>
               <button
                 onClick={toggleMute}
-                className="p-1.5 text-white hover:text-[#45bfae] transition-colors"
+                className="p-1.5 text-white hover:text-[#C7F36B] transition-colors"
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
               </button>
             </div>
             <div className="text-xs text-gray-300 font-mono">
-              Closecraft AI Revenue OS
+              CloseCraft AI Revenue OS
             </div>
           </div>
         </div>
@@ -150,9 +150,9 @@ export default function ExplainerVideoModal({
               <button
                 key={ch.title}
                 onClick={() => jumpTo(ch.time, idx)}
-                className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   activeChapter === idx
-                    ? "bg-[#248277] text-white shadow-sm font-semibold"
+                    ? "bg-[#C7F36B] text-[#111827] shadow-sm font-bold"
                     : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
                 }`}
               >
@@ -164,11 +164,11 @@ export default function ExplainerVideoModal({
 
           <div className="flex items-center gap-2 w-full sm:w-auto justify-end pt-1 sm:pt-0">
             <Link
-              href="/signup"
+              href="/demo"
               onClick={onClose}
-              className="text-xs px-3.5 py-1.5 rounded-lg bg-[#248277] hover:bg-[#1f6f65] text-white font-bold transition-all shadow-sm flex items-center gap-1"
+              className="text-xs px-3.5 py-1.5 rounded-lg bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold transition-all shadow-sm flex items-center gap-1"
             >
-              <span>Start 7-Day Free Trial</span>
+              <span>Explore Interactive Demo</span>
             </Link>
           </div>
         </div>

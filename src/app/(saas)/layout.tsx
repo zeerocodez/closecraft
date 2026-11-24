@@ -4,6 +4,7 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
+import EvaluatorBanner from '@/components/layout/EvaluatorBanner';
 import { getOrCreateWorkspaceSubscription } from '@/lib/payments/subscription';
 
 export default async function SaasLayout({ children }: { children: React.ReactNode }) {
@@ -20,7 +21,7 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
   // Server-authoritative approval check: only approved organizations can access the SaaS
   const org = await db.organization.findUnique({
     where: { id: organizationId },
-    select: { id: true, name: true, status: true }
+    select: { id: true, name: true, status: true, slug: true }
   });
 
   if (!org || org.status !== 'APPROVED') {
@@ -42,6 +43,14 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
 
   return (
     <AppShell user={userWithRole}>
+      {org.slug === 'apex-demo' && (
+        <EvaluatorBanner
+          currentUserEmail={session.user.email ?? undefined}
+          currentUserName={session.user.name ?? undefined}
+          currentUserRole={member?.role ?? undefined}
+        />
+      )}
+
       {subscription.status === 'TRIALING' && subscription.trialHoursLeft <= 72 && (
         <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2.5">

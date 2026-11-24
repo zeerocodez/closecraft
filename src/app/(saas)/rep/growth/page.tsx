@@ -24,7 +24,7 @@ export default async function PartnerGrowthPage() {
     redirect('/today');
   }
 
-  let whereClause: any = {};
+  const whereClause: any = {};
   if (!isOperator && proProfile) {
     whereClause.assignedPartnerId = proProfile.id;
   }

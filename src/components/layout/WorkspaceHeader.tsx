@@ -79,26 +79,21 @@ export default function WorkspaceHeader({
 
       {/* Right Column: Context Action + Notifications + User Profile Menu */}
       <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        {/* Context-Aware Primary Action Button */}
-        {activeProduct === 'closecraft' && (
-          <Link
-            href="/services"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-primary text-on-primary hover:bg-[#5cd4c3] text-xs font-bold transition-all shadow-sm shadow-primary/10 select-none"
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Growth Services</span>
-          </Link>
-        )}
+        <Link
+          href="/recovery"
+          className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-bold transition-all shadow-sm select-none"
+        >
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Recover Leads</span>
+        </Link>
 
-        {activeProduct === 'revenue' && (
-          <Link
-            href="/leads?action=new"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0b1117] text-xs font-bold transition-all shadow-sm select-none"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Enquiry</span>
-          </Link>
-        )}
+        <Link
+          href="/leads?action=new"
+          className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-extrabold transition-all shadow-sm shadow-emerald-950/20 select-none active:scale-95"
+        >
+          <Plus className="w-4 h-4 stroke-[2.5]" />
+          <span>New Enquiry</span>
+        </Link>
 
         {activeProduct === 'dss' && (
           <Link

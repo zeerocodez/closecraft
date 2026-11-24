@@ -150,36 +150,21 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     );
   }
 
-  // 2. Product-Aware Navigation Items
+  // 2. Streamlined Global Navigation Sections
   interface NavItem {
     href: string;
     icon: string;
     label: string;
+    badge?: string;
     exact?: boolean;
     visible?: boolean;
   }
 
   const getProductNav = (): { title: string; items: NavItem[] }[] => {
-    if (activeProduct === 'revenue') {
-      return [
-        {
-          title: 'Revenue Engine',
-          items: [
-            { href: '/dashboard/revenue-engine', icon: 'TrendingUp', label: 'Command Centre', exact: true },
-            { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
-            { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
-            { href: '/appointments', icon: 'Calendar', label: 'Appointments' },
-            { href: '/inbox', icon: 'Inbox', label: 'Inbox' },
-            { href: '/team', icon: 'UserCheck', label: 'Team Roster', visible: isManagerOrOwner },
-          ],
-        },
-      ];
-    }
-
     if (activeProduct === 'dss') {
       return [
         {
-          title: 'Digital Sales School',
+          title: 'LEARNING',
           items: [
             { href: '/dss/dashboard', icon: 'GraduationCap', label: 'My Learning', exact: true },
             { href: '/dss/courses', icon: 'BookOpen', label: 'Courses & Syllabus' },
@@ -187,23 +172,57 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
             { href: '/dss/examinations', icon: 'Award', label: 'Examinations' },
             { href: '/dss/roleplay', icon: 'PlayCircle', label: 'AI Roleplay' },
             { href: '/dss/certificates', icon: 'ShieldCheck', label: 'Certificates' },
-            { href: '/dss/settings', icon: 'Settings', label: 'Student Settings' },
+            { href: '/dashboard', icon: 'ArrowLeft', label: 'Back to Revenue OS' },
           ],
         },
       ];
     }
 
-    // Default: CloseCraft (Services & Client Experience)
+    // Master CloseCraft Revenue Operating System
     return [
       {
-        title: 'CloseCraft',
+        title: 'OVERVIEW',
         items: [
-          { href: '/dashboard', icon: 'Layout', label: 'Overview', exact: true },
-          { href: '/growth/projects', icon: 'Layers', label: 'Growth Projects' },
-          { href: '/services', icon: 'Briefcase', label: 'Services Catalogue' },
-          { href: '/inbox', icon: 'Inbox', label: 'Enquiries Inbox' },
+          { href: '/dashboard', icon: 'TrendingUp', label: 'Command Centre', exact: true },
+        ],
+      },
+      {
+        title: 'REVENUE',
+        items: [
+          { href: '/inbox', icon: 'Inbox', label: 'Unified Inbox' },
+          { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
+          { href: '/recovery', icon: 'Sparkles', label: 'Lead Recovery', badge: 'RECOVER' },
+          { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
+          { href: '/today', icon: 'Clock', label: 'Follow-ups' },
+          { href: '/commitments', icon: 'CheckSquare', label: 'Promise Ledger', badge: 'DELIVER' },
+        ],
+      },
+      {
+        title: 'INTELLIGENCE',
+        items: [
+          { href: '/practice', icon: 'Target', label: 'AI Practice Coach' },
+          { href: '/dashboard/analytics', icon: 'Activity', label: 'Revenue Analytics' },
+        ],
+      },
+      {
+        title: 'BUSINESS',
+        items: [
+          { href: '/services', icon: 'Briefcase', label: 'Growth Services' },
+          { href: '/team', icon: 'UserCheck', label: 'Team Roster', visible: isManagerOrOwner },
+        ],
+      },
+      {
+        title: 'LEARNING',
+        items: [
+          { href: '/dss/dashboard', icon: 'GraduationCap', label: 'Digital Sales School' },
+        ],
+      },
+      {
+        title: 'SETTINGS',
+        items: [
+          { href: '/settings', icon: 'Settings', label: 'Workspace' },
+          { href: '/settings#meta-ads', icon: 'Share2', label: 'Meta Lead Ads' },
           { href: '/billing', icon: 'CreditCard', label: 'Billing & Invoices', visible: isManagerOrOwner },
-          { href: '/settings', icon: 'Settings', label: 'Settings' },
         ],
       },
     ];
@@ -256,17 +275,17 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                       href={item.href}
                       onClick={() => isMobile && setIsOpen(false)}
                       title={!isExpanded && !isMobile ? item.label : undefined}
-                      className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group relative overflow-hidden ${
+                      className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-all group relative overflow-hidden ${
                         isActive
-                          ? 'bg-primary/15 text-primary-fixed font-bold border border-primary/30'
-                          : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                          ? 'bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/35 shadow-sm shadow-emerald-500/10'
+                          : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                       }`}
                     >
                       <Icon
                         name={item.icon}
-                        size={18}
-                        className={`shrink-0 ${
-                          isActive ? 'text-primary-fixed' : 'text-on-surface-variant group-hover:text-on-surface'
+                        size={17}
+                        className={`shrink-0 transition-colors ${
+                          isActive ? 'text-emerald-400' : 'text-on-surface-variant group-hover:text-on-surface'
                         }`}
                       />
                       <span
@@ -276,6 +295,11 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                       >
                         {item.label}
                       </span>
+                      {item.badge && (isExpanded || isMobile) && (
+                        <span className="ml-auto text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                          {item.badge}
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

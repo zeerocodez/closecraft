@@ -7,18 +7,23 @@ import { HOMEPAGE_FAQS } from "@/lib/data/homepage-faqs";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "CloseCraft | Lead Generation and Sales Growth Platform",
-  description: "CloseCraft helps businesses acquire leads, manage enquiries, follow up consistently and convert more opportunities into customers.",
+  title: "CloseCraft | AI Revenue Operations, Lead Recovery & Fulfilment Platform",
+  description: "Recover more opportunities. Convert more customers. Deliver what you promise. CloseCraft connects inbound inquiry triage, AI lead recovery, and customer commitment fulfilment for fast-growing businesses.",
   keywords: [
-    "Closecraft | 7-Day Free Trial for Sales Follow-Up",
-    "Organise enquiries and keep follow-up moving with Closecraft. Start a 7-day Starter trial with no credit card, or request a Revenue Audit for your business.",
-    "lead generation",
-    "sales follow up",
-    "meta ads"
+    "AI revenue operations platform",
+    "AI CRM software",
+    "lead recovery software",
+    "WhatsApp CRM for business",
+    "sales follow up automation",
+    "how to recover lost sales leads",
+    "customer commitment tracker",
+    "sales pipeline management",
+    "omnichannel revenue inbox",
+    "stop losing leads"
   ],
   openGraph: {
-    title: "CloseCraft | Lead Generation and Sales Growth Platform",
-    description: "CloseCraft helps businesses acquire leads, manage enquiries, follow up consistently and convert more opportunities into customers.",
+    title: "CloseCraft | AI Revenue Operations, Lead Recovery & Fulfilment Platform",
+    description: "Recover more opportunities. Convert more customers. Deliver what you promise. CloseCraft connects inbound inquiry triage, AI lead recovery, and customer commitment fulfilment for fast-growing businesses.",
     url: "https://www.closecrafthq.com",
     siteName: "CloseCraft",
     locale: "en_US",
@@ -28,15 +33,15 @@ export const metadata: Metadata = {
         url: "/images/closecraft-og.png",
         width: 1200,
         height: 630,
-        alt: "CloseCraft - Lead Generation and Sales Growth Platform",
+        alt: "CloseCraft - AI Revenue Operations, Lead Recovery & Fulfilment Platform",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "CloseCraft | Lead Generation and Sales Growth Platform",
-    description: "CloseCraft helps businesses acquire leads, manage enquiries, follow up consistently and convert more opportunities into customers.",
+    title: "CloseCraft | AI Revenue Operations, Lead Recovery & Fulfilment Platform",
+    description: "Recover more opportunities. Convert more customers. Deliver what you promise. Connect inbound triage, lead recovery, and fulfilment tracking.",
     images: ["/images/closecraft-og.png"],
     creator: "@closecrafthq",
   },

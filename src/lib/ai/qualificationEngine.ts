@@ -1,4 +1,12 @@
+/**
+ * Canonical AI Lead Qualification Engine Adapter
+ * 
+ * Routes legacy qualification calls into the unified, structured AI extractor
+ * and Revenue Engine. Completely replaces deprecated mock/keyword rules.
+ */
+
 import { db } from "@/lib/db";
+import { extractLeadQualificationData, LeadQualificationResult } from "./extractor";
 
 export type QualificationResult = {
   shouldReply: boolean;
@@ -11,80 +19,118 @@ export type QualificationResult = {
     timeline?: string;
   };
   handoffReason?: string;
-}
+  leadQualificationResult?: LeadQualificationResult;
+};
 
+/**
+ * Authoritative lead qualification processor.
+ * Evaluates prospect messages using the canonical AI Extractor and enforces tenant qualification policies.
+ */
 export async function processLeadWithAI(leadId: string, newMessageContent: string): Promise<QualificationResult> {
-  console.log(`[AI Engine] Analyzing message for lead ${leadId}: "${newMessageContent}"`);
-  
-  // In production, this would call an LLM (e.g. OpenAI GPT-4o) with the conversation history.
-  // We mock a basic heuristic rule-engine here for the local execution.
-  
-  const content = newMessageContent.toLowerCase();
-  const result: QualificationResult = {
-    shouldReply: true,
-    draftReply: null,
-    updatedIntentScore: 50,
-    extractedData: {}
-  };
-
-  if (content.includes("price") || content.includes("cost") || content.includes("how much")) {
-    result.draftReply = "Our pricing starts at $99/month for the basic package. Do you have a specific budget allocated for this project?";
-    result.updatedIntentScore = 65;
-    result.extractedData.need = "Pricing info requested";
-  } else if (content.includes("human") || content.includes("agent") || content.includes("talk to someone")) {
-    result.shouldReply = false;
-    result.handoffReason = "Requested human assistance";
-    result.updatedIntentScore = 80;
-  } else if (content.includes("buy") || content.includes("sign up") || content.includes("ready")) {
-    result.shouldReply = true;
-    result.draftReply = "That's great! I'll have one of our closing specialists reach out to you immediately to get you onboarded.";
-    result.updatedIntentScore = 95;
-    result.extractedData.timeline = "Immediate";
-  } else {
-    result.draftReply = "Thanks for reaching out! Could you tell me a bit more about what you're looking to achieve with CloseCraft so I can route you properly?";
-    result.updatedIntentScore = 55;
-  }
-
-  // Update QualificationData in DB
-  if (Object.keys(result.extractedData).length > 0) {
-    await db.qualificationData.upsert({
-      where: { leadId },
-      create: {
-        leadId,
-        ...result.extractedData
-      },
-      update: {
-        ...result.extractedData
-      }
-    });
-  }
-
-  // Update lead intent
-  await db.lead.update({
+  const lead = await db.lead.findUnique({
     where: { id: leadId },
-    data: { 
-      buyingIntent: result.updatedIntentScore,
-      status: result.shouldReply ? 'QUALIFYING' : 'ENGAGED'
-    }
+    include: {
+      organization: true,
+      qualificationData: true,
+    },
   });
 
-  // If a handoff is triggered, log an audit action
-  if (result.handoffReason) {
-    const lead = await db.lead.findUnique({ where: { id: leadId }});
-    if (lead?.organizationId) {
-      await db.auditLog.create({
+  if (!lead) {
+    throw new Error(`Lead ${leadId} not found`);
+  }
+
+  // Run canonical structured AI qualification
+  const aiResult = await extractLeadQualificationData(
+    newMessageContent,
+    lead.qualificationData?.customData,
+    lead.buyingIntent ?? undefined,
+    lead.organization?.qualificationPolicy
+  );
+
+  const shouldReply = aiResult.nextActionType === 'RESPOND' || aiResult.nextActionType === 'SEND_BOOKING_LINK';
+  const handoffReason = aiResult.nextActionType === 'ASSIGN_HUMAN' 
+    ? 'High-intent opportunity requiring senior sales executive negotiation' 
+    : undefined;
+
+  // Update lead and qualification data with verified, non-fabricated fields
+  await db.$transaction(async (tx) => {
+    await tx.lead.update({
+      where: { id: leadId },
+      data: {
+        buyingIntent: aiResult.intentScore,
+        status: aiResult.intentScore >= 80 ? 'OPPORTUNITY' : (aiResult.intentScore >= 50 ? 'QUALIFYING' : 'NEW'),
+        aiAssessment: aiResult.aiAssessment,
+        nextStepsRecommendation: aiResult.nextStepsRecommendation,
+        assignedRole: aiResult.targetRole,
+      },
+    });
+
+    if (lead.qualificationData) {
+      await tx.qualificationData.update({
+        where: { id: lead.qualificationData.id },
+        data: {
+          budget: aiResult.budget || lead.qualificationData.budget,
+          authority: aiResult.authority || lead.qualificationData.authority,
+          need: aiResult.need || lead.qualificationData.need,
+          timeline: aiResult.timeline || lead.qualificationData.timeline,
+        },
+      });
+    } else {
+      await tx.qualificationData.create({
+        data: {
+          leadId,
+          budget: aiResult.budget,
+          authority: aiResult.authority,
+          need: aiResult.need,
+          timeline: aiResult.timeline,
+        },
+      });
+    }
+
+    // Persist Intent Signal
+    if (lead.organizationId) {
+      await tx.revenueSignal.create({
+        data: {
+          organizationId: lead.organizationId,
+          leadId,
+          type: 'INTENT',
+          value: aiResult.intentScore,
+          source: 'AI',
+          evidence: aiResult.intentEvidence,
+        },
+      });
+
+      // Audit Log
+      await tx.auditLog.create({
         data: {
           organizationId: lead.organizationId,
           leadId,
           actorType: 'AI',
-          action: 'HUMAN_HANDOFF_TRIGGERED',
+          action: 'LEAD_QUALIFIED_CANONICAL',
           resourceType: 'LEAD',
           resourceId: leadId,
-          newState: result.handoffReason
-        }
+          newState: JSON.stringify({
+            intentScore: aiResult.intentScore,
+            fitScore: aiResult.fitScore,
+            nextActionType: aiResult.nextActionType,
+            recommendedActor: aiResult.recommendedActor,
+          }),
+        },
       });
     }
-  }
+  });
 
-  return result;
+  return {
+    shouldReply,
+    draftReply: shouldReply ? `Thank you for sharing your requirements. We're reviewing your request and will follow up with tailored solution options.` : null,
+    updatedIntentScore: aiResult.intentScore,
+    extractedData: {
+      budget: aiResult.budget,
+      authority: aiResult.authority,
+      need: aiResult.need,
+      timeline: aiResult.timeline,
+    },
+    handoffReason,
+    leadQualificationResult: aiResult,
+  };
 }

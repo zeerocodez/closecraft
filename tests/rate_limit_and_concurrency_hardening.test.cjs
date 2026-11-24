@@ -57,3 +57,4 @@ test('Security Hardening: Auth credentials callback enforces account and IP brut
   assert.match(content, /rateLimit\(`auth-login-account:/, 'auth callback must rate limit by account');
   assert.match(content, /rateLimit\(`auth-login-ip:/, 'auth callback must rate limit by client IP');
 });
+

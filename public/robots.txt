@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /dashboard/
+Disallow: /recovery/
+Disallow: /commitments/
+Disallow: /leads/
+Disallow: /appointments/
+Disallow: /operator/
+Disallow: /settings/
+Disallow: /today
+Disallow: /inbox
+Disallow: /pipeline
+Disallow: /billing
+Disallow: /team
+Disallow: /practice
+Disallow: /rep
+Disallow: /onboarding/
+
+Sitemap: https://www.closecrafthq.com/sitemap.xml
