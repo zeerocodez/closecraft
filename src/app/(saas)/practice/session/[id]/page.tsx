@@ -28,18 +28,18 @@ export default async function PracticeSessionPage({
     let newSessionId: string | null = null;
     let startError: any = null;
 
-    if (sParams?.scenarioId) {
-      try {
-        const result = await startPracticeSession({
-          scenarioId: sParams.scenarioId,
-          parentAttemptId: sParams.parentAttemptId,
-          changedCondition: sParams.changedCondition,
-          assignmentId: sParams.assignmentId,
-        });
-        newSessionId = result.sessionId;
-      } catch (err: any) {
-        startError = err;
-      }
+    const targetScenarioId = sParams?.scenarioId ? String(sParams.scenarioId).trim() : '';
+
+    try {
+      const result = await startPracticeSession({
+        scenarioId: targetScenarioId,
+        parentAttemptId: sParams?.parentAttemptId,
+        changedCondition: sParams?.changedCondition,
+        assignmentId: sParams?.assignmentId,
+      });
+      newSessionId = result.sessionId;
+    } catch (err: any) {
+      startError = err;
     }
 
     if (newSessionId) {
@@ -49,7 +49,7 @@ export default async function PracticeSessionPage({
     if (startError) {
       console.error('Session start error:', startError);
       if (startError.message?.includes('Unauthorized')) {
-        redirect(`/login?callbackUrl=${encodeURIComponent(`/practice/session/new?scenarioId=${sParams?.scenarioId || ''}`)}`);
+        redirect(`/login?callbackUrl=${encodeURIComponent(`/practice/session/new?scenarioId=${targetScenarioId}`)}`);
       }
     }
 

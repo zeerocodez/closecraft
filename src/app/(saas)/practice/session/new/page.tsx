@@ -15,16 +15,14 @@ export default async function NewPracticeSessionPage({
   }>;
 }) {
   const params = await searchParams;
-  if (!params?.scenarioId) {
-    redirect('/practice/scenarios');
-  }
+  const rawId = params?.scenarioId ? String(params.scenarioId).trim() : '';
 
   let sessionId: string | null = null;
   let authError = false;
 
   try {
     const result = await startPracticeSession({
-      scenarioId: params.scenarioId,
+      scenarioId: rawId,
       parentAttemptId: params.parentAttemptId,
       changedCondition: params.changedCondition,
       assignmentId: params.assignmentId,
@@ -43,7 +41,7 @@ export default async function NewPracticeSessionPage({
   }
 
   if (authError) {
-    const callback = encodeURIComponent(`/practice/session/new?scenarioId=${params.scenarioId}`);
+    const callback = encodeURIComponent(`/practice/session/new?scenarioId=${rawId}`);
     redirect(`/login?callbackUrl=${callback}`);
   }
 

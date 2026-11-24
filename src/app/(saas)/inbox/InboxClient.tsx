@@ -734,25 +734,25 @@ export default function InboxClient({
               </div>
 
               {/* Commercial Snapshot Card */}
-              <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20 space-y-3">
+              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/20 space-y-2.5">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
                   Opportunity Snapshot
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                <div className="p-2.5 rounded-lg bg-black/40 border border-white/5 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
                     <span className="text-[10px] text-gray-400 block">Est. Deal Value</span>
-                    <span className="text-sm font-bold text-white font-mono mt-0.5 block whitespace-normal break-words">
+                    <span className="text-sm sm:text-base font-extrabold text-white font-mono mt-0.5 block truncate" title={activeDealAmount}>
                       {activeDealAmount}
                     </span>
                   </div>
-                  <div className="p-2.5 rounded-lg bg-black/40 border border-white/5">
+                  <div className="text-right shrink-0">
                     <span className="text-[10px] text-gray-400 block">Propensity</span>
-                    <span className="text-sm font-bold text-emerald-400 font-mono mt-0.5 block">
+                    <span className="text-sm sm:text-base font-extrabold text-emerald-400 font-mono mt-0.5 block">
                       {activeLead.buyingIntent || 50}%
                     </span>
                   </div>
                 </div>
-                <div className="text-[11px] text-gray-400 flex items-center justify-between pt-1">
+                <div className="text-[11px] text-gray-400 flex items-center justify-between pt-0.5">
                   <span>Pipeline Stage:</span>
                   <span className="font-bold text-white font-mono">{activeDeal?.stage || 'OPPORTUNITY'}</span>
                 </div>

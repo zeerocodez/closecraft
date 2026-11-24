@@ -238,7 +238,7 @@ export default function LoginPage() {
               type="button"
               onClick={handleDirectDemoSignIn}
               disabled={isLoading}
-              className="px-3 py-1.5 rounded-lg bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-xs shrink-0 transition-all shadow-md cursor-pointer active:scale-95 disabled:opacity-50"
+              className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs shrink-0 transition-all shadow-md cursor-pointer active:scale-95 disabled:opacity-50"
             >
               {isLoading ? 'Signing in...' : '1-Click Sign In →'}
             </button>

@@ -124,12 +124,32 @@ export async function startPracticeSession(data: {
   const { userId, organizationId } = await requireAuth();
   await seedScenariosIfEmpty();
 
-  const scenario = await prisma.practiceScenario.findUnique({
-    where: { id: data.scenarioId },
-  });
+  const cleanScenarioId = data.scenarioId?.trim();
+  let scenario = cleanScenarioId ? await prisma.practiceScenario.findUnique({
+    where: { id: cleanScenarioId },
+  }) : null;
+
+  // Fallback to fuzzy prefix match or first available published scenario if ID is partially truncated
+  if (!scenario && cleanScenarioId) {
+    const prefix = cleanScenarioId.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15);
+    if (prefix.length >= 8) {
+      scenario = await prisma.practiceScenario.findFirst({
+        where: {
+          id: { startsWith: prefix },
+          isPublished: true,
+        },
+      });
+    }
+    if (!scenario) {
+      scenario = await prisma.practiceScenario.findFirst({
+        where: { isPublished: true },
+        orderBy: { workshopNumber: 'asc' },
+      });
+    }
+  }
 
   if (!scenario) {
-    throw new Error('Scenario not found.');
+    throw new Error('Scenario not found or no published scenarios available.');
   }
 
   // Tenant access check: if scenario belongs to an organization, user must belong to it
