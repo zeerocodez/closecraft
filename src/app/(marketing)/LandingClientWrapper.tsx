@@ -538,7 +538,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                   CloseCraft HQ is a revenue operations platform for businesses. It is not affiliated with CloseCraft App.
                 </p>
                 <p className="text-[11px] text-[#71717a]">
-                  Zeerocodes Automation Limited. RC 8421094.
+                  Zeerocodes Automation Limited. RC 8181339.
                 </p>
                 <div className="pt-1">
                   <a 

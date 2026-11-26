@@ -8,7 +8,7 @@
 [![Payments](https://img.shields.io/badge/Billing-Bachs.io-indigo)](https://bachs.io)
 [![Multi-Tenant](https://img.shields.io/badge/Multi--Tenancy-Strict_Server_Isolation-purple)](#multi-tenant-architecture)
 
-> **Disclaimer:** CloseCraft HQ is a revenue operations platform for businesses by Zeerocodes Automation Limited (RC 8421094). It is not affiliated with CloseCraft App.
+> **Disclaimer:** CloseCraft HQ is a revenue operations platform for businesses by Zeerocodes Automation Limited (RC 8181339). It is not affiliated with CloseCraft App.
 
 ---
 
@@ -241,4 +241,4 @@ A dedicated evaluation portal is available at `/demo` for evaluators and judges.
 
 ## 8. License & Commercial Information
 
-CloseCraft is proprietary software engineered by **Zeerocodes Automation Limited** (RC 8421094), Lagos, Nigeria. Built for the AI Startup Challenge. All rights reserved.
+CloseCraft is proprietary software engineered by **Zeerocodes Automation Limited** (RC 8181339), Lagos, Nigeria. Built for the AI Startup Challenge. All rights reserved.

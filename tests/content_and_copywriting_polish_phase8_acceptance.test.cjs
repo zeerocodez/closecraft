@@ -82,7 +82,7 @@ test('CloseCraft HQ Phase 8: Content, Copywriting Polish & Editorial Consistency
   await t.test('7. Proof, Trust & Final Conversion Action', () => {
     assert.ok(proofTrustContent.includes('Better Follow-Up Starts With Better Visibility.'));
     assert.ok(landingContent.includes('How Many Interested Customers Are You Losing Because Nobody Followed Up?'));
-    assert.ok(landingContent.includes('Zeerocodes Automation Limited. RC 8421094.'));
+    assert.ok(landingContent.includes('Zeerocodes Automation Limited. RC 8181339.'));
     assert.ok(landingContent.includes('+234 902 636 5853'));
   });
 

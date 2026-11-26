@@ -34,7 +34,7 @@ not an unrestricted public launch.**
 | Demo accounts accepted weak passwords (`password`, `demo`) bypassing bcrypt, and skipped login rate limits | **Fixed** (Phase 1) — bcrypt-only verification, rate limits for all accounts |
 | Root `create_admin.js` with a hardcoded admin password; `password123` in the Prisma seed | **Fixed** (Phase 1) — env-based `scripts/create_admin.js`; seed password generated/env-supplied |
 | Legal pages and launch assets sold a superseded offer (₦20,000/₦45,000 "Pro", 14-day trial) while billing charged ₦15,000/₦35,000/₦75,000 with a 7-day trial | **Fixed** (Phase 2) — catalog is the single source of truth; guarded by `tests/pricing_consistency.test.cjs` |
-| Company RC number appeared as both 8421094 and 7291048 | **Fixed** (Phase 2) — unified to RC 8421094 (the number used by invoice generation). Owner to confirm against the CAC certificate |
+| Company RC number appeared as both 8421094 and 7291048 — **both were wrong** | **Fixed** — corrected everywhere (including invoice generation) to **RC 8181339**, verified against the CAC Certificate of Incorporation (Zeerocodes Automation Limited, incorporated 15 January 2025) |
 | 94MB onboarding video shipped in `public/`; repo working tree 235MB | **Fixed** (Phase 4) — video re-encoded to 3.9MB; tree now ~27MB |
 | Fabricated `aggregateRating` (4.9★, 128 reviews) in SEO structured data | **Fixed** (Phase 5) — removed until real review data exists |
 | Test-suite claims inconsistent (35 / 37 / 97 in different docs); part of the suite is self-referential | **Open** — see the accuracy note in `docs/QA_AUTOMATION_AND_ACCEPTANCE_REPORT.md`. Converting acceptance tests to source-/behaviour-verifying tests is ongoing work |
@@ -51,8 +51,10 @@ not an unrestricted public launch.**
    quoted with permission.
 4. Repository made private once external evaluation (AI Startup Challenge)
    no longer requires public access — the code is proprietary.
-5. Owner confirms the RC number and Bachs live-key status in writing in
+5. Owner confirms the Bachs live-key status in writing in
    `docs/COMMERCIAL_ARCHITECTURE_AND_CONFIRMATION_CHECKLIST.md`.
+   (The RC number item is closed: RC 8181339, verified against the CAC
+   certificate on 26 Nov 2026.)
 
 ## 4. Sign-off
 

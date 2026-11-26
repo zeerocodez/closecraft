@@ -42,7 +42,7 @@ describe('Phase 2: pricing / trial / RC consistency', () => {
   it('only one RC number appears in the repo docs and code', () => {
     for (const rel of ['README.md', 'docs/AI_STARTUP_CHALLENGE.md', 'docs/COMMERCIAL_ARCHITECTURE_AND_CONFIRMATION_CHECKLIST.md']) {
       assert.ok(!read(rel).includes('7291048'), `${rel} still uses the wrong RC number`);
-      assert.ok(read(rel).includes('8421094'), `${rel} missing canonical RC number`);
+      assert.ok(read(rel).includes('8181339'), `${rel} missing canonical RC number`);
     }
   });
 
