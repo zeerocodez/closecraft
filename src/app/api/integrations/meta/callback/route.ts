@@ -36,7 +36,8 @@ export async function GET(req: Request) {
   let userId = '';
 
   try {
-    const secret = process.env.AUTH_SECRET || 'closecraft_default_meta_vault_secret_2026';
+    const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+    if (!secret) throw new Error("[Meta] AUTH_SECRET must be set to sign/verify OAuth state");
     const rawState = Buffer.from(state, 'base64url').toString('utf8');
     const { payload, signature } = JSON.parse(rawState);
 

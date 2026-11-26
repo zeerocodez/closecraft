@@ -3,7 +3,13 @@ import crypto from 'crypto';
 const ALGORITHM = 'aes-256-gcm';
 
 function getEncryptionKey(): Buffer {
-  const secret = process.env.ENCRYPTION_KEY || process.env.AUTH_SECRET || 'closecraft_default_meta_vault_secret_2026';
+  const secret = process.env.ENCRYPTION_KEY || process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("[MetaCrypto] ENCRYPTION_KEY or AUTH_SECRET must be set in production");
+    }
+    return crypto.createHash('sha256').update("dev-only-insecure-key-set-ENCRYPTION_KEY-in-production").digest();
+  }
   return crypto.createHash('sha256').update(secret).digest();
 }
 

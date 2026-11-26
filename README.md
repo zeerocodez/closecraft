@@ -191,6 +191,14 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 A dedicated evaluation portal is available at `/demo` for evaluators and judges.
 
 ### Demonstration Workspace Credentials
+
+> **Security note:** The Apex demo workspace contains synthetic data only and is
+> isolated from customer workspaces. These accounts authenticate with their
+> seeded bcrypt password hash like any other account — there is no password
+> bypass — and login rate limits apply to them. Rotate the demo password and
+> disable the demo workspace outside evaluation periods. Never store real
+> client data in the demo workspace.
+
 | Role | Email | Password | Responsibilities |
 | :--- | :--- | :--- | :--- |
 | **Managing Director (Owner)** | `demo.owner@apexconsulting.ng` | `DemoAccess2026!` | Overall revenue analytics, pipeline health, settings |
