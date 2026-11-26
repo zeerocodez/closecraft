@@ -30,18 +30,18 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.closecrafthq.com"),
   title: {
-    default: "Closecraft | Know Who Is Following Up",
-    template: "%s | Closecraft",
+    default: "CloseCraft HQ | AI Revenue Operations, Lead Recovery and Fulfilment Platform",
+    template: "%s | CloseCraft HQ",
   },
-  description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+  description: "CloseCraft HQ helps businesses manage enquiries, recover dormant leads, enforce follow-up accountability, and close more sales with AI speed and human judgement.",
   alternates: {
     canonical: "https://www.closecrafthq.com",
   },
   openGraph: {
-    title: "Closecraft | Know Who Is Following Up",
-    description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+    title: "CloseCraft HQ | AI Revenue Operations, Lead Recovery and Fulfilment Platform",
+    description: "CloseCraft HQ helps businesses manage enquiries, recover dormant leads, enforce follow-up accountability, and close more sales.",
     url: "https://www.closecrafthq.com",
-    siteName: "Closecraft",
+    siteName: "CloseCraft HQ",
     locale: "en_US",
     type: "website",
     images: [
@@ -49,15 +49,15 @@ export const metadata: Metadata = {
         url: "/images/closecraft-og.png",
         width: 1200,
         height: 630,
-        alt: "Closecraft - AI Revenue Operating System & Follow-Up Command Centre",
+        alt: "CloseCraft HQ - AI Revenue Operations, Lead Recovery and Fulfilment Platform",
         type: "image/png",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Closecraft | Know Who Is Following Up",
-    description: "Closecraft helps service businesses manage enquiries, enforce follow-up accountability, and close more of the leads they already have.",
+    title: "CloseCraft HQ | AI Revenue Operations, Lead Recovery and Fulfilment Platform",
+    description: "CloseCraft HQ helps businesses manage enquiries, recover dormant leads, and enforce follow-up accountability.",
     images: ["/images/closecraft-og.png"],
     creator: "@closecrafthq",
     site: "@closecrafthq",

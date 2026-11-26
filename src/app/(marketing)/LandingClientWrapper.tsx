@@ -26,6 +26,8 @@ import ProductsShowcaseSection from '@/components/landing/ProductsShowcaseSectio
 import GrowthServicesSection from '@/components/growth/GrowthServicesSection';
 import WhoWeHelpSection from '@/components/landing/WhoWeHelpSection';
 import WhyCloseCraftSection from '@/components/landing/WhyCloseCraftSection';
+import { DemoCaseStudiesSection } from '@/components/landing/DemoCaseStudiesSection';
+import { HomepagePricingSection } from '@/components/landing/HomepagePricingSection';
 import ProofAndTrustSection from '@/components/landing/ProofAndTrustSection';
 import UserGuideDownloadSection from '@/components/landing/UserGuideDownloadSection';
 import HomepageFaqSection from '@/components/landing/HomepageFaqSection';
@@ -272,13 +274,12 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
               Sign In
             </Link>
 
-            <button
-              type="button"
-              onClick={() => openAudit('AUDIT')}
-              className="inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs sm:text-sm font-extrabold shadow-lg shadow-[#C7F36B]/20 transition-all active:scale-95 cursor-pointer"
+            <Link
+              href="/signup"
+              className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs sm:text-sm font-extrabold shadow-lg shadow-[#C7F36B]/20 transition-all active:scale-95"
             >
-              GET STARTED
-            </button>
+              START FREE TRIAL
+            </Link>
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -411,14 +412,25 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
               {/* CTAs */}
               <div className="flex flex-wrap items-center justify-center gap-3.5 pt-2">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+                <Link
+                  href="/signup"
+                  className="px-8 py-4 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#C7F36B]/20 transition-all active:scale-95 text-center group"
+                >
+                  <span>START YOUR 7-DAY FREE TRIAL</span>
+                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
                 <button
                   type="button"
                   onClick={() => openAudit('AUDIT')}
-                  className="px-8 py-4 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#C7F36B]/20 transition-all active:scale-95 text-center cursor-pointer group"
+                  className="px-6 py-4 rounded-xl bg-[#101010] hover:bg-[#19191f] text-white border border-[#2a2a30] font-bold text-sm inline-flex items-center justify-center gap-2 transition-all cursor-pointer"
                 >
-                  <span>GET STARTED</span>
-                  <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                  <span>BOOK A FREE FOLLOW-UP DIAGNOSTIC</span>
                 </button>
+              </div>
+              <p className="text-[11px] font-mono uppercase tracking-widest text-[#C7F36B]/90 pt-1">
+                NO CREDIT CARD REQUIRED &middot; CLOSECRAFT HQ REVENUE OPERATING SYSTEM
+              </p>
 
                 <a
                   href="/guides/CloseCraft-From-Enquiry-To-Customer-Guide.pdf"
@@ -469,34 +481,32 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
           </div>
         </section>
 
-        {/* DEMO VSL SECTION: REVENUE ENGINE WALKTHROUGH (Directly after Hero) */}
-        <ExplainerVideoSection onOpenAudit={() => openAudit('AUDIT')} />
-
-        {/* INTRODUCTORY GROWTH SERVICES (Directly after VSL) */}
-        <GrowthServicesSection />
-
-        {/* SECTION 3: HOW IT WORKS */}
-        <HowItWorksProcess />
-
-        {/* SECTION 4 & 5: THE HIDDEN REVENUE LEAK & THE COST OF POOR FOLLOW-UP */}
+        {/* SECTION 2 & 3: THE PROBLEM & INTERACTIVE ROI CALCULATOR */}
         <RevenueLeakSection onOpenAuditModal={(calcData?: { leadVolume: string; monthlyLeak: string; responseTime: string }) => openAudit('AUDIT', calcData)} />
 
-        {/* SECTION 6 & 7: THE CLOSECRAFT SOLUTION & PRODUCTS THAT POWER THE SYSTEM */}
-        <ProductsShowcaseSection />
-
-        {/* SECTION 9: WHO WE HELP */}
-        <WhoWeHelpSection />
-
-        {/* SECTION 10: WHY CLOSECRAFT */}
-        <WhyCloseCraftSection />
-
-        {/* SECTION 11: PROOF AND TRUST */}
+        {/* SECTION 4: RESULTS / PROOF (Demo Case Studies & Trust Architecture) */}
+        <DemoCaseStudiesSection />
         <ProofAndTrustSection />
 
-        {/* SECTION: USER GUIDE (FROM ENQUIRY TO CUSTOMER) */}
+        {/* SECTION 5: HOW IT WORKS (Process + Walkthrough) */}
+        <HowItWorksProcess />
+        <ExplainerVideoSection onOpenAudit={() => openAudit('AUDIT')} />
+
+        {/* SECTION 6: THE 3 PRODUCTS & TARGET MARKETS */}
+        <ProductsShowcaseSection />
+        <WhoWeHelpSection />
+        <WhyCloseCraftSection />
+
+        {/* SECTION 7: GROWTH SERVICES */}
+        <GrowthServicesSection />
+
+        {/* SECTION 8: PRICING (SaaS Plans, Regional Markets, Services & Sales Enablement) */}
+        <HomepagePricingSection onOpenEnterpriseModal={() => openAudit('AUDIT')} />
+
+        {/* SECTION 9: FIELD MANUAL LEAD MAGNET */}
         <UserGuideDownloadSection />
 
-        {/* SECTION 12: FREQUENTLY ASKED QUESTIONS */}
+        {/* SECTION 10: FREQUENTLY ASKED QUESTIONS */}
         <HomepageFaqSection />
 
         {/* SECTION 13: FINAL CONVERSION SECTION */}
@@ -519,7 +529,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                 </p>
 
                 <p className="text-sm font-medium text-zinc-300">
-                  Stop allowing interested prospects to disappear into unanswered messages and forgotten callbacks. Build an accountable revenue process with CloseCraft.
+                  Stop allowing interested prospects to disappear into unanswered messages and forgotten callbacks. Build an accountable revenue process with CloseCraft HQ.
                 </p>
                 <p className="sr-only">Give your next opportunity a clear next step.</p>
               </div>
@@ -561,7 +571,10 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                   <Logo variant="full" size="md" alt="CloseCraft HQ" />
                 </Link>
                 <p className="text-xs text-[#a1a1aa] max-w-sm leading-relaxed">
-                  CloseCraft is the revenue growth platform connecting customer acquisition with consistent follow-up and sales conversion.
+                  CloseCraft HQ is the AI revenue operations, lead recovery, and fulfilment platform connecting customer acquisition with accountable sales conversion.
+                </p>
+                <p className="text-[11px] text-[#71717a]">
+                  CloseCraft HQ is a revenue operations platform for businesses. It is not affiliated with CloseCraft App.
                 </p>
                 <p className="text-[11px] text-[#71717a]">
                   Zeerocodes Automation Limited. RC 8421094.
@@ -619,7 +632,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
             </div>
 
             <div className="pt-8 border-t border-[#1f1f1f] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#71717a]">
-              <p>&copy; {new Date().getFullYear()} CloseCraft (Zeerocodes Automation Limited). All rights reserved.</p>
+              <p>&copy; {new Date().getFullYear()} CloseCraft HQ (Zeerocodes Automation Limited). All rights reserved.</p>
               <div className="flex items-center gap-4">
                 <Link href="/cookies" className="hover:text-white transition-colors">Cookie Settings</Link>
                 <span>&bull;</span>

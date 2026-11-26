@@ -1,13 +1,30 @@
 import { db } from '@/lib/db';
+import {
+  DEFAULT_SUBSCRIPTION_PLANS,
+  normalizePlanCode,
+  PlanCode,
+} from '@/lib/billing/catalog';
+import {
+  DEFAULT_GRACE_PERIOD_DAYS,
+  DEFAULT_TRIAL_DAYS,
+  getPlatformBillingPolicy,
+  normalizeSubscriptionState,
+  transitionSubscriptionState,
+} from '@/lib/billing/stateMachine';
+import {
+  assertEntitlementLimit,
+  getWorkspaceEntitlementsAndUsage,
+} from '@/lib/billing/entitlements';
 
-export const TRIAL_DURATION_HOURS = 168; // Exactly 7 days (168 hours)
+export const TRIAL_DURATION_HOURS = DEFAULT_TRIAL_DAYS * 24; // 7 days (168 hours)
 export const TRIAL_DURATION_MS = TRIAL_DURATION_HOURS * 60 * 60 * 1000;
-export const TRIAL_POLICY_VERSION = 'V2_7DAY';
+export const TRIAL_POLICY_VERSION = 'V3_7DAY_COMMERCIAL';
 
 export interface WorkspacePlanConfig {
-  id: 'STARTER' | 'PRO' | 'ENTERPRISE' | 'MANAGED_SALES';
+  id: 'STARTER' | 'GROWTH' | 'SCALE' | 'ENTERPRISE' | 'PRO' | 'MANAGED_SALES';
   name: string;
   pricePerMonth: number;
+  usdPricePerMonth?: number;
   currency: string;
   maxInternalSeats: number;
   maxActiveLeads: number;
@@ -16,87 +33,100 @@ export interface WorkspacePlanConfig {
   features: string[];
 }
 
-export const WORKSPACE_PLANS: Record<'STARTER' | 'PRO' | 'ENTERPRISE' | 'MANAGED_SALES', WorkspacePlanConfig> = {
+const starterDef = DEFAULT_SUBSCRIPTION_PLANS.find((p) => p.code === 'STARTER')!;
+const growthDef = DEFAULT_SUBSCRIPTION_PLANS.find((p) => p.code === 'GROWTH')!;
+const scaleDef = DEFAULT_SUBSCRIPTION_PLANS.find((p) => p.code === 'SCALE')!;
+const enterpriseDef = DEFAULT_SUBSCRIPTION_PLANS.find((p) => p.code === 'ENTERPRISE')!;
+
+export const WORKSPACE_PLANS: Record<string, WorkspacePlanConfig> = {
   STARTER: {
     id: 'STARTER',
     name: 'Starter',
-    pricePerMonth: 20000.0,
+    pricePerMonth: 15000.0,
+    usdPricePerMonth: 19,
     currency: 'NGN',
-    maxInternalSeats: 3,
-    maxActiveLeads: 1000, // Discrepancy resolved: configured 1,000 active leads/month
-    headline: '3 Internal Seats · 7-Day Free Trial',
-    description: 'Designed for lean service businesses looking to capture enquiries and establish structured follow-up routines.',
-    features: [
-      'Up to 3 internal team seats',
-      'Up to 1,000 active leads/month',
-      '7-day free trial (no card required)',
-      'Enquiry inbox & lead assignment',
-      'Follow-up reminders & leakage radar',
-      'Bachs.io hosted checkout (cards, bank transfer, MoMo)',
-      'Add remote sales support pilots anytime',
-    ],
+    maxInternalSeats: starterDef.entitlements.maxTeamMembers,
+    maxActiveLeads: starterDef.entitlements.maxActiveLeads,
+    headline: '2 Team Members · Up to 500 Active Leads · 7-Day Free Trial',
+    description: starterDef.description,
+    features: starterDef.featuresList,
   },
-  PRO: {
-    id: 'PRO',
-    name: 'Pro',
-    pricePerMonth: 45000.0,
+  GROWTH: {
+    id: 'GROWTH',
+    name: 'Growth',
+    pricePerMonth: 35000.0,
+    usdPricePerMonth: 49,
     currency: 'NGN',
-    maxInternalSeats: 10,
-    maxActiveLeads: 10000,
-    headline: '10 Internal Seats · High-Velocity Operations',
-    description: 'Built for growing sales organizations requiring multi-rep capacity, automated round-robin distribution, and manager coaching tools.',
-    features: [
-      'Up to 10 internal team seats',
-      'Expanded active lead capacity',
-      'Round-robin and automated lead assignment',
-      'Manager call review & coaching queue',
-      'Revenue health analytics & leakage detection',
-      'Priority WhatsApp & email notification dispatch',
-      'Dedicated pilot onboarding assistance',
-    ],
+    maxInternalSeats: growthDef.entitlements.maxTeamMembers,
+    maxActiveLeads: growthDef.entitlements.maxActiveLeads,
+    headline: 'Recommended Plan · 5 Team Members · 2,000 Active Leads',
+    description: growthDef.description,
+    features: growthDef.featuresList,
+  },
+  // Legacy PRO alias mapped cleanly to GROWTH entitlements
+  PRO: {
+    id: 'GROWTH',
+    name: 'Growth',
+    pricePerMonth: 35000.0,
+    usdPricePerMonth: 49,
+    currency: 'NGN',
+    maxInternalSeats: growthDef.entitlements.maxTeamMembers,
+    maxActiveLeads: growthDef.entitlements.maxActiveLeads,
+    headline: 'Recommended Plan · 5 Team Members · 2,000 Active Leads',
+    description: growthDef.description,
+    features: growthDef.featuresList,
+  },
+  SCALE: {
+    id: 'SCALE',
+    name: 'Scale',
+    pricePerMonth: 75000.0,
+    usdPricePerMonth: 99,
+    currency: 'NGN',
+    maxInternalSeats: scaleDef.entitlements.maxTeamMembers,
+    maxActiveLeads: scaleDef.entitlements.maxActiveLeads,
+    headline: '15 Team Members · 10,000 Active Leads · Advanced Analytics',
+    description: scaleDef.description,
+    features: scaleDef.featuresList,
   },
   ENTERPRISE: {
     id: 'ENTERPRISE',
     name: 'Enterprise',
-    pricePerMonth: 75000.0,
+    pricePerMonth: 0,
     currency: 'NGN',
-    maxInternalSeats: 25,
-    maxActiveLeads: 50000,
-    headline: 'Enterprise Operations · Expanded Capacity',
-    description: 'Larger teams needing custom integrations, expanded lead volume, and dedicated security controls.',
-    features: [
-      'Up to 25 internal team seats',
-      'Expanded active lead allowance (50,000+)',
-      'Custom CRM & ERP integrations',
-      'Dedicated onboarding & priority support',
-      'Enterprise SLA & audit export',
-    ],
+    maxInternalSeats: enterpriseDef.entitlements.maxTeamMembers,
+    maxActiveLeads: enterpriseDef.entitlements.maxActiveLeads,
+    headline: 'Custom Quotation · Multi-Workspace & Custom SLA',
+    description: enterpriseDef.description,
+    features: enterpriseDef.featuresList,
   },
   MANAGED_SALES: {
     id: 'MANAGED_SALES',
-    name: 'Managed Sales Engagement',
+    name: 'Sales Enablement & Closing',
     pricePerMonth: 150000.0,
     currency: 'NGN',
     maxInternalSeats: 10,
     maxActiveLeads: 10000,
-    headline: 'Remote Sales Support · From ₦150,000 for 30 Days',
-    description: 'Suitable businesses needing remote sales support with workspace access included in agreed engagement scope.',
+    headline: 'Performance Commission (2–15%) or Dedicated Sales Team',
+    description: 'Dedicated appointment setters, closers, or managed sales execution with configurable commission terms.',
     features: [
-      'Remote sales closers and appointment setters',
-      'Workspace access included in engagement scope',
-      'Offer economics & lead flow review',
-      'Daily activity & pipeline tracking',
+      'Appointment setting (2–5% indicative)',
+      'Sales closing (5–10% indicative)',
+      'Setting + closing (8–15% indicative)',
+      'Dedicated sales team (Custom retainer + commission)',
     ],
   },
 };
 
 export interface SubscriptionStatusInfo {
-  status: 'TRIALING' | 'ACTIVE' | 'GRACE' | 'EXPIRED' | 'PILOT_INCLUDED';
-  isOperational: boolean; // Can user perform operational CRM actions (add leads, automate, outreach)?
-  plan: string;
+  status: 'TRIALING' | 'ACTIVE' | 'PAST_DUE' | 'GRACE_PERIOD' | 'SUSPENDED' | 'CANCELLED' | 'EXPIRED' | 'PILOT_INCLUDED' | 'GRACE';
+  isOperational: boolean;
+  plan: PlanCode;
+  planName: string;
   pricePerMonth: number;
   currency: string;
   billingMode: string;
+  billingInterval: string;
+  marketRegion: string;
   trialStartedAt: Date;
   trialEndsAt: Date;
   trialPolicyVersion: string;
@@ -104,35 +134,40 @@ export interface SubscriptionStatusInfo {
   trialHoursLeft: number;
   paidThroughDate: Date | null;
   gracePeriodEndsAt: Date | null;
+  gracePeriodDays: number;
+  cancelAtPeriodEnd: boolean;
+  cancelledAt: Date | null;
   activePilotEngagementId: string | null;
   maxInternalSeats: number;
   internalSeatsUsed: number;
   maxActiveLeads: number;
   activeLeadsCount: number;
+  usageSummary: Awaited<ReturnType<typeof getWorkspaceEntitlementsAndUsage>>;
 }
 
 /**
- * Gets or initializes the 7-day Starter trial workspace subscription.
- * Idempotent: never overwrites or resets existing trial dates.
+ * Gets or initializes the configurable 7-day Starter trial workspace subscription.
+ * Idempotent: never resets trial dates or erases customer data on expiry.
  */
 export async function getOrCreateWorkspaceSubscription(organizationId: string): Promise<SubscriptionStatusInfo> {
   const now = new Date();
+  const policy = await getPlatformBillingPolicy();
 
-  // Check if an active pilot engagement exists for this organization
   const activePilot = await db.pilotEngagement.findFirst({
     where: {
       organizationId,
-      status: { in: ['ACTIVE', 'SCHEDULED'] }
-    }
+      status: { in: ['ACTIVE', 'SCHEDULED'] },
+    },
   });
 
   let sub = await db.workspaceSubscription.findUnique({
-    where: { organizationId }
+    where: { organizationId },
   });
 
   if (!sub) {
-    // 7-day trial = exactly 168 hours from server creation in UTC
-    const trialEnd = new Date(now.getTime() + TRIAL_DURATION_MS);
+    const trialMs = (policy.trialDays || DEFAULT_TRIAL_DAYS) * 24 * 60 * 60 * 1000;
+    const trialEnd = new Date(now.getTime() + trialMs);
+
     sub = await db.workspaceSubscription.create({
       data: {
         organizationId,
@@ -140,46 +175,69 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
         trialStartedAt: now,
         trialEndsAt: trialEnd,
         plan: 'STARTER',
-        pricePerMonth: 20000.0,
+        pricePerMonth: 15000.0,
         currency: 'NGN',
         billingMode: 'MANUAL_MONTHLY',
-        maxInternalSeats: 3,
+        billingInterval: 'MONTHLY',
+        marketRegion: 'NG',
+        gracePeriodDays: policy.gracePeriodDays || DEFAULT_GRACE_PERIOD_DAYS,
+        maxInternalSeats: 2,
         activePilotEngagementId: activePilot ? activePilot.id : null,
-      }
+      },
     });
+
+    await db.subscriptionEvent.create({
+      data: {
+        organizationId,
+        subscriptionId: sub.id,
+        eventType: 'TRIAL_STARTED',
+        toStatus: sub.status,
+        toPlan: 'STARTER',
+        actorType: 'SYSTEM',
+        reason: `${policy.trialDays}-day free trial initialized (no credit card required)`,
+      },
+    }).catch(() => {});
   }
 
-  // If active pilot engagement exists, status is PILOT_INCLUDED
+  // Sync Pilot link
   if (activePilot && sub.status !== 'PILOT_INCLUDED') {
-    sub = await db.workspaceSubscription.update({
-      where: { organizationId },
-      data: {
-        status: 'PILOT_INCLUDED',
-        activePilotEngagementId: activePilot.id,
-      }
+    sub = await transitionSubscriptionState({
+      organizationId,
+      toStatus: 'PILOT_INCLUDED',
+      eventType: 'PILOT_ACTIVATED',
+      actorType: 'SYSTEM',
+      updateFields: { activePilotEngagementId: activePilot.id },
+      bypassTransitionGuard: true,
     });
   } else if (!activePilot && sub.status === 'PILOT_INCLUDED') {
-    // If pilot finished, transition to trial or grace
     const isTrialValid = sub.trialEndsAt > now;
-    sub = await db.workspaceSubscription.update({
-      where: { organizationId },
-      data: {
-        status: isTrialValid ? 'TRIALING' : (sub.paidThroughDate && sub.paidThroughDate > now ? 'ACTIVE' : 'EXPIRED'),
-        activePilotEngagementId: null,
-      }
+    const fallbackStatus = isTrialValid
+      ? 'TRIALING'
+      : sub.paidThroughDate && sub.paidThroughDate > now
+      ? 'ACTIVE'
+      : 'EXPIRED';
+    sub = await transitionSubscriptionState({
+      organizationId,
+      toStatus: fallbackStatus,
+      eventType: 'PILOT_ENDED',
+      actorType: 'SYSTEM',
+      updateFields: { activePilotEngagementId: null },
+      bypassTransitionGuard: true,
     });
   }
 
-  // Calculate current effective status
-  let effectiveStatus: 'TRIALING' | 'ACTIVE' | 'GRACE' | 'EXPIRED' | 'PILOT_INCLUDED' = sub.status as any;
+  let effectiveStatus = normalizeSubscriptionState(sub.status);
   let isOperational = true;
 
   if (effectiveStatus === 'PILOT_INCLUDED') {
     isOperational = true;
   } else if (effectiveStatus === 'ACTIVE') {
     if (sub.paidThroughDate && sub.paidThroughDate < now) {
-      if (sub.gracePeriodEndsAt && sub.gracePeriodEndsAt > now) {
-        effectiveStatus = 'GRACE';
+      if (sub.cancelAtPeriodEnd) {
+        effectiveStatus = 'CANCELLED';
+        isOperational = false;
+      } else if (sub.gracePeriodEndsAt && sub.gracePeriodEndsAt > now) {
+        effectiveStatus = 'GRACE_PERIOD';
         isOperational = true;
       } else {
         effectiveStatus = 'EXPIRED';
@@ -187,6 +245,14 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
       }
     } else {
       isOperational = true;
+    }
+  } else if (effectiveStatus === 'PAST_DUE' || effectiveStatus === 'GRACE_PERIOD') {
+    if (sub.gracePeriodEndsAt && sub.gracePeriodEndsAt > now) {
+      effectiveStatus = 'GRACE_PERIOD';
+      isOperational = true;
+    } else {
+      effectiveStatus = 'EXPIRED';
+      isOperational = false;
     }
   } else if (effectiveStatus === 'TRIALING') {
     if (sub.trialEndsAt <= now) {
@@ -200,8 +266,16 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
     } else {
       isOperational = true;
     }
-  } else if (effectiveStatus === 'EXPIRED') {
-    if (sub.paidThroughDate && sub.paidThroughDate > now) {
+  } else if (effectiveStatus === 'CANCELLED') {
+    if (sub.paidThroughDate && sub.paidThroughDate > now && !sub.cancelledAt) {
+      isOperational = true;
+    } else if (sub.cancelAtPeriodEnd && sub.paidThroughDate && sub.paidThroughDate > now) {
+      isOperational = true;
+    } else {
+      isOperational = false;
+    }
+  } else if (effectiveStatus === 'SUSPENDED' || effectiveStatus === 'EXPIRED') {
+    if (effectiveStatus === 'EXPIRED' && sub.paidThroughDate && sub.paidThroughDate > now) {
       effectiveStatus = 'ACTIVE';
       isOperational = true;
     } else {
@@ -213,33 +287,19 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
   const trialHoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
   const trialDaysLeft = Math.floor(trialHoursLeft / 24);
 
-  // Count internal members
-  const internalSeatsUsed = await db.organizationMember.count({
-    where: {
-      organizationId,
-      role: { not: 'EXTERNAL_PROFESSIONAL' },
-    },
-  });
-
-  // Count active leads (excluding terminal WON/LOST/DISQUALIFIED deals)
-  const activeLeadsCount = await db.lead.count({
-    where: {
-      organizationId,
-      status: { notIn: ['WON', 'LOST', 'DISQUALIFIED'] },
-    },
-  });
-
-  const planKey = (sub.plan?.toUpperCase() || 'STARTER') as keyof typeof WORKSPACE_PLANS;
-  const planConfig = WORKSPACE_PLANS[planKey] || WORKSPACE_PLANS.STARTER;
-  const maxActiveLeads = planConfig.maxActiveLeads || 1000;
+  const usageSummary = await getWorkspaceEntitlementsAndUsage(organizationId);
+  const planCode = normalizePlanCode(sub.plan);
 
   return {
     status: effectiveStatus,
     isOperational,
-    plan: sub.plan,
+    plan: planCode,
+    planName: usageSummary.planName,
     pricePerMonth: sub.pricePerMonth,
     currency: sub.currency,
     billingMode: sub.billingMode,
+    billingInterval: sub.billingInterval || 'MONTHLY',
+    marketRegion: sub.marketRegion || 'NG',
     trialStartedAt: sub.trialStartedAt,
     trialEndsAt: sub.trialEndsAt,
     trialPolicyVersion: TRIAL_POLICY_VERSION,
@@ -247,61 +307,55 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
     trialHoursLeft,
     paidThroughDate: sub.paidThroughDate,
     gracePeriodEndsAt: sub.gracePeriodEndsAt,
+    gracePeriodDays: sub.gracePeriodDays || DEFAULT_GRACE_PERIOD_DAYS,
+    cancelAtPeriodEnd: Boolean(sub.cancelAtPeriodEnd),
+    cancelledAt: sub.cancelledAt,
     activePilotEngagementId: sub.activePilotEngagementId,
-    maxInternalSeats: sub.maxInternalSeats || 3,
-    internalSeatsUsed,
-    maxActiveLeads,
-    activeLeadsCount,
+    maxInternalSeats: usageSummary.entitlements.maxTeamMembers,
+    internalSeatsUsed: usageSummary.usage.teamMembers,
+    maxActiveLeads: usageSummary.entitlements.maxActiveLeads + usageSummary.credits.leads,
+    activeLeadsCount: usageSummary.usage.activeLeads,
+    usageSummary,
   };
 }
 
 /**
- * Asserts that the workspace is currently operational (active trial, active subscription, or pilot included).
- * At server time >= trialEndsAt, an unpaid workspace no longer receives trial access.
- * Throws an explicit error without altering existing data.
+ * Asserts that the workspace is currently operational.
+ * Never deletes or hides existing customer data when expired.
  */
 export async function assertWorkspaceOperational(organizationId: string): Promise<SubscriptionStatusInfo> {
   const sub = await getOrCreateWorkspaceSubscription(organizationId);
   if (!sub.isOperational) {
-    throw new Error('Your free trial has ended. Choose a plan to continue using paid features. You can still access your account and billing options.');
+    throw new Error('Your free trial or paid billing period has ended. Choose a plan in Billing to resume new automated operations — all your existing records remain safe and accessible.');
   }
   return sub;
 }
 
 /**
- * Asserts that the workspace has not exceeded its plan active-lead allowance.
- * Starter tier is bounded at 1,000 active leads.
+ * Backend enforcement for active-lead allowance (Starter 500, Growth 2,000, Scale 10,000, Enterprise custom).
  */
 export async function assertWithinLeadAllowance(organizationId: string): Promise<void> {
-  const sub = await getOrCreateWorkspaceSubscription(organizationId);
-  if (sub.activeLeadsCount >= sub.maxActiveLeads) {
-    throw new Error(`Starter workspace active-lead allowance reached (${sub.activeLeadsCount}/${sub.maxActiveLeads} leads). Please upgrade to Pro to continue adding leads.`);
-  }
+  await assertEntitlementLimit(organizationId, 'LEADS');
 }
 
-/**
- * Calculates next paid through date for calendar month renewal.
- * Early renewal extends the existing paid-through date.
- * Renewal after expiry starts 1 calendar month from current confirmation.
- */
-export function calculateNextPaidThroughDate(currentPaidThroughDate: Date | null, durationMonths: number = 1): {
+export function calculateNextPaidThroughDate(
+  currentPaidThroughDate: Date | null,
+  durationMonths: number = 1,
+  gracePeriodDays: number = DEFAULT_GRACE_PERIOD_DAYS
+): {
   nextPaidThroughDate: Date;
   gracePeriodEndsAt: Date;
 } {
   const now = new Date();
-  let baseDate: Date;
-
-  if (currentPaidThroughDate && currentPaidThroughDate > now) {
-    baseDate = new Date(currentPaidThroughDate);
-  } else {
-    baseDate = new Date(now);
-  }
+  const baseDate = currentPaidThroughDate && currentPaidThroughDate > now
+    ? new Date(currentPaidThroughDate)
+    : new Date(now);
 
   const nextPaidThroughDate = new Date(baseDate);
   nextPaidThroughDate.setMonth(nextPaidThroughDate.getMonth() + durationMonths);
 
   const gracePeriodEndsAt = new Date(nextPaidThroughDate);
-  gracePeriodEndsAt.setDate(gracePeriodEndsAt.getDate() + 7); // 7-day grace period
+  gracePeriodEndsAt.setDate(gracePeriodEndsAt.getDate() + gracePeriodDays);
 
   return { nextPaidThroughDate, gracePeriodEndsAt };
 }

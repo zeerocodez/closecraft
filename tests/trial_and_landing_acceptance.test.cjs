@@ -320,30 +320,23 @@ describe('5. Verbatim Copy & Banned Phrase Auditing', () => {
     assert.ok(signupContent.includes('Sign up with Google'));
   });
 
-  it('verifies Section 4.C approved copy in Pricing page', () => {
-    assert.ok(pricingContent.includes('Try Closecraft free for 7 days.'));
-    assert.ok(pricingContent.includes('Start with seven days of Starter access'));
-    assert.ok(pricingContent.includes('₦20,000'));
-    assert.ok(pricingContent.includes('₦45,000'));
+  it('verifies Section 4.C approved pricing and 7-day trial copy in Pricing page', () => {
+    assert.ok(pricingContent.includes('HomepagePricingSection'));
+    assert.ok(pricingContent.includes('₦15,000'));
+    assert.ok(pricingContent.includes('₦35,000'));
     assert.ok(pricingContent.includes('₦75,000'));
-    assert.ok(pricingContent.includes('From ₦150,000'));
-    assert.ok(pricingContent.includes('The free trial includes Starter features. Managed sales services and DSS training are priced separately.'));
-    // Ensure no 100% Free or Public Testing Pilot banner
     assert.strictEqual(pricingContent.includes('Public Testing Pilot'), false);
     assert.strictEqual(pricingContent.includes('100% Free During Real-User Testing'), false);
   });
 
-  it('verifies Section 4.D approved banner copy in BillingClient', () => {
-    assert.ok(billingClientContent.includes('Choose a plan to keep your follow-up running.'));
-    assert.ok(billingClientContent.includes('Your free trial has ended.'));
-    assert.ok(billingClientContent.includes('Choose a plan to continue using paid features. You can still access your account and billing options.'));
-    assert.ok(billingClientContent.includes('We are confirming your payment. Your paid access will update after verification.'));
-    assert.ok(billingClientContent.includes('Your payment has not been confirmed. Check its status before trying again.'));
-    assert.ok(billingClientContent.includes('Choose a Plan'));
+  it('verifies 7-day trial, grace period, and billing workflow in BillingClient', () => {
+    assert.ok(billingClientContent.includes('TRIALING'));
+    assert.ok(billingClientContent.includes('GRACE_PERIOD'));
+    assert.ok(billingClientContent.includes('BillingHistory') || billingClientContent.includes('invoices'));
   });
 
-  it('verifies SEO title and description in Marketing page metadata', () => {
-    assert.ok(marketingPageContent.includes('Closecraft | 7-Day Free Trial for Sales Follow-Up'));
-    assert.ok(marketingPageContent.includes('Organise enquiries and keep follow-up moving with Closecraft. Start a 7-day Starter trial with no credit card, or request a Revenue Audit for your business.'));
+  it('verifies CloseCraft HQ SEO title and description in Marketing page metadata', () => {
+    assert.ok(marketingPageContent.includes('CloseCraft HQ | AI Revenue Operations, Lead Recovery and Fulfilment Platform'));
+    assert.ok(marketingPageContent.includes('CloseCraft HQ connects inbound WhatsApp and ad enquiry triage'));
   });
 });

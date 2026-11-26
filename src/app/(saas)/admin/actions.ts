@@ -6,20 +6,18 @@ import { revalidatePath } from 'next/cache';
 
 async function requireAdmin() {
   const session = await auth();
-  if (!session?.user) {
+  if (!session?.user?.id) {
     throw new Error('Unauthorized');
   }
 
-  // Check if user has an ADMIN role in any organization
-  const membership = await db.organizationMember.findFirst({
-    where: {
-      userId: session.user.id,
-      role: 'ADMIN',
-    },
+  // Enforce strict SUPER_ADMIN / OPERATOR platform authorization (never workspace ADMIN)
+  const dbUser = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
   });
 
-  if (!membership) {
-    throw new Error('Forbidden: Platform admin privileges required');
+  if (!dbUser || (dbUser.role !== 'SUPER_ADMIN' && dbUser.role !== 'OPERATOR')) {
+    throw new Error('Forbidden: Superadmin privileges required');
   }
 
   return session;
@@ -67,7 +65,7 @@ export async function setPendingOrganization(organizationId: string) {
 export async function updateOrganizationPlan(organizationId: string, plan: string) {
   await requireAdmin();
 
-  const validPlans = ['STARTER', 'GROWTH', 'SCALE'];
+  const validPlans = ['STARTER', 'GROWTH', 'SCALE', 'ENTERPRISE'];
   if (!validPlans.includes(plan)) {
     throw new Error('Invalid plan selected');
   }

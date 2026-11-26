@@ -19,6 +19,9 @@ export interface CreateProposalInput {
   scopeSummary: string;
   estimatedDays?: number;
   validDays?: number;
+  discountAmount?: number;
+  taxRatePercent?: number;
+  termsAndConditions?: string;
   lineItems: CreateProposalLineItemInput[];
 }
 
@@ -56,7 +59,18 @@ export function generateProjectInvoiceNumber(): string {
  * Can be authored by the assigned professional or platform operator.
  */
 export async function createProjectProposal(input: CreateProposalInput) {
-  const { projectRequestId, createdById, title, scopeSummary, estimatedDays = 14, validDays = 14, lineItems } = input;
+  const {
+    projectRequestId,
+    createdById,
+    title,
+    scopeSummary,
+    estimatedDays = 14,
+    validDays = 14,
+    discountAmount = 0,
+    taxRatePercent = 0,
+    termsAndConditions,
+    lineItems,
+  } = input;
 
   if (!lineItems || lineItems.length === 0) {
     throw new Error('A proposal must contain at least one line item deliverable.');
@@ -76,12 +90,12 @@ export async function createProjectProposal(input: CreateProposalInput) {
   }
 
   // Calculate financials server-side
-  let totalAmount = 0;
+  let subtotalAmount = 0;
   const processedLineItems = lineItems.map((item, idx) => {
     const qty = item.quantity && item.quantity > 0 ? item.quantity : 1;
     const unitPrice = Math.max(0, Number(item.unitPrice) || 0);
     const totalPrice = qty * unitPrice;
-    totalAmount += totalPrice;
+    subtotalAmount += totalPrice;
 
     return {
       serviceType: item.serviceType,
@@ -94,6 +108,12 @@ export async function createProjectProposal(input: CreateProposalInput) {
       sortOrder: idx + 1,
     };
   });
+
+  const cleanDiscount = Math.min(subtotalAmount, Math.max(0, Number(discountAmount) || 0));
+  const taxableBase = Math.max(0, subtotalAmount - cleanDiscount);
+  const cleanTaxRate = Math.min(50, Math.max(0, Number(taxRatePercent) || 0));
+  const taxAmount = Math.round(((taxableBase * cleanTaxRate) / 100) * 100) / 100;
+  const totalAmount = Math.round((taxableBase + taxAmount) * 100) / 100;
 
   if (totalAmount <= 0) {
     throw new Error('Total proposal amount must be greater than zero NGN.');
@@ -113,7 +133,11 @@ export async function createProjectProposal(input: CreateProposalInput) {
         title: title.trim(),
         scopeSummary: scopeSummary.trim(),
         totalAmount,
+        discountAmount: cleanDiscount,
+        taxRatePercent: cleanTaxRate,
+        taxAmount,
         currency: 'NGN',
+        termsAndConditions: termsAndConditions?.trim() || 'Milestone delivery upon verified payment via Bachs.io.',
         status: 'SENT',
         estimatedDays,
         validUntil,

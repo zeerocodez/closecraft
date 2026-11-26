@@ -49,6 +49,8 @@ export default function OnboardingWizardClient({
 
   // Step 1: Essential Workspace Setup
   const [wsName, setWsName] = useState(organizationName || 'My Workspace');
+  const [wsIndustry, setWsIndustry] = useState('Real Estate & Property');
+  const [wsBusinessType, setWsBusinessType] = useState('B2C High-Ticket');
   const [wsCurrency, setWsCurrency] = useState(initialQualification?.currency || 'NGN');
   const [teamSize, setTeamSize] = useState<'SOLO' | 'SMALL_TEAM' | 'GROWING'>('SOLO');
   const [channels, setChannels] = useState<string[]>(['WhatsApp', 'Website forms']);
@@ -383,6 +385,40 @@ export default function OnboardingWizardClient({
         </div>
       )}
 
+      {step < 5 && (
+        <div className="p-3.5 rounded-2xl bg-surface-container-low/80 border border-outline-variant/25 space-y-2">
+          <div className="flex items-center justify-between text-[11px]">
+            <span className="font-bold uppercase tracking-wider text-on-surface-variant">10-Step CloseCraft HQ Launch Checklist</span>
+            <span className="font-mono text-primary font-semibold">Interactive Setup</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5 text-[10px]">
+            {[
+              { label: '1. Business Profile', done: Boolean(wsName) },
+              { label: '2. Industry', done: Boolean(wsIndustry) },
+              { label: '3. Business Type', done: Boolean(wsBusinessType) },
+              { label: '4. Intended Use', done: step > 2 },
+              { label: '5. Lead Sources', done: step > 3 },
+              { label: '6. Team Invite (/team)', done: false },
+              { label: '7. Channel Connect (/settings)', done: false },
+              { label: '8. 7-Day Trial / Plan (/billing)', done: false },
+              { label: '9. First Lead Import (/recovery)', done: false },
+              { label: '10. First Follow-up Workflow', done: false },
+            ].map((item) => (
+              <span
+                key={item.label}
+                className={`px-2 py-0.5 rounded-full border ${
+                  item.done
+                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                    : 'bg-surface-container border-outline-variant/25 text-on-surface-variant'
+                }`}
+              >
+                {item.done ? '✓ ' : ''}{item.label}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* STEP 1: ESSENTIAL WORKSPACE SETUP */}
       {step === 1 && (
         <div className="space-y-6 animate-in fade-in duration-200">
@@ -405,6 +441,36 @@ export default function OnboardingWizardClient({
                 placeholder="e.g. Sterling Properties"
                 className="w-full py-2.5 px-3 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/30 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
               />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface">Industry</label>
+              <select
+                value={wsIndustry}
+                onChange={(e) => setWsIndustry(e.target.value)}
+                className="w-full py-2.5 px-3 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/30 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="Real Estate & Property">Real Estate &amp; Property</option>
+                <option value="Education & Training">Education &amp; Training Institutes</option>
+                <option value="Professional Services">Professional Services &amp; Agencies</option>
+                <option value="Healthcare & Wellness">Healthcare &amp; Medical</option>
+                <option value="E-Commerce & Retail">High-Value E-Commerce</option>
+                <option value="Technology & SaaS">Technology &amp; SaaS</option>
+              </select>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-on-surface">Business Model</label>
+              <select
+                value={wsBusinessType}
+                onChange={(e) => setWsBusinessType(e.target.value)}
+                className="w-full py-2.5 px-3 rounded-xl bg-surface-container-low text-on-surface border border-outline-variant/30 text-xs focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="B2C High-Ticket">B2C Consultations / High-Ticket</option>
+                <option value="B2B Sales">B2B Service / Enterprise Sales</option>
+                <option value="Admissions & Cohort">Student Admissions / Cohorts</option>
+                <option value="WhatsApp & Social Commerce">WhatsApp &amp; Social Selling</option>
+              </select>
             </div>
 
             <div className="space-y-1">

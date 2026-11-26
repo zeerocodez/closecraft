@@ -1,34 +1,34 @@
-# CloseCraft — AI Revenue Operating System
-> Multi-tenant AI revenue recovery and sales execution platform for B2B enterprises, consulting firms, agencies, and high-ticket service providers.
+# CloseCraft HQ — AI Revenue Operations, Lead Recovery & Fulfilment Platform
+> Multi-tenant AI revenue operations platform connecting customer acquisition, consistent WhatsApp & ad follow-up, dormant lead recovery, quotation-based growth services, and human closing capacity.
 
 [![CI / Build Status](https://img.shields.io/badge/Build-Passing-emerald)](https://closecrafthq.com)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.4.6_App_Router-black)](https://nextjs.org/)
 [![Database](https://img.shields.io/badge/Prisma-PostgreSQL_Supabase-38bdf8)](https://prisma.io)
+[![Payments](https://img.shields.io/badge/Billing-Bachs.io-indigo)](https://bachs.io)
 [![Multi-Tenant](https://img.shields.io/badge/Multi--Tenancy-Strict_Server_Isolation-purple)](#multi-tenant-architecture)
 
----
-
-## 1. Executive Summary & Value Proposition
-
-In high-ticket B2B services, up to **67% of inbound commercial enquiries leak away** due to delayed first touch, unstandardized qualification, lack of human closer assignment, and non-existent follow-up discipline.
-
-CloseCraft bridges the gap between receiving an enquiry and converting it into realized revenue:
-1. **Multi-Tenant Inbound Capture:** Automatically ingests enquiries from official **WhatsApp Business Platform**, **Meta Lead Ads (Facebook & Instagram)**, and embeddable **Website Widgets** with cryptographic signature verification.
-2. **Canonical AI Qualification:** Standardizes lead evaluation into four objective signals (**Intent, Fit, Urgency, Value**) without fabricating unstated budgets or hallucinating decision timelines.
-3. **Prescriptive Next Best Action:** Answers *"What needs attention right now?"* for sales teams, assigning each action to the appropriate actor: **AI**, **Automation**, **Human Closer**, or **System**.
-4. **Sales Rep Dispatch & Fair Routing:** Automatically routes qualified opportunities to certified Closers and Setters via round-robin, scheduling discovery calls with automatic meeting links.
-5. **Revenue Leakage Prevention:** Continuously monitors pipeline deals and response SLAs, alerting management to stalled deals and at-risk revenue before opportunities are permanently lost.
-6. **Financial Distinction:** Strictly separates **prospect-stated budgets**, **AI opportunity estimates**, **signed contract values**, and **verified realised cash collections** (Bachs / Paystack).
+> **Disclaimer:** CloseCraft HQ is a revenue operations platform for businesses by Zeerocodes Automation Limited (RC 8421094). It is not affiliated with CloseCraft App.
 
 ---
 
-## 2. Target Market
+## 1. Executive Summary & Commercial Streams
 
-* **Consulting Practices & Advisory Firms:** Management consultants, legal practices, accounting and audit firms handling retainers between ₦1.5M and ₦15M.
-* **B2B Digital Agencies:** Software engineering, growth marketing, and digital transformation agencies with high-value inbound enquiries.
-* **Corporate Training Academies:** Professional bootcamps and executive education programs requiring disciplined qualification and enrolment tracking.
-* **High-Ticket Sales Teams:** Distributed sales forces in Nigeria, Kenya, Ghana, and broader emerging markets operating primarily over WhatsApp and direct calls.
+CloseCraft HQ unifies **four connected commercial streams** on one multi-tenant PostgreSQL/Prisma architecture:
+1. **Revenue Engine SaaS Subscriptions (Workspace & Capacity Pricing):** Regional pricing in NGN, USD, GBP, and CAD (`Starter` ₦15k/$19, `Growth Recommended` ₦35k/$49, `Scale` ₦75k/$99, `Enterprise` custom quote) with 7-day no-card trials, 5-day grace periods, monthly/annual billing (~2 months free), usage metering, and opt-in prepaid usage credits via **Bachs.io**.
+2. **Introductory Growth Services (Quotation-Based):** Consolidated project briefs for Meta/IG Ads, AI Image Flyers, AI Videos, Landing Pages, and VSL Production with itemized discounts/taxes, invoices, and downloadable receipts.
+3. **Lead Recovery Campaigns:** Historical spreadsheet/chat ingestion, opt-out filtering, tiered pricing (`₦25k` / `₦50k` / `₦100k` / Custom), human approval gating, and honest `interestedCount` vs verified `WON` attribution.
+4. **Sales Enablement & Digital Sales School (DSS):** Trained sales capacity under structured commission tiers (`2%–5%`, `5%–10%`, `8%–15%`, Retainer+Commission), accrued strictly upon verified Bachs.io payments with Maker-Checker approvals and refund reversals.
+
+See [`docs/COMMERCIAL_ARCHITECTURE_AND_CONFIRMATION_CHECKLIST.md`](docs/COMMERCIAL_ARCHITECTURE_AND_CONFIRMATION_CHECKLIST.md) for the full commercial architecture, readiness status matrix, and owner launch confirmations.
+
+---
+
+## 2. Target Markets
+
+* **Real Estate & Property (Primary Launch Market — Lagos, Nigeria First):** Builders, estate developers, and brokerages preventing weekend/WhatsApp buyer leakage and lost inspection bookings.
+* **Education & Training Institutes (Primary Launch Market — Lagos, Nigeria First):** Academies, tech bootcamps, and certification centres turning prospective student enquiries into verified enrolments.
+* **Also Built For:** Clinics & wellness practices, solar/clean energy firms, luxury retail & auto dealers, B2B consulting/agencies, legal/advisory practices, and travel/hospitality teams globally.
 
 ---
 

@@ -15,6 +15,7 @@ import {
   updateClientServiceStatusAction,
   updateServiceRequestStageAction
 } from './actions';
+import CommercialControlPanel from '@/components/admin/CommercialControlPanel';
 
 export type OrgWithDetails = {
   id: string;
@@ -143,6 +144,7 @@ interface AdminDashboardClientProps {
   serviceRequests?: any[];
   closecraftAffiliates?: any[];
   closecraftPayouts?: any[];
+  commercialAnalytics?: any;
 }
 
 export default function AdminDashboardClient({ 
@@ -156,9 +158,10 @@ export default function AdminDashboardClient({
   closecraftAffiliates = [],
   closecraftPayouts = [],
   stats, 
-  finances 
+  finances,
+  commercialAnalytics,
 }: AdminDashboardClientProps) {
-  const [activeTab, setActiveTab] = useState<'finance' | 'orgs' | 'services' | 'affiliates' | 'users' | 'create'>('finance');
+  const [activeTab, setActiveTab] = useState<'finance' | 'commercial' | 'orgs' | 'services' | 'affiliates' | 'users' | 'create'>('commercial');
   const [currency, setCurrency] = useState<'NGN' | 'USD'>('NGN');
   const [statusFilter, setStatusFilter] = useState<'ALL' | 'PENDING' | 'APPROVED' | 'SUSPENDED'>('ALL');
   const [requestFilter, setRequestFilter] = useState<'ALL' | 'EARLY_ACCESS' | 'LEAD_GENERATION' | 'MANAGED_SALES' | 'TEAM_TRAINING'>('ALL');
@@ -378,6 +381,18 @@ export default function AdminDashboardClient({
       {/* Primary Navigation Tabs */}
       <div className="flex items-center gap-1 sm:gap-2 border-b border-outline-variant/30 overflow-x-auto pb-1">
         <button
+          onClick={() => setActiveTab('commercial')}
+          className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+            activeTab === 'commercial'
+              ? 'border-primary text-primary'
+              : 'border-transparent text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          <span className="material-symbols-outlined text-[18px]">tune</span>
+          <span>Commercial &amp; Billing Control</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('finance')}
           className={`flex items-center gap-2 px-4 py-2.5 border-b-2 text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
             activeTab === 'finance'
@@ -459,6 +474,11 @@ export default function AdminDashboardClient({
           <span>Onboard Client</span>
         </button>
       </div>
+
+      {/* TAB 0: SUPERADMIN COMMERCIAL CONTROL CENTRE */}
+      {activeTab === 'commercial' && commercialAnalytics && (
+        <CommercialControlPanel analytics={commercialAnalytics} />
+      )}
 
       {/* TAB 1: REVENUE & FINANCIAL INTELLIGENCE */}
       {activeTab === 'finance' && (

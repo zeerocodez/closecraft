@@ -40,6 +40,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Campaign name and targetSegment are required' }, { status: 400 });
     }
 
+    const { assertEntitlementLimit, recordMeteredUsage } = await import('@/lib/billing/entitlements');
+    await assertEntitlementLimit(organizationId, 'CAMPAIGNS');
+
     const result = await createReactivationCampaign({
       organizationId,
       userId: session.user.id,
@@ -47,8 +50,16 @@ export async function POST(req: Request) {
       targetSegment: body.targetSegment,
       channel: body.channel || 'WHATSAPP',
       tone: body.tone || 'PROFESSIONAL',
-      customMessagePrompt: body.customMessagePrompt
+      customMessagePrompt: body.customMessagePrompt,
+      leadSource: body.leadSource,
+      consentConfirmed: Boolean(body.consentConfirmed),
     });
+
+    await recordMeteredUsage({
+      organizationId,
+      type: 'CAMPAIGN',
+      units: 1,
+    }).catch(() => {});
 
     return NextResponse.json({ success: true, ...result });
   } catch (err: any) {

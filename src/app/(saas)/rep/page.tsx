@@ -177,11 +177,35 @@ export default async function RepDashboardPage() {
     ]
   });
 
+  // Fetch Sales Engagement Agreements & Verified Sales Commission Records
+  const isOrgManager = ['OWNER', 'ADMIN'].includes(membership.role);
+  const [salesAgreements, salesCommissions] = await Promise.all([
+    db.salesEngagementAgreement.findMany({
+      where: {
+        organizationId,
+        ...(isOrgManager ? {} : { representativeUserId: userId }),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    }),
+    db.salesCommissionRecord.findMany({
+      where: {
+        organizationId,
+        ...(isOrgManager ? {} : { representativeUserId: userId }),
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    }),
+  ]);
+
   // Compute metrics
   const activeLeadsCount = leads.filter(l => l.status !== 'CLOSED').length;
   const wonDeals = deals.filter(d => d.stage === 'WON');
   const pipelineValue = deals.filter(d => d.stage !== 'WON' && d.stage !== 'LOST').reduce((sum, d) => sum + d.amount, 0);
-  const totalCommission = wonDeals.reduce((sum, d) => sum + (d.commissionAmount || 0), 0);
+  const verifiedSalesCommissionTotal = salesCommissions
+    .filter((c) => c.status !== 'REVERSED' && c.status !== 'DISPUTED')
+    .reduce((sum, c) => sum + c.commissionAmount, 0);
+  const totalCommission = wonDeals.reduce((sum, d) => sum + (d.commissionAmount || 0), 0) + verifiedSalesCommissionTotal;
   const pendingPayout = wonDeals.filter(d => d.commissionStatus === 'PENDING').reduce((sum, d) => sum + (d.commissionAmount || 0), 0);
 
   return (
@@ -193,6 +217,26 @@ export default async function RepDashboardPage() {
       appointments={appointments}
       teamMembers={teamMembers}
       deliveryTasks={assignedDeliveryTasks as any}
+      salesAgreements={salesAgreements.map((a) => ({
+        id: a.id,
+        tierCode: a.serviceType,
+        engagementModel: a.commissionModel,
+        commissionRatePct: a.combinedRate || a.closingRate || a.appointmentSettingRate,
+        monthlyRetainer: a.monthlyRetainerAmount || 0,
+        currency: a.currency,
+        status: a.status,
+      }))}
+      salesCommissions={salesCommissions.map((c) => ({
+        id: c.id,
+        verifiedRevenueAmount: c.verifiedPaymentAmount,
+        commissionRatePct: c.commissionRatePercent,
+        commissionAmount: c.commissionAmount,
+        currency: c.currency,
+        status: c.status,
+        verifiedAt: c.paidAt ? c.paidAt.toISOString() : null,
+        notes: c.payoutReference || c.reversalReason || c.disputeReason || c.commissionType,
+        createdAt: c.createdAt.toISOString(),
+      }))}
       metrics={{
         activeLeadsCount,
         wonDealsCount: wonDeals.length,
