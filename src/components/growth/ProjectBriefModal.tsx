@@ -753,7 +753,7 @@ export default function ProjectBriefModal({
               <div className="p-6 rounded-2xl bg-[#141414] border border-[#222222] text-left max-w-lg mx-auto space-y-4">
                 <h5 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                   <Clock size={14} className="text-[#45bfae]" />
-                  What Happens Next (Under 30 Minutes SLA)
+                  What Happens Next (Under 30 Minutes Response SLA — Service Level Agreement)
                 </h5>
 
                 <ol className="space-y-3 text-xs text-[#a1a1aa]">

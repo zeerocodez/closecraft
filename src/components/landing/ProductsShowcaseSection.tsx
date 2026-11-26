@@ -135,7 +135,7 @@ export default function ProductsShowcaseSection() {
                   </div>
                   <div className="flex items-center gap-2 text-zinc-200">
                     <CheckCircle2 size={13} className="text-[#45bfae] shrink-0" />
-                    <span>Strict Follow-Up SLA Countdowns</span>
+                    <span>Strict Follow-Up Response Deadlines (SLAs)</span>
                   </div>
                   <div className="flex items-center gap-2 text-zinc-200">
                     <CheckCircle2 size={13} className="text-[#45bfae] shrink-0" />

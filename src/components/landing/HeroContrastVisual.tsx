@@ -75,8 +75,8 @@ export default function HeroContrastVisual() {
             <span className="w-2.5 h-2.5 rounded-full bg-[#45bfae] animate-pulse" />
             <span className="text-xs font-bold text-[#45bfae] tracking-wide uppercase">With CloseCraft HQ</span>
           </div>
-          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-semibold border border-[#248277]/40">
-            STRICT SLA ACTIVE
+          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-semibold border border-[#248277]/40" title="Service Level Agreement — guaranteed maximum response time">
+            RESPONSE SLA ACTIVE
           </span>
         </div>
 
@@ -93,9 +93,9 @@ export default function HeroContrastVisual() {
           </div>
           <div className="flex items-center justify-between text-xs text-zinc-300">
             <span className="text-[11px]">Assigned Closer: Somtochukwu O.</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 flex items-center gap-1">
+            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 flex items-center gap-1" title="Response deadline target">
               <Clock size={10} />
-              <span>15m SLA Timer</span>
+              <span>15m SLA Timer (Response Deadline)</span>
             </span>
           </div>
         </div>

@@ -57,7 +57,7 @@ export default function ProofAndTrustSection() {
             <div className="space-y-1.5">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-amber-400" />
-                <span>SLA Timers &amp; Countdowns</span>
+                <span>Response Deadline (SLA) Timers &amp; Countdowns</span>
               </h3>
               <p className="text-xs text-[#a1a1aa] leading-relaxed">
                 Strict response countdowns alert reps and owners before high-intent prospects go cold.

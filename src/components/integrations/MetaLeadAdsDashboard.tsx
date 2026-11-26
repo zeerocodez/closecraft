@@ -36,6 +36,7 @@ function FacebookIcon({ size = 20, className = "" }: { size?: number; className?
 
 interface MetaStatusData {
   isConnected: boolean;
+  oauthConfigured?: boolean;
   integration: {
     id: string;
     status: string;
@@ -106,6 +107,7 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
   const [data, setData] = useState<MetaStatusData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [metaAuthError, setMetaAuthError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'FORMS' | 'PAGES' | 'IMPORT' | 'LOGS'>('OVERVIEW');
   const [isPending, startTransition] = useTransition();
   const [toast, setToast] = useState<string | null>(null);
@@ -145,6 +147,13 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
   };
 
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const qErr = params.get('meta_error') || params.get('error');
+      if (qErr) {
+        setMetaAuthError(decodeURIComponent(qErr));
+      }
+    }
     loadStatus();
   }, []);
 
@@ -242,9 +251,28 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
   };
 
   const isConnected = data?.isConnected;
+  const oauthConfigured = data?.oauthConfigured !== false;
 
   return (
     <div className="space-y-6">
+      {(metaAuthError || !oauthConfigured || error) && (
+        <div className="p-4 rounded-2xl bg-amber-950/35 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-3">
+          <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <p className="font-bold text-amber-100">
+              {metaAuthError === 'MetaAppCredentialsMissing' || !oauthConfigured
+                ? 'Meta App Credentials Required Before OAuth Connect'
+                : 'Meta Connection Notice'}
+            </p>
+            <p className="text-amber-200/90 leading-relaxed">
+              {metaAuthError === 'MetaAppCredentialsMissing' || !oauthConfigured
+                ? 'To connect Facebook & Instagram pages without triggering Meta Invalid App ID errors, set a valid numeric META_APP_ID and META_APP_SECRET in Vercel / your environment variables, and add /api/integrations/meta/callback to your Meta App Valid OAuth Redirect URIs.'
+                : error || metaAuthError}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Toast Alert */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
@@ -324,7 +352,7 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
                   Disconnect
                 </button>
               </div>
-            ) : (
+            ) : oauthConfigured ? (
               <a
                 href="/api/integrations/meta/auth"
                 className="px-6 py-3 rounded-2xl bg-[#1877F2] hover:bg-[#166FE5] text-white font-bold text-xs shadow-lg shadow-[#1877F2]/25 transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
@@ -332,6 +360,16 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
                 <FacebookIcon size={16} className="fill-white" />
                 <span>Connect Facebook & Instagram</span>
               </a>
+            ) : (
+              <button
+                type="button"
+                disabled
+                className="px-6 py-3 rounded-2xl bg-zinc-800 text-zinc-400 border border-white/10 font-bold text-xs flex items-center gap-2 cursor-not-allowed opacity-80"
+                title="Configure META_APP_ID and META_APP_SECRET in Vercel / .env first"
+              >
+                <FacebookIcon size={16} className="fill-zinc-400" />
+                <span>Configure META_APP_ID to Connect</span>
+              </button>
             )}
           </div>
         </div>

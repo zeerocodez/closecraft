@@ -113,7 +113,7 @@ const SAAS_PLANS: PlanView[] = [
   {
     code: 'ENTERPRISE',
     name: 'Enterprise',
-    tagline: 'Multi-location organisations requiring custom capacities, branches, and SLAs.',
+    tagline: 'Multi-location organisations requiring custom capacities, branches, and agreed response targets (SLAs).',
     ctaLabel: 'TALK TO SALES',
     ctaHref: '#contact-sales',
     prices: { NG: null, US: null, GB: null, CA: null },
@@ -128,7 +128,7 @@ const SAAS_PLANS: PlanView[] = [
       'Multiple workspaces & branch-level isolation',
       'Advanced roles, permissions & audit governance',
       'Custom integrations & bespoke AI workflows',
-      'Dedicated onboarding & agreed SLAs',
+      'Dedicated onboarding & Service Level Agreements (SLAs)',
       'Custom commercial quotation & invoicing',
     ],
   },
@@ -342,7 +342,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
             <div>
               <span className="text-sm font-bold text-white">Compare SaaS Plan Capacities &amp; Governance</span>
               <p className="text-xs text-zinc-400">
-                Workspaces, active lead caps, team seats, AI operations, and SLA protections
+                Workspaces, active lead caps, team seats, AI operations, and Service Level Agreement (SLA) protections
               </p>
             </div>
             {showCompare ? <ChevronUp size={18} className="text-zinc-400" /> : <ChevronDown size={18} className="text-zinc-400" />}

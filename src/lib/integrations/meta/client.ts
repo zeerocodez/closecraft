@@ -13,11 +13,16 @@ export interface MetaConfig {
 }
 
 export function getMetaConfig(): MetaConfig {
-  const appId = process.env.META_APP_ID || process.env.FACEBOOK_APP_ID || '794829102839182';
-  const appSecret = process.env.META_APP_SECRET || process.env.FACEBOOK_APP_SECRET || '';
-  const verifyToken = process.env.FACEBOOK_VERIFY_TOKEN || 'closecraft_meta_webhook_verify_token_2026';
+  const appId = (process.env.META_APP_ID || process.env.FACEBOOK_APP_ID || '').trim();
+  const appSecret = (process.env.META_APP_SECRET || process.env.FACEBOOK_APP_SECRET || '').trim();
+  const verifyToken = (process.env.FACEBOOK_VERIFY_TOKEN || process.env.META_LEAD_ADS_VERIFY_TOKEN || 'closecraft_meta_webhook_verify_token_2026').trim();
 
   return { appId, appSecret, verifyToken };
+}
+
+export function isMetaAppConfigured(): boolean {
+  const { appId, appSecret } = getMetaConfig();
+  return Boolean(appId && /^\d{6,25}$/.test(appId) && appSecret);
 }
 
 /**
@@ -28,6 +33,9 @@ export function getMetaAuthUrl(params: {
   state: string;
 }): string {
   const { appId } = getMetaConfig();
+  if (!appId || !/^\d{6,25}$/.test(appId)) {
+    throw new Error('META_APP_ID / FACEBOOK_APP_ID is missing or not a valid numeric Meta App ID.');
+  }
   
   // Scopes requested for Lead Ads retrieval and asset inspection
   const scopes = [

@@ -36,7 +36,7 @@ export default function UserGuideDownloadSection() {
     },
     {
       number: '04',
-      title: 'Assigning Next Best Actions & SLAs',
+      title: 'Assigning Next Best Actions & Response Deadlines (SLAs)',
       desc: 'Ensure no deal is ever left without an assigned owner, clear deadline, and predetermined follow-up cadence.'
     },
     {

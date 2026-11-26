@@ -179,7 +179,7 @@ export default function GrowthServiceDetailClient({
                 03. FOLLOW UP &amp; CONVERT
               </span>
               <p className="text-xs font-semibold text-white">Revenue Engine</p>
-              <p className="text-[11px] text-zinc-400">Allocate deterministic Next Best Actions and enforce strict SLA timers.</p>
+              <p className="text-[11px] text-zinc-400">Allocate deterministic Next Best Actions and enforce strict response deadline (SLA) timers.</p>
             </div>
 
             <div className="p-4 rounded-2xl bg-[#101010] border border-[#1f1f1f] space-y-2">

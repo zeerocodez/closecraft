@@ -62,11 +62,11 @@ export default function HowItWorksProcess({ onOpenServiceBrief }: HowItWorksProc
       tag: 'EXECUTION',
       title: 'FOLLOW UP & CONVERT',
       tagline: 'Give every lead a next action.',
-      description: 'Give every qualified opportunity a clear next action, assigned owner, strict SLA countdown timer, and structured closing playbook.',
+      description: 'Give every qualified opportunity a clear next action, assigned owner, strict response deadline (SLA — Service Level Agreement) countdown timer, and structured closing playbook.',
       icon: <Workflow className="w-5 h-5 text-amber-400" />,
       solutions: [
         'Deterministic Next Best Action',
-        'Strict Follow-Up SLA Countdowns',
+        'Strict Follow-Up Response Deadlines (SLA Countdowns)',
         'Visual Sales Pipeline (Kanban & List)',
         'Revenue Leakage Detection',
         'Closer & Setter Workspaces'

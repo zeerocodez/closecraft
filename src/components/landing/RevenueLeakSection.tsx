@@ -116,7 +116,7 @@ export default function RevenueLeakSection({ onOpenAuditModal }: RevenueLeakSect
                   <span>The Managed Outcome (With CloseCraft System)</span>
                 </div>
                 <p className="text-xs text-zinc-300 leading-relaxed">
-                  <strong>Every enquiry has an assigned SLA:</strong> Inquiries are acknowledged instantly, follow-ups are scheduled deterministically, and reps receive Next Best Action guidance. <strong>30+ sales closed</strong> from the same ad spend.
+                  <strong>Every enquiry has an assigned response deadline (SLA — Service Level Agreement):</strong> Inquiries are acknowledged instantly, follow-ups are scheduled deterministically, and reps receive Next Best Action guidance. <strong>30+ sales closed</strong> from the same ad spend.
                 </p>
               </div>
             </div>

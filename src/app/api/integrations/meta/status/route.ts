@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
+import { isMetaAppConfigured } from '@/lib/integrations/meta/client';
 
 export async function GET() {
   try {
@@ -105,6 +106,7 @@ export async function GET() {
 
     return NextResponse.json({
       isConnected: Boolean(integration && integration.status === 'CONNECTED'),
+      oauthConfigured: isMetaAppConfigured(),
       integration: integration
         ? {
             id: integration.id,

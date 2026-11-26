@@ -358,52 +358,34 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
           <div className="absolute top-1/3 right-1/4 w-[450px] h-[450px] bg-[#14A7F7]/6 rounded-full blur-[140px] pointer-events-none" />
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
-            <div className="max-w-5xl mx-auto text-center space-y-8">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold tracking-tight text-white leading-[1.1] max-w-4xl mx-auto">
-                Turn Unfollowed Enquiries Into Paid Buyers, Enrolments &amp; Booked Deals.
+            <div className="max-w-4xl mx-auto text-center space-y-7">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-heading font-extrabold tracking-tight text-white leading-[1.12] max-w-4xl mx-auto">
+                Stop Losing Revenue to Unfollowed Leads.
               </h1>
 
-              <p className="text-base sm:text-xl text-[#a1a1aa] leading-relaxed max-w-3xl mx-auto">
-                Move from scattered WhatsApp chats, missed callbacks, and wasted ad spend to an accountable revenue system — where every enquiry is qualified immediately, followed up automatically, and closed cleanly.
+              <p className="text-lg sm:text-xl text-[#a1a1aa] leading-relaxed max-w-3xl mx-auto">
+                CloseCraft helps your business recover overlooked opportunities, manage customer conversations, follow up consistently and turn more enquiries into paying customers.
               </p>
 
-              {/* Before -> After Value Transformation Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 text-left max-w-5xl mx-auto pt-1">
-                <div className="p-4 rounded-2xl bg-[#0d1413] border border-[#248277]/45 space-y-1.5">
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-                    Stop Losing Paid Ad Clicks
-                  </p>
-                  <p className="text-sm font-bold text-white">
-                    Reply Fast &amp; Enforce 15m Urgent SLAs
-                  </p>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Hot buyers get qualified on WhatsApp or Meta Ads and routed to a human closer before competitors reply.
-                  </p>
-                </div>
+              <div className="flex flex-wrap items-center justify-center gap-3 py-1">
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span>RECOVER: Old Enquiries</span>
+                </span>
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span>CONVERT: Sales Momentum</span>
+                </span>
+                <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
+                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span>DELIVER: Customer Promises</span>
+                </span>
+              </div>
 
-                <div className="p-4 rounded-2xl bg-[#0d1413] border border-[#248277]/45 space-y-1.5">
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-                    Recover Existing Pipeline
-                  </p>
-                  <p className="text-sm font-bold text-[#C7F36B]">
-                    Turn Old Chats &amp; Sheets Into New Cash
-                  </p>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    Reactivate dormant property, student, and service enquiries you already paid to acquire without extra ad spend.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-[#0d1413] border border-[#248277]/45 space-y-1.5">
-                  <p className="text-[11px] font-mono uppercase tracking-wider text-zinc-400">
-                    Own Every Sale End-to-End
-                  </p>
-                  <p className="text-sm font-bold text-white">
-                    Track Promise → Invoice → Paid Receipt
-                  </p>
-                  <p className="text-xs text-zinc-400 leading-relaxed">
-                    See what needs attention right now, spot stalled deals early, and verify every naira or dollar collected via Bachs.io.
-                  </p>
-                </div>
+              <div className="max-w-2xl mx-auto p-4 rounded-2xl bg-[#0d1716]/80 border border-[#248277]/40 shadow-inner">
+                <p className="text-sm sm:text-base font-medium text-zinc-300">
+                  CloseCraft connects inbound WhatsApp and ad enquiry triage, AI-driven lead reactivation, and customer commitment fulfilment into one unified revenue operations platform.
+                </p>
               </div>
 
               {/* Clean Conversion CTAs */}

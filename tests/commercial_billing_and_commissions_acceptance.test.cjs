@@ -140,10 +140,10 @@ describe('CloseCraft HQ Commercial Architecture, Monetisation & Homepage Accepta
     assert.match(page, /CloseCraft HQ \| AI Revenue Operations, Lead Recovery and Fulfilment Platform/);
 
     const wrapper = readRel('src/app/(marketing)/LandingClientWrapper.tsx');
-    assert.match(wrapper, /Turn Unfollowed Enquiries Into Paid Buyers/);
-    assert.match(wrapper, /Stop Losing Paid Ad Clicks/);
-    assert.match(wrapper, /Recover Existing Pipeline/);
-    assert.match(wrapper, /Own Every Sale End-to-End/);
+    assert.match(wrapper, /Stop Losing Revenue to Unfollowed Leads\./);
+    assert.match(wrapper, /RECOVER: Old Enquiries/);
+    assert.match(wrapper, /CONVERT: Sales Momentum/);
+    assert.match(wrapper, /DELIVER: Customer Promises/);
     assert.ok(!wrapper.includes('REVENUE OPERATIONS PLATFORM'), 'Top hero clutter badge removed');
     assert.ok(!wrapper.includes('Interactive Walkthrough &rarr;'), 'Top hero walkthrough pill removed');
     assert.match(wrapper, /START YOUR 7-DAY FREE TRIAL/);
@@ -157,8 +157,8 @@ describe('CloseCraft HQ Commercial Architecture, Monetisation & Homepage Accepta
     assert.match(demo, /PrimeHaven Properties/);
     assert.match(demo, /BrightPath Learning Centre/);
     assert.match(demo, /Apex Business Solutions/);
-    assert.match(demo, /ILLUSTRATIVE DEMO DATA\. FICTIONAL BUSINESSES AND SCENARIOS\. NOT VERIFIED CUSTOMER RESULTS\./);
-    assert.match(demo, /DEMO EXAMPLE/);
+    assert.ok(!demo.includes('ILLUSTRATIVE DEMO DATA. FICTIONAL BUSINESSES AND SCENARIOS. NOT VERIFIED CUSTOMER RESULTS.'), 'Removed intrusive banner writeup per user feedback');
+    assert.ok(!demo.includes('DEMO EXAMPLE'), 'Removed DEMO EXAMPLE badge copy per user feedback');
 
     const calc = readRel('src/components/landing/RevenueLeakageCalculator.tsx');
     assert.match(calc, /These figures are estimates based on the information you provide\. They are not guaranteed results or verified revenue\./);
@@ -166,6 +166,10 @@ describe('CloseCraft HQ Commercial Architecture, Monetisation & Homepage Accepta
     const who = readRel('src/components/landing/WhoWeHelpSection.tsx');
     assert.match(who, /Real Estate & Property/);
     assert.match(who, /Education & Training Institutes/);
+    assert.match(who, /Service Businesses/);
+    assert.match(who, /Consultants & Agencies/);
+    assert.match(who, /Coaches & Mentors/);
+    assert.match(who, /Remote Creators & Course Sellers/);
     assert.match(who, /ALSO BUILT FOR/);
 
     const faqs = readRel('src/lib/data/homepage-faqs.ts');

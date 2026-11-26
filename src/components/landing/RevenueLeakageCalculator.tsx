@@ -35,7 +35,7 @@ export default function RevenueLeakageCalculator({ onOpenAuditModal }: RevenueLe
   // Benchmark close rates based on response speed
   const benchmarkRates: Record<ResponseTimeSpeed, { label: string; rate: number; badge: string; color: string }> = {
     UNDER_15_MINS: {
-      label: 'Within 15 minutes (Rapid SLA)',
+      label: 'Within 15 minutes (Rapid Response Target / SLA)',
       rate: 0.18,
       badge: 'Best Practice',
       color: 'text-[#45bfae] bg-[#248277]/20 border-[#248277]/40',
@@ -283,7 +283,7 @@ export default function RevenueLeakageCalculator({ onOpenAuditModal }: RevenueLe
               </div>
 
               <div className="flex items-center justify-between pb-2 border-b border-white/5">
-                <span className="text-zinc-400">Potential with CloseCraft SLAs:</span>
+                <span className="text-zinc-400">Potential with CloseCraft Response Deadlines (SLAs):</span>
                 <span className="font-mono font-bold text-[#45bfae]">
                   {results.optimalDeals} deals / mo ({formatNGN(results.optimalRevenue)})
                 </span>

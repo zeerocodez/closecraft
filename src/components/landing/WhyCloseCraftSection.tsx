@@ -19,7 +19,7 @@ export default function WhyCloseCraftSection() {
     {
       feature: 'Follow-Up Accountability',
       without: 'Reps rely on memory or paper notepads. Promises of "call back tomorrow" get lost.',
-      withCloseCraft: 'Strict SLA timers with Next Best Action guidance ensuring prompt callbacks.'
+      withCloseCraft: 'Strict response deadlines (SLA timers) with Next Best Action guidance ensuring prompt callbacks.'
     },
     {
       feature: 'Lead Prioritisation',

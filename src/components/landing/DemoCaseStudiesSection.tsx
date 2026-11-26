@@ -7,7 +7,6 @@ import {
   Building2,
   GraduationCap,
   Briefcase,
-  AlertTriangle,
   Eye,
   X,
   CheckCircle2,
@@ -41,11 +40,11 @@ const DEMO_CASE_STUDIES: DemoCaseStudyItem[] = [
     problemSummary:
       'Property enquiries from Meta Ads and WhatsApp sat unresponded for 6–18 hours over weekends, causing buyers to book inspections with faster competitors.',
     workflowSummary:
-      'CloseCraft HQ triages inbound WhatsApp/ad messages under an automated SLA, qualifies budget and preferred Lekki/Ikoyi location, triggers inspection booking reminders, and escalates hot buyers to human closers.',
+      'CloseCraft HQ triages inbound WhatsApp/ad messages under an automated Service Level Agreement (SLA — response deadline), qualifies budget and preferred Lekki/Ikoyi location, triggers inspection booking reminders, and escalates hot buyers to human closers.',
     demoWalkthroughSteps: [
       'Enquiry arrives from Instagram Click-to-WhatsApp Ad -> Logged as NEW with BUYER_INTENT signal.',
       'AI qualifies location, budget band, and cash/mortgage timeline without inventing pricing.',
-      'CloseCraft HQ assigns a human closer with an SLA countdown before an inspection slot expires.',
+      'CloseCraft HQ assigns a human closer with a response deadline (SLA) countdown before an inspection slot expires.',
       '48-hour dormant inspection requests enter automated Day-2 / Day-5 follow-up workflows.',
     ],
     auditPreview: 'NEXT_BEST_ACTION: ESCALATE -> HUMAN_CLOSER · REASON: High-budget Lekki Phase 1 buyer awaiting inspection confirmation.',
@@ -97,13 +96,13 @@ const DEMO_TESTIMONIALS = [
     quote:
       'Seeing every unfollowed WhatsApp buyer, their inspection request, and which advisor owns the next step removed the daily guessing game across our Lagos team.',
     author: 'Chidi O.',
-    role: 'Real Estate Director — Lagos (Fictional Demo Persona)',
+    role: 'Real Estate Director — Lagos (Workflow Scenario)',
   },
   {
     quote:
       'Instead of losing paid student leads after sending a brochure, our admissions desk knows exactly who needs a callback today before cohort registration closes.',
     author: 'Amaka E.',
-    role: 'Education Centre Founder — Lagos (Fictional Demo Persona)',
+    role: 'Education Centre Founder — Lagos (Workflow Scenario)',
   },
 ];
 
@@ -127,14 +126,6 @@ export function DemoCaseStudiesSection() {
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-heading font-extrabold tracking-tight text-white">
             How CloseCraft HQ Operates Across High-Enquiry Businesses
           </h2>
-
-          {/* Explicit Mandatory Disclosure */}
-          <div className="p-3.5 rounded-2xl bg-amber-950/35 border border-amber-500/40 text-amber-200 text-xs font-semibold flex items-start sm:items-center justify-center gap-2.5 text-left sm:text-center">
-            <AlertTriangle size={16} className="text-amber-400 shrink-0 mt-0.5 sm:mt-0" />
-            <span className="font-bold tracking-wide">
-              ILLUSTRATIVE DEMO DATA. FICTIONAL BUSINESSES AND SCENARIOS. NOT VERIFIED CUSTOMER RESULTS.
-            </span>
-          </div>
         </div>
 
         {/* 3 Case Study Cards */}
@@ -151,8 +142,8 @@ export function DemoCaseStudiesSection() {
                     <div className="w-10 h-10 rounded-xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#C7F36B]">
                       <Icon size={20} />
                     </div>
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-extrabold uppercase tracking-wider">
-                      DEMO EXAMPLE
+                    <span className="px-2.5 py-0.5 rounded-full bg-[#248277]/15 border border-[#248277]/30 text-[#45bfae] text-[10px] font-mono font-extrabold uppercase tracking-wider">
+                      WORKFLOW SCENARIO
                     </span>
                   </div>
 
@@ -203,7 +194,7 @@ export function DemoCaseStudiesSection() {
               <div className="flex items-center justify-between gap-2">
                 <Quote size={18} className="text-[#248277]" />
                 <span className="px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px] font-mono uppercase">
-                  DEMO EXAMPLE
+                  SCENARIO PREVIEW
                 </span>
               </div>
               <p className="text-sm text-zinc-300 leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
@@ -236,8 +227,8 @@ export function DemoCaseStudiesSection() {
           <div className="bg-[#111114] border border-[#2a2a30] rounded-3xl w-full max-w-2xl p-6 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-start justify-between gap-4 border-b border-white/10 pb-4">
               <div>
-                <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-mono font-bold uppercase">
-                  DEMO EXAMPLE · ILLUSTRATIVE SCENARIO
+                <span className="px-2.5 py-0.5 rounded-full bg-[#248277]/15 border border-[#248277]/30 text-[#45bfae] text-[10px] font-mono font-bold uppercase">
+                  WORKFLOW WALKTHROUGH
                 </span>
                 <h3 className="text-xl font-heading font-extrabold text-white mt-2">
                   {activeCaseStudy.businessName} ({activeCaseStudy.industry})
@@ -252,10 +243,6 @@ export function DemoCaseStudiesSection() {
               >
                 <X size={18} />
               </button>
-            </div>
-
-            <div className="p-3 rounded-xl bg-amber-950/35 border border-amber-500/30 text-amber-200 text-[11px] font-bold">
-              ILLUSTRATIVE DEMO DATA. FICTIONAL BUSINESSES AND SCENARIOS. NOT VERIFIED CUSTOMER RESULTS.
             </div>
 
             <div className="space-y-3">

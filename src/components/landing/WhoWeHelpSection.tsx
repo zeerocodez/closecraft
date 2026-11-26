@@ -12,6 +12,9 @@ import {
   Car,
   Plane,
   MapPin,
+  Wrench,
+  Users,
+  Video,
 } from 'lucide-react';
 
 const PRIMARY_MARKETS = [
@@ -44,10 +47,13 @@ const PRIMARY_MARKETS = [
 ];
 
 const ALSO_BUILT_FOR = [
-  { name: 'Clinics & Diagnostics', desc: 'Convert consultation enquiries into booked appointments.', icon: Stethoscope },
+  { name: 'Service Businesses', desc: 'Home, beauty, fitness, events, and local service firms turning inbound chats into booked jobs.', icon: Wrench },
+  { name: 'Consultants & Agencies', desc: 'Strategy, HR, B2B, and marketing consultants tracking discovery calls through to signed retainers.', icon: Briefcase },
+  { name: 'Coaches & Mentors', desc: 'Business, executive, and career coaches nurturing applicants cleanly until cohort or 1-on-1 enrolment.', icon: Users },
+  { name: 'Remote Creators & Course Sellers', desc: 'Digital creators, solo experts, and online educators converting social DMs and link-in-bio enquiries.', icon: Video },
+  { name: 'Clinics & Diagnostics', desc: 'Convert consultation enquiries into booked patient appointments.', icon: Stethoscope },
   { name: 'Solar & Clean Energy', desc: 'Follow up seamlessly on site audits and system quotes.', icon: Sun },
   { name: 'Luxury Retail & Auto', desc: 'Keep showroom and high-ticket vehicle buyers engaged.', icon: Car },
-  { name: 'B2B & Tech Agencies', desc: 'Track proposals from discovery call to signed invoice.', icon: Briefcase },
   { name: 'Legal & Advisory', desc: 'Respond cleanly and manage confidential consultations.', icon: Scale },
   { name: 'Travel & Hospitality', desc: 'Turn tour, visa, and booking chats into confirmed orders.', icon: Plane },
 ];

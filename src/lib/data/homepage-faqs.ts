@@ -10,7 +10,7 @@ export const HOMEPAGE_FAQS: HomepageFaqItem[] = [
   },
   {
     q: '2. Who is CloseCraft HQ built for?',
-    a: 'Our primary launch markets are Real Estate & Property businesses and Education & Training Institutes in Lagos, Nigeria—alongside high-enquiry clinics, solar firms, luxury retail, agencies, and B2B services operating across Nigeria, the US, UK, and Canada.',
+    a: 'Our primary launch markets are Real Estate & Property businesses and Education & Training Institutes in Lagos, Nigeria—alongside service businesses, consultants, coaches, remote creators, clinics, solar firms, agencies, and B2B teams operating across Nigeria, the US, UK, and Canada.',
   },
   {
     q: '3. How does the 7-day free trial work?',
@@ -33,8 +33,8 @@ export const HOMEPAGE_FAQS: HomepageFaqItem[] = [
     a: 'No. AI handles speed, triage, qualification summaries, and Next Best Action recommendations under strict workspace limits and structured rules. High-value negotiation, pricing commitments, and closing remain controlled by your human team—or audited Digital Sales School reps.',
   },
   {
-    q: '8. What does the urgent follow-up SLA actually cover?',
-    a: 'When high-intent buying signals, inspection requests, or complex objections are detected, CloseCraft HQ escalates deterministically to your assigned human closer with a visible 15-minute urgent response SLA countdown so hot leads do not cool down unnoticed.',
+    q: '8. What is a follow-up SLA (Service Level Agreement), and what does CloseCraft HQ cover?',
+    a: 'An SLA (Service Level Agreement) is a strict response-time deadline ensuring inbound prospects are never left waiting. When high-intent buying signals, inspection requests, or complex objections are detected, CloseCraft HQ escalates deterministically to your assigned human closer with a visible 15-minute urgent response deadline (SLA) countdown so hot leads do not cool down unnoticed.',
   },
   {
     q: '9. Can we use CloseCraft HQ with WhatsApp and Facebook/Instagram Ads?',

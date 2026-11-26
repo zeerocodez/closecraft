@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
-import { getMetaAuthUrl, getMetaConfig } from '@/lib/integrations/meta/client';
+import { getMetaAuthUrl, getMetaConfig, isMetaAppConfigured } from '@/lib/integrations/meta/client';
 import crypto from 'crypto';
 
 export async function GET(req: Request) {
@@ -30,9 +30,9 @@ export async function GET(req: Request) {
     }
 
     const { appId, appSecret } = getMetaConfig();
-    if (!appSecret) {
-      // In development or demo mode if Meta secret is unconfigured, return actionable guidance
-      console.warn('[MetaAuth] META_APP_SECRET is not configured in .env');
+    if (!appId || !/^\d{6,25}$/.test(appId) || !appSecret || !isMetaAppConfigured()) {
+      console.warn('[MetaAuth] META_APP_ID / META_APP_SECRET missing or invalid in environment configuration.');
+      return NextResponse.redirect(new URL('/settings?meta_error=MetaAppCredentialsMissing#meta-ads', req.url));
     }
 
     // Compute redirect URI dynamically based on current host
