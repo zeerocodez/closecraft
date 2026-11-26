@@ -16,7 +16,7 @@ This guide provides field-by-field submission instructions for the launch operat
 
 ### Submission Golden Rules
 1. **Never Pay for Fast-Tracking:** If a portal prompts for "Express Review ($49)", "Skip the Line ($129)", or "Featured Sponsor ($99)", **always choose the free standard option**.
-2. **Never Fabricate Numbers:** Do not claim hundreds of customers or automated unassisted WhatsApp bots. Use verified facts: 14-day free trial, Starter tier at ₦20,000/mo, click-to-chat WhatsApp links, dedicated remote closers via structured 30-day pilots.
+2. **Never Fabricate Numbers:** Do not claim hundreds of customers or automated unassisted WhatsApp bots. Use verified facts: 7-day free trial, Starter tier at ₦15,000/mo, click-to-chat WhatsApp links, dedicated remote closers via structured 30-day pilots.
 3. **Log Everything in `launch/launch.csv`:** Immediately upon submitting, update the corresponding row in `launch/launch.csv` with:
    - `status`: `Submitted` or `Under review`
    - `submitted_at`: Current date/time (e.g., `2026-10-29T10:00:00Z`)
@@ -151,7 +151,7 @@ This guide provides field-by-field submission instructions for the launch operat
   Closecraft provides:
   1. Clear enquiry ownership and next-action SLAs for sales teams.
   2. Instant WhatsApp click-to-chat links pre-populated with lead context.
-  3. Seamless Naira billing via Bachs.io (₦20,000/mo Starter, ₦45,000/mo Pro).
+  3. Seamless Naira billing via Bachs.io (₦15,000/mo Starter, ₦35,000/mo Growth).
   4. On-demand access to trained, screened remote sales closers via 30-day managed pilots.
 
   We would be glad to share full founder insights, product screenshots, or arrange a demo walkthrough.
@@ -171,7 +171,7 @@ This guide provides field-by-field submission instructions for the launch operat
 * **Content Structure:**
   - Share realistic breakdown of why Instagram and website ad spend is wasted when employees take leads into private chats with no owner assigned.
   - Explain the 3 rules of follow-up discipline: 1 lead = 1 owner, next action within 24 hours, single dashboard for customer history.
-  - Introduce Closecraft as the purpose-built solution built by Zeerocodes Automation Limited with a 14-day free trial.
+  - Introduce Closecraft as the purpose-built solution built by Zeerocodes Automation Limited with a 7-day free trial.
   - Solicit comments and advice from fellow Nigerian business owners.
 
 ---

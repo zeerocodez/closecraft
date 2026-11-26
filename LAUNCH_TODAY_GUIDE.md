@@ -1,6 +1,6 @@
 # Closecraft "Launch Today" Production Deployment & Go-Live Guide
 
-This guide gives you everything you need to take Closecraft live **today** with the new **Automated Business-Owner Onboarding & Qualification System**, **Starter (₦20,000/month)** and **Pro (₦45,000/month)** plans, active seat limit enforcement, official Bachs.io payment processing, and production infrastructure.
+This guide gives you everything you need to take Closecraft live **today** with the new **Automated Business-Owner Onboarding & Qualification System**, **Starter (₦15,000/month)**, **Growth (₦35,000/month)** and **Scale (₦75,000/month)** plans, active seat limit enforcement, official Bachs.io payment processing, and production infrastructure.
 
 ---
 
@@ -64,8 +64,8 @@ New business owners never land on an empty dashboard. Instead, they are automati
 ### C. Multi-Tier Plan Structure & Seat Enforcement
 | Plan | Price (NGN) | Internal Seats | Description & Target Audience |
 | :--- | :--- | :--- | :--- |
-| **Starter** | **₦20,000 / mo** | **3 Seats** | Lean service businesses & small sales teams. 14-day free trial (no card required), enquiry capture, follow-up SLA tracking, and revenue leakage alerts. |
-| **Pro** | **₦45,000 / mo** | **10 Seats** | High-velocity sales teams. Includes everything in Starter plus 10 internal team seats, **Round-Robin automated lead routing**, manager call coaching & review queue, priority notification dispatch, and revenue health analytics. |
+| **Starter** | **₦15,000 / mo** | **2 Seats** | Lean service businesses & small sales teams. 7-day free trial (no card required), enquiry capture, follow-up SLA tracking, and revenue leakage alerts. |
+| **Growth** | **₦35,000 / mo** | **5 Seats** | Growing sales teams. Includes everything in Starter plus 5 internal team seats, **Round-Robin automated lead routing**, manager call coaching & review queue, priority notification dispatch, and revenue health analytics. |
 
 - **Seat Cap Enforcement**: `addTenantTeamMember` checks `internalMembersCount >= maxSeats`. If a Starter workspace attempts to add a 4th internal team member, the action throws a clean error guiding the owner to upgrade to Pro.
 - **Bachs Checkout Session Metadata**: Bachs hosted checkout sessions record `plan: 'STARTER'` or `plan: 'PRO'`.
@@ -206,7 +206,7 @@ Follow this complete end-to-end verification script:
 1. In `/team`, add Rep 1 and Rep 2 (Total internal members = 3: Owner + Rep 1 + Rep 2).
 2. Attempt adding a 4th member. System cleanly blocks:
    > *"Workspace seat limit reached (3/3 internal seats in use). Please upgrade to the Pro plan (10 seats) in Billing & Subscriptions to invite additional team members."*
-3. Go to `/billing`, click **Upgrade to Pro (₦45,000 / month)**.
+3. Go to `/billing`, click **Upgrade to Growth (₦35,000 / month)**.
 4. Complete Bachs checkout and return to `/billing?status=success`.
 5. Seats increase to 10 immediately, allowing the new team member to be invited!
 

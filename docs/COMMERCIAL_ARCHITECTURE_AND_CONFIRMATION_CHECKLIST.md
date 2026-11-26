@@ -4,6 +4,16 @@
 **Primary Billing Provider:** Bachs.io  
 **Independence Notice:** CloseCraft HQ is a revenue operations platform for businesses. It is not affiliated with CloseCraft App.
 
+
+> **Single source of truth (added Nov 2026):** Plan names, prices, seats, lead
+> limits and trial length are defined in code in `src/lib/billing/catalog.ts`
+> (Starter ₦15,000/mo · 2 seats · 500 leads · 7-day trial; Growth ₦35,000/mo ·
+> 5 seats · 2,000 leads; Scale ₦75,000/mo · 15 seats · 10,000 leads; Enterprise
+> custom). The company registration number is **RC 8421094**. Every page, doc
+> and launch asset must match the catalog — if they disagree, the catalog is
+> right and the other document is a bug. Older documents that quoted
+> ₦20,000/₦45,000 "Pro" pricing or a 14-day trial describe a superseded offer.
+
 ---
 
 ## 1. Architecture Summary Across 4 Commercial Streams

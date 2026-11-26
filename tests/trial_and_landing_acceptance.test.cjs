@@ -289,8 +289,8 @@ describe('5. Verbatim Copy & Banned Phrase Auditing', () => {
 
   it('verifies approved Pricing tiers in LandingClientWrapper', () => {
     assert.ok(landingWrapperContent.includes('Try Closecraft free for 7 days.'));
-    assert.ok(landingWrapperContent.includes('₦20,000'));
-    assert.ok(landingWrapperContent.includes('₦45,000'));
+    assert.ok(landingWrapperContent.includes('₦15,000'));
+    assert.ok(landingWrapperContent.includes('₦35,000'));
     assert.ok(landingWrapperContent.includes('₦75,000'));
   });
 

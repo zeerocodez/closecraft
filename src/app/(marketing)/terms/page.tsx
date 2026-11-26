@@ -61,10 +61,10 @@ export default function TermsOfServicePage() {
                 <strong className="text-on-surface">7-Day Free Trial:</strong> New workspaces receive 7 days (168 hours) of complimentary Starter access. No credit card or upfront commitment is required to start, and no automatic charge occurs when the trial expires.
               </li>
               <li>
-                <strong className="text-on-surface">Starter Workspace (₦20,000 / month):</strong> Includes up to 3 internal team seats, up to 1,000 active leads/month, enquiry management inbox, Today radar, SLA tracking, and Bachs checkout integration.
+                <strong className="text-on-surface">Starter Workspace (₦15,000 / month):</strong> Includes up to 2 internal team seats, up to 500 active leads/month, enquiry management inbox, Today radar, SLA tracking, and Bachs checkout integration.
               </li>
               <li>
-                <strong className="text-on-surface">Pro Workspace (₦45,000 / month):</strong> Includes up to 10 internal team seats, automated round-robin lead routing, manager call coaching queues, and priority notification dispatch.
+                <strong className="text-on-surface">Growth Workspace (₦35,000 / month):</strong> Includes up to 5 internal team seats, up to 2,000 active leads/month, automated round-robin lead routing, manager call coaching queues, and priority notification dispatch.
               </li>
               <li>
                 <strong className="text-on-surface">Seat Allocation:</strong> Internal roles (Owner, Admin, Manager, Closer, Setter, Member) consume allocated seat licenses. External remote sales professionals attached via authorized pilot engagements do not count against your internal seat quota.

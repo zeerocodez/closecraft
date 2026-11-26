@@ -14,7 +14,7 @@
 
 Closecraft's launch distribution strategy focuses on high-credibility developer, founder, product discovery, and regional business directories. Every submission complies strictly with the following launch rules:
 1. **Accurate Feature Scope:** Only live, operational capabilities are promoted. WhatsApp interactions are accurately described as generating direct pre-formatted WhatsApp chat links (click-to-chat with customer context), not unassisted background bot spamming.
-2. **Transparent Commercial Model:** SaaS subscription tiers (Starter ₦20,000/mo, Pro ₦45,000/mo) with 14-day free trial, powered by verified Bachs.io checkout; managed sales pilots starting from ₦150,000/30 days via formal scope agreement.
+2. **Transparent Commercial Model:** SaaS subscription tiers (Starter ₦15,000/mo, Growth ₦35,000/mo, Scale ₦75,000/mo) with 7-day free trial, powered by verified Bachs.io checkout; managed sales pilots starting from ₦150,000/30 days via formal scope agreement.
 3. **Privacy & Security Integrity:** Full PostgreSQL Row-Level Security (RLS), tenant isolation, NDPR/GDPR compliance, DSR rights portal, and cookie consent mechanisms.
 4. **Zero Paid Placement:** No budget allocated to paid directory fast-tracks (e.g. BetaList $129 express queue, Uneed $39 instant listing, Fazier sponsor slots). All listings use standard free review pipelines.
 
@@ -30,7 +30,7 @@ Closecraft's launch distribution strategy focuses on high-credibility developer,
 | **Short Description** | 120–160 chars | `Closecraft gives service businesses full visibility over inbound enquiries, assigning every lead a clear owner, next action, and follow-up deadline.` |
 | **Primary Category** | Category / Tag | `Sales / CRM / Productivity / Lead Management` |
 | **Secondary Category**| Category / Tag | `Revenue Operations / Small Business Tools / B2B` |
-| **Pricing Model** | Form selection | `Free Trial / Paid Subscription (from ₦20,000/mo)` |
+| **Pricing Model** | Form selection | `Free Trial / Paid Subscription (from ₦15,000/mo)` |
 | **App Website URL** | Full HTTPS URL | `https://www.closecrafthq.com` |
 | **Sales Inquiries** | Direct email | `sales@closecrafthq.com` |
 | **General & Support**| Direct email | `info@closecrafthq.com` |
@@ -90,7 +90,7 @@ Closecraft's launch distribution strategy focuses on high-credibility developer,
 * **Audience Fit:** **High**. Early-stage founders, freelancers, digital agency leads, and beta testers searching for emerging workflow tools.
 * **Cost:** **$0 (Free queue, 4–8 weeks review)**. (Strictly decline the $129 "Skip the Line" paid express review).
 * **Eligibility Check:**
-  - Product must be newly launched or in active private/public beta. (Compliant: Closecraft offers a 14-day free trial).
+  - Product must be newly launched or in active private/public beta. (Compliant: Closecraft offers a 7-day free trial).
   - Must have a functional landing page with email capture or self-serve signup. (Compliant: full auth + onboarding live).
   - No affiliate sites, agencies disguised as tools, or pure content blogs. (Compliant: pure SaaS web application).
 * **Submission Copy:**
@@ -217,7 +217,7 @@ Closecraft's launch distribution strategy focuses on high-credibility developer,
 * **Audience Fit:** **Extremely High**. Nigerian business owners, agency principals, tech executives, and startup founders struggling with sales team accountability, manual WhatsApp lead chaos, and payment collection.
 * **Cost:** **$0 (Editorial / Community pitch)**.
 * **Tailored Nigerian Commercial Angle:**
-  - Highlights native Bachs.io payment checkout in Nigerian Naira (₦20,000 Starter, ₦45,000 Pro).
+  - Highlights native Bachs.io payment checkout in Nigerian Naira (₦15,000 Starter, ₦35,000 Growth).
   - Solves the acute local agency problem: staff losing high-ticket Instagram and website enquiries in personal WhatsApp chats.
   - Highlights the Digital Sales School (DSS) ecosystem partnership, providing screened Nigerian sales professionals for 30-day remote closer pilots.
 * **Draft Pitch Copy:**
@@ -232,7 +232,7 @@ Closecraft's launch distribution strategy focuses on high-credibility developer,
   > Closecraft provides:
   > 1. Clear enquiry ownership and next-action SLAs for sales teams.
   > 2. Instant WhatsApp click-to-chat links pre-populated with lead context.
-  > 3. Seamless Naira billing via Bachs.io (₦20,000/mo Starter, ₦45,000/mo Pro).
+  > 3. Seamless Naira billing via Bachs.io (₦15,000/mo Starter, ₦35,000/mo Growth).
   > 4. On-demand access to trained, screened remote sales closers via 30-day managed pilots.
   > 
   > We would be glad to share full founder insights, product screenshots, or arrange a demo walkthrough.

@@ -27,7 +27,7 @@ Closecraft integrates with the **Bachs.io Sandbox** (`https://sandbox-api.bachs.
 
 | URL | Path in Repo | Functionality |
 |---|---|---|
-| `/billing` | `src/app/(saas)/billing/page.tsx` | Displays 14-day no-card trial status, active approved NGN 15,000 invoice, plan tiers, invoice history, and checkout button |
+| `/billing` | `src/app/(saas)/billing/page.tsx` | Displays 7-day no-card trial status, active approved NGN 15,000 invoice, plan tiers, invoice history, and checkout button |
 | `/billing/return` | `src/app/(saas)/billing/return/page.tsx` | Return page displaying `Pending` while polling `/api/billing/invoices/[id]/status`. Once verified, celebrates activation and renders exact `paidThroughDate`. Safe if user closes tab. |
 | `/billing/checkout/mock` | `src/app/billing/checkout/mock/page.tsx` | Sandbox visual simulator when Bachs secret keys are not configured in local development |
 

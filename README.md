@@ -241,4 +241,4 @@ A dedicated evaluation portal is available at `/demo` for evaluators and judges.
 
 ## 8. License & Commercial Information
 
-CloseCraft is proprietary software engineered by **Zeerocodes Automation Limited** (RC 7291048), Lagos, Nigeria. Built for the AI Startup Challenge. All rights reserved.
+CloseCraft is proprietary software engineered by **Zeerocodes Automation Limited** (RC 8421094), Lagos, Nigeria. Built for the AI Startup Challenge. All rights reserved.

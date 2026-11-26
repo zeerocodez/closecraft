@@ -41,7 +41,7 @@ export default function ManagedServiceTermsPage() {
               <span className="text-primary font-mono text-sm">01.</span> Distinction from Software Subscription
             </h2>
             <p className="text-on-surface-variant mb-3">
-              The Closecraft SaaS subscription (Starter ₦20,000/mo, Pro ₦45,000/mo) provides software for your existing internal sales personnel.
+              The Closecraft SaaS subscription (Starter ₦15,000/mo, Growth ₦35,000/mo, Scale ₦75,000/mo) provides software for your existing internal sales personnel.
             </p>
             <p className="text-on-surface-variant">
               A <strong>Managed Sales Pilot</strong> (starting from ₦150,000 / 30 days) is a distinct operational engagement that provides human sales capacity—trained remote closers or appointment setters. Full Closecraft software workspace access is included during the pilot period without duplicate software charges.

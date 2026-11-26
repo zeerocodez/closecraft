@@ -6,7 +6,7 @@ Closecraft has been evolved from a validated pilot into a full production sales-
 - **Core positioning:** “Know who is following up.”
 - **Supporting description:** “Manage sales opportunities and get professional help moving them forward.”
 - **Operating Model:**
-  - **Software-only Workspaces:** Customers use the sales operations platform (Contacts, Opportunities, Today view, Custom Stages, Pipeline, Team Queues) for NGN 15,000/month (up to 5 internal users, 14-day no-card trial) with manual renewal checkout.
+  - **Software-only Workspaces:** Customers use the sales operations platform (Contacts, Opportunities, Today view, Custom Stages, Pipeline, Team Queues) for NGN 15,000/month (up to 2 internal users, 7-day no-card trial) with manual renewal checkout.
   - **Managed Sales Services:** Scoped, versioned service packages (Enquiry Follow-up, Appointment Setting, Remote Closing) quoted individually with transparent economics contribution worksheets.
   - **Service Delivery & Quality:** Closecraft coordinates professional assessment, sales brief approval, call quality reviews, and continuity handovers.
 
@@ -19,7 +19,7 @@ Closecraft has been evolved from a validated pilot into a full production sales-
 | **Milestone A** | **Foundation: Permissions, Roles & Security** | **COMPLETE** | Explicit permission matrix (`matrix.ts`), 6 workspace roles, platform roles, time-bounded emergency support access with audit logging, expiring invitations, and revocable sessions. |
 | **Milestone B** | **Sales Operations: Contacts & Opportunities** | **COMPLETE** | Contact entity separate from opportunities, reviewed duplicate merging with provenance, custom stages mapped to system categories, reversible archiving, and public lead capture API (`/api/leads/capture`). |
 | **Milestone C** | **Managed Services: Catalogue & Quality** | **COMPLETE** | Versioned service package catalogue (`catalogueService.ts`), call review scorecards assessing judgment & boundary adherence (`qualityService.ts`), operational issues, and controlled replacement workflow. |
-| **Milestone D** | **Billing & Financial Integrity** | **COMPLETE** | Precise integer minor units (`money.ts`), zero floating-point math, exact Bachs decimal conversion (`"15000.00"`), deterministic proration, 14-day trial, and entitlement grace periods. |
+| **Milestone D** | **Billing & Financial Integrity** | **COMPLETE** | Precise integer minor units (`money.ts`), zero floating-point math, exact Bachs decimal conversion (`"15000.00"`), deterministic proration, 7-day trial, and entitlement grace periods. |
 | **Milestone E** | **Compensation & Reporting** | **COMPLETE** | Attribution engine with prior-contact disqualification (`attributionService.ts`), verified cash basis, maker-checker payout authorization, and drill-down operational reports (`operationalReports.ts`). |
 | **Milestone F** | **Production Hardening & Reliability** | **COMPLETE** | Durable transactional outbox worker (`outboxWorker.ts`) with bounded retries & dead-letter queue, health check API (`/api/health`), structured logger with secret redaction (`logger.ts`), and 35 automated acceptance tests. |
 

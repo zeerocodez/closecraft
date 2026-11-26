@@ -180,14 +180,14 @@ export default async function DSSAdminCampaignsPage() {
               <div className="p-4 rounded-xl bg-[#071126] border border-white/5">
                 <div className="font-bold text-white text-sm">Closecraft Starter Plan</div>
                 <div className="text-xs text-[#94A3B8] mt-0.5">
-                  ₦20,000/month • Software subscription. Excluded from tuition discounts.
+                  ₦15,000/month • Software subscription. Excluded from tuition discounts.
                 </div>
               </div>
 
               <div className="p-4 rounded-xl bg-[#071126] border border-white/5">
-                <div className="font-bold text-white text-sm">Closecraft Pro Plan</div>
+                <div className="font-bold text-white text-sm">Closecraft Growth Plan</div>
                 <div className="text-xs text-[#94A3B8] mt-0.5">
-                  ₦45,000/month • Software subscription. Excluded from tuition discounts.
+                  ₦35,000/month • Software subscription. Excluded from tuition discounts.
                 </div>
               </div>
 

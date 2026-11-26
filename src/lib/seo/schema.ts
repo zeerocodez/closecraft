@@ -184,7 +184,7 @@ export function getSoftwareApplicationJsonLd(custom?: {
     applicationCategory: custom?.applicationCategory || 'BusinessApplication',
     offers: {
       '@type': 'Offer',
-      price: '20000.00',
+      price: '15000.00',
       priceCurrency: 'NGN',
       priceValidUntil: '2027-12-31',
       availability: 'https://schema.org/InStock',

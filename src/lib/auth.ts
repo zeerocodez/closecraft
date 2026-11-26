@@ -178,11 +178,11 @@ export const {
                     organizationId: org.id,
                     status: "TRIALING",
                     plan: "STARTER",
-                    pricePerMonth: 20000.0,
+                    pricePerMonth: 15000.0,
                     currency: "NGN",
                     trialStartedAt,
                     trialEndsAt,
-                    maxInternalSeats: 3,
+                    maxInternalSeats: 2,
                   }
                 });
               }
