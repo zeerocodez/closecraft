@@ -73,7 +73,7 @@ export default function HeroContrastVisual() {
         <div className="flex items-center justify-between pb-3 border-b border-[#248277]/30">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#45bfae] animate-pulse" />
-            <span className="text-xs font-bold text-[#45bfae] tracking-wide uppercase">With CloseCraft</span>
+            <span className="text-xs font-bold text-[#45bfae] tracking-wide uppercase">With CloseCraft HQ</span>
           </div>
           <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#248277]/20 text-[#45bfae] font-semibold border border-[#248277]/40">
             STRICT SLA ACTIVE

@@ -140,6 +140,12 @@ describe('CloseCraft HQ Commercial Architecture, Monetisation & Homepage Accepta
     assert.match(page, /CloseCraft HQ \| AI Revenue Operations, Lead Recovery and Fulfilment Platform/);
 
     const wrapper = readRel('src/app/(marketing)/LandingClientWrapper.tsx');
+    assert.match(wrapper, /Turn Unfollowed Enquiries Into Paid Buyers/);
+    assert.match(wrapper, /Stop Losing Paid Ad Clicks/);
+    assert.match(wrapper, /Recover Existing Pipeline/);
+    assert.match(wrapper, /Own Every Sale End-to-End/);
+    assert.ok(!wrapper.includes('REVENUE OPERATIONS PLATFORM'), 'Top hero clutter badge removed');
+    assert.ok(!wrapper.includes('Interactive Walkthrough &rarr;'), 'Top hero walkthrough pill removed');
     assert.match(wrapper, /START YOUR 7-DAY FREE TRIAL/);
     assert.match(wrapper, /NO CREDIT CARD REQUIRED/);
     assert.match(wrapper, /BOOK A FREE FOLLOW-UP DIAGNOSTIC/);
