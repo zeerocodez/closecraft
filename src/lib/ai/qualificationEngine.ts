@@ -39,6 +39,12 @@ export async function processLeadWithAI(leadId: string, newMessageContent: strin
     throw new Error(`Lead ${leadId} not found`);
   }
 
+  // Enforce tenant AI qualification metering before running AI work
+  if (lead.organizationId) {
+    const { assertEntitlementLimit } = await import('@/lib/billing/entitlements');
+    await assertEntitlementLimit(lead.organizationId, 'AI_QUALIFICATIONS');
+  }
+
   // Run canonical structured AI qualification
   const aiResult = await extractLeadQualificationData(
     newMessageContent,
@@ -46,6 +52,17 @@ export async function processLeadWithAI(leadId: string, newMessageContent: strin
     lead.buyingIntent ?? undefined,
     lead.organization?.qualificationPolicy
   );
+
+  // Meter AI qualification operation
+  if (lead.organizationId) {
+    const { recordMeteredUsage } = await import('@/lib/billing/entitlements');
+    await recordMeteredUsage({
+      organizationId: lead.organizationId,
+      type: 'AI_QUALIFICATION',
+      units: 1,
+      estimatedProviderCostUsd: 0.002,
+    }).catch(() => {});
+  }
 
   const shouldReply = aiResult.nextActionType === 'RESPOND' || aiResult.nextActionType === 'SEND_BOOKING_LINK';
   const handoffReason = aiResult.nextActionType === 'ASSIGN_HUMAN' 

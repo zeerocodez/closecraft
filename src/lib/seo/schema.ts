@@ -8,7 +8,7 @@ export function getOrganizationJsonLd() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     '@id': `${BASE_URL}/#organization`,
-    name: 'CloseCraft',
+    name: 'CloseCraft HQ',
     legalName: 'CloseCraft Revenue Growth Systems',
     url: BASE_URL,
     logo: `${BASE_URL}/icon.png`,
@@ -53,7 +53,7 @@ export function getWebSiteJsonLd() {
     '@type': 'WebSite',
     '@id': `${BASE_URL}/#website`,
     url: BASE_URL,
-    name: 'CloseCraft',
+    name: 'CloseCraft HQ',
     description: 'AI-powered customer acquisition, appointment setting, and high-ticket sales closing operating system.',
     publisher: {
       '@id': `${BASE_URL}/#organization`,

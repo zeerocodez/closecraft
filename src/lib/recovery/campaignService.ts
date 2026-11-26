@@ -10,6 +10,21 @@ export interface CampaignCreationInput {
   channel?: 'WHATSAPP' | 'EMAIL' | 'SMS';
   tone?: 'PROFESSIONAL' | 'FRIENDLY' | 'VALUE_OFFER' | 'DIRECT_CHECKIN';
   customMessagePrompt?: string;
+  leadSource?: string;
+  consentConfirmed?: boolean;
+}
+
+export function resolveRecoveryPricingTier(leadCount: number) {
+  if (leadCount <= 500) {
+    return { code: 'TIER_500', name: 'Up to 500 leads', serviceFee: 25000, isCustomQuote: false };
+  }
+  if (leadCount <= 2000) {
+    return { code: 'TIER_2000', name: '501–2,000 leads', serviceFee: 50000, isCustomQuote: false };
+  }
+  if (leadCount <= 5000) {
+    return { code: 'TIER_5000', name: '2,001–5,000 leads', serviceFee: 100000, isCustomQuote: false };
+  }
+  return { code: 'CUSTOM', name: 'Above 5,000 leads', serviceFee: 0, isCustomQuote: true };
 }
 
 /**
@@ -54,8 +69,12 @@ export async function createReactivationCampaign(input: CampaignCreationInput) {
 
   // 1. Fetch eligible contactable leads in this segment
   const eligibleLeads = await getLeadsInSegment(organizationId, targetSegment, true);
+  const optedOutCount = await db.lead.count({
+    where: { organizationId, optedOutOfMarketing: true },
+  });
+  const tier = resolveRecoveryPricingTier(eligibleLeads.length);
 
-  // 2. Create the campaign record
+  // 2. Create the campaign record with transparent tier & fee metadata
   const campaign = await db.reactivationCampaign.create({
     data: {
       organizationId,
@@ -64,9 +83,16 @@ export async function createReactivationCampaign(input: CampaignCreationInput) {
       targetSegment,
       channel,
       tone,
+      leadSource: input.leadSource || 'CRM / CSV Import',
+      packageTier: tier.code,
+      serviceFee: tier.serviceFee,
+      currency: 'NGN',
+      consentConfirmed: Boolean(input.consentConfirmed),
       messageTemplate: input.customMessagePrompt || `Personalized ${tone.toLowerCase()} outreach for ${targetSegment}`,
       status: 'DRAFT',
-      targetCount: eligibleLeads.length
+      targetCount: eligibleLeads.length,
+      validContactCount: eligibleLeads.length,
+      suppressedCount: optedOutCount,
     }
   });
 
@@ -100,9 +126,27 @@ export async function createReactivationCampaign(input: CampaignCreationInput) {
     campaignId: campaign.id,
     name: campaign.name,
     targetCount: eligibleLeads.length,
+    packageTier: tier.code,
+    serviceFee: tier.serviceFee,
     status: campaign.status,
     previewSample: messagesData.slice(0, 3)
   };
+}
+
+export async function approveRecoveryCampaign(campaignId: string, organizationId: string, userId: string) {
+  const campaign = await db.reactivationCampaign.findFirst({
+    where: { id: campaignId, organizationId },
+  });
+  if (!campaign) throw new Error('Campaign not found');
+
+  return db.reactivationCampaign.update({
+    where: { id: campaign.id },
+    data: {
+      customerApprovedAt: new Date(),
+      consentConfirmed: true,
+      status: campaign.paymentVerified ? 'PAID' : 'APPROVED',
+    },
+  });
 }
 
 /**
@@ -124,6 +168,10 @@ export async function dispatchReactivationCampaign(campaignId: string, organizat
   }
 
   const isLiveDispatchEnabled = process.env.WHATSAPP_LIVE_DISPATCH_ENABLED === 'true';
+
+  if (isLiveDispatchEnabled && !campaign.customerApprovedAt) {
+    throw new Error('Customer approval of reactivation messaging is required before live channel dispatch.');
+  }
 
   let dispatchedCount = 0;
   let deliveredCount = 0;
@@ -300,12 +348,12 @@ export async function processInboundRecoveryResponse(params: {
       }
     });
 
-    // Increment campaign response & conversion count
+    // Increment campaign response & interested count (never treat interested prospects as converted sales!)
     await db.reactivationCampaign.update({
       where: { id: recentReactivation.campaignId },
       data: {
         responseCount: { increment: 1 },
-        ...(outcome !== 'NOT_INTERESTED' ? { convertedCount: { increment: 1 } } : {})
+        ...(outcome !== 'NOT_INTERESTED' ? { interestedCount: { increment: 1 } } : {})
       }
     });
   }

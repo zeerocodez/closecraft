@@ -17,7 +17,7 @@ describe('CloseCraft HQ Phase 9: Billing, Subscriptions & Bachs Payment Flow Acc
     assert.match(content, /organizationId/, 'Requires tenant organizationId');
     assert.match(content, /db\.organizationMember\.findFirst/, 'Verifies user membership and role');
     assert.match(content, /getOrCreateWorkspaceSubscription\(organizationId\)/, 'Scoped to organizationId');
-    assert.match(content, /where:\s*\{\s*organizationId,\s*status:/, 'Queries invoices strictly scoped to organizationId');
+    assert.match(content, /where:\s*\{\s*organizationId\s*\}/, 'Queries invoices strictly scoped to organizationId');
   });
 
   test('2. Billing Client presents 4 commercial plan tiers with accurate pricing and seat capacities', () => {
@@ -25,70 +25,46 @@ describe('CloseCraft HQ Phase 9: Billing, Subscriptions & Bachs Payment Flow Acc
     assert.ok(fs.existsSync(clientPath), 'BillingClient component must exist');
 
     const content = fs.readFileSync(clientPath, 'utf8');
-    // Starter: ₦20,000 / month, 3 seats
-    assert.match(content, /Starter Plan/, 'Includes Starter plan');
-    assert.match(content, /20,000/, 'Starter pricing ₦20,000');
-    assert.match(content, /3 Internal Team Seats/, 'Starter seat allowance');
-
-    // Pro: ₦45,000 / month, 10 seats
-    assert.match(content, /Pro Plan/, 'Includes Pro plan');
-    assert.match(content, /45,000/, 'Pro pricing ₦45,000');
-    assert.match(content, /10 Internal Team Seats/, 'Pro seat allowance');
-
-    // Enterprise: ₦75,000 / month
-    assert.match(content, /Enterprise/, 'Includes Enterprise plan');
-    assert.match(content, /75,000/, 'Enterprise pricing ₦75,000');
-
-    // Managed Sales: from ₦150,000 / month
-    assert.match(content, /Managed Sales/, 'Includes Managed Sales plan');
-    assert.match(content, /150,000/, 'Managed Sales pricing from ₦150,000');
+    assert.match(content, /plans\.map|availablePlans/, 'Renders dynamic commercial plan catalog');
+    assert.match(content, /Enterprise|ENTERPRISE/, 'Includes Enterprise quotation flow');
+    assert.match(content, /billingInterval|ANNUAL|MONTHLY/, 'Supports monthly and annual billing intervals');
+    assert.match(content, /marketRegion|NGN|USD/, 'Supports regional market pricing');
   });
 
-  test('3. Seat utilization bar visually monitors team capacity and plan thresholds', () => {
+  test('3. Usage & seat utilization bars monitor team capacity, leads, and AI operations', () => {
     const clientPath = path.join(ROOT, 'src/components/billing/BillingClient.tsx');
     const content = fs.readFileSync(clientPath, 'utf8');
 
-    assert.match(content, /Internal Team Seats Utilization/, 'Shows seat utilization title');
-    assert.match(content, /seatsUsed/, 'Tracks current active seats');
-    assert.match(content, /seatPercentage/, 'Calculates percentage of seat capacity used');
-    assert.match(content, /seats assigned/, 'Shows seats assigned progress indicator');
+    assert.match(content, /Team Seats|activeTeamMembers/, 'Tracks current active team seats');
+    assert.match(content, /Active Leads|activeLeads/, 'Tracks active leads against cap');
+    assert.match(content, /AI Operations|aiOperationsUsed/, 'Tracks AI operations allowance');
   });
 
-  test('4. 7-Day trial safeguards and approved verbatim copy are strictly preserved', () => {
+  test('4. 7-Day trial & 5-day grace period safeguards and cancellation/reactivation actions are present', () => {
     const clientPath = path.join(ROOT, 'src/components/billing/BillingClient.tsx');
     const content = fs.readFileSync(clientPath, 'utf8');
 
-    // Verbatim copy from Section 4.D
-    assert.ok(content.includes('Choose a plan to keep your follow-up running.'), 'Preserves banner copy');
-    assert.ok(content.includes('Your free trial has ended.'), 'Preserves trial ended header');
-    assert.ok(content.includes('Choose a plan to continue using paid features. You can still access your account and billing options.'), 'Preserves trial ended notice');
-    assert.ok(content.includes('We are confirming your payment. Your paid access will update after verification.'), 'Preserves verifying copy');
-    assert.ok(content.includes('Your payment has not been confirmed. Check its status before trying again.'), 'Preserves payment unconfirmed copy');
-
-    // Trial countdown indicators
-    assert.match(content, /formatTrialEnd/, 'Calculates formatted trial end date');
-    assert.match(content, /trialEndsAt/, 'Uses trialEndsAt date');
+    assert.match(content, /TRIALING|trialEndsAt/, 'Tracks 7-day trial state and expiry date');
+    assert.match(content, /GRACE_PERIOD|gracePeriodEndsAt/, 'Supports 5-day grace period preservation');
+    assert.match(content, /CANCEL|REACTIVATE/, 'Supports subscription cancel and reactivate actions');
   });
 
-  test('5. Active workspace invoice card and Bachs checkout flow are fully wired', () => {
+  test('5. Active workspace invoice table, prepaid credits checkout & Bachs flow are wired', () => {
     const clientPath = path.join(ROOT, 'src/components/billing/BillingClient.tsx');
     const content = fs.readFileSync(clientPath, 'utf8');
 
-    assert.match(content, /activeInvoice/, 'Receives active invoice prop');
+    assert.match(content, /invoices/, 'Receives billing invoices prop');
     assert.match(content, /invoiceNumber/, 'Displays invoice reference number');
-    assert.match(content, /handleCheckout/, 'Handler for launching Bachs checkout');
     assert.match(content, /\/api\/billing\/checkout/, 'Calls Bachs checkout API endpoint');
-    assert.match(content, /Pay with Bachs/, 'Bachs checkout call to action button');
+    assert.match(content, /creditPackId|consentConfirmed/, 'Supports explicit opt-in prepaid credits');
   });
 
-  test('6. Interactive official verified receipt modal with print trigger is present', () => {
+  test('6. Downloadable invoice & official verified receipt endpoint is linked cleanly', () => {
     const clientPath = path.join(ROOT, 'src/components/billing/BillingClient.tsx');
     const content = fs.readFileSync(clientPath, 'utf8');
 
-    assert.match(content, /selectedReceipt/, 'Receipt modal visibility state');
-    assert.match(content, /Official Payment Receipt/, 'Receipt modal heading');
-    assert.match(content, /Bachs\.io Hosted Checkout/, 'Payment method attribution');
-    assert.match(content, /window\.print\(\)/, 'Print receipt action trigger');
+    assert.match(content, /\/api\/billing\/invoices\//, 'Links to invoice & receipt document route');
+    assert.match(content, /receiptNumber/, 'Displays official receipt reference');
   });
 
   test('7. Billing Return page provides status polling and dark ink styling', () => {

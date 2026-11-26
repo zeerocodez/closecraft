@@ -310,6 +310,9 @@ export default function RevenueLeakageCalculator({ onOpenAuditModal }: RevenueLe
               <p className="text-[11px] text-center text-zinc-500 pt-2">
                 Free assessment &middot; Plug your lead leakage in under 7 days
               </p>
+              <p className="text-[11px] text-center text-zinc-400 bg-black/30 border border-white/5 rounded-lg p-2 mt-2">
+                These figures are estimates based on the information you provide. They are not guaranteed results or verified revenue.
+              </p>
             </div>
           </div>
         </div>

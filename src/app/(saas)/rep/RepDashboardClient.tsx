@@ -101,6 +101,26 @@ interface RepDashboardClientProps {
   appointments: RepAppointment[];
   teamMembers: any[];
   deliveryTasks?: any[];
+  salesAgreements?: Array<{
+    id: string;
+    tierCode: string;
+    engagementModel: string;
+    commissionRatePct: number;
+    monthlyRetainer: number;
+    currency: string;
+    status: string;
+  }>;
+  salesCommissions?: Array<{
+    id: string;
+    verifiedRevenueAmount: number;
+    commissionRatePct: number;
+    commissionAmount: number;
+    currency: string;
+    status: string;
+    verifiedAt?: string | null;
+    notes?: string | null;
+    createdAt: string;
+  }>;
   metrics: {
     activeLeadsCount: number;
     wonDealsCount: number;
@@ -118,6 +138,8 @@ export default function RepDashboardClient({
   appointments,
   teamMembers,
   deliveryTasks = [],
+  salesAgreements = [],
+  salesCommissions = [],
   metrics,
 }: RepDashboardClientProps) {
   const [activeTab, setActiveTab] = useState<'LEADS' | 'OPEN_POOL' | 'DEALS' | 'CALENDAR' | 'COMMISSIONS' | 'TASKS'>('LEADS');
@@ -1083,6 +1105,78 @@ export default function RepDashboardClient({
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* Verified-Payment Sales Commission Ledger & Active Engagement Agreements */}
+          <div className="p-5 border-t border-outline-variant/30 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface">
+                  Verified-Payment Sales Enablement Ledger
+                </h4>
+                <p className="text-[11px] text-on-surface-variant">
+                  Commissions accrue only upon verified customer payments and follow Maker-Checker payout approvals.
+                </p>
+              </div>
+              {salesAgreements.length > 0 && (
+                <div className="flex flex-wrap gap-1.5">
+                  {salesAgreements.slice(0, 3).map((agr) => (
+                    <span key={agr.id} className="px-2.5 py-1 rounded-full bg-surface-container border border-outline-variant/30 text-[10px] font-mono text-on-surface-variant">
+                      {agr.tierCode} · {agr.engagementModel} · {agr.commissionRatePct}% ({agr.status})
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {salesCommissions.length === 0 ? (
+              <p className="text-xs text-on-surface-variant">
+                No verified-payment commission entries accrued yet.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-surface-container-low/50 border-b border-outline-variant/20 text-on-surface-variant uppercase font-bold text-[10px]">
+                      <th className="p-3">Verified Date</th>
+                      <th className="p-3">Verified Revenue</th>
+                      <th className="p-3">Rate</th>
+                      <th className="p-3">Commission Accrued</th>
+                      <th className="p-3 text-right">Ledger Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-outline-variant/15">
+                    {salesCommissions.map((rec) => (
+                      <tr key={rec.id}>
+                        <td className="p-3 font-mono text-on-surface-variant">
+                          {rec.verifiedAt ? new Date(rec.verifiedAt).toLocaleDateString() : new Date(rec.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="p-3 font-mono font-bold text-on-surface">
+                          {rec.currency} {rec.verifiedRevenueAmount.toLocaleString()}
+                        </td>
+                        <td className="p-3 font-mono text-primary font-bold">{rec.commissionRatePct}%</td>
+                        <td className="p-3 font-mono font-bold text-emerald-400">
+                          {rec.currency} {rec.commissionAmount.toLocaleString()}
+                        </td>
+                        <td className="p-3 text-right">
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                            rec.status === 'PAID'
+                              ? 'bg-emerald-500/20 text-emerald-400'
+                              : rec.status === 'APPROVED_PAYABLE'
+                              ? 'bg-primary/20 text-primary'
+                              : rec.status === 'REVERSED' || rec.status === 'CANCELLED'
+                              ? 'bg-rose-500/20 text-rose-400'
+                              : 'bg-amber-500/20 text-amber-400'
+                          }`}>
+                            {rec.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

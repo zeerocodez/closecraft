@@ -6,6 +6,7 @@ import { getOrganizationSegmentSummaries } from '@/lib/recovery/segmentationServ
 import { RecoveryAttributionMetrics } from '@/components/recovery/RecoveryAttributionMetrics';
 import { LeadImportZone } from '@/components/recovery/LeadImportZone';
 import { SegmentationExplorer } from '@/components/recovery/SegmentationExplorer';
+import { RecoveryCampaignActions } from '@/components/recovery/RecoveryCampaignActions';
 import { Sparkles, Database, Layers, Send, TrendingUp, ShieldCheck } from 'lucide-react';
 
 export const metadata = {
@@ -150,31 +151,52 @@ export default async function RevenueRecoveryPage() {
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-outline-variant/20 text-on-surface-variant text-[11px] font-bold">
-                  <th className="pb-3">Campaign Name</th>
+                  <th className="pb-3">Campaign &amp; Pricing Tier</th>
                   <th className="pb-3">Segment</th>
-                  <th className="pb-3">Channel</th>
-                  <th className="pb-3">Status</th>
+                  <th className="pb-3">Status &amp; Payment</th>
                   <th className="pb-3">Dispatched</th>
-                  <th className="pb-3">Responses</th>
-                  <th className="pb-3">Re-Opened</th>
+                  <th className="pb-3">Responses / Interested</th>
+                  <th className="pb-3">WON Converted</th>
+                  <th className="pb-3 text-right">Approval / Billing</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/10 text-on-surface">
                 {campaigns.map((c) => (
                   <tr key={c.id} className="hover:bg-surface-container/30 transition-colors">
-                    <td className="py-3 font-bold">{c.name}</td>
-                    <td className="py-3 font-mono text-[11px] text-primary">{c.targetSegment}</td>
-                    <td className="py-3">{c.channel}</td>
                     <td className="py-3">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
-                        c.status === 'ACTIVE' || c.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-surface-container text-on-surface-variant'
-                      }`}>
-                        {c.status}
-                      </span>
+                      <div className="font-bold">{c.name}</div>
+                      <div className="text-[10px] font-mono text-on-surface-variant mt-0.5">
+                        Tier: <span className="text-primary font-semibold">{c.packageTier || 'TIER_500'}</span> · Fee: {c.currency === 'USD' ? '$' : '₦'}{(c.serviceFee || 0).toLocaleString()} ({c.channel})
+                      </div>
+                    </td>
+                    <td className="py-3 font-mono text-[11px] text-primary">{c.targetSegment}</td>
+                    <td className="py-3 space-y-1">
+                      <div>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold ${
+                          c.status === 'ACTIVE' || c.status === 'COMPLETED' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-surface-container text-on-surface-variant'
+                        }`}>
+                          {c.status}
+                        </span>
+                      </div>
+                      <div className="text-[10px] font-mono text-on-surface-variant">
+                        Pay: <span className={c.paymentVerified ? 'text-emerald-400 font-bold' : 'text-amber-400'}>{c.paymentVerified ? 'PAID' : 'PENDING'}</span>
+                      </div>
                     </td>
                     <td className="py-3 font-mono">{c.dispatchedCount}</td>
-                    <td className="py-3 font-mono text-amber-400">{c.responseCount}</td>
+                    <td className="py-3 font-mono text-amber-400">
+                      {c.responseCount} resp / {c.interestedCount} interested
+                    </td>
                     <td className="py-3 font-mono text-emerald-400 font-bold">{c.convertedCount}</td>
+                    <td className="py-3 text-right">
+                      <RecoveryCampaignActions
+                        campaignId={c.id}
+                        campaignName={c.name}
+                        isApproved={Boolean(c.customerApprovedAt)}
+                        paymentStatus={c.paymentVerified ? 'PAID' : 'PENDING'}
+                        setupFeeAmount={c.serviceFee || 0}
+                        currency={c.currency || 'NGN'}
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>

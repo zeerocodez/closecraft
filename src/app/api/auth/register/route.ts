@@ -122,12 +122,15 @@ export async function POST(req: Request) {
           organizationId: org.id,
           status: "TRIALING",
           plan: "STARTER",
-          pricePerMonth: 20000.0,
+          pricePerMonth: 15000.0,
           currency: "NGN",
           billingMode: "MANUAL_MONTHLY",
+          billingInterval: "MONTHLY",
+          marketRegion: "NG",
+          gracePeriodDays: 5,
           trialStartedAt: now,
           trialEndsAt,
-          maxInternalSeats: 3,
+          maxInternalSeats: 2,
         }
       });
 

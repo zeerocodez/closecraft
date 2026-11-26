@@ -141,6 +141,13 @@ model Organization {
   metaLeadForms        MetaLeadForm[]
   metaLeadSyncLogs     MetaLeadSyncLog[]
 
+  // Commercial, Metering & Commission Engine Relations
+  usageRecords         UsageRecord[]
+  usageCredits         UsageCredit[]
+  subscriptionEvents   SubscriptionEvent[]
+  salesAgreements      SalesEngagementAgreement[]
+  commissionRecords    SalesCommissionRecord[]
+
   @@index([whatsappPhoneNumberId])
   @@index([facebookPageId])
 }
@@ -555,31 +562,46 @@ model LeadIntelligence {
 }
 
 model ReactivationCampaign {
-  id                 String       @id @default(cuid())
-  name               String
-  targetSegment      String       // PREVIOUSLY_INTERESTED, PRICE_SENSITIVE, ABANDONED, REPEAT_BUYER, COLD_STALLED, ALL
-  channel            String       @default("WHATSAPP") // WHATSAPP, EMAIL, SMS
-  messageTemplate    String       // Template or generative brief
-  tone               String       @default("PROFESSIONAL") // FRIENDLY, PROFESSIONAL, VALUE_OFFER, DIRECT_CHECKIN
-  status             String       @default("DRAFT") // DRAFT, SCHEDULED, ACTIVE, COMPLETED, PAUSED
-  targetCount        Int          @default(0)
-  dispatchedCount    Int          @default(0)
-  deliveredCount     Int          @default(0)
-  responseCount      Int          @default(0)
-  convertedCount     Int          @default(0)
-  recoveredRevenue   Decimal      @default(0.0) @db.Decimal(12, 2)
-  currency           String       @default("NGN")
-  scheduledAt        DateTime?
-  completedAt        DateTime?
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id                   String       @id @default(cuid())
+  name                 String
+  targetSegment        String       // PREVIOUSLY_INTERESTED, PRICE_SENSITIVE, ABANDONED, REPEAT_BUYER, COLD_STALLED, ALL
+  channel              String       @default("WHATSAPP") // WHATSAPP, EMAIL, SMS
+  messageTemplate      String       // Template or generative brief
+  tone                 String       @default("PROFESSIONAL") // FRIENDLY, PROFESSIONAL, VALUE_OFFER, DIRECT_CHECKIN
+  status               String       @default("DRAFT") // DRAFT, QUOTED, APPROVED, PAID, SCHEDULED, ACTIVE, COMPLETED, PAUSED
+  leadSource           String?
+  packageTier          String?      // TIER_500, TIER_2000, TIER_5000, CUSTOM
+  serviceFee           Float        @default(0)
+  messagingFeeEstimate Float        @default(0)
+  dataCleaningFee      Float        @default(0)
+  consentConfirmed     Boolean      @default(false)
+  customerApprovedAt   DateTime?
+  paymentVerified      Boolean      @default(false)
+  invoiceId            String?
+  targetCount          Int          @default(0)
+  validContactCount    Int          @default(0)
+  duplicateSkippedCount Int         @default(0)
+  suppressedCount      Int          @default(0)
+  dispatchedCount      Int          @default(0)
+  deliveredCount       Int          @default(0)
+  responseCount        Int          @default(0)
+  interestedCount      Int          @default(0)
+  qualifiedCount       Int          @default(0)
+  appointmentCount     Int          @default(0)
+  convertedCount       Int          @default(0)
+  recoveredRevenue     Decimal      @default(0.0) @db.Decimal(12, 2)
+  currency             String       @default("NGN")
+  scheduledAt          DateTime?
+  completedAt          DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
 
-  organizationId     String
-  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdById        String?
-  createdBy          User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  organizationId       String
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdById          String?
+  createdBy            User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
-  messages           ReactivationMessage[]
+  messages             ReactivationMessage[]
 
   @@index([organizationId])
   @@index([status])
@@ -1133,6 +1155,9 @@ model PlatformSettings {
   ecosystemPublicTraineesEnabled  Boolean @default(true)
   guideEnabled                    Boolean @default(true)
   ecosystemRankingConfig    Json?
+  defaultTrialDays          Int      @default(7)
+  defaultGracePeriodDays    Int      @default(5)
+  trialEligibilityPolicy    Json?
 }
 
 model JobPosting {
@@ -1496,53 +1521,75 @@ model ClientBlocker {
 model WorkspaceSubscription {
   id                      String          @id @default(cuid())
   organizationId          String          @unique
-  status                  String          @default("TRIALING") // TRIALING, ACTIVE, GRACE, EXPIRED, PILOT_INCLUDED
+  status                  String          @default("TRIALING") // TRIALING, ACTIVE, PAST_DUE, GRACE_PERIOD, SUSPENDED, CANCELLED, EXPIRED, PILOT_INCLUDED
   trialStartedAt          DateTime        @default(now())
   trialEndsAt             DateTime
-  plan                    String          @default("STARTER") // STARTER (NGN 20,000/mo), PRO (NGN 45,000/mo)
-  pricePerMonth           Float           @default(20000.0)
+  plan                    String          @default("STARTER") // STARTER, GROWTH, SCALE, ENTERPRISE (legacy PRO mapped cleanly)
+  pricePerMonth           Float           @default(15000.0)
   currency                String          @default("NGN")
-  billingMode             String          @default("MANUAL_MONTHLY") // "Monthly, renew manually"
+  billingMode             String          @default("MANUAL_MONTHLY") // MANUAL_MONTHLY, MANUAL_ANNUAL
+  billingInterval         String          @default("MONTHLY") // MONTHLY, ANNUAL
+  marketRegion            String          @default("NG") // NG, US, GB, CA, GLOBAL
   paidThroughDate         DateTime?
-  gracePeriodEndsAt       DateTime?       // 7-day grace period
-  maxInternalSeats        Int             @default(3)
+  gracePeriodDays         Int             @default(5)
+  gracePeriodEndsAt       DateTime?       // Default 5-day grace period
+  pastDueSince            DateTime?
+  cancelledAt             DateTime?
+  cancelAtPeriodEnd       Boolean         @default(false)
+  suspendedAt             DateTime?
+  expiredAt               DateTime?
+  maxInternalSeats        Int             @default(2)
   activePilotEngagementId String?
+  customEntitlements      Json?           // Superadmin custom overrides for ENTERPRISE
+  promotionalCodeId       String?
   createdAt               DateTime        @default(now())
   updatedAt               DateTime        @updatedAt
 
   organization            Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  events                  SubscriptionEvent[]
 
   @@index([organizationId])
   @@index([status])
 }
 
 model BachsInvoice {
-  id               String           @id @default(cuid())
-  organizationId   String
-  engagementId     String?
-  invoiceNumber    String           @unique
-  type             String           // SOFTWARE_SUBSCRIPTION, PILOT_ENGAGEMENT, PERFORMANCE_FEE
-  amount           Float
-  currency         String           @default("NGN")
-  status           String           @default("ISSUED") // ISSUED, CONFIRMED, FUNDS_AVAILABLE, PAID_OUT, REFUNDED
-  bachsCheckoutId  String?          @unique
-  bachsCheckoutUrl String?
-  bachsChargeId    String?
-  paidAt           DateTime?
-  fundsAvailableAt DateTime?
-  customerEmail    String?
-  customerName     String?
-  metadata         String?          // JSON string
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                   String           @id @default(cuid())
+  organizationId       String
+  engagementId         String?
+  invoiceNumber        String           @unique
+  receiptNumber        String?
+  type                 String           // SOFTWARE_SUBSCRIPTION, WORKSPACE_INVOICE, PILOT_ENGAGEMENT, PERFORMANCE_FEE, GROWTH_SERVICE, LEAD_RECOVERY, USAGE_CREDIT
+  amount               Float
+  subtotalAmount       Float?
+  discountAmount       Float            @default(0)
+  taxAmount            Float            @default(0)
+  taxRatePercent       Float            @default(0)
+  currency             String           @default("NGN")
+  status               String           @default("ISSUED") // ISSUED, APPROVED, PAID, CONFIRMED, FUNDS_AVAILABLE, PAID_OUT, REFUNDED, CANCELLED
+  bachsCheckoutId      String?          @unique
+  bachsCheckoutUrl     String?
+  bachsChargeId        String?
+  paidAt               DateTime?
+  dueDate              DateTime?
+  fundsAvailableAt     DateTime?
+  customerEmail        String?
+  customerName         String?
+  billingInterval      String?
+  promotionalCode      String?
+  paymentMethodSummary String?
+  lineItemsJson        String?
+  metadata             String?          // JSON string
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 
-  organization     Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  engagement       PilotEngagement? @relation(fields: [engagementId], references: [id], onDelete: SetNull)
-  paymentAttempts  PaymentAttempt[]
+  organization         Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  engagement           PilotEngagement? @relation(fields: [engagementId], references: [id], onDelete: SetNull)
+  paymentAttempts      PaymentAttempt[]
 
   @@index([organizationId])
   @@index([engagementId])
   @@index([status])
+  @@index([receiptNumber])
 }
 
 model PaymentAttempt {
@@ -2781,7 +2828,11 @@ model ProjectProposal {
   
   // Financial summary — computed from line items; stored for quick reads
   totalAmount      Decimal         @db.Decimal(14, 2)
+  discountAmount   Decimal         @default(0) @db.Decimal(14, 2)
+  taxRatePercent   Float           @default(0)
+  taxAmount        Decimal         @default(0) @db.Decimal(14, 2)
   currency         String          @default("NGN")
+  termsAndConditions String?       @db.Text
   
   status           ProposalStatus  @default(DRAFT)
 
@@ -3082,4 +3133,240 @@ model MetaLeadSyncLog {
   @@index([organizationId])
   @@index([metaLeadId])
   @@index([status])
+}
+
+// -----------------------------------------------------------------------------
+// COMMERCIAL MONETISATION, REGIONAL PRICING, METERING & COMMISSIONS ENGINE
+// -----------------------------------------------------------------------------
+
+model SubscriptionPlan {
+  id              String              @id @default(cuid())
+  code            String              @unique // STARTER, GROWTH, SCALE, ENTERPRISE
+  name            String
+  tagline         String?
+  description     String              @db.Text
+  isRecommended   Boolean             @default(false)
+  isCustomQuote   Boolean             @default(false)
+  isActive        Boolean             @default(true)
+  sortOrder       Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  regionalPrices  PlanRegionalPrice[]
+  entitlements    PlanEntitlement?
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model PlanRegionalPrice {
+  id                  String           @id @default(cuid())
+  planId              String
+  plan                SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  marketRegion        String           // NG, US, GB, CA, GLOBAL
+  currency            String           // NGN, USD, GBP, CAD
+  monthlyPrice        Float
+  annualPrice         Float            // Typically 10x monthlyPrice (~2 months free)
+  annualSavingsLabel  String?
+  isActive            Boolean          @default(true)
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+
+  @@unique([planId, marketRegion, currency])
+  @@index([marketRegion, currency])
+}
+
+model PlanEntitlement {
+  id                            String           @id @default(cuid())
+  planId                        String           @unique
+  plan                          SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  maxWorkspaces                 Int              @default(1)
+  maxActiveLeads                Int              @default(500)
+  maxTeamMembers                Int              @default(2)
+  maxAiRequestsPerMonth         Int              @default(200)
+  maxAiQualificationsPerMonth   Int              @default(200)
+  maxAutomatedFollowUpsPerMonth Int              @default(500)
+  maxConnectedChannels          Int              @default(1)
+  maxCampaigns                  Int              @default(2)
+  maxStorageMb                  Int              @default(500)
+  featureFlags                  Json             @default("{}") // { aiQualification: true, automationWorkflows: true, multiplePipelines: false, ... }
+  createdAt                     DateTime         @default(now())
+  updatedAt                     DateTime         @updatedAt
+}
+
+model SubscriptionEvent {
+  id             String                @id @default(cuid())
+  organizationId String
+  subscriptionId String
+  eventType      String                // TRIAL_STARTED, ACTIVATED, RENEWED, UPGRADED, DOWNGRADED, PAYMENT_FAILED, GRACE_ENTERED, SUSPENDED, CANCELLED, EXPIRED, REACTIVATED, ADMIN_ADJUSTED
+  fromStatus     String?
+  toStatus       String?
+  fromPlan       String?
+  toPlan         String?
+  actorId        String?
+  actorType      String                @default("SYSTEM") // USER, ADMIN, SUPER_ADMIN, WEBHOOK, SYSTEM
+  reason         String?
+  metadata       Json?
+  createdAt      DateTime              @default(now())
+
+  organization   Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subscription   WorkspaceSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([subscriptionId])
+  @@index([eventType])
+}
+
+model UsageRecord {
+  id                       String       @id @default(cuid())
+  organizationId           String
+  periodKey                String       // e.g. "2026-11"
+  aiRequestsUsed           Int          @default(0)
+  aiQualificationsUsed     Int          @default(0)
+  automatedFollowUpsUsed   Int          @default(0)
+  campaignsCreated         Int          @default(0)
+  storageMbUsed            Float        @default(0)
+  estimatedProviderCostUsd Float        @default(0)
+  createdAt                DateTime     @default(now())
+  updatedAt                DateTime     @updatedAt
+
+  organization             Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, periodKey])
+  @@index([organizationId])
+}
+
+model UsageCredit {
+  id               String       @id @default(cuid())
+  organizationId   String
+  creditType       String       // AI_OPS, FOLLOW_UPS, RECOVERY_MESSAGES, LEADS
+  purchasedUnits   Int
+  remainingUnits   Int
+  amountPaid       Float
+  currency         String       @default("NGN")
+  invoiceId        String?
+  consentConfirmed Boolean      @default(true)
+  expiresAt        DateTime?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+
+  organization     Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, creditType])
+}
+
+model PromotionalCode {
+  id               String    @id @default(cuid())
+  code             String    @unique
+  description      String?
+  discountType     String    // PERCENTAGE, FIXED
+  discountValue    Float
+  currency         String?   // Required if FIXED
+  applicablePlans  String[]  @default([])
+  maxRedemptions   Int?
+  redemptionsCount Int       @default(0)
+  validFrom        DateTime  @default(now())
+  validUntil       DateTime?
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+}
+
+model LeadRecoveryTier {
+  id                  String   @id @default(cuid())
+  code                String   @unique // TIER_500, TIER_2000, TIER_5000, CUSTOM
+  name                String
+  minLeads            Int      @default(0)
+  maxLeads            Int?     // null = custom above 5000
+  serviceFeeNgn       Float
+  serviceFeeUsd       Float?
+  isCustomQuote       Boolean  @default(false)
+  messagingDisclaimer String   @default("Messaging charges and extensive data-cleaning work are billed separately if required.")
+  isActive            Boolean  @default(true)
+  sortOrder           Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model SalesCommissionTierConfig {
+  id                   String   @id @default(cuid())
+  serviceType          String   @unique // APPOINTMENT_SETTING, SALES_CLOSING, COMBINED, DEDICATED_TEAM
+  displayName          String
+  minCommissionPercent Float
+  maxCommissionPercent Float
+  defaultRetainerNgn   Float?
+  notes                String?
+  isActive             Boolean  @default(true)
+  updatedAt            DateTime @updatedAt
+}
+
+model SalesEngagementAgreement {
+  id                     String                  @id @default(cuid())
+  organizationId         String
+  representativeUserId   String?
+  serviceType            String                  // APPOINTMENT_SETTING, SALES_CLOSING, COMBINED, DEDICATED_TEAM
+  status                 String                  @default("DRAFT") // DRAFT, PENDING_APPROVAL, ACTIVE, PAUSED, TERMINATED
+  businessDetails        String                  @db.Text
+  productDescription     String                  @db.Text
+  productPricing         String
+  grossMarginPercent     Float?
+  targetCustomerProfile  String                  @db.Text
+  salesProcess           String                  @db.Text
+  qualificationCriteria  String                  @db.Text
+  commissionModel        String                  @default("PERCENTAGE") // PERCENTAGE, FIXED, TIERED, SPLIT
+  appointmentSettingRate Float                   @default(3.0) // e.g. 2-5%
+  closingRate            Float                   @default(7.5) // e.g. 5-10%
+  combinedRate           Float                   @default(10.0) // e.g. 8-15%
+  fixedCommissionAmount  Float?
+  monthlyRetainerAmount  Float?
+  currency               String                  @default("NGN")
+  attributionWindowDays  Int                     @default(30)
+  attributionRules       String?                 @db.Text
+  settlementTerms        String                  @db.Text
+  approvedById           String?
+  approvedAt             DateTime?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  organization           Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  commissions            SalesCommissionRecord[]
+
+  @@index([organizationId])
+  @@index([representativeUserId])
+  @@index([status])
+}
+
+model SalesCommissionRecord {
+  id                    String                   @id @default(cuid())
+  organizationId        String
+  agreementId           String
+  representativeUserId  String
+  leadId                String?
+  dealId                String?
+  invoiceId             String?                  // Mandatory verified payment link before PAYABLE
+  commissionType        String                   // APPOINTMENT_SETTING, CLOSING, COMBINED, SPLIT, RETAINER
+  verifiedPaymentAmount Float                    @default(0)
+  commissionRatePercent Float                    @default(0)
+  commissionAmount      Float                    @default(0)
+  currency              String                   @default("NGN")
+  status                String                   @default("PENDING") // PENDING, QUALIFIED, APPROVED, PAYABLE, PAID, REVERSED, DISPUTED
+  proposedById          String?
+  approvedById          String?
+  payoutReference       String?
+  disputeReason         String?
+  reversalReason        String?
+  paidAt                DateTime?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  organization          Organization             @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  agreement             SalesEngagementAgreement @relation(fields: [agreementId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([representativeUserId])
+  @@index([status])
+  @@index([invoiceId])
 }

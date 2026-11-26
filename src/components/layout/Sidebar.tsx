@@ -202,6 +202,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
         items: [
           { href: '/practice', icon: 'Target', label: 'AI Practice Coach' },
           { href: '/dashboard/analytics', icon: 'Activity', label: 'Revenue Analytics' },
+          { href: '/rep', icon: 'Award', label: 'Sales Performance' },
         ],
       },
       {
@@ -340,6 +341,31 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                   }`}
                 >
                   Operator Queue
+                </span>
+              </Link>
+              <Link
+                href="/admin"
+                onClick={() => isMobile && setIsOpen(false)}
+                title={!isExpanded && !isMobile ? 'Commercial Control' : undefined}
+                className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-colors group relative overflow-hidden ${
+                  pathname.startsWith('/admin')
+                    ? 'bg-amber-400/15 text-amber-300 font-bold border border-amber-400/30'
+                    : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                }`}
+              >
+                <Icon
+                  name="Sliders"
+                  size={18}
+                  className={`shrink-0 ${
+                    pathname.startsWith('/admin') ? 'text-amber-300' : 'text-on-surface-variant'
+                  }`}
+                />
+                <span
+                  className={`text-xs font-semibold whitespace-nowrap transition-opacity duration-150 ${
+                    !isExpanded && !isMobile ? 'opacity-0 w-0' : 'opacity-100'
+                  }`}
+                >
+                  Commercial Control
                 </span>
               </Link>
             </div>

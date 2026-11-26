@@ -24,16 +24,25 @@ export function getBachsApiBase(): string {
 }
 
 export interface BachsCheckoutParams {
-  amount?: number; // e.g. 15000 or 150000
-  currency?: string; // e.g. 'NGN'
+  amount?: number; // e.g. 15000 or 35000
+  currency?: string; // e.g. 'NGN', 'USD', 'GBP', 'CAD'
   customerEmail?: string;
   customerName?: string;
   customerPhone?: string;
   organizationId: string;
   invoiceId?: string;
   engagementId?: string;
-  type?: 'SOFTWARE_SUBSCRIPTION' | 'WORKSPACE_INVOICE' | 'PILOT_ENGAGEMENT' | 'PERFORMANCE_FEE' | 'GROWTH_SERVICE';
-  plan?: 'STARTER' | 'PRO';
+  type?:
+    | 'SOFTWARE_SUBSCRIPTION'
+    | 'WORKSPACE_INVOICE'
+    | 'PILOT_ENGAGEMENT'
+    | 'PERFORMANCE_FEE'
+    | 'GROWTH_SERVICE'
+    | 'LEAD_RECOVERY'
+    | 'USAGE_CREDIT';
+  plan?: 'STARTER' | 'GROWTH' | 'SCALE' | 'ENTERPRISE' | 'PRO';
+  billingInterval?: 'MONTHLY' | 'ANNUAL';
+  marketRegion?: string;
   successUrl: string;
   cancelUrl: string;
   metadata?: Record<string, any>;
@@ -499,18 +508,28 @@ export async function processBachsWebhookEvent(event: any): Promise<{
     const targetOrgId = invoice.organizationId;
     const now = new Date();
 
-    // 1. Mark invoice as PAID under verified service-role context (bypasses RLS payment webhook trigger)
+    // 1. Mark invoice as PAID with immutable receipt reference
+    const receiptNumber = invoice.receiptNumber || `CC-RCPT-${invoice.invoiceNumber.replace(/^INV-|^CC-INV-/, '')}`;
     await withTenantContext({ isServiceRole: true, organizationId: targetOrgId }, async (tx) => {
       await tx.bachsInvoice.update({
         where: { id: invoice.id },
         data: {
           status: 'PAID',
+          receiptNumber,
           bachsChargeId: chargeId || invoice.bachsChargeId,
           paidAt: now,
           fundsAvailableAt: now,
         }
       });
     });
+
+    // Increment promo code usage if applicable
+    if (invoice.promotionalCode) {
+      await db.promotionalCode.updateMany({
+        where: { code: invoice.promotionalCode },
+        data: { redemptionsCount: { increment: 1 } }
+      }).catch(() => {});
+    }
 
     // 2. Mark payment attempt as SUCCEEDED
     if (checkoutId) {
@@ -527,50 +546,96 @@ export async function processBachsWebhookEvent(event: any): Promise<{
         parsedMetadata = typeof invoice.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice.metadata || {});
       } catch (_) {}
 
-      const targetPlan = (metadata.plan || parsedMetadata.plan || (invoice.amount >= 40000 ? 'PRO' : 'STARTER')).toUpperCase() === 'PRO' ? 'PRO' : 'STARTER';
-      const planPrice = targetPlan === 'PRO' ? 45000.0 : 20000.0;
-      const planSeats = targetPlan === 'PRO' ? 10 : 3;
+      const { normalizePlanCode, resolveServerPlanPrice } = await import('@/lib/billing/catalog');
+      const { calculateNextPaidThroughDate } = await import('@/lib/payments/subscription');
+      const { DEFAULT_GRACE_PERIOD_DAYS } = await import('@/lib/billing/stateMachine');
+
+      const rawPlan = metadata.plan || parsedMetadata.plan || (invoice.amount >= 70000 && invoice.currency === 'NGN' ? 'SCALE' : invoice.amount >= 30000 && invoice.currency === 'NGN' ? 'GROWTH' : 'STARTER');
+      const targetPlan = normalizePlanCode(rawPlan);
+      const billingInterval = (metadata.billingInterval || parsedMetadata.billingInterval || invoice.billingInterval || 'MONTHLY').toUpperCase() === 'ANNUAL' ? 'ANNUAL' : 'MONTHLY';
+      const marketRegion = metadata.marketRegion || parsedMetadata.marketRegion || 'NG';
+
+      let planPrice = invoice.amount;
+      let planSeats = targetPlan === 'SCALE' ? 15 : targetPlan === 'GROWTH' ? 5 : 2;
+      try {
+        const resolved = await resolveServerPlanPrice({
+          planCode: targetPlan,
+          marketRegion,
+          currency: invoice.currency,
+          billingInterval,
+        });
+        planPrice = resolved.priceRow.monthlyPrice;
+        planSeats = resolved.entitlements?.maxTeamMembers || planSeats;
+      } catch {
+        // Enterprise custom invoice or direct amount fallback
+      }
 
       const sub = await db.workspaceSubscription.findUnique({
         where: { organizationId: targetOrgId }
       });
 
-      let nextPaidThrough: Date;
-      if (sub?.paidThroughDate && sub.paidThroughDate > now) {
-        // Early renewal extends existing paid-through date by 30 days
-        nextPaidThrough = new Date(sub.paidThroughDate);
-        nextPaidThrough.setDate(nextPaidThrough.getDate() + 30);
-      } else {
-        // Renewal from now grants 30 days of active access
-        nextPaidThrough = new Date(now);
-        nextPaidThrough.setDate(nextPaidThrough.getDate() + 30);
-      }
+      const graceDays = sub?.gracePeriodDays || DEFAULT_GRACE_PERIOD_DAYS;
+      const durationMonths = billingInterval === 'ANNUAL' ? 12 : 1;
+      const { nextPaidThroughDate: nextPaidThrough, gracePeriodEndsAt: gracePeriodEnd } = calculateNextPaidThroughDate(
+        sub?.paidThroughDate || null,
+        durationMonths,
+        graceDays
+      );
 
-      const gracePeriodEnd = new Date(nextPaidThrough);
-      gracePeriodEnd.setDate(gracePeriodEnd.getDate() + 7);
+      const fromStatus = sub?.status || 'NONE';
+      const fromPlan = sub?.plan || null;
 
-      await db.workspaceSubscription.upsert({
+      const updatedSub = await db.workspaceSubscription.upsert({
         where: { organizationId: targetOrgId },
         update: {
           status: 'ACTIVE',
           plan: targetPlan,
           pricePerMonth: planPrice,
+          currency: invoice.currency || 'NGN',
+          billingInterval,
+          billingMode: billingInterval === 'ANNUAL' ? 'MANUAL_ANNUAL' : 'MANUAL_MONTHLY',
+          marketRegion,
           maxInternalSeats: planSeats,
           paidThroughDate: nextPaidThrough,
           gracePeriodEndsAt: gracePeriodEnd,
+          pastDueSince: null,
+          cancelledAt: null,
+          cancelAtPeriodEnd: false,
+          suspendedAt: null,
+          expiredAt: null,
         },
         create: {
           organizationId: targetOrgId,
           status: 'ACTIVE',
           plan: targetPlan,
           pricePerMonth: planPrice,
+          currency: invoice.currency || 'NGN',
+          billingInterval,
+          billingMode: billingInterval === 'ANNUAL' ? 'MANUAL_ANNUAL' : 'MANUAL_MONTHLY',
+          marketRegion,
           maxInternalSeats: planSeats,
+          gracePeriodDays: graceDays,
           trialStartedAt: now,
           trialEndsAt: now,
           paidThroughDate: nextPaidThrough,
           gracePeriodEndsAt: gracePeriodEnd,
         }
       });
+
+      await db.subscriptionEvent.create({
+        data: {
+          organizationId: targetOrgId,
+          subscriptionId: updatedSub.id,
+          eventType: fromStatus === 'ACTIVE' ? (fromPlan !== targetPlan ? 'UPGRADED' : 'RENEWED') : 'ACTIVATED',
+          fromStatus,
+          toStatus: 'ACTIVE',
+          fromPlan,
+          toPlan: targetPlan,
+          actorType: 'WEBHOOK',
+          reason: `Payment verified via Bachs.io (${invoice.invoiceNumber}, ${billingInterval})`,
+          metadata: { invoiceId: invoice.id, receiptNumber, amount: invoice.amount, currency: invoice.currency },
+        }
+      }).catch(() => {});
 
       await db.organization.update({
         where: { id: targetOrgId },
@@ -584,13 +649,14 @@ export async function processBachsWebhookEvent(event: any): Promise<{
           action: 'WORKSPACE_INVOICE_PAID',
           resourceType: 'BILLING',
           resourceId: invoice.id,
-          newState: JSON.stringify({ paidThroughDate: nextPaidThrough, amount: invoice.amount })
+          newState: JSON.stringify({ plan: targetPlan, billingInterval, paidThroughDate: nextPaidThrough, amount: invoice.amount, receiptNumber })
         }
       });
 
       // Dispatch CC-05: Payment Received & Subscription Active (non-blocking)
       try {
         const { sendTransactionalEmailEvent } = await import('@/lib/email/service');
+        const { formatMoneyDisplay } = await import('@/lib/billing/catalog');
         const orgRecord = await db.organization.findUnique({
           where: { id: targetOrgId },
           include: {
@@ -610,10 +676,10 @@ export async function processBachsWebhookEvent(event: any): Promise<{
             data: {
               firstName: orgRecord?.members[0]?.user?.name?.split(' ')[0] || 'there',
               workspaceName: orgRecord?.name || 'Your Workspace',
-              planName: targetPlan === 'PRO' ? 'Pro' : 'Starter',
-              billingPeriod: 'Monthly',
-              amountPaid: `₦${invoice.amount.toLocaleString()}`,
-              paymentReference: invoice.invoiceNumber,
+              planName: targetPlan,
+              billingPeriod: billingInterval === 'ANNUAL' ? 'Annual (12 Months)' : 'Monthly',
+              amountPaid: formatMoneyDisplay(invoice.amount, invoice.currency),
+              paymentReference: `${invoice.invoiceNumber} / Receipt ${receiptNumber}`,
               dashboardUrl: `${baseUrl}/dashboard`,
               billingUrl: `${baseUrl}/billing`,
             },
@@ -624,6 +690,47 @@ export async function processBachsWebhookEvent(event: any): Promise<{
         }
       } catch (emailErr) {
         console.warn('[CC-05 Dispatch Notice]', emailErr);
+      }
+    }
+
+    // 3.B Fulfill Prepaid Usage Credits
+    if (purchaseType === 'USAGE_CREDIT') {
+      let parsedMetadata: any = {};
+      try {
+        parsedMetadata = typeof invoice.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice.metadata || {});
+      } catch (_) {}
+      const creditType = metadata.creditType || parsedMetadata.creditType || 'AI_OPS';
+      const units = Number(metadata.units || parsedMetadata.units || 500);
+      await db.usageCredit.create({
+        data: {
+          organizationId: targetOrgId,
+          creditType,
+          purchasedUnits: units,
+          remainingUnits: units,
+          amountPaid: invoice.amount,
+          currency: invoice.currency || 'NGN',
+          invoiceId: invoice.id,
+          consentConfirmed: true,
+        },
+      });
+    }
+
+    // 3.C Fulfill Lead Recovery Campaign Package
+    if (purchaseType === 'LEAD_RECOVERY') {
+      let parsedMetadata: any = {};
+      try {
+        parsedMetadata = typeof invoice.metadata === 'string' ? JSON.parse(invoice.metadata) : (invoice.metadata || {});
+      } catch (_) {}
+      const campaignId = metadata.recoveryCampaignId || parsedMetadata.recoveryCampaignId;
+      if (campaignId) {
+        await db.reactivationCampaign.updateMany({
+          where: { id: campaignId, organizationId: targetOrgId },
+          data: {
+            paymentVerified: true,
+            invoiceId: invoice.id,
+            status: 'PAID',
+          },
+        });
       }
     }
 
@@ -868,6 +975,50 @@ export async function processBachsWebhookEvent(event: any): Promise<{
     return { handled: true, details: `Fulfillment completed for ${purchaseType} (Invoice ${invoice.invoiceNumber})` };
   }
 
+  // Handle failed payment events (collection.failed, charge.failed, invoice.payment_failed)
+  if (['collection.failed', 'charge.failed', 'invoice.payment_failed', 'payment.failed'].includes(eventType)) {
+    const checkoutId = eventData.checkout_id || eventData.id;
+    const invoiceId = metadata.invoiceId;
+
+    let invoice = null;
+    if (invoiceId) {
+      invoice = await db.bachsInvoice.findUnique({ where: { id: invoiceId } });
+    }
+    if (!invoice && checkoutId) {
+      invoice = await db.bachsInvoice.findFirst({ where: { bachsCheckoutId: checkoutId } });
+    }
+
+    if (checkoutId) {
+      await db.paymentAttempt.updateMany({
+        where: { checkoutId },
+        data: { status: 'FAILED', rawResponse: JSON.stringify(event) },
+      });
+    }
+
+    if (invoice) {
+      const targetOrgId = invoice.organizationId;
+      const sub = await db.workspaceSubscription.findUnique({ where: { organizationId: targetOrgId } });
+      if (sub && ['ACTIVE', 'PAST_DUE'].includes(sub.status)) {
+        const { transitionSubscriptionState } = await import('@/lib/billing/stateMachine');
+        await transitionSubscriptionState({
+          organizationId: targetOrgId,
+          toStatus: 'GRACE_PERIOD',
+          eventType: 'PAYMENT_FAILED',
+          actorType: 'WEBHOOK',
+          reason: `Bachs payment failed for ${invoice.invoiceNumber}. Entered 5-day grace period; data preserved.`,
+          metadata: { invoiceId: invoice.id, eventType },
+        }).catch(() => {});
+      }
+
+      if (eventId) {
+        await db.webhookEvent.create({
+          data: { eventId, provider: 'BACHS', eventType, status: 'PROCESSED', payload: JSON.stringify(event) },
+        }).catch(() => {});
+      }
+      return { handled: true, details: `Payment failure recorded for Invoice ${invoice.invoiceNumber}; grace period notifications triggered` };
+    }
+  }
+
   // Handle refund events (charge.refunded, refund.succeeded, collection.refunded, invoice.refunded)
   if (['refund.succeeded', 'charge.refunded', 'collection.refunded', 'invoice.refunded'].includes(eventType)) {
     const checkoutId = eventData.checkout_id || eventData.id;
@@ -902,7 +1053,7 @@ export async function processBachsWebhookEvent(event: any): Promise<{
         },
       });
 
-      // 2. Clawback or cancel any unpaid affiliate commissions for this invoice
+      // 2. Clawback or cancel any unpaid affiliate & sales commissions for this invoice
       await db.affiliateCommission.updateMany({
         where: {
           invoiceId: invoice.id,
@@ -912,6 +1063,8 @@ export async function processBachsWebhookEvent(event: any): Promise<{
           status: 'CANCELLED',
         },
       });
+      const { reverseCommissionsForRefundedInvoice } = await import('@/lib/sales/commissionEngine');
+      await reverseCommissionsForRefundedInvoice(invoice.id).catch(() => {});
 
       // 3. Cancel any ClientService activated via this invoice
       const clientServices = await db.clientService.findMany({
