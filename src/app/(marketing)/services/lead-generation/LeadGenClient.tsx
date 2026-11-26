@@ -310,7 +310,7 @@ export default function LeadGenClient() {
             <div className="rounded-3xl bg-[#090D12] border border-white/15 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#248277]/60 transition-all group">
               <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
                 <Image
-                  src="/images/Starter package rate card.png"
+                  src="/images/Starter package rate card.webp"
                   alt="Starter Package Rate Card — ₦2,000 daily ad spend"
                   fill
                   className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
@@ -364,7 +364,7 @@ export default function LeadGenClient() {
               </div>
               <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
                 <Image
-                  src="/images/Growth package rate card.png"
+                  src="/images/Growth package rate card.webp"
                   alt="Growth Package Rate Card — ₦3,000 daily ad spend"
                   fill
                   className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
@@ -415,7 +415,7 @@ export default function LeadGenClient() {
             <div className="rounded-3xl bg-[#090D12] border border-white/15 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#248277]/60 transition-all group">
               <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
                 <Image
-                  src="/images/Elite digital sales rate card.png"
+                  src="/images/Elite digital sales rate card.webp"
                   alt="Elite Package Rate Card — ₦4,000 daily ad spend"
                   fill
                   className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
@@ -466,7 +466,7 @@ export default function LeadGenClient() {
             <div className="rounded-3xl bg-[#090D12] border border-white/15 overflow-hidden flex flex-col justify-between shadow-xl hover:border-[#248277]/60 transition-all group">
               <div className="relative aspect-[3/4] w-full bg-black/60 overflow-hidden">
                 <Image
-                  src="/images/Enterprise custom ad spend rate card.png"
+                  src="/images/Enterprise custom ad spend rate card.webp"
                   alt="Enterprise Custom Ad Spend Rate Card"
                   fill
                   className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"

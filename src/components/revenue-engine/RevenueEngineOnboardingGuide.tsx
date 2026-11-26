@@ -842,6 +842,8 @@ export function RevenueEngineOnboardingGuide({
             <div className="relative rounded-xl overflow-hidden aspect-video bg-black shadow-inner border border-outline-variant/30">
               <video
                 src="/videos/closecraft-onboarding.mp4"
+                poster="/images/closecraft-onboarding-poster.jpg"
+                preload="metadata"
                 controls
                 autoPlay
                 playsInline
