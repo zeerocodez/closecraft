@@ -20,7 +20,7 @@
 
 ### Stream A: Revenue Engine SaaS Subscriptions
 - **Core Rule:** Workspace-and-capacity pricing, not per-seat licence gouging.
-- **NGN Plans:** `STARTER` (₦15,000/mo — 1 workspace, 500 leads, 2 seats, 250 AI ops), `GROWTH` Recommended (₦35,000/mo — 2,000 leads, 5 seats, 1,000 AI ops), `SCALE` (₦75,000/mo — 10,000 leads, 15 seats, 3,500 AI ops), `ENTERPRISE` (Superadmin-configured custom quotation & multi-workspace limits).
+- **NGN Plans:** `STARTER` (₦15,000/mo — 1 workspace, 500 leads, 2 seats, 200 AI ops), `GROWTH` Recommended (₦35,000/mo — 2,000 leads, 5 seats, 1,000 AI ops), `SCALE` (₦75,000/mo — 10,000 leads, 15 seats, 5,000 AI ops), `ENTERPRISE` (Superadmin-configured custom quotation & multi-workspace limits).
 - **Regional Markets:** Independent prices configured per market (`NG`, `US`, `GB`, `CA`, `GLOBAL`) with `MONTHLY` and `ANNUAL` (~2 months free = 10x monthly) billing.
 - **Subscription Lifecycle (`src/lib/billing/stateMachine.ts`):** `TRIALING` (7-day no-card trial), `ACTIVE`, `PAST_DUE`, `GRACE_PERIOD` (5-day default preserving data), `SUSPENDED`, `CANCELLED`, `EXPIRED`, `PILOT_INCLUDED`.
 - **Metering & Enforcement (`src/lib/billing/entitlements.ts`):** Server-enforced lead caps (`EntitlementLimitError`), team seat limits, AI qualification metering (`estimatedProviderCostUsd`), campaign limits, and opt-in prepaid `UsageCredit` packs.
