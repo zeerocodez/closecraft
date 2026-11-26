@@ -1,4 +1,15 @@
 # QA AUTOMATION AND ACCEPTANCE REPORT
+
+> **Accuracy note (Nov 2026 review):** Test counts quoted across this
+> repository's documents are inconsistent (35, 37/37, and 97 appear in
+> different files), and a portion of the acceptance suite is self-referential
+> — some test files define the values they then assert, so they pass
+> regardless of the production code. Those tests document intent; they are
+> not verification. Newer regression tests (e.g.
+> `tests/hardcoded_secrets_regression.test.cjs`,
+> `tests/pricing_consistency.test.cjs`) read the real source files and fail
+> when the code regresses. Treat the pass claims below as the team's own
+> report from November 2026, not independent verification.
 **Product:** CloseCraft Revenue Operating System  
 **Test Harness:** Native Node.js Test Runner (`node:test`, `node:assert/strict`)  
 **Database Environment:** Supabase Cloud PostgreSQL 15+ Pooler  

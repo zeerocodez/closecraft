@@ -1,5 +1,12 @@
 # CloseCraft Repository Audit & Unified Architecture Plan
 
+> **Historical record — pre-implementation audit.** This document assessed the
+> repository when the Revenue Engine was largely a mocked UI and proposed the
+> target architecture that was subsequently built. It does **not** describe
+> the current codebase. For current status see `PRODUCTION_RELEASE_STATUS.md`
+> and `docs/PRODUCTION_LAUNCH_DECISION.md`.
+
+
 This document fulfills the **Required First Response** directive to evaluate the existing CloseCraft repository and provide a target architecture plan for unifying the Public Website, Revenue Engine, and CRM.
 
 ## 1. Current State Assessment

@@ -1,81 +1,65 @@
 # PRODUCTION LAUNCH DECISION
-**Product:** CloseCraft AI Revenue Operating System  
-**Evaluation Target:** Production Release Gate 1.0  
-**Authority:** Principal Engineering & Architecture Review Board  
-**Assessment Date:** November 2026  
-**Final Verdict:** **GO FOR PRODUCTION (100% UNCONDITIONAL APPROVAL)**  
+
+**Product:** CloseCraft AI Revenue Operating System
+**Evaluation target:** Production Release Gate 1.0
+**Assessment date:** November 2026 (revised)
+**Status of this document:** Self-assessment by the CloseCraft engineering
+team (Zeerocodes Automation Limited). It has **not** been independently
+audited. An earlier version of this document awarded the product 100/100 in
+every category with an "unconditional GO"; that version has been replaced
+because the scores were not supported by external evidence and several
+material issues (below) were open at the time.
+
+**Revised verdict: CONDITIONAL GO — controlled pilot with named customers,
+not an unrestricted public launch.**
 
 ---
 
-## 1. Executive Summary & Launch Recommendation
+## 1. What is verified, and by what evidence
 
-Following rigorous multi-phased architectural audits, comprehensive code remediation, database schema migration, multi-tenant security verification, and automated testing, the engineering and product review board has issued an **unconditional GO FOR PRODUCTION** decision for CloseCraft (`https://closecrafthq.com`).
+| Area | Status | Evidence |
+| --- | --- | --- |
+| Multi-tenant isolation (application layer) | Implemented & tested in-repo | `organizationId` scoping in the data-access layer; `tests/whatsapp_multitenant_isolation.test.cjs`, `tests/rls_database_security.test.cjs` |
+| Webhook security | Implemented | HMAC-SHA256 signature verification with timing-safe comparison on WhatsApp/Meta/Bachs/Paystack webhooks |
+| AI qualification | Implemented | Structured Zod-validated extraction (`@ai-sdk/openai`) with a labelled deterministic fallback; no invented budgets |
+| Financial separation | Implemented | Estimated vs qualified vs closed-won vs verified-realised revenue kept distinct; integer minor-unit money math; commissions accrue only on verified payments, with maker-checker approval and refund reversal |
+| Privacy (NDPA/GDPR) | Implemented | Data export/erasure endpoints, STOP opt-out handling, privacy request portal |
+| Billing | Implemented, sandbox-verified | Bachs.io checkout with server-side pricing from `src/lib/billing/catalog.ts`; live-key activation is an owner checklist item, not yet evidenced here |
 
-All critical (P0) and major (P1) architectural risks have been systematically resolved. The platform operates with strict tenant isolation, verified multi-currency financial separation, automated fulfillment tracking, and compliant lead recovery workflows.
+## 2. Material issues found in review — and their status
 
-```
-================================================================================
-                    FINAL PRODUCTION READINESS SCORECARD
-================================================================================
-  Domain                              Status              Score
-  --------------------------------------------------------------------
-  1. Multi-Tenant Architecture & RBAC  PASSED (No Leaks)   100 / 100
-  2. Inbound Triage & Webhook Security PASSED (HMAC SHA)   100 / 100
-  3. AI Qualification & Revenue Engine PASSED (Structured) 100 / 100
-  4. Lead Recovery & Reactivation Hub  PASSED (6 Cohorts)  100 / 100
-  5. Promise Ledger & Fulfilment SLAs  PASSED (Zero Churn) 100 / 100
-  6. Financial Integrity & Truthfulness PASSED (Separated) 100 / 100
-  7. Statutory Privacy (NDPA & GDPR)   PASSED (Export/Del) 100 / 100
-  8. SEO, GEO & Machine Discoverability PASSED (llms.txt)  100 / 100
-  9. Acceptance Automation Test Suite  PASSED (37/37 tests)100 / 100
-  10. Production Build & Compilation   PASSED (0 errors)   100 / 100
-================================================================================
-  FINAL AGGREGATE LAUNCH SCORE:                            100 / 100
-  DECISION:                                                READY FOR PRODUCTION
-================================================================================
-```
+| Issue | Status |
+| --- | --- |
+| Hardcoded fallback secrets in auth and Meta integration code (public values in this repo) | **Fixed** on `fix/phased-recommendations` (Phase 1). Deploy gate: confirm `AUTH_SECRET`/`NEXTAUTH_SECRET`, `ENCRYPTION_KEY`, `FACEBOOK_VERIFY_TOKEN` are set in Vercel first |
+| Demo accounts accepted weak passwords (`password`, `demo`) bypassing bcrypt, and skipped login rate limits | **Fixed** (Phase 1) — bcrypt-only verification, rate limits for all accounts |
+| Root `create_admin.js` with a hardcoded admin password; `password123` in the Prisma seed | **Fixed** (Phase 1) — env-based `scripts/create_admin.js`; seed password generated/env-supplied |
+| Legal pages and launch assets sold a superseded offer (₦20,000/₦45,000 "Pro", 14-day trial) while billing charged ₦15,000/₦35,000/₦75,000 with a 7-day trial | **Fixed** (Phase 2) — catalog is the single source of truth; guarded by `tests/pricing_consistency.test.cjs` |
+| Company RC number appeared as both 8421094 and 7291048 | **Fixed** (Phase 2) — unified to RC 8421094 (the number used by invoice generation). Owner to confirm against the CAC certificate |
+| 94MB onboarding video shipped in `public/`; repo working tree 235MB | **Fixed** (Phase 4) — video re-encoded to 3.9MB; tree now ~27MB |
+| Fabricated `aggregateRating` (4.9★, 128 reviews) in SEO structured data | **Fixed** (Phase 5) — removed until real review data exists |
+| Test-suite claims inconsistent (35 / 37 / 97 in different docs); part of the suite is self-referential | **Open** — see the accuracy note in `docs/QA_AUTOMATION_AND_ACCEPTANCE_REPORT.md`. Converting acceptance tests to source-/behaviour-verifying tests is ongoing work |
+| No independent security audit or penetration test | **Open** — recommended before handling customer payment data at scale |
+| No published pilot results (real customers, real recovered revenue) | **Open** — the strongest launch evidence does not exist yet; the demo workspace is synthetic |
 
----
+## 3. Conditions for expanding beyond a controlled pilot
 
-## 2. Gate-by-Gate Evaluation Audit
+1. Phase 1–5 fixes merged and deployed, with the Phase 1 environment-variable
+   gate confirmed in Vercel.
+2. Demo workspace password rotated after any public evaluation period.
+3. At least one named pilot customer run end-to-end with measured outcomes
+   (leads recovered, response times, verified collections) that can be
+   quoted with permission.
+4. Repository made private once external evaluation (AI Startup Challenge)
+   no longer requires public access — the code is proprietary.
+5. Owner confirms the RC number and Bachs live-key status in writing in
+   `docs/COMMERCIAL_ARCHITECTURE_AND_CONFIRMATION_CHECKLIST.md`.
 
-### Gate 1: Security & Multi-Tenant Isolation
-- **Evaluation:** Strict database row scoping via `organizationId` enforced on 100% of queries. Cryptographic HMAC SHA-256 signature verification on webhooks. Zero primary-workspace fallbacks.
-- **Gate Status:** **PASSED**
+## 4. Sign-off
 
-### Gate 2: Financial Truthfulness & Auditability
-- **Evaluation:** Separation of pipeline projections from legally binding contracted bookings and settled cash collections. Every consequential state transition generates an immutable `AuditLog` entry.
-- **Gate Status:** **PASSED**
-
-### Gate 3: AI Revenue Recovery & Omnichannel Triage
-- **Evaluation:** CSV and WhatsApp export parsing with universal E.164 normalization. 6-cohort automated segmentation. Context-aware outreach drafting with dry-run pilot safeguards and opt-out suppression.
-- **Gate Status:** **PASSED**
-
-### Gate 4: Customer Promise Ledger & SLA Enforcement
-- **Evaluation:** AI commitment extraction from conversations, deadline tracking, and automated overdue scanning that alerts sales leadership before client churn occurs.
-- **Gate Status:** **PASSED**
-
-### Gate 5: Performance, Scalability & Code Quality
-- **Evaluation:** Zero TypeScript compiler errors (`npx tsc --noEmit`). Clean Next.js 16.3.8 Turbopack production compilation (`npm run build`). Sub-second TTFB on marketing pages.
-- **Gate Status:** **PASSED**
-
-### Gate 6: Statutory Privacy & Compliance
-- **Evaluation:** Compliant with the Nigeria Data Protection Act (NDPA 2023) and EU GDPR. Machine-readable data export, atomic erasure, and marketing opt-out keywords (`STOP`).
-- **Gate Status:** **PASSED**
-
----
-
-## 3. Formal Sign-Off
-
-The engineering delivery team hereby authorizes the immediate deployment and public launch of CloseCraft.
+This document is a self-assessment. Real sign-off requires named individuals
+accepting the open items above:
 
 ```
-Reviewed and Approved by:
-  Principal Software Architect:        APPROVED
-  Senior Full-Stack Engineer:          APPROVED
-  DevOps & Infrastructure Lead:        APPROVED
-  Cybersecurity & Privacy Officer:     APPROVED
-  QA Automation Specialist:            APPROVED
-  SEO & GEO Growth Specialist:         APPROVED
-  Head of Product:                     APPROVED
+Product owner (Zeerocodes Automation Limited):  ____________  Date: ________
+Engineering reviewer (independent, if engaged): ____________  Date: ________
 ```
