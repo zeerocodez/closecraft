@@ -47,13 +47,27 @@ export function getCurrentPeriodKey(date: Date = new Date()): string {
   return `${y}-${m}`;
 }
 
-export async function getWorkspaceEntitlementsAndUsage(organizationId: string): Promise<WorkspaceUsageAndEntitlements> {
+export async function getWorkspaceEntitlementsAndUsage(
+  organizationId: string,
+  preloadedSub?: {
+    plan?: string | null;
+    status?: string | null;
+    trialEndsAt?: Date | null;
+    paidThroughDate?: Date | null;
+    gracePeriodEndsAt?: Date | null;
+    maxInternalSeats?: number | null;
+    customEntitlements?: unknown;
+  } | null
+): Promise<WorkspaceUsageAndEntitlements> {
   await ensureCommercialCatalogInitialized();
   const periodKey = getCurrentPeriodKey();
 
-  const sub = await db.workspaceSubscription.findUnique({
-    where: { organizationId },
-  });
+  const sub =
+    preloadedSub !== undefined
+      ? preloadedSub
+      : await db.workspaceSubscription.findUnique({
+          where: { organizationId },
+        });
 
   const planCode = normalizePlanCode(sub?.plan);
   const dbPlan = await db.subscriptionPlan.findUnique({

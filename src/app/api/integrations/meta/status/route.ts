@@ -165,6 +165,16 @@ export async function GET() {
         errorMessage: l.errorMessage,
         createdAt: l.createdAt,
       })),
+      recentLogs: syncLogs.map((l) => ({
+        id: l.id,
+        syncType: l.campaignName ? 'WEBHOOK' : 'SYNC',
+        leadgenId: l.metaLeadId,
+        formId: l.formId,
+        pageId: l.pageId,
+        status: l.status,
+        details: l.errorMessage || l.campaignName || 'Processed into Revenue Engine',
+        createdAt: l.createdAt,
+      })),
       teamMembers: teamMembers.map((m) => ({
         id: m.userId,
         name: m.user.name || m.user.email?.split('@')[0] || 'Team Member',
@@ -179,7 +189,17 @@ export async function GET() {
         qualificationRate: totalLeadsCaptured > 0 ? Math.round((qualifiedLeads / totalLeadsCaptured) * 100) : 0,
         winRate: totalLeadsCaptured > 0 ? Math.round((dealsWonCount / totalLeadsCaptured) * 100) : 0,
       },
+      metrics: {
+        totalLeadsCaptured,
+        aiQualifiedCount: qualifiedLeads,
+        qualificationRate: totalLeadsCaptured > 0 ? Math.round((qualifiedLeads / totalLeadsCaptured) * 100) : 0,
+        followupsDueCount: followUpsDue,
+        dealsWonCount,
+        verifiedRevenue,
+        currency: '₦',
+      },
       campaignAttribution,
+      campaigns: campaignAttribution,
     });
   } catch (error: any) {
     console.error('[MetaStatus] Error retrieving integration status:', error);

@@ -281,7 +281,7 @@ export default async function SettingsPage() {
               Workspace Subscription & Seat Capacity
             </h2>
             <p className="text-xs text-gray-400">
-              Capacity: <strong className="text-white font-semibold">{subscription.maxInternalSeats} Internal Team Seats</strong> · {subscription.maxActiveLeads.toLocaleString()} Active Leads/mo.
+              Capacity: <strong className="text-white font-semibold">{subscription.maxInternalSeats ?? 2} Internal Team Seats</strong> · {(subscription.maxActiveLeads ?? 500).toLocaleString()} Active Leads/mo.
             </p>
           </div>
 

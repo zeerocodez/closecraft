@@ -427,12 +427,24 @@ export function normalizePlanCode(rawPlan?: string | null): PlanCode {
   return 'STARTER';
 }
 
+let commercialCatalogCacheExpiresAt = 0;
+
 /**
  * Idempotently ensures the commercial catalog tables have baseline configurations.
- * Never overwrites existing customized plans, prices, or tiers modified by Superadmins.
+ * Uses a warm in-memory TTL cache to avoid repeated count round-trips on serverless renders.
  */
-export async function ensureCommercialCatalogInitialized() {
-  const existingPlansCount = await db.subscriptionPlan.count();
+export async function ensureCommercialCatalogInitialized(forceRefresh = false) {
+  const now = Date.now();
+  if (!forceRefresh && commercialCatalogCacheExpiresAt > now) {
+    return;
+  }
+
+  const [existingPlansCount, recoveryTiersCount, commissionTiersCount] = await Promise.all([
+    db.subscriptionPlan.count(),
+    db.leadRecoveryTier.count(),
+    db.salesCommissionTierConfig.count(),
+  ]);
+
   if (existingPlansCount === 0) {
     for (const plan of DEFAULT_SUBSCRIPTION_PLANS) {
       const createdPlan = await db.subscriptionPlan.upsert({
@@ -492,7 +504,6 @@ export async function ensureCommercialCatalogInitialized() {
     }
   }
 
-  const recoveryTiersCount = await db.leadRecoveryTier.count();
   if (recoveryTiersCount === 0) {
     for (const tier of DEFAULT_RECOVERY_TIERS) {
       await db.leadRecoveryTier.upsert({
@@ -503,7 +514,6 @@ export async function ensureCommercialCatalogInitialized() {
     }
   }
 
-  const commissionTiersCount = await db.salesCommissionTierConfig.count();
   if (commissionTiersCount === 0) {
     for (const ct of DEFAULT_COMMISSION_TIERS) {
       await db.salesCommissionTierConfig.upsert({
@@ -513,6 +523,8 @@ export async function ensureCommercialCatalogInitialized() {
       });
     }
   }
+
+  commercialCatalogCacheExpiresAt = Date.now() + 10 * 60 * 1000;
 }
 
 export async function getActivePlansWithPricing(marketRegion?: string, currency?: string) {

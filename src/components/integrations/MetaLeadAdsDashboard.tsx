@@ -108,6 +108,7 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [metaAuthError, setMetaAuthError] = useState<string | null>(null);
+  const [metaSuccessNotice, setMetaSuccessNotice] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'OVERVIEW' | 'FORMS' | 'PAGES' | 'IMPORT' | 'LOGS'>('OVERVIEW');
   const [isPending, startTransition] = useTransition();
   const [toast, setToast] = useState<string | null>(null);
@@ -150,8 +151,14 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const qErr = params.get('meta_error') || params.get('error');
+      const qSuccess = params.get('meta_success');
       if (qErr) {
         setMetaAuthError(decodeURIComponent(qErr));
+      }
+      if (qSuccess === 'true') {
+        const pCount = params.get('meta_pages') || '0';
+        const fCount = params.get('meta_forms') || '0';
+        setMetaSuccessNotice(`Meta Business connected successfully — ${pCount} Page(s) and ${fCount} Lead Form(s) synced.`);
       }
     }
     loadStatus();
@@ -255,6 +262,18 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
 
   return (
     <div className="space-y-6">
+      {metaSuccessNotice && (
+        <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 text-emerald-200 text-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <CheckCircle2 size={18} className="text-emerald-400 shrink-0" />
+            <span className="font-semibold">{metaSuccessNotice}</span>
+          </div>
+          <button type="button" onClick={() => setMetaSuccessNotice(null)} className="text-emerald-300 hover:text-white">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {(metaAuthError || !oauthConfigured || error) && (
         <div className="p-4 rounded-2xl bg-amber-950/35 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-3">
           <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />

@@ -151,18 +151,20 @@ export interface SubscriptionStatusInfo {
  */
 export async function getOrCreateWorkspaceSubscription(organizationId: string): Promise<SubscriptionStatusInfo> {
   const now = new Date();
-  const policy = await getPlatformBillingPolicy();
+  const [policy, activePilot, existingSub] = await Promise.all([
+    getPlatformBillingPolicy(),
+    db.pilotEngagement.findFirst({
+      where: {
+        organizationId,
+        status: { in: ['ACTIVE', 'SCHEDULED'] },
+      },
+    }),
+    db.workspaceSubscription.findUnique({
+      where: { organizationId },
+    }),
+  ]);
 
-  const activePilot = await db.pilotEngagement.findFirst({
-    where: {
-      organizationId,
-      status: { in: ['ACTIVE', 'SCHEDULED'] },
-    },
-  });
-
-  let sub = await db.workspaceSubscription.findUnique({
-    where: { organizationId },
-  });
+  let sub = existingSub;
 
   if (!sub) {
     const trialMs = (policy.trialDays || DEFAULT_TRIAL_DAYS) * 24 * 60 * 60 * 1000;
@@ -287,7 +289,7 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
   const trialHoursLeft = Math.floor(remainingMs / (1000 * 60 * 60));
   const trialDaysLeft = Math.floor(trialHoursLeft / 24);
 
-  const usageSummary = await getWorkspaceEntitlementsAndUsage(organizationId);
+  const usageSummary = await getWorkspaceEntitlementsAndUsage(organizationId, sub);
   const planCode = normalizePlanCode(sub.plan);
 
   return {
