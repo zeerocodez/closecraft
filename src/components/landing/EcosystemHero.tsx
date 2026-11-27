@@ -55,24 +55,24 @@ function actions(key: NodeKey, on: HeroLinks): Array<{ label: string; href: stri
     case "organizations":
       return [
         ...(on.organizations ? [{ label: "Meet organizations", href: "/organizations" }] : []),
-        { label: "Register your organization", href: "/org/register" },
+        { label: "Register your organization", href: "/signup" },
       ];
     case "employers":
       return [
         ...(on.trainees ? [{ label: "Explore trainees", href: "/trainees" }] : []),
-        { label: "Register as an employer", href: "/employer/register" },
-        { label: "Employer sign in", href: "/employer/login" },
+        { label: "Register as an employer", href: "/signup" },
+        { label: "Employer sign in", href: "/login" },
       ];
     case "opportunities":
       return [
         ...(on.jobs ? [{ label: "Discover opportunities", href: "/jobs" }] : []),
-        { label: "Find training", href: "/courses" },
+        { label: "Find training", href: "/dss" },
         ...(on.events ? [{ label: "See events", href: "/events" }] : []),
       ];
     default:
       return [
         ...(on.organizations ? [{ label: "Explore organizations", href: "/organizations" }] : []),
-        { label: "Register as an investor", href: "/investor/register" },
+        { label: "Register as an investor", href: "/contact" },
       ];
   }
 }

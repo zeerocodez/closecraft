@@ -268,7 +268,7 @@ function EntryForm({ draft, onChange, onSave, onCancel, busy }: { draft: Draft; 
                 const known = DESTINATIONS.find((d) => d.href === href);
                 setLink(i, { href, ...(known && !l.label.trim() ? { label: known.label } : {}) });
               }}
-              placeholder="/courses"
+              placeholder="/dss"
             />
             <Button type="button" size="sm" variant="secondary" onClick={() => set({ links: draft.links.filter((_, j) => j !== i) })}>
               Remove

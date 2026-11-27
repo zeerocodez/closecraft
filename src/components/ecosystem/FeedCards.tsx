@@ -59,7 +59,7 @@ export default function FeedCard({ item }: { item: FeedItem }) {
             <p className="font-display font-semibold text-brand-ink">{item.job.title}</p>
             <p className="text-sm text-gray-600">{item.job.company}</p>
             <p className="mt-1 text-xs text-gray-500">Closes {item.job.closingDate.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}</p>
-            <div className="mt-3"><Button href="/trainee/job-postings" size="sm" variant="secondary">View jobs</Button></div>
+            <div className="mt-3"><Button href="/jobs" size="sm" variant="secondary">View jobs</Button></div>
           </Card>
         </div>
       );

@@ -155,7 +155,7 @@ function topicLinks(skill: string, question: string, on: GuideSwitches): GuideLi
   const enc = encodeURIComponent(skill);
   const programs: GuideLink = on.orgPages
     ? { label: `Explore ${skill} programs and organizations`, href: `/search?q=${enc}` }
-    : { label: "Browse training programs", href: "/courses" };
+    : { label: "Browse training programs", href: "/dss" };
   const jobs: GuideLink = { label: `See ${skill} opportunities`, href: `/jobs?q=${enc}` };
   const people: GuideLink = { label: `Meet ${skill} trainees`, href: `/trainees?q=${enc}` };
   let order = [programs, jobs, people];
@@ -177,7 +177,7 @@ function dedupe(links: GuideLink[], max = 5): GuideLink[] {
 }
 
 const START_HERE: GuideLink[] = [
-  { label: "Browse training programs", href: "/courses" },
+  { label: "Browse training programs", href: "/dss" },
   { label: "See opportunities", href: "/jobs" },
   { label: "Meet training organizations", href: "/organizations" },
   { label: "Explore trainees", href: "/trainees" },

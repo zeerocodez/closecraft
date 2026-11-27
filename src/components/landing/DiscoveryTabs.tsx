@@ -18,12 +18,12 @@ interface TabDef {
 }
 
 const TAB_DEFS: TabDef[] = [
-  { key: "training", label: "Training", seeAll: { label: "Browse all programs", href: "/courses" }, invite: { text: "Training organizations list their programs here.", label: "Register your organization", href: "/org/register" } },
-  { key: "opportunities", label: "Opportunities", seeAll: { label: "See all opportunities", href: "/jobs" }, invite: { text: "Employers post open roles here.", label: "Register as an employer", href: "/employer/register" } },
-  { key: "organizations", label: "Organizations", seeAll: { label: "Meet all organizations", href: "/organizations" }, invite: { text: "Training organizations appear here once they publish a page.", label: "Register your organization", href: "/org/register" } },
-  { key: "trainees", label: "Trainees", seeAll: { label: "Explore all trainees", href: "/trainees" }, invite: { text: "Trainees who choose a public profile appear here.", label: "Create a trainee account", href: "/trainee/register" } },
-  { key: "events", label: "Events", seeAll: { label: "See all events", href: "/events" }, invite: { text: "Organizations announce open days and workshops here.", label: "Register your organization", href: "/org/register" } },
-  { key: "videos", label: "Videos", seeAll: { label: "Watch all videos", href: "/learn" }, invite: { text: "Trainees present educational videos for their organization here.", label: "Create a trainee account", href: "/trainee/register" } },
+  { key: "training", label: "Training", seeAll: { label: "Browse all programs", href: "/dss" }, invite: { text: "Training organizations list their programs here.", label: "Register your organization", href: "/signup" } },
+  { key: "opportunities", label: "Opportunities", seeAll: { label: "See all opportunities", href: "/jobs" }, invite: { text: "Employers post open roles here.", label: "Register as an employer", href: "/signup" } },
+  { key: "organizations", label: "Organizations", seeAll: { label: "Meet all organizations", href: "/organizations" }, invite: { text: "Training organizations appear here once they publish a page.", label: "Register your organization", href: "/signup" } },
+  { key: "trainees", label: "Trainees", seeAll: { label: "Explore all trainees", href: "/trainees" }, invite: { text: "Trainees who choose a public profile appear here.", label: "Create a trainee account", href: "/dss/register" } },
+  { key: "events", label: "Events", seeAll: { label: "See all events", href: "/events" }, invite: { text: "Organizations announce open days and workshops here.", label: "Register your organization", href: "/signup" } },
+  { key: "videos", label: "Videos", seeAll: { label: "Watch all videos", href: "/learn" }, invite: { text: "Trainees present educational videos for their organization here.", label: "Create a trainee account", href: "/dss/register" } },
 ];
 
 export interface DiscoveryProps {

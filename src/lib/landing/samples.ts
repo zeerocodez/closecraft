@@ -12,9 +12,9 @@ import type { ActivityItem, LandingEvent, LandingJob, LandingOrg, LandingProgram
  *    ("List your program"), not what the example is.
  */
 export const SAMPLE_LINKS = {
-  trainee: "/trainee/register",
-  organization: "/org/register",
-  employer: "/employer/register",
+  trainee: "/dss/register",
+  organization: "/signup",
+  employer: "/signup",
 } as const;
 
 const org = (id: string, name: string, tagline: string, location: string, skills: string[]): LandingOrg => ({
