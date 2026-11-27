@@ -22,12 +22,12 @@ export const Card = ({
   };
 
   const hoverStyle = hoverable
-    ? 'hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all cursor-pointer'
+    ? 'hover:border-primary/40 hover:shadow-pop hover:-translate-y-0.5 transition-all cursor-pointer'
     : '';
 
   return (
     <div
-      className={`rounded-2xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface shadow-sm ${paddingStyles[padding]} ${hoverStyle} ${className}`}
+      className={`rounded-2xl border border-outline-variant/40 bg-surface-container-lowest text-on-surface card-sheen ${paddingStyles[padding]} ${hoverStyle} ${className}`}
       {...props}
     >
       {children}

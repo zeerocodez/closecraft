@@ -156,8 +156,13 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex flex-col w-full px-4 md:px-8 pb-12 pt-8 min-h-screen justify-center items-center bg-surface">
-      <div className="w-full max-w-md mx-auto flex flex-col pt-4">
+    <div className="relative flex flex-col w-full px-4 md:px-8 pb-12 pt-8 min-h-screen justify-center items-center bg-surface overflow-hidden">
+      {/* Ambient brand glow */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 h-80 w-[36rem] rounded-full bg-emerald-500/[0.09] blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-64 w-[24rem] rounded-full bg-teal-500/[0.06] blur-3xl" />
+      </div>
+      <div className="relative w-full max-w-md mx-auto flex flex-col pt-4">
         {/* Top Header Links */}
         <div className="flex items-center justify-between mb-4">
           <Link
@@ -209,7 +214,7 @@ export default function LoginPage() {
         </div>
 
         {/* Login Card */}
-        <div className="relative w-full rounded-2xl bg-surface-container-lowest border border-outline-variant/40 shadow-xl p-6 sm:p-7 mb-6 overflow-hidden">
+        <div className="relative w-full rounded-2xl bg-surface-container-lowest border border-outline-variant/40 shadow-pop card-sheen p-6 sm:p-7 mb-6 overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-primary-fixed to-emerald-400" />
 
           <Suspense fallback={null}>

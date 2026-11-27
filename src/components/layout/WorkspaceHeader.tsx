@@ -49,7 +49,7 @@ export default function WorkspaceHeader({
   const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : 'U';
 
   return (
-    <header className="h-16 flex-shrink-0 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 flex items-center justify-between px-3 sm:px-6 lg:px-8 z-30 sticky top-0">
+    <header className="h-16 flex-shrink-0 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] flex items-center justify-between px-3 sm:px-6 lg:px-8 z-30 sticky top-0">
       {/* Left Column: Menu Button + Product Switcher + Workspace Pill */}
       <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
         {isMobile && (

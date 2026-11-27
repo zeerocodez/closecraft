@@ -50,7 +50,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     userRole === 'SUPER_ADMIN';
 
   const sidebarClasses = `
-    fixed left-0 top-0 h-full bg-surface-container-lowest border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none shadow-sm
+    fixed left-0 top-0 h-full bg-gradient-to-b from-surface-container-lowest via-surface-container-lowest to-[#070B14] border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none shadow-sm
     transition-[width,transform] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
     ${
       isMobile
@@ -110,10 +110,13 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                   title={!isExpanded && !isMobile ? item.label : undefined}
                   className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group relative overflow-hidden ${
                     isActive
-                      ? 'bg-primary/15 text-primary-fixed font-bold border border-primary/30'
+                      ? 'bg-primary/15 text-primary-fixed font-bold border border-primary/30 shadow-sm shadow-primary/10'
                       : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
                   }`}
                 >
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-primary" aria-hidden="true" />
+                  )}
                   <Icon
                     name={item.icon}
                     size={20}
@@ -282,6 +285,9 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                           : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                       }`}
                     >
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-full bg-emerald-400" aria-hidden="true" />
+                      )}
                       <Icon
                         name={item.icon}
                         size={17}

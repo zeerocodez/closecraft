@@ -20,7 +20,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         )}
         <input
           ref={ref}
-          className={`flex h-11 w-full rounded-xl border bg-surface-container-lowest px-3.5 py-2.5 text-sm text-on-surface ring-offset-surface placeholder:text-on-surface-variant/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent disabled:cursor-not-allowed disabled:opacity-50 ${
+          className={`flex h-11 w-full rounded-xl border bg-surface-container-lowest px-3.5 py-2.5 text-sm text-on-surface ring-offset-surface placeholder:text-on-surface-variant/60 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:border-transparent focus-visible:shadow-[0_0_0_4px_rgba(16,185,129,0.15)] disabled:cursor-not-allowed disabled:opacity-50 ${
             leftIcon ? 'pl-10' : ''
           } ${rightIcon ? 'pr-10' : ''} ${
             hasError ? 'border-error/80 focus-visible:ring-error' : 'border-outline-variant/50 hover:border-outline-variant'

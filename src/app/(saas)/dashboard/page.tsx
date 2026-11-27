@@ -196,8 +196,8 @@ export default async function CommandCentrePage({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-outline-variant/30">
         <div>
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1.5 shadow-xs">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] animate-pulse" />
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-accent-lime/15 text-accent-lime border border-accent-lime/30 flex items-center gap-1.5 shadow-xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
               <span>REVENUE COMMAND CENTRE</span>
             </span>
             <span className="text-xs text-on-surface-variant font-medium">
@@ -221,7 +221,7 @@ export default async function CommandCentrePage({
         <div className="flex items-center gap-2 self-start md:self-auto flex-wrap">
           <Link
             href="/recovery"
-            className="h-9 px-3 rounded-xl bg-[#C7F36B]/15 hover:bg-[#C7F36B]/25 text-[#C7F36B] border border-[#C7F36B]/35 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
+            className="h-9 px-3 rounded-xl bg-accent-lime/15 hover:bg-accent-lime/25 text-accent-lime border border-accent-lime/35 text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs"
             title="Launch Lead Recovery Campaign"
           >
             <Sparkles size={14} />
@@ -233,7 +233,7 @@ export default async function CommandCentrePage({
             className="h-9 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/60 text-xs font-semibold flex items-center gap-1.5 transition-all"
             title="Open Customer Promise Ledger"
           >
-            <CheckSquare size={14} className="text-[#C7F36B]" />
+            <CheckSquare size={14} className="text-accent-lime" />
             <span>Promise Ledger</span>
           </Link>
 
@@ -247,7 +247,7 @@ export default async function CommandCentrePage({
       {/* ========================================================================= */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Metric 1: Verified Cash Collected */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-[#C7F36B]/40 transition-colors">
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group card-sheen hover:border-accent-lime/40 transition-colors">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
               Revenue Collected
@@ -266,7 +266,7 @@ export default async function CommandCentrePage({
         </div>
 
         {/* Metric 2: Active Open Pipeline */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-blue-500/40 transition-colors">
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group card-sheen hover:border-blue-500/40 transition-colors">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
               Active Opportunities
@@ -275,12 +275,12 @@ export default async function CommandCentrePage({
               OPEN PIPELINE
             </span>
           </div>
-          <p className="text-2xl sm:text-3xl font-mono font-extrabold text-[#C7F36B] tracking-tight">
+          <p className="text-2xl sm:text-3xl font-mono font-extrabold text-accent-lime tracking-tight">
             ₦{metrics.openPipeline.toLocaleString()}
           </p>
           <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
             <span>In negotiation / proposal</span>
-            <Link href="/pipeline" className="text-xs font-bold text-on-surface hover:text-[#C7F36B] flex items-center gap-0.5">
+            <Link href="/pipeline" className="text-xs font-bold text-on-surface hover:text-accent-lime flex items-center gap-0.5">
               <span>View Pipeline</span>
               <ArrowRight size={11} />
             </Link>
@@ -288,12 +288,12 @@ export default async function CommandCentrePage({
         </div>
 
         {/* Metric 3: Recovered Opportunities */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-[#C7F36B]/40 transition-colors">
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group card-sheen hover:border-accent-lime/40 transition-colors">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
               Recovered Opportunities
             </span>
-            <span className="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
+            <span className="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-accent-lime/15 text-accent-lime border border-accent-lime/30">
               RECOVER PILLAR
             </span>
           </div>
@@ -302,7 +302,7 @@ export default async function CommandCentrePage({
           </p>
           <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
             <span>Revived dormant leads</span>
-            <Link href="/recovery" className="text-xs font-bold text-on-surface hover:text-[#C7F36B] flex items-center gap-0.5">
+            <Link href="/recovery" className="text-xs font-bold text-on-surface hover:text-accent-lime flex items-center gap-0.5">
               <span>Recovery Hub</span>
               <ArrowRight size={11} />
             </Link>
@@ -310,7 +310,7 @@ export default async function CommandCentrePage({
         </div>
 
         {/* Metric 4: Outstanding Commitments */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group hover:border-amber-500/40 transition-colors">
+        <div className="p-4 sm:p-5 rounded-2xl bg-surface-container-low border border-outline-variant/40 space-y-2 relative overflow-hidden group card-sheen hover:border-amber-500/40 transition-colors">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">
               Customer Promises
@@ -328,7 +328,7 @@ export default async function CommandCentrePage({
           </p>
           <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
             <span>{overdueCommitments.filter(c => c.isOverdue).length} overdue SLA</span>
-            <Link href="/commitments" className="text-xs font-bold text-on-surface hover:text-[#C7F36B] flex items-center gap-0.5">
+            <Link href="/commitments" className="text-xs font-bold text-on-surface hover:text-accent-lime flex items-center gap-0.5">
               <span>Promise Ledger</span>
               <ArrowRight size={11} />
             </Link>
@@ -342,11 +342,11 @@ export default async function CommandCentrePage({
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#C7F36B] animate-pulse" />
+            <div className="w-2.5 h-2.5 rounded-full bg-accent-lime animate-pulse" />
             <h2 className="text-lg font-bold text-on-surface tracking-tight">
               Needs Your Attention
             </h2>
-            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
+            <span className="text-xs font-mono font-bold px-2 py-0.5 rounded-full bg-accent-lime/15 text-accent-lime border border-accent-lime/30">
               {attentionItemsCount} items
             </span>
           </div>
@@ -473,7 +473,7 @@ export default async function CommandCentrePage({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-outline-variant/30">
           <div>
             <h3 className="text-base font-bold text-on-surface flex items-center gap-2">
-              <Sparkles size={16} className="text-[#C7F36B]" />
+              <Sparkles size={16} className="text-accent-lime" />
               <span>Opportunities You May Be Overlooking</span>
             </h3>
             <p className="text-xs text-on-surface-variant mt-0.5">
@@ -482,7 +482,7 @@ export default async function CommandCentrePage({
           </div>
           <Link
             href="/recovery"
-            className="text-xs font-bold text-[#C7F36B] hover:underline flex items-center gap-1 self-start sm:self-auto"
+            className="text-xs font-bold text-accent-lime hover:underline flex items-center gap-1 self-start sm:self-auto"
           >
             <span>Launch Recovery Wave</span>
             <ArrowRight size={13} />
@@ -506,7 +506,7 @@ export default async function CommandCentrePage({
                     <span className="font-bold text-xs text-on-surface truncate max-w-[140px]">
                       {lead.name}
                     </span>
-                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30">
+                    <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-accent-lime/15 text-accent-lime border border-accent-lime/30">
                       {lead.buyingIntent ?? 80}% Fit
                     </span>
                   </div>
@@ -516,7 +516,7 @@ export default async function CommandCentrePage({
                 </div>
                 <Link
                   href={`/inbox?leadId=${lead.id}`}
-                  className="w-full py-1.5 rounded-lg bg-[#C7F36B]/10 hover:bg-[#C7F36B]/20 text-[#C7F36B] text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
+                  className="w-full py-1.5 rounded-lg bg-accent-lime/10 hover:bg-accent-lime/20 text-accent-lime text-[11px] font-bold flex items-center justify-center gap-1 transition-colors"
                 >
                   <span>Reactivate Enquiry</span>
                   <ArrowRight size={11} />
@@ -542,13 +542,13 @@ export default async function CommandCentrePage({
                   href={`/dashboard?tab=${tab.id}`}
                   className={`relative pb-3 font-semibold text-xs transition-colors ${
                     isActive
-                      ? 'text-[#C7F36B] font-bold'
+                      ? 'text-accent-lime font-bold'
                       : 'text-on-surface-variant hover:text-on-surface'
                   }`}
                 >
                   {tab.label}
                   {isActive && (
-                    <div className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-[#C7F36B] rounded-t-full shadow-[0_-2px_8px_rgba(199,243,107,0.4)]" />
+                    <div className="absolute bottom-[-1px] left-0 right-0 h-0.5 bg-accent-lime rounded-t-full shadow-[0_-2px_8px_rgba(199,243,107,0.4)]" />
                   )}
                 </Link>
               );
@@ -601,7 +601,7 @@ export default async function CommandCentrePage({
             {recentAudits.map((event) => (
               <div key={event.id} className="py-2.5 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] shrink-0" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-lime shrink-0" />
                   <span className="font-semibold text-on-surface truncate">
                     {event.reason || event.action}
                   </span>
