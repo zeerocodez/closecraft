@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
 import { assignLeadToUser } from '@/app/(saas)/actions';
@@ -48,8 +48,21 @@ export default function InboxClient({
 }: InboxClientProps) {
   const router = useRouter();
 
-  // Local leads state for instant optimistic updates
+  // Local leads state synced with server refreshes for live webhook updates
   const [leads, setLeads] = useState<any[]>(initialLeads);
+
+  useEffect(() => {
+    setLeads(initialLeads);
+  }, [initialLeads]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        router.refresh();
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [router]);
 
   // Filters & Navigation State
   const [activeChannelFilter, setActiveChannelFilter] = useState<'ALL' | 'WHATSAPP' | 'EMAIL' | 'WEB' | 'HANDOFF' | 'HOT'>('ALL');
@@ -209,7 +222,15 @@ export default function InboxClient({
             })
           );
         }
-        showToast('Message logged and dispatched');
+        if (data.dispatch?.deliveryStatus === 'SENT') {
+          showToast('Message delivered via WhatsApp Cloud API ✓');
+        } else if (data.dispatch?.deliveryStatus === 'DRY_RUN_LOGGED') {
+          showToast('Saved (WhatsApp Dry-Run Mode active — enable WHATSAPP_LIVE_DISPATCH_ENABLED=true for live send)');
+        } else if (data.dispatch?.deliveryStatus === 'FAILED') {
+          showToast(data.dispatch.error || 'WhatsApp dispatch failed — logged in thread');
+        } else {
+          showToast('Message logged and dispatched');
+        }
         router.refresh();
       } else {
         const errData = await res.json().catch(() => ({}));

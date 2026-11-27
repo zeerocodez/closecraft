@@ -121,3 +121,24 @@ describe('Webhook self-tests & expiry UI banners', () => {
     assert.ok(waCard.includes('Verify Webhook'));
   });
 });
+
+describe('Unified Inbox WhatsApp bidirectional delivery', () => {
+  it('webhook handles rich WhatsApp payloads, phone variants, and bubbles existing conversations', () => {
+    const waWebhook = read('src/app/api/webhooks/whatsapp/route.ts');
+    assert.ok(waWebhook.includes('extractInboundWhatsAppContent'));
+    assert.ok(waWebhook.includes('normalizeWhatsAppNumber'));
+    assert.ok(waWebhook.includes('updatedAt: new Date()'));
+  });
+
+  it('POST /api/messages dispatches live via sendWhatsAppMessage instead of mocking', () => {
+    const msgRoute = read('src/app/api/messages/route.ts');
+    assert.ok(msgRoute.includes('sendWhatsAppMessage'));
+    assert.ok(!msgRoute.includes('[WhatsApp API Mock]'));
+  });
+
+  it('InboxClient syncs initialLeads and refreshes live for incoming webhook messages', () => {
+    const inbox = read('src/app/(saas)/inbox/InboxClient.tsx');
+    assert.ok(inbox.includes('setLeads(initialLeads)'));
+    assert.ok(inbox.includes('router.refresh()'));
+  });
+});

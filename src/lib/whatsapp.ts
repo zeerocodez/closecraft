@@ -106,6 +106,7 @@ export interface SendWhatsAppMessageParams {
   templateComponents?: any[];
   conversationId?: string;
   allowOutsideServiceWindow?: boolean;
+  senderType?: 'AI' | 'HUMAN';
 }
 
 export interface SendWhatsAppMessageResult {
@@ -113,8 +114,41 @@ export interface SendWhatsAppMessageResult {
   deliveryStatus: 'PENDING' | 'PROCESSING' | 'SENT' | 'DELIVERED' | 'FAILED' | 'CANCELLED' | 'DRY_RUN_LOGGED';
   providerMessageId?: string;
   messageId?: string;
+  messageRecord?: any;
   error?: string;
   dryRun?: boolean;
+}
+
+async function persistWhatsAppMessage(params: {
+  conversationId: string;
+  leadId: string;
+  content: string;
+  senderType: 'AI' | 'HUMAN';
+  status: string;
+  providerMessageId?: string;
+  errorMessage?: string;
+}) {
+  const msg = await db.message.create({
+    data: {
+      conversationId: params.conversationId,
+      content: params.content,
+      senderType: params.senderType,
+      status: params.status,
+      providerMessageId: params.providerMessageId,
+      errorMessage: params.errorMessage,
+    },
+  });
+  await Promise.all([
+    db.conversation.update({
+      where: { id: params.conversationId },
+      data: { updatedAt: new Date() },
+    }).catch(() => null),
+    db.lead.update({
+      where: { id: params.leadId },
+      data: { updatedAt: new Date() },
+    }).catch(() => null),
+  ]);
+  return msg;
 }
 
 /**
@@ -140,6 +174,7 @@ export async function sendWhatsAppMessage(
     templateLanguage = 'en_US',
     templateComponents = [],
     conversationId: providedConvId,
+    senderType = 'AI',
   } = params;
 
   const cleanPhone = normalizeWhatsAppNumber(recipientPhone);
@@ -214,20 +249,20 @@ export async function sendWhatsAppMessage(
     if (!isWindowOpen && !params.allowOutsideServiceWindow) {
       const errorMsg = 'Outside WhatsApp 24-hour customer service window. WhatsApp Cloud API requires an approved business template for business-initiated conversations.';
       console.warn(`[WhatsApp Dispatch] Window closed for ${cleanPhone}: ${errorMsg}`);
-      
-      await db.message.create({
-        data: {
-          conversationId: convId,
-          content: text || '[Failed Dispatch: Window Closed]',
-          senderType: 'AI',
-          status: 'FAILED',
-          errorMessage: errorMsg,
-        },
+
+      const msgRecord = await persistWhatsAppMessage({
+        conversationId: convId,
+        leadId,
+        content: text || '[Failed Dispatch: Window Closed]',
+        senderType,
+        status: 'FAILED',
+        errorMessage: errorMsg,
       });
 
       return {
         success: false,
         deliveryStatus: 'FAILED',
+        messageRecord: msgRecord,
         error: errorMsg,
       };
     }
@@ -238,18 +273,17 @@ export async function sendWhatsAppMessage(
 
   if (!isLiveDispatchEnabled) {
     const dryRunId = `dry_run_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-    const loggedContent = messageType === 'template' 
+    const loggedContent = messageType === 'template'
       ? `[WhatsApp Template: ${templateName}] ${text || ''}`.trim()
       : (text || '');
 
-    await db.message.create({
-      data: {
-        conversationId: convId,
-        content: loggedContent,
-        senderType: 'AI',
-        status: 'DRY_RUN_LOGGED',
-        providerMessageId: dryRunId,
-      },
+    const msgRecord = await persistWhatsAppMessage({
+      conversationId: convId,
+      leadId,
+      content: loggedContent,
+      senderType,
+      status: 'DRY_RUN_LOGGED',
+      providerMessageId: dryRunId,
     });
 
     console.log(`[WhatsApp Pilot Dry-Run] Recorded outbound message to +${cleanPhone}: "${loggedContent.slice(0, 80)}" (DeliveryStatus: DRY_RUN_LOGGED)`);
@@ -260,6 +294,7 @@ export async function sendWhatsAppMessage(
       dryRun: true,
       providerMessageId: dryRunId,
       messageId: dryRunId,
+      messageRecord: msgRecord,
     };
   }
 
@@ -284,19 +319,19 @@ export async function sendWhatsAppMessage(
     const credErr = 'Missing WhatsApp Cloud API credentials for organization (WHATSAPP_ACCESS_TOKEN / WHATSAPP_PHONE_NUMBER_ID).';
     console.error(`[WhatsApp Dispatch Error] ${credErr}`);
 
-    await db.message.create({
-      data: {
-        conversationId: convId,
-        content: text || `[Template: ${templateName}]`,
-        senderType: 'AI',
-        status: 'FAILED',
-        errorMessage: credErr,
-      },
+    const msgRecord = await persistWhatsAppMessage({
+      conversationId: convId,
+      leadId,
+      content: text || `[Template: ${templateName}]`,
+      senderType,
+      status: 'FAILED',
+      errorMessage: credErr,
     });
 
     return {
       success: false,
       deliveryStatus: 'FAILED',
+      messageRecord: msgRecord,
       error: credErr,
     };
   }
@@ -340,16 +375,13 @@ export async function sendWhatsAppMessage(
 
       if (response.ok && data.messages?.[0]?.id) {
         const wamid = data.messages[0].id;
-        
-        // Save message with explicit SENT status (not yet DELIVERED until receipt confirmed)
-        await db.message.create({
-          data: {
-            conversationId: convId,
-            content: text || `[Template: ${templateName}]`,
-            senderType: 'AI',
-            status: 'SENT',
-            providerMessageId: wamid,
-          },
+        const msgRecord = await persistWhatsAppMessage({
+          conversationId: convId,
+          leadId,
+          content: text || `[Template: ${templateName}]`,
+          senderType,
+          status: 'SENT',
+          providerMessageId: wamid,
         });
 
         console.log(`[WhatsApp Cloud API] Message accepted by Meta for +${cleanPhone} (wamid: ${wamid})`);
@@ -358,6 +390,7 @@ export async function sendWhatsAppMessage(
           deliveryStatus: 'SENT',
           providerMessageId: wamid,
           messageId: wamid,
+          messageRecord: msgRecord,
         };
       } else {
         lastError = data.error?.message || `HTTP ${response.status}: ${JSON.stringify(data)}`;
@@ -370,19 +403,19 @@ export async function sendWhatsAppMessage(
   }
 
   // Log failed message in database so it remains visible and retryable
-  await db.message.create({
-    data: {
-      conversationId: convId,
-      content: text || `[Template: ${templateName}]`,
-      senderType: 'AI',
-      status: 'FAILED',
-      errorMessage: lastError || 'Unknown provider error',
-    },
+  const msgRecord = await persistWhatsAppMessage({
+    conversationId: convId,
+    leadId,
+    content: text || `[Template: ${templateName}]`,
+    senderType,
+    status: 'FAILED',
+    errorMessage: lastError || 'Unknown provider error',
   });
 
   return {
     success: false,
     deliveryStatus: 'FAILED',
+    messageRecord: msgRecord,
     error: lastError || 'Failed to dispatch WhatsApp message after retry.',
   };
 }

@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { RevenueEngine } from '@/lib/revenue-engine/engine';
 import { timingSafeEqualString } from '@/lib/apiSecurity';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
 import crypto from 'crypto';
 
 export async function GET(request: Request) {
@@ -118,12 +119,35 @@ export async function POST(request: Request) {
   }
 }
 
+function extractInboundWhatsAppContent(message: any): string {
+  const direct =
+    message.text?.body ||
+    message.button?.text ||
+    message.interactive?.button_reply?.title ||
+    message.interactive?.list_reply?.title ||
+    message.image?.caption ||
+    message.video?.caption ||
+    message.document?.caption;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
+
+  if (message.document?.filename) return `[Document: ${message.document.filename}]`;
+  if (message.image) return '[Image attachment received]';
+  if (message.video) return '[Video attachment received]';
+  if (message.audio || message.voice) return '[Voice/Audio message received]';
+  if (message.location) {
+    return `[Location shared: ${message.location.latitude}, ${message.location.longitude}]`;
+  }
+  if (message.type) return `[WhatsApp ${message.type} message received]`;
+  return '';
+}
+
 async function processWhatsAppMessage(message: any, contactName: string, phoneNumberId: string) {
-  const fromPhone = message.from;
-  const content = message.text?.body || message.button?.text || '';
+  const fromPhone = String(message.from || '').trim();
+  const cleanPhone = normalizeWhatsAppNumber(fromPhone);
+  const content = extractInboundWhatsAppContent(message);
   const messageId = String(message.id || `wa_msg_${fromPhone}_${Date.now()}`);
 
-  if (!content) return; // Only text and button interactions supported currently
+  if (!content) return;
 
   // 1. Duplicate Event Protection & Idempotency
   const existingEvent = await db.webhookEvent.findUnique({
@@ -187,11 +211,15 @@ async function processWhatsAppMessage(message: any, contactName: string, phoneNu
     },
   }).catch(() => null);
 
-  // 3. Find or create Lead strictly scoped to the resolved organization
+  // 3. Find or create Lead strictly scoped to the resolved organization (matching phone variants)
+  const phoneCandidates = Array.from(
+    new Set([fromPhone, cleanPhone, cleanPhone ? `+${cleanPhone}` : null].filter(Boolean) as string[])
+  );
+
   let lead = await db.lead.findFirst({
     where: {
-      phone: fromPhone,
       organizationId: org.id,
+      OR: phoneCandidates.map((p) => ({ phone: p })),
     },
   });
 
@@ -250,7 +278,17 @@ async function processWhatsAppMessage(message: any, contactName: string, phoneNu
         status: 'ACTIVE',
       },
     });
+  } else {
+    await db.conversation.update({
+      where: { id: conversation.id },
+      data: { updatedAt: new Date() },
+    }).catch(() => null);
   }
+
+  await db.lead.update({
+    where: { id: lead.id },
+    data: { updatedAt: new Date() },
+  }).catch(() => null);
 
   // 5. Create Message record
   await db.message.create({
