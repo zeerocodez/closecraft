@@ -62,6 +62,14 @@ export async function POST(req: Request) {
       if (belongs === false) {
         return NextResponse.json({ error: 'That phone number is not listed under the WhatsApp Business Account ID provided. Check both IDs belong to the same business.' }, { status: 400 });
       }
+      // Best-effort subscribe CloseCraft Meta app to this WABA so inbound messages route cleanly
+      await fetch(
+        `https://graph.facebook.com/${process.env.META_GRAPH_API_VERSION || 'v21.0'}/${encodeURIComponent(businessAccountId)}/subscribed_apps`,
+        {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
+        }
+      ).catch(() => null);
     }
 
     const org = await db.organization.update({

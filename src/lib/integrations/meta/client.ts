@@ -145,6 +145,72 @@ export async function refreshLongLivedUserToken(currentToken: string): Promise<{
 }
 
 /**
+ * Validates whether a Meta OAuth token is currently accepted by Graph API.
+ */
+export async function validateMetaToken(accessToken: string): Promise<{
+  valid: boolean;
+  expired: boolean;
+  user?: { id: string; name: string };
+  error?: string;
+}> {
+  try {
+    const url = `${GRAPH_BASE}/me?fields=id,name&access_token=${encodeURIComponent(accessToken)}`;
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const code = data?.error?.code;
+      return {
+        valid: false,
+        expired: code === 190 || res.status === 401,
+        error: data?.error?.message || `HTTP ${res.status}`,
+      };
+    }
+    return {
+      valid: true,
+      expired: false,
+      user: { id: data.id, name: data.name },
+    };
+  } catch (err: any) {
+    return {
+      valid: false,
+      expired: false,
+      error: err?.message || 'Network error validating Meta token',
+    };
+  }
+}
+
+/**
+ * Checks live whether the app is subscribed to leadgen events for a Facebook Page.
+ */
+export async function checkPageLeadgenSubscription(
+  pageId: string,
+  pageAccessToken: string
+): Promise<{ subscribed: boolean; error?: string }> {
+  try {
+    const url = `${GRAPH_BASE}/${pageId}/subscribed_apps?access_token=${encodeURIComponent(pageAccessToken)}`;
+    const res = await fetch(url, { headers: { Accept: 'application/json' } });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      return {
+        subscribed: false,
+        error: data?.error?.message || `HTTP ${res.status}`,
+      };
+    }
+    const apps = Array.isArray(data.data) ? data.data : [];
+    const { appId } = getMetaConfig();
+    const matched = apps.some(
+      (app: any) =>
+        (!appId || String(app.id) === String(appId)) &&
+        Array.isArray(app.subscribed_fields) &&
+        app.subscribed_fields.includes('leadgen')
+    );
+    return { subscribed: matched };
+  } catch (err: any) {
+    return { subscribed: false, error: err?.message || 'Subscription check failed' };
+  }
+}
+
+/**
  * Retrieves the authenticated Meta User profile.
  */
 export async function fetchUserProfile(accessToken: string): Promise<{ id: string; name: string }> {

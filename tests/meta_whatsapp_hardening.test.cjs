@@ -98,3 +98,38 @@ describe('Settings health monitor honesty', () => {
     assert.ok(src.includes('WhatsAppConfigCard'));
   });
 });
+
+describe('Webhook self-tests, expiry UI & expanded Inbox', () => {
+  it('exposes Meta and WhatsApp self-test endpoints guarded by requireIntegrationManager', () => {
+    const metaTest = read('src/app/api/integrations/meta/test/route.ts');
+    const waTest = read('src/app/api/integrations/whatsapp/test/route.ts');
+    assert.ok(metaTest.includes('requireIntegrationManager'));
+    assert.ok(metaTest.includes('checkPageLeadgenSubscription'));
+    assert.ok(waTest.includes('requireIntegrationManager'));
+    assert.ok(waTest.includes('hello_world'));
+  });
+
+  it('surfaces token expiry and webhook self-test controls in Settings UI', () => {
+    const statusRoute = read('src/app/api/integrations/meta/status/route.ts');
+    const metaDash = read('src/components/integrations/MetaLeadAdsDashboard.tsx');
+    const waCard = read('src/app/(saas)/settings/WhatsAppConfigCard.tsx');
+    assert.ok(statusRoute.includes('isExpired'));
+    assert.ok(statusRoute.includes('tokenDaysRemaining'));
+    assert.ok(metaDash.includes('Verify Webhook'));
+    assert.ok(metaDash.includes('Reconnect Meta'));
+    assert.ok(waCard.includes('/api/integrations/whatsapp/test'));
+    assert.ok(waCard.includes('Verify Webhook'));
+  });
+
+  it('WhatsApp webhook supports interactive/media payloads, phone normalization & Inbox auto-refreshes cleanly', () => {
+    const waWebhook = read('src/app/api/webhooks/whatsapp/route.ts');
+    const inboxPage = read('src/app/(saas)/inbox/page.tsx');
+    const inboxClient = read('src/app/(saas)/inbox/InboxClient.tsx');
+    assert.ok(waWebhook.includes('extractInboundWhatsAppContent'));
+    assert.ok(waWebhook.includes('normalizeWhatsAppNumber'));
+    assert.ok(waWebhook.includes('updatedAt: new Date()'));
+    assert.ok(!inboxPage.includes('max-h-[calc(100dvh-5rem)]'));
+    assert.ok(inboxClient.includes('setLeads(initialLeads)'));
+    assert.ok(inboxClient.includes('showInspector'));
+  });
+});

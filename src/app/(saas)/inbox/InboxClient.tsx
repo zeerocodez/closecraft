@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
+import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
 import { assignLeadToUser } from '@/app/(saas)/actions';
@@ -26,7 +26,10 @@ import {
   CheckCheck,
   ShieldCheck,
   ChevronDown,
-  Megaphone
+  Megaphone,
+  PanelRight,
+  RefreshCw,
+  X
 } from 'lucide-react';
 
 export interface TeamMember {
@@ -73,8 +76,21 @@ export default function InboxClient({
 }: InboxClientProps) {
   const router = useRouter();
 
-  // Local leads state for instant optimistic updates
+  // Local leads state synced cleanly with live webhook refreshes
   const [leads, setLeads] = useState<any[]>(initialLeads);
+
+  useEffect(() => {
+    setLeads(initialLeads);
+  }, [initialLeads]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        router.refresh();
+      }
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [router]);
 
   // Filters & Navigation State
   const [activeChannelFilter, setActiveChannelFilter] = useState<'ALL' | 'WHATSAPP' | 'META_ADS' | 'WEB' | 'HANDOFF' | 'HOT'>('ALL');
@@ -88,6 +104,13 @@ export default function InboxClient({
 
   // Human Takeover / AI Pause state per conversation
   const [pausedAiLeads, setPausedAiLeads] = useState<Record<string, boolean>>({});
+  const [showInspector, setShowInspector] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1536) {
+      setShowInspector(true);
+    }
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -343,8 +366,8 @@ export default function InboxClient({
         {/* =========================================================================
             PANE 1: Conversation List (Triage Stream)
             ========================================================================= */}
-        <section 
-          className={`w-full lg:w-[340px] xl:w-[370px] shrink-0 border-r border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-hidden ${
+        <section
+          className={`w-full lg:w-[340px] xl:w-[320px] shrink-0 border-r border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-hidden ${
             mobileTab !== 'LIST' ? 'hidden lg:flex' : 'flex'
           }`}
         >
@@ -534,9 +557,9 @@ export default function InboxClient({
         </section>
 
         {/* =========================================================================
-            PANE 2: Omnichannel Conversation Thread & Composer
+            PANE 2: Omnichannel Conversation Thread & Composer (Expanded Primary Workspace)
             ========================================================================= */}
-        <section 
+        <section
           className={`flex-1 min-w-0 flex flex-col bg-[#0f1214] h-full overflow-hidden ${
             mobileTab !== 'CHAT' ? 'hidden lg:flex' : 'flex'
           }`}
@@ -544,7 +567,7 @@ export default function InboxClient({
           {activeLead ? (
             <>
               {/* Conversation Header */}
-              <header className="p-4 md:p-5 bg-[#0a0d12]/85 backdrop-blur-md border-b border-white/10 flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <header className="px-5 py-4 bg-[#0a0d12]/85 backdrop-blur-md border-b border-white/10 flex flex-wrap items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shadow-md shrink-0">
                     {activeLead.name?.substring(0, 2).toUpperCase() || 'LD'}
@@ -556,8 +579,8 @@ export default function InboxClient({
                         {activeLead.status}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-400 truncate">
-                      <span>{activeLead.phone || activeLead.email}</span>
+                    <div className="flex items-center gap-2 text-xs text-gray-400 truncate mt-0.5">
+                      <span className="font-mono">{activeLead.phone || activeLead.email}</span>
                       <span>•</span>
                       <span className="text-emerald-400 font-medium">{ENQUIRY_SOURCE_LABEL[getEnquirySource(activeLead)]} enquiry</span>
                     </div>
@@ -565,30 +588,11 @@ export default function InboxClient({
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* Team Member Closer Assignment Dropdown */}
-                  <div className="flex items-center gap-1.5 bg-[#161a1d] px-2.5 py-1.5 rounded-xl border border-white/10 text-xs">
-                    <UserCheck size={13} className="text-emerald-400 shrink-0" />
-                    <span className="text-gray-400 text-[11px] font-medium hidden sm:inline">Rep:</span>
-                    <select
-                      value={activeLead.assignedUserId || ''}
-                      onChange={(e) => handleAssignLead(e.target.value)}
-                      disabled={isAssigning}
-                      className="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer max-w-[130px] truncate"
-                    >
-                      <option value="" className="bg-[#111827] text-gray-400">Unassigned</option>
-                      {teamMembers.map((m) => (
-                        <option key={m.id} value={m.id} className="bg-[#111827] text-white">
-                          {m.name} ({m.role})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* AI Auto-Pilot Toggle Button */}
                   <button
                     type="button"
                     onClick={toggleAiHandoff}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
+                    className={`px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border whitespace-nowrap ${
                       isAiPaused
                         ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
                         : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
@@ -599,17 +603,45 @@ export default function InboxClient({
                     <span className="hidden sm:inline">{isAiPaused ? 'Human Active' : 'AI Copilot'}</span>
                   </button>
 
+                  {/* Toggle Lead Intelligence Inspector Drawer */}
+                  <button
+                    type="button"
+                    onClick={() => setShowInspector((prev) => !prev)}
+                    className={`hidden lg:inline-flex px-3 py-2 rounded-xl text-xs font-semibold items-center gap-1.5 transition-all border whitespace-nowrap ${
+                      showInspector
+                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                        : 'bg-white/5 hover:bg-white/10 text-gray-200 border-white/10'
+                    }`}
+                    title="Show/Hide Lead Intelligence details"
+                  >
+                    <PanelRight size={14} />
+                    <span>Lead Intel</span>
+                  </button>
+
                   {/* Direct WhatsApp Web Button */}
                   {activeLead.phone && (
                     <button
                       type="button"
                       onClick={handleDirectWhatsAppOutreach}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-950/40"
+                      className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-950/40 whitespace-nowrap"
                     >
                       <Phone size={13} />
                       <span className="hidden sm:inline">WhatsApp</span>
                     </button>
                   )}
+
+                  {/* Manual Refresh */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.refresh();
+                      showToast('Inbox synced');
+                    }}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-colors"
+                    title="Refresh inbox"
+                  >
+                    <RefreshCw size={14} />
+                  </button>
                 </div>
               </header>
 
@@ -713,9 +745,9 @@ export default function InboxClient({
               </div>
 
               {/* Smart Composer & Presets */}
-              <div className="p-4 md:p-5 bg-[#0a0d12] border-t border-white/5 shrink-0 space-y-3">
+              <div className="p-4 md:p-5 bg-[#0a0d12] border-t border-white/5 shrink-0 space-y-2.5">
                 {/* AI Preset Chips - Clean horizontal scroll with no truncation */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/10 shrink-0">
+                <div className="flex items-center gap-2 overflow-x-auto pb-0.5 scrollbar-thin scrollbar-thumb-white/10 shrink-0">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mr-0.5 flex items-center gap-1 shrink-0">
                     <Sparkles size={12} /> Templates:
                   </span>
@@ -724,7 +756,7 @@ export default function InboxClient({
                       key={idx}
                       type="button"
                       onClick={() => setComposerText(t.text)}
-                      className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-medium transition-colors border border-white/5 shrink-0 whitespace-nowrap"
+                      className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-medium transition-colors border border-white/5 shrink-0 whitespace-nowrap"
                     >
                       {t.label}
                     </button>
@@ -734,11 +766,11 @@ export default function InboxClient({
                 {/* Composer Form */}
                 <form onSubmit={handleSendMessage} className="space-y-2">
                   <textarea
-                    rows={3}
+                    rows={2}
                     placeholder="Type an omnichannel reply, or choose a verified template above..."
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value)}
-                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)] transition-all resize-none"
+                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)] transition-all resize-none"
                   />
 
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -749,12 +781,12 @@ export default function InboxClient({
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 shrink-0">
                       {activeLead.phone && (
                         <button
                           type="button"
                           onClick={handleDirectWhatsAppOutreach}
-                          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md"
+                          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md whitespace-nowrap"
                         >
                           <ExternalLink size={13} />
                           <span>Open in WhatsApp</span>
@@ -764,7 +796,7 @@ export default function InboxClient({
                       <button
                         type="submit"
                         disabled={isSending || !composerText.trim()}
-                        className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/25 hover:shadow-emerald-400/40 disabled:opacity-40"
+                        className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/25 hover:shadow-emerald-400/40 disabled:opacity-40 whitespace-nowrap"
                       >
                         <Send size={13} />
                         <span>{isSending ? 'Sending...' : 'Log & Send'}</span>
@@ -782,21 +814,35 @@ export default function InboxClient({
         </section>
 
         {/* =========================================================================
-            PANE 3: Omnichannel Lead Context Inspector
+            PANE 3: Omnichannel Lead Context Inspector (Toggleable on Laptops, Docked on 2XL)
             ========================================================================= */}
-        <section 
-          className={`w-full xl:w-80 2xl:w-88 shrink-0 border-l border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-y-auto p-5 space-y-5 ${
-            mobileTab !== 'CONTEXT' ? 'hidden xl:flex' : 'flex'
+        <section
+          className={`w-full lg:w-[320px] xl:w-[340px] shrink-0 border-l border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-y-auto p-5 space-y-5 ${
+            mobileTab === 'CONTEXT'
+              ? 'flex'
+              : showInspector
+                ? 'hidden lg:flex'
+                : 'hidden'
           }`}
         >
           {activeLead ? (
             <>
               {/* Header */}
-              <div className="border-b border-white/5 pb-3">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 block mb-1">
-                  Lead Intelligence
-                </span>
-                <h3 className="font-serif font-bold text-white text-base truncate">{activeLead.name}</h3>
+              <div className="border-b border-white/5 pb-3 flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 block mb-1">
+                    Lead Intelligence
+                  </span>
+                  <h3 className="font-serif font-bold text-white text-base truncate">{activeLead.name}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowInspector(false)}
+                  className="hidden lg:inline-flex p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5"
+                  title="Close Lead Intel panel"
+                >
+                  <X size={14} />
+                </button>
               </div>
 
               {/* Commercial Snapshot Card */}

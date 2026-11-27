@@ -72,11 +72,11 @@ export default async function InboxPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-4 w-full h-[calc(100dvh-5rem)] max-h-[calc(100dvh-5rem)] p-4 sm:p-6 overflow-hidden">
+    <div className="flex flex-col gap-3 w-full lg:h-[calc(100dvh-8.5rem)] min-h-[580px] p-4 sm:p-6">
       {/* Header */}
-      <div className="flex flex-row items-center justify-between gap-4 border-b border-outline-variant/30 pb-4 shrink-0">
+      <div className="flex flex-row items-center justify-between gap-4 border-b border-outline-variant/30 pb-3 shrink-0">
         <div>
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 mb-1.5 shadow-xs">
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 mb-1 shadow-xs">
             <MessageSquare size={12} />
             <span>Omnichannel Communications Hub</span>
           </div>
@@ -92,7 +92,7 @@ export default async function InboxPage() {
         </div>
       </div>
 
-      {/* Main Inbox 3-Pane Client */}
+      {/* Main Inbox Client */}
       <InboxClient initialLeads={leads} teamMembers={teamMembers} currentUserId={session.user.id} />
     </div>
   );

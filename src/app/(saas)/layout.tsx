@@ -18,22 +18,25 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
     redirect("/login");
   }
 
-  // Server-authoritative approval check: only approved organizations can access the SaaS
-  const org = await db.organization.findUnique({
-    where: { id: organizationId },
-    select: { id: true, name: true, status: true, slug: true }
-  });
+  // Server-authoritative approval check + membership + cached subscription lookup in parallel
+  const [org, member, subscription] = await Promise.all([
+    db.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true, name: true, status: true, slug: true }
+    }),
+    db.organizationMember.findFirst({
+      where: { userId: session.user.id, organizationId },
+      select: { role: true }
+    }),
+    getOrCreateWorkspaceSubscription(organizationId).catch((subErr) => {
+      console.error('[SaasLayout] Subscription lookup fallback:', subErr);
+      return null;
+    }),
+  ]);
 
   if (!org || org.status !== 'APPROVED') {
     redirect('/pending-approval');
   }
-
-  const member = await db.organizationMember.findFirst({
-    where: { userId: session.user.id, organizationId },
-    select: { role: true }
-  });
-
-  const subscription = await getOrCreateWorkspaceSubscription(organizationId);
 
   const userWithRole = {
     ...session.user,
@@ -51,7 +54,7 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
         />
       )}
 
-      {subscription.status === 'TRIALING' && subscription.trialHoursLeft <= 72 && (
+      {subscription?.status === 'TRIALING' && subscription.trialHoursLeft <= 72 && (
         <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2.5">
             <span className="material-symbols-outlined text-amber-400 text-[20px] shrink-0">timer</span>
@@ -74,7 +77,7 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
         </div>
       )}
 
-      {subscription.status === 'EXPIRED' && (
+      {subscription?.status === 'EXPIRED' && (
         <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2.5">
             <span className="material-symbols-outlined text-red-400 text-[20px] shrink-0">warning</span>
