@@ -7,6 +7,7 @@ import { getOrCreateWorkspaceSubscription } from '@/lib/payments/subscription';
 import { SettingsForm } from './SettingsForm';
 import { WorkspaceIdentityForm } from './WorkspaceIdentityForm';
 import { MetaAdsConfigCard } from './MetaAdsConfigCard';
+import { WhatsAppConfigCard } from './WhatsAppConfigCard';
 // Webhook verify token is read server-side only and passed to the settings
 // card as a prop — it must never be hardcoded in client components.
 // (MetaAdsConfigCard is available for the Meta setup section:
@@ -15,6 +16,7 @@ const metaVerifyToken = process.env.FACEBOOK_VERIFY_TOKEN || process.env.META_VE
 import { MetaLeadAdsDashboard } from '@/components/integrations/MetaLeadAdsDashboard';
 import { 
   Building2, 
+  PlugZap,
   Sparkles, 
   CreditCard, 
   Users, 
@@ -76,6 +78,16 @@ export default async function SettingsPage() {
   const callerMember = org.members.find(m => m.user.id === session.user.id);
   const isOwnerOrAdmin = callerMember?.role === 'OWNER' || callerMember?.role === 'ADMIN' || (session.user as any)?.role === 'SUPER_ADMIN';
 
+  // Real channel health, computed from stored connection state — the health
+  // monitor below must never claim a channel is operational when it is not.
+  const metaIntegration = await db.metaIntegration.findUnique({
+    where: { organizationId },
+    select: { status: true },
+  });
+  const metaConnected = metaIntegration?.status === 'CONNECTED';
+  const whatsappConnected = Boolean(org.whatsappPhoneNumberId && org.whatsappAccessToken);
+  const allChannelsReady = metaConnected && whatsappConnected;
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto font-sans pb-16">
       {/* Top Header */}
@@ -121,6 +133,21 @@ export default async function SettingsPage() {
           initialSlug={org.slug}
           initialWhatsApp={org.whatsappNumber || ''}
         />
+      </section>
+
+      {/* Section 1.B: WhatsApp Business Connection (tenant's own number) */}
+      <section className="p-6 md:p-8 rounded-3xl bg-[#0f1214] border border-white/5 shadow-xl space-y-6">
+        <div>
+          <h2 className="font-serif text-lg font-bold text-white flex items-center gap-2">
+            <PlugZap size={18} className="text-[#45bfae]" />
+            <span>WhatsApp Business Connection</span>
+          </h2>
+          <p className="text-xs text-gray-400 mt-0.5">
+            Tenants bring their own WhatsApp Business number. Inbound enquiries to it route only to this workspace, and replies send from it.
+          </p>
+        </div>
+
+        <WhatsAppConfigCard />
       </section>
 
       {/* Section 2: Onboarding & Fit Assessment Profile */}
@@ -226,9 +253,15 @@ export default async function SettingsPage() {
           <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/5 space-y-3">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-white">Ingestion Channel Health Monitor</span>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                ALL SYSTEMS OPERATIONAL
-              </span>
+              {allChannelsReady ? (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                  ALL SYSTEMS OPERATIONAL
+                </span>
+              ) : (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 font-bold">
+                  SETUP INCOMPLETE
+                </span>
+              )}
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1">
               <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
@@ -242,20 +275,20 @@ export default async function SettingsPage() {
 
               <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span className={`w-2 h-2 rounded-full ${metaConnected ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
                   <span className="text-xs font-bold text-white">Meta Lead Ads</span>
                 </div>
                 <p className="text-[11px] text-gray-400 font-mono truncate">/api/webhooks/facebook</p>
-                <span className="text-[10px] text-emerald-400 block font-medium">Webhook Active</span>
+                <span className={`text-[10px] block font-medium ${metaConnected ? 'text-emerald-400' : 'text-amber-400'}`}>{metaConnected ? 'Connected' : 'Not connected — see Meta Lead Ads below'}</span>
               </div>
 
               <div className="p-3 rounded-xl bg-[#13171a] border border-white/5 space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span className="text-xs font-bold text-white">WhatsApp Outreach</span>
+                  <span className={`w-2 h-2 rounded-full ${whatsappConnected ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
+                  <span className="text-xs font-bold text-white">WhatsApp</span>
                 </div>
-                <p className="text-[11px] text-gray-400 font-mono truncate">{org.whatsappNumber || 'Default Gateway'}</p>
-                <span className="text-[10px] text-emerald-400 block font-medium">1-Click Direct Sync</span>
+                <p className="text-[11px] text-gray-400 font-mono truncate">{whatsappConnected ? (org.whatsappNumber || 'Own number') : 'No number connected'}</p>
+                <span className={`text-[10px] block font-medium ${whatsappConnected ? 'text-emerald-400' : 'text-amber-400'}`}>{whatsappConnected ? 'Connected — own number' : 'Not connected — see WhatsApp Connection above'}</span>
               </div>
             </div>
           </div>

@@ -12,6 +12,21 @@
  */
 
 import { db } from './db';
+import { decryptCredential } from './integrations/meta/crypto';
+
+/**
+ * Organization tokens are stored encrypted at rest (Meta OAuth callback and
+ * the WhatsApp connect route both encrypt). Decrypt before use; values that
+ * were stored as legacy plaintext pass through decryptCredential unchanged.
+ */
+function resolveOrgToken(stored: string | null | undefined): string | null {
+  if (!stored) return null;
+  try {
+    return decryptCredential(stored);
+  } catch {
+    return stored;
+  }
+}
 
 export function normalizeWhatsAppNumber(rawPhone: string | null | undefined): string | null {
   if (!rawPhone || typeof rawPhone !== 'string') return null;
@@ -258,7 +273,11 @@ export async function sendWhatsAppMessage(
     },
   });
 
-  const accessToken = org?.whatsappAccessToken || org?.metaAccessToken || process.env.WHATSAPP_ACCESS_TOKEN || process.env.META_ACCESS_TOKEN;
+  const accessToken =
+    resolveOrgToken(org?.whatsappAccessToken) ||
+    resolveOrgToken(org?.metaAccessToken) ||
+    process.env.WHATSAPP_ACCESS_TOKEN ||
+    process.env.META_ACCESS_TOKEN;
   const phoneNumberId = org?.whatsappPhoneNumberId || process.env.WHATSAPP_PHONE_NUMBER_ID;
 
   if (!accessToken || !phoneNumberId) {

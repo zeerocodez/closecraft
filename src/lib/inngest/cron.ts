@@ -62,3 +62,14 @@ export const detectRevenueLeaks = inngest.createFunction(
     return { success: true, processed: stalledDeals.length };
   }
 );
+
+// Cron Job: Meta token lifecycle — refresh tenant Meta tokens before their
+// 60-day expiry so Lead Ads connections never die silently.
+export const metaTokenLifecycle = inngest.createFunction(
+  { id: 'meta-token-lifecycle', triggers: [{ cron: '30 2 * * *' }] }, // Daily at 02:30
+  async ({ step }) => {
+    const { runMetaTokenLifecycle } = await import('@/lib/integrations/meta/tokenLifecycle');
+    const summary = await step.run('refresh-due-meta-tokens', async () => runMetaTokenLifecycle());
+    return { success: true, ...summary };
+  }
+);
