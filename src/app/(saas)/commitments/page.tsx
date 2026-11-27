@@ -73,7 +73,7 @@ export default async function CommitmentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-outline-variant/30">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-[#C7F36B]/15 text-[#C7F36B] border border-[#C7F36B]/30 flex items-center gap-1.5 shadow-xs">
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-accent-lime/15 text-accent-lime border border-accent-lime/30 flex items-center gap-1.5 shadow-xs">
               <CheckSquare size={12} />
               <span>DELIVER PILLAR</span>
             </span>

@@ -77,11 +77,11 @@ export default function ExplainerVideoModal({
         {/* Header */}
         <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 bg-[#0e1620] border-b border-white/10">
           <div className="flex items-center gap-2.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#C7F36B] animate-pulse" />
+            <div className="w-2.5 h-2.5 rounded-full bg-accent-lime animate-pulse" />
             <span id="explainer-video-title" className="text-xs sm:text-sm font-bold uppercase tracking-wider text-white">
               CloseCraft Revenue Engine Walkthrough
             </span>
-            <span className="hidden sm:inline-block text-[11px] font-mono px-2 py-0.5 rounded bg-[#C7F36B]/20 text-[#C7F36B] border border-[#C7F36B]/40">
+            <span className="hidden sm:inline-block text-[11px] font-mono px-2 py-0.5 rounded bg-accent-lime/20 text-accent-lime border border-accent-lime/40">
               60s Walkthrough
             </span>
           </div>
@@ -111,7 +111,7 @@ export default function ExplainerVideoModal({
           {!isPlaying && (
             <button
               onClick={togglePlay}
-              className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#C7F36B] text-[#111827] flex items-center justify-center shadow-xl hover:scale-105 transition-transform cursor-pointer"
+              className="absolute inset-0 m-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-accent-lime text-[#111827] flex items-center justify-center shadow-xl hover:scale-105 transition-transform cursor-pointer"
               aria-label="Play video"
             >
               <Play size={32} className="ml-1 fill-[#111827]" />
@@ -123,14 +123,14 @@ export default function ExplainerVideoModal({
             <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={togglePlay}
-                className="p-1.5 text-white hover:text-[#C7F36B] transition-colors"
+                className="p-1.5 text-white hover:text-accent-lime transition-colors"
                 aria-label={isPlaying ? "Pause" : "Play"}
               >
                 {isPlaying ? <Pause size={18} /> : <Play size={18} />}
               </button>
               <button
                 onClick={toggleMute}
-                className="p-1.5 text-white hover:text-[#C7F36B] transition-colors"
+                className="p-1.5 text-white hover:text-accent-lime transition-colors"
                 aria-label={isMuted ? "Unmute" : "Mute"}
               >
                 {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
@@ -152,7 +152,7 @@ export default function ExplainerVideoModal({
                 onClick={() => jumpTo(ch.time, idx)}
                 className={`text-xs px-2.5 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   activeChapter === idx
-                    ? "bg-[#C7F36B] text-[#111827] shadow-sm font-bold"
+                    ? "bg-accent-lime text-[#111827] shadow-sm font-bold"
                     : "bg-white/5 text-gray-400 hover:text-white hover:bg-white/10"
                 }`}
               >
@@ -166,7 +166,7 @@ export default function ExplainerVideoModal({
             <Link
               href="/demo"
               onClick={onClose}
-              className="text-xs px-3.5 py-1.5 rounded-lg bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold transition-all shadow-sm flex items-center gap-1"
+              className="text-xs px-3.5 py-1.5 rounded-lg bg-accent-lime hover:bg-accent-lime-soft text-[#111827] font-extrabold transition-all shadow-sm flex items-center gap-1"
             >
               <span>Explore Interactive Demo</span>
             </Link>

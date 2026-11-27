@@ -260,10 +260,10 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
           <div className="flex items-center gap-2.5 sm:gap-3">
             <Link 
               href="/demo" 
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#C7F36B]/15 hover:bg-[#C7F36B]/25 text-[#C7F36B] border border-[#C7F36B]/30 text-xs sm:text-sm font-bold transition-all shadow-sm hover:border-[#C7F36B]"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-accent-lime/15 hover:bg-accent-lime/25 text-accent-lime border border-accent-lime/30 text-xs sm:text-sm font-bold transition-all shadow-sm hover:border-accent-lime"
               title="Interactive AI Startup Challenge Demonstration Workspace"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#C7F36B] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
               <span>Live Demo</span>
             </Link>
 
@@ -276,7 +276,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
             <Link
               href="/signup"
-              className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs sm:text-sm font-extrabold shadow-lg shadow-[#C7F36B]/20 transition-all active:scale-95"
+              className="hidden sm:inline-flex items-center justify-center px-4 sm:px-5 py-2.5 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] text-xs sm:text-sm font-extrabold shadow-lg shadow-accent-lime/20 transition-all active:scale-95"
             >
               START FREE TRIAL
             </Link>
@@ -369,15 +369,15 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
 
               <div className="flex flex-wrap items-center justify-center gap-3 py-1">
                 <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span className="w-2 h-2 rounded-full bg-accent-lime" />
                   <span>RECOVER: Old Enquiries</span>
                 </span>
                 <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span className="w-2 h-2 rounded-full bg-accent-lime" />
                   <span>CONVERT: Sales Momentum</span>
                 </span>
                 <span className="px-3.5 py-1.5 rounded-lg bg-[#111827] border border-[#248277]/40 text-xs font-bold text-white flex items-center gap-2 shadow-sm">
-                  <span className="w-2 h-2 rounded-full bg-[#C7F36B]" />
+                  <span className="w-2 h-2 rounded-full bg-accent-lime" />
                   <span>DELIVER: Customer Promises</span>
                 </span>
               </div>
@@ -393,7 +393,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
                   <Link
                     href="/signup"
-                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-[#C7F36B]/20 transition-all active:scale-95 text-center group"
+                    className="w-full sm:w-auto px-8 py-4 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2 shadow-xl shadow-accent-lime/20 transition-all active:scale-95 text-center group"
                   >
                     <span>START YOUR 7-DAY FREE TRIAL</span>
                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
@@ -407,13 +407,13 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                   </button>
                   <a
                     href="#how-it-works"
-                    className="px-4 py-3 text-sm font-semibold text-[#45bfae] hover:text-[#C7F36B] transition-colors inline-flex items-center gap-1.5"
+                    className="px-4 py-3 text-sm font-semibold text-[#45bfae] hover:text-accent-lime transition-colors inline-flex items-center gap-1.5"
                   >
                     <span>See How It Works</span>
                     <ChevronRight size={15} />
                   </a>
                 </div>
-                <p className="text-[11px] font-mono uppercase tracking-widest text-[#C7F36B]/90">
+                <p className="text-[11px] font-mono uppercase tracking-widest text-accent-lime/90">
                   NO CREDIT CARD REQUIRED &middot; CLOSECRAFT HQ REVENUE OPERATING SYSTEM
                 </p>
               </div>
@@ -477,7 +477,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div className="p-10 sm:p-16 rounded-3xl bg-[#0d1716] border border-[#248277]/60 text-center space-y-6 shadow-2xl relative overflow-hidden">
               <div className="space-y-4 max-w-2xl mx-auto">
-                <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-[#C7F36B]/20 text-[#C7F36B] font-bold uppercase tracking-wider border border-[#C7F36B]/40">
+                <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-accent-lime/20 text-accent-lime font-bold uppercase tracking-wider border border-accent-lime/40">
                   REVENUE OS
                 </span>
 
@@ -499,7 +499,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                 <button
                   type="button"
                   onClick={() => openAudit('AUDIT')}
-                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm sm:text-base shadow-xl shadow-[#C7F36B]/25 transition-all active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full sm:w-auto px-8 py-4 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] font-extrabold text-sm sm:text-base shadow-xl shadow-accent-lime/25 transition-all active:scale-95 inline-flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <span>GET STARTED</span>
                   <ArrowRight size={18} />

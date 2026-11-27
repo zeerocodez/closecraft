@@ -60,8 +60,8 @@ export default function GrowthServicesSection() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14 sm:space-y-16">
           {/* Header */}
           <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111827] border border-[#C7F36B]/40 text-[#C7F36B] text-xs font-bold uppercase tracking-wider shadow-inner">
-              <Layers size={13} className="text-[#C7F36B]" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111827] border border-accent-lime/40 text-accent-lime text-xs font-bold uppercase tracking-wider shadow-inner">
+              <Layers size={13} className="text-accent-lime" />
               <span>INTRODUCTORY GROWTH SERVICES</span>
             </div>
 
@@ -74,7 +74,7 @@ export default function GrowthServicesSection() {
             </p>
 
             <div className="inline-flex items-center gap-2 text-xs text-[#64748B] pt-1">
-              <ShieldCheck size={14} className="text-[#C7F36B]" />
+              <ShieldCheck size={14} className="text-accent-lime" />
               <span>
                 Consultation-based services. Scope and pricing are determined after reviewing your project brief.
               </span>
@@ -133,7 +133,7 @@ export default function GrowthServicesSection() {
                     <button
                       type="button"
                       onClick={() => handleOpenBrief(key)}
-                      className="w-full py-3 px-4 rounded-xl bg-[#16202C] hover:bg-[#C7F36B] hover:text-[#111827] text-white border border-[#263342] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer group/btn shadow-md active:scale-95"
+                      className="w-full py-3 px-4 rounded-xl bg-[#16202C] hover:bg-accent-lime hover:text-[#111827] text-white border border-[#263342] text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer group/btn shadow-md active:scale-95"
                     >
                       <span>GET STARTED</span>
                       <ArrowRight size={14} className="group-hover/btn:translate-x-1 transition-transform" />

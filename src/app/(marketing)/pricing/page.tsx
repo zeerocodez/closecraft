@@ -43,7 +43,7 @@ export default function PricingPage() {
             </Link>
             <Link
               href="/signup"
-              className="px-4 py-2 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs sm:text-sm font-extrabold"
+              className="px-4 py-2 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] text-xs sm:text-sm font-extrabold"
             >
               START 7-DAY FREE TRIAL
             </Link>
