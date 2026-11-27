@@ -191,6 +191,17 @@ export default function InboxClient({
         const data = await res.json();
         setComposerText('');
 
+        // Report the dispatch outcome truthfully: a WhatsApp reply is only
+        // "sent" when Meta accepted it. Dry-run mode logs without sending.
+        if (data.dispatch?.deliveryStatus === 'SENT') {
+          showToast('Message sent via WhatsApp');
+        } else if (data.dispatch?.dryRun) {
+          showToast('Live WhatsApp dispatch is off — message logged only, not sent');
+        } else if (data.dispatch) {
+          showToast(data.dispatch.error || 'WhatsApp delivery failed — the message is marked failed in the thread');
+        } else {
+          showToast('Message logged');
+        }
         // Optimistically add message
         if (data.message) {
           setLeads((prev) =>
@@ -209,7 +220,6 @@ export default function InboxClient({
             })
           );
         }
-        showToast('Message logged and dispatched');
         router.refresh();
       } else {
         const errData = await res.json().catch(() => ({}));
@@ -691,7 +701,7 @@ export default function InboxClient({
                           className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md"
                         >
                           <ExternalLink size={13} />
-                          <span>Dispatch via WhatsApp</span>
+                          <span>Open in WhatsApp</span>
                         </button>
                       )}
 

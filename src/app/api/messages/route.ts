@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { rateLimit } from '@/lib/rateLimit';
+import { sendWhatsAppMessage } from '@/lib/whatsapp';
 
 export async function POST(request: Request) {
   try {
@@ -66,7 +67,77 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Conversation not found or unauthorized' }, { status: 404 });
     }
 
-    // Insert the message into the DB
+    // ==========================================
+    // WHATSAPP conversations: dispatch the reply through the real Cloud
+    // API engine (src/lib/whatsapp.ts). The engine enforces the 24-hour
+    // customer service window, opt-out consent, and the
+    // WHATSAPP_LIVE_DISPATCH_ENABLED pilot gate, uses the organization's
+    // own encrypted credentials, and persists the message row itself with
+    // the truthful delivery status (SENT / FAILED / DRY_RUN_LOGGED) and
+    // the Meta provider message id — so this route must not also insert.
+    // ==========================================
+    if (conversation.channel === 'WHATSAPP' && safeSenderType === 'HUMAN' && conversation.lead.phone) {
+      const requestStartedAt = new Date();
+      const dispatch = await sendWhatsAppMessage({
+        organizationId: session.organizationId,
+        leadId: conversation.leadId,
+        recipientPhone: conversation.lead.phone,
+        messageType: 'text',
+        text: trimmedContent,
+        conversationId: effectiveConversationId,
+        senderType: 'HUMAN',
+      });
+
+      // Fetch the row the engine persisted. A dispatch blocked before any
+      // persistence (e.g. the lead opted out) leaves no row — record the
+      // blocked attempt so it stays visible and auditable in the thread.
+      let message = await db.message.findFirst({
+        where: {
+          conversationId: effectiveConversationId,
+          content: trimmedContent,
+          createdAt: { gte: requestStartedAt },
+        },
+        orderBy: { createdAt: 'desc' },
+      });
+      if (!message) {
+        message = await db.message.create({
+          data: {
+            conversationId: effectiveConversationId,
+            content: trimmedContent,
+            senderType: safeSenderType,
+            status: 'FAILED',
+            errorMessage: dispatch.error || 'WhatsApp dispatch was blocked before sending.',
+          },
+        });
+      }
+
+      // Update conversation's updatedAt timestamp to bubble it up in the inbox
+      await db.conversation.update({
+        where: { id: effectiveConversationId },
+        data: { updatedAt: new Date() }
+      });
+
+      // Update lead's updatedAt timestamp too
+      await db.lead.update({
+        where: { id: conversation.leadId },
+        data: { updatedAt: new Date() }
+      });
+
+      return NextResponse.json(
+        {
+          success: true,
+          message,
+          dispatch: {
+            deliveryStatus: dispatch.deliveryStatus,
+            dryRun: Boolean(dispatch.dryRun),
+            error: dispatch.error || null,
+          },
+        },
+        { status: 201 }
+      );
+    }
+
+    // Non-WhatsApp channels (and prospect simulation): record the message only.
     const message = await db.message.create({
       data: {
         conversationId: effectiveConversationId,
@@ -75,46 +146,21 @@ export async function POST(request: Request) {
       }
     });
 
- // Update conversation's updatedAt timestamp to bubble it up in the inbox
- await db.conversation.update({
- where: { id: conversationId },
- data: { updatedAt: new Date() }
- });
+    // Update conversation's updatedAt timestamp to bubble it up in the inbox
+    await db.conversation.update({
+      where: { id: effectiveConversationId },
+      data: { updatedAt: new Date() }
+    });
 
- // Update lead's updatedAt timestamp too
- await db.lead.update({
- where: { id: conversation.leadId },
- data: { updatedAt: new Date() }
- });
+    // Update lead's updatedAt timestamp too
+    await db.lead.update({
+      where: { id: conversation.leadId },
+      data: { updatedAt: new Date() }
+    });
 
- // ==========================================
- // SEND TO WHATSAPP META CLOUD API
- // ==========================================
- const phoneNumber = conversation.lead.phone;
- if (phoneNumber) {
- console.log(`[WhatsApp API Mock] Sending message to ${phoneNumber}: "${content}"`);
- 
- // In production:
- /*
- await fetch(`https://graph.facebook.com/v19.0/${process.env.WHATSAPP_PHONE_ID}/messages`, {
- method: 'POST',
- headers: {
- 'Authorization': `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
- 'Content-Type': 'application/json'
- },
- body: JSON.stringify({
- messaging_product: 'whatsapp',
- to: phoneNumber,
- type: 'text',
- text: { body: content }
- })
- });
- */
- }
-
- return NextResponse.json({ success: true, message }, { status: 201 });
- } catch (error) {
- console.error('Failed to send message:', error);
- return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
- }
+    return NextResponse.json({ success: true, message }, { status: 201 });
+  } catch (error) {
+    console.error('Failed to send message:', error);
+    return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
+  }
 }
