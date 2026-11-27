@@ -118,6 +118,33 @@ export async function exchangeCodeForTokens(params: {
 }
 
 /**
+ * Re-exchanges a still-valid long-lived user token for a fresh 60-day token.
+ * Meta permits this exchange while the current token is valid; it is the
+ * only way to extend a tenant connection without a new OAuth round-trip.
+ * Throws with Meta's error message when the token can no longer be refreshed
+ * (expired, revoked, or password changed) — the tenant must reconnect.
+ */
+export async function refreshLongLivedUserToken(currentToken: string): Promise<{
+  accessToken: string;
+  expiresIn?: number;
+}> {
+  const { appId, appSecret } = getMetaConfig();
+  const exchangeUrl = `${GRAPH_BASE}/oauth/access_token?` + new URLSearchParams({
+    grant_type: 'fb_exchange_token',
+    client_id: appId,
+    client_secret: appSecret,
+    fb_exchange_token: currentToken,
+  }).toString();
+
+  const res = await fetch(exchangeUrl, { headers: { Accept: 'application/json' } });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.access_token) {
+    throw new Error(data.error?.message || `Meta token refresh failed with HTTP ${res.status}`);
+  }
+  return { accessToken: data.access_token, expiresIn: data.expires_in };
+}
+
+/**
  * Retrieves the authenticated Meta User profile.
  */
 export async function fetchUserProfile(accessToken: string): Promise<{ id: string; name: string }> {
