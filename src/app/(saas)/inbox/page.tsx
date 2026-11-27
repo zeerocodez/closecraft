@@ -72,27 +72,31 @@ export default async function InboxPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-2 w-full h-[calc(100dvh-5rem)] max-h-[calc(100dvh-5rem)] p-2 sm:p-3 overflow-hidden">
-      {/* Header */}
-      <div className="flex flex-row items-center justify-between gap-4 border-b border-outline-variant/30 pb-2.5 shrink-0">
-        <div>
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 mb-0.5 shadow-xs">
-            <MessageSquare size={12} />
-            <span>Omnichannel Communications Hub</span>
+    <div className="flex flex-col gap-3 w-full h-[calc(100dvh-7.5rem)] min-h-[580px] overflow-hidden">
+      {/* Compact Header */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-2 border-b border-outline-variant/25 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+            <MessageSquare size={17} />
           </div>
-          <h1 className="text-lg md:text-xl font-heading font-extrabold text-on-surface tracking-tight">
-            Unified Revenue Inbox
-          </h1>
+          <div>
+            <h1 className="text-lg md:text-xl font-heading font-extrabold text-on-surface tracking-tight leading-tight">
+              Unified Revenue Inbox
+            </h1>
+            <p className="text-[11px] text-on-surface-variant">
+              Omnichannel conversations across WhatsApp, email, and AI handoffs
+            </p>
+          </div>
         </div>
 
         {/* Security & Tenant Badge */}
-        <div className="flex items-center gap-2 text-xs text-on-surface-variant font-mono">
-          <ShieldCheck size={14} className="text-emerald-400" />
-          <span className="hidden sm:inline">Tenant Isolated &bull; WhatsApp Cloud API</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-300 font-medium shrink-0">
+          <ShieldCheck size={13} className="text-emerald-400" />
+          <span>Tenant Isolated &bull; WhatsApp Cloud API</span>
         </div>
       </div>
 
-      {/* Main Inbox 3-Pane Client */}
+      {/* Main Inbox Client */}
       <InboxClient initialLeads={leads} teamMembers={teamMembers} currentUserId={session.user.id} />
     </div>
   );

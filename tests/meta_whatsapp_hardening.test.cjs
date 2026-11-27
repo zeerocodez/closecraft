@@ -140,5 +140,20 @@ describe('Unified Inbox WhatsApp bidirectional delivery', () => {
     const inbox = read('src/app/(saas)/inbox/InboxClient.tsx');
     assert.ok(inbox.includes('setLeads(initialLeads)'));
     assert.ok(inbox.includes('router.refresh()'));
+    assert.ok(inbox.includes('Meta Ads'));
+    assert.ok(inbox.includes('Web Capture'));
+  });
+
+  it('classifies WhatsApp, Meta Ads, and Web Capture leads accurately and wires Web Capture intake to Inbox', () => {
+    const { resolveLeadInboxChannel } = require('../src/lib/inbox/channel.ts');
+    assert.equal(resolveLeadInboxChannel({ source: 'WHATSAPP', phone: '2348000000000' }), 'WHATSAPP');
+    assert.equal(resolveLeadInboxChannel({ source: 'FACEBOOK_LEAD_AD', phone: '2348000000000' }), 'META_ADS');
+    assert.equal(resolveLeadInboxChannel({ source: 'WEBSITE_WIDGET', phone: '2348000000000' }), 'WEB');
+    assert.equal(resolveLeadInboxChannel({ source: 'PUBLIC_WEBSITE', phone: '2348000000000' }), 'WEB');
+
+    const captureSrc = read('src/app/api/leads/capture/route.ts');
+    const embedSrc = read('src/app/api/leads/embed/route.ts');
+    assert.ok(captureSrc.includes('triggerInboxIngestionForLead'));
+    assert.ok(embedSrc.includes('triggerInboxIngestionForLead'));
   });
 });

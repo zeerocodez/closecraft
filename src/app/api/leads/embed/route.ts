@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { triggerInboxIngestionForLead } from '@/lib/inbox/intake';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -148,6 +149,13 @@ export async function POST(req: NextRequest) {
         nextAction: 'Triage Inbound Website Lead',
         nextActionDueAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2-hour SLA
       }
+    });
+
+    await triggerInboxIngestionForLead({
+      organizationId: org.id,
+      leadId: lead.id,
+      channel: 'WEB',
+      initialMessage: cleanMessage,
     });
 
     return NextResponse.json(

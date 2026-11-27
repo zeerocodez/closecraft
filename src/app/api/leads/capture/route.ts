@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { checkDuplicateLead } from '@/lib/dal/lead';
 import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { triggerInboxIngestionForLead } from '@/lib/inbox/intake';
 
 /**
  * Public Lead Capture Endpoint
@@ -134,7 +135,15 @@ export async function POST(req: NextRequest) {
       ? `Likely duplicate of existing enquiry for ${duplicateCheck.name}`
       : null;
 
-    // 6. Write outbox event for async notifications
+    // 6. Qualify & open Unified Inbox thread via RevenueEngine (guaranteed Web Capture fallback)
+    await triggerInboxIngestionForLead({
+      organizationId: org.id,
+      leadId: lead.id,
+      channel: 'WEB',
+      initialMessage: lead.message || `Inbound web enquiry from ${lead.name}`,
+    });
+
+    // 7. Write outbox event for async notifications
     await db.outboxMessage.create({
       data: {
         organizationId: org.id,

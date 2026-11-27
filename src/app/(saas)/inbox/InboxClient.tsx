@@ -4,6 +4,7 @@ import React, { useEffect, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { formatWhatsAppUrl } from '@/lib/whatsapp';
 import { assignLeadToUser } from '@/app/(saas)/actions';
+import { formatInboxChannelLabel, resolveLeadInboxChannel, type InboxChannel } from '@/lib/inbox/channel';
 import { 
   MessageSquare, 
   Send, 
@@ -25,7 +26,10 @@ import {
   Check,
   CheckCheck,
   ShieldCheck,
-  ChevronDown
+  ChevronDown,
+  PanelRight,
+  RefreshCw,
+  X
 } from 'lucide-react';
 
 export interface TeamMember {
@@ -65,7 +69,7 @@ export default function InboxClient({
   }, [router]);
 
   // Filters & Navigation State
-  const [activeChannelFilter, setActiveChannelFilter] = useState<'ALL' | 'WHATSAPP' | 'EMAIL' | 'WEB' | 'HANDOFF' | 'HOT'>('ALL');
+  const [activeChannelFilter, setActiveChannelFilter] = useState<'ALL' | 'WHATSAPP' | 'META_ADS' | 'WEB' | 'HANDOFF' | 'HOT'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLeadId, setActiveLeadId] = useState<string | null>(initialLeads[0]?.id || null);
   const [composerText, setComposerText] = useState('');
@@ -76,6 +80,14 @@ export default function InboxClient({
 
   // Human Takeover / AI Pause state per conversation
   const [pausedAiLeads, setPausedAiLeads] = useState<Record<string, boolean>>({});
+  const [showTemplates, setShowTemplates] = useState(false);
+  const [showInspector, setShowInspector] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.innerWidth >= 1536) {
+      setShowInspector(true);
+    }
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -90,11 +102,11 @@ export default function InboxClient({
     { label: 'Request WhatsApp Call 📞', text: 'Are you available for a quick 5-minute WhatsApp audio call right now to align on next steps?' }
   ];
 
-  // 1. Filter Leads
+  // 1. Filter Leads across WhatsApp, Meta Ads & Web Capture
   const filteredLeads = leads.filter((lead) => {
-    const primaryChannel = lead.conversations?.[0]?.channel || (lead.phone ? 'WHATSAPP' : 'EMAIL');
+    const primaryChannel = resolveLeadInboxChannel(lead);
     if (activeChannelFilter === 'WHATSAPP' && primaryChannel !== 'WHATSAPP') return false;
-    if (activeChannelFilter === 'EMAIL' && primaryChannel !== 'EMAIL') return false;
+    if (activeChannelFilter === 'META_ADS' && primaryChannel !== 'META_ADS') return false;
     if (activeChannelFilter === 'WEB' && primaryChannel !== 'WEB') return false;
     if (activeChannelFilter === 'HOT') {
       const intent = lead.buyingIntent || 0;
@@ -111,11 +123,21 @@ export default function InboxClient({
       const matchName = lead.name?.toLowerCase().includes(q);
       const matchPhone = lead.phone?.toLowerCase().includes(q);
       const matchEmail = lead.email?.toLowerCase().includes(q);
-      if (!matchName && !matchPhone && !matchEmail) return false;
+      const matchCampaign = lead.metaCampaignName?.toLowerCase().includes(q);
+      if (!matchName && !matchPhone && !matchEmail && !matchCampaign) return false;
     }
 
     return true;
   });
+
+  const channelCounts: Record<InboxChannel, number> = leads.reduce(
+    (acc, l) => {
+      const ch = resolveLeadInboxChannel(l);
+      acc[ch] = (acc[ch] || 0) + 1;
+      return acc;
+    },
+    { WHATSAPP: 0, META_ADS: 0, WEB: 0, EMAIL: 0 } as Record<InboxChannel, number>
+  );
 
   // Ensure active lead exists
   let currentActiveId = activeLeadId;
@@ -325,150 +347,190 @@ export default function InboxClient({
         {/* =========================================================================
             PANE 1: Conversation List (Triage Stream)
             ========================================================================= */}
-        <section 
-          className={`w-full lg:w-80 xl:w-84 shrink-0 border-r border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-hidden ${
+        <section
+          className={`w-full lg:w-[290px] xl:w-[310px] shrink-0 border-r border-white/[0.07] flex flex-col bg-[#0a0d12] h-full overflow-hidden ${
             mobileTab !== 'LIST' ? 'hidden lg:flex' : 'flex'
           }`}
         >
-          {/* Search & Channel Filters */}
-          <div className="p-3 border-b border-white/5 space-y-2.5 shrink-0">
+          {/* Search & Source Filters */}
+          <div className="p-4 border-b border-white/[0.07] space-y-3 shrink-0">
             {/* Search Box */}
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+              <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" />
               <input
                 type="text"
-                placeholder="Search conversations..."
+                placeholder="Search leads, phones, campaigns..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#161a1d] border border-white/10 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full bg-[#141920] border border-white/10 rounded-xl py-2.5 pl-10 pr-3.5 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
 
-            {/* Channel Filters */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
+            {/* Source & Priority Filters */}
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setActiveChannelFilter('ALL')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
                   activeChannelFilter === 'ALL'
-                    ? 'bg-emerald-500 text-slate-950 font-extrabold'
-                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                    ? 'bg-emerald-500 text-slate-950 font-bold'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-gray-300'
                 }`}
               >
                 All ({leads.length})
               </button>
               <button
                 type="button"
-                onClick={() => setActiveChannelFilter('HANDOFF')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                  activeChannelFilter === 'HANDOFF'
-                    ? 'bg-emerald-500 text-slate-950 font-extrabold'
-                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                onClick={() => setActiveChannelFilter('WHATSAPP')}
+                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeChannelFilter === 'WHATSAPP'
+                    ? 'bg-emerald-600 text-white font-bold'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-emerald-300'
                 }`}
               >
-                Handoff
+                WhatsApp ({channelCounts.WHATSAPP})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('META_ADS')}
+                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeChannelFilter === 'META_ADS'
+                    ? 'bg-[#1877F2] text-white font-bold'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-sky-300'
+                }`}
+              >
+                Meta Ads ({channelCounts.META_ADS})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('WEB')}
+                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeChannelFilter === 'WEB'
+                    ? 'bg-teal-500 text-slate-950 font-bold'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-teal-300'
+                }`}
+              >
+                Web Capture ({channelCounts.WEB})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveChannelFilter('HOT')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold flex items-center gap-1 transition-all ${
                   activeChannelFilter === 'HOT'
-                    ? 'bg-amber-500 text-black'
-                    : 'bg-white/5 hover:bg-white/10 text-amber-400'
+                    ? 'bg-amber-500 text-black font-bold'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-amber-300'
                 }`}
               >
                 <Flame size={12} /> Hot
               </button>
               <button
                 type="button"
-                onClick={() => setActiveChannelFilter('WHATSAPP')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                  activeChannelFilter === 'WHATSAPP'
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                onClick={() => setActiveChannelFilter('HANDOFF')}
+                className={`px-2.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all ${
+                  activeChannelFilter === 'HANDOFF'
+                    ? 'bg-white text-slate-950 font-bold'
+                    : 'bg-white/[0.04] hover:bg-white/[0.08] text-gray-400'
                 }`}
               >
-                WhatsApp
+                Handoff
               </button>
             </div>
           </div>
 
           {/* Conversation Cards Stream */}
-          <div className="flex-1 overflow-y-auto divide-y divide-white/5 p-2 space-y-1">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
             {filteredLeads.length === 0 ? (
-              <div className="p-8 text-center text-xs text-gray-500">
-                No active conversations matching criteria.
+              <div className="p-8 text-center text-xs text-gray-500 leading-relaxed">
+                No conversations match this filter yet.
               </div>
             ) : (
               filteredLeads.map((lead) => {
                 const latestMsg = lead.conversations?.[0]?.messages?.[0];
                 const isSelected = lead.id === currentActiveId;
                 const isHot = lead.buyingIntent && lead.buyingIntent >= 70;
-                const channel = lead.conversations?.[0]?.channel || (lead.phone ? 'WHATSAPP' : 'EMAIL');
+                const channel = resolveLeadInboxChannel(lead);
+                const channelLabel = formatInboxChannelLabel(channel);
+                const previewText = latestMsg?.content || lead.message || '';
                 const deal = lead.deals?.[0];
-                const dealVal = deal ? `₦${(deal.amount / 1000).toFixed(0)}k` : null;
+                const dealVal = deal && deal.amount > 0 ? `₦${(deal.amount / 1000).toFixed(0)}k` : null;
                 const assigned = lead.assignedUser || teamMembers.find((m) => m.id === lead.assignedUserId);
 
                 return (
                   <article
                     key={lead.id}
                     onClick={() => handleSelectLead(lead.id)}
-                    className={`p-3 rounded-xl cursor-pointer transition-all ${
+                    className={`p-3.5 rounded-2xl cursor-pointer transition-all space-y-2.5 ${
                       isSelected
-                        ? 'bg-emerald-500/10 border border-emerald-500/40 shadow-lg shadow-emerald-500/5'
-                        : 'bg-white/[0.02] hover:bg-white/5 border border-transparent'
+                        ? 'bg-emerald-500/[0.11] border border-emerald-500/40 shadow-lg shadow-emerald-500/5'
+                        : 'bg-white/[0.025] hover:bg-white/[0.05] border border-white/[0.04]'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xs shrink-0">
+                    <div className="flex items-start justify-between gap-2.5">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                          isSelected
+                            ? 'bg-emerald-500 text-slate-950'
+                            : 'bg-white/[0.06] text-gray-200 border border-white/10'
+                        }`}>
                           {lead.name?.substring(0, 2).toUpperCase() || 'LD'}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-white text-xs truncate">{lead.name}</span>
+                            <span className="font-semibold text-sm text-white truncate">{lead.name}</span>
                             {isHot && (
                               <span title="High Intent Lead">
                                 <Flame size={12} className="text-amber-400 fill-amber-400 shrink-0" />
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-gray-500 truncate">
+                          <div className="text-[11px] text-gray-400 truncate mt-0.5 font-mono">
                             {lead.phone || lead.email}
                           </div>
                         </div>
                       </div>
 
-                      {latestMsg && (
-                        <span className="text-[10px] text-gray-500 shrink-0 font-mono">
-                          {new Date(latestMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {(latestMsg || lead.updatedAt) && (
+                        <span className="text-[10px] text-gray-500 shrink-0 font-mono pt-0.5">
+                          {new Date(latestMsg?.createdAt || lead.updatedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
                     </div>
 
                     {/* Latest Message Preview */}
-                    {latestMsg && (
-                      <p className="text-[11px] text-gray-400 line-clamp-1 mb-2 leading-relaxed">
+                    {previewText && (
+                      <p className="text-xs text-gray-400 line-clamp-2 leading-relaxed">
                         <strong className="text-gray-300 font-medium">
-                          {latestMsg.senderType === 'PROSPECT' ? 'Buyer: ' : latestMsg.senderType === 'AI' ? 'AI: ' : 'You: '}
+                          {latestMsg
+                            ? latestMsg.senderType === 'PROSPECT'
+                              ? 'Buyer: '
+                              : latestMsg.senderType === 'AI'
+                                ? 'AI: '
+                                : 'You: '
+                            : 'Enquiry: '}
                         </strong>
-                        {latestMsg.content}
+                        {previewText}
                       </p>
                     )}
 
                     {/* Badges Strip */}
-                    <div className="flex items-center justify-between text-[10px] pt-1 border-t border-white/5">
-                      <div className="flex items-center gap-1.5 truncate">
-                        <span className={`px-1.5 py-0.5 rounded font-bold uppercase tracking-wider text-[9px] ${
-                          channel === 'WHATSAPP' 
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                        }`}>
-                          {channel}
+                    <div className="flex items-center justify-between text-[10px] pt-2 border-t border-white/[0.06]">
+                      <div className="flex items-center gap-2 truncate">
+                        <span
+                          className={`px-2 py-0.5 rounded-md font-bold uppercase tracking-wider text-[9px] border ${
+                            channel === 'WHATSAPP'
+                              ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                              : channel === 'META_ADS'
+                                ? 'bg-[#1877F2]/15 text-sky-300 border-[#1877F2]/30'
+                                : channel === 'WEB'
+                                  ? 'bg-teal-500/10 text-teal-300 border-teal-500/25'
+                                  : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                          }`}
+                        >
+                          {channelLabel}
                         </span>
 
                         {assigned && (
-                          <span className="text-[10px] text-gray-400 font-medium truncate flex items-center gap-0.5">
+                          <span className="text-[11px] text-gray-400 font-medium truncate flex items-center gap-1">
                             <User size={10} className="text-emerald-400 shrink-0" />
                             {assigned.name?.split(' ')[0]}
                           </span>
@@ -491,62 +553,46 @@ export default function InboxClient({
         {/* =========================================================================
             PANE 2: Omnichannel Conversation Thread & Composer
             ========================================================================= */}
-        <section 
+        <section
           className={`flex-1 min-w-0 flex flex-col bg-[#0f1214] h-full overflow-hidden ${
             mobileTab !== 'CHAT' ? 'hidden lg:flex' : 'flex'
           }`}
         >
           {activeLead ? (
             <>
-              {/* Conversation Header */}
-              <header className="p-3.5 bg-[#0a0d12] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shadow-md shrink-0">
+              {/* Calm, Uncluttered Conversation Header */}
+              <header className="px-5 py-4 bg-[#0a0d12] border-b border-white/[0.07] flex items-center justify-between gap-4 shrink-0">
+                <div className="flex items-center gap-3.5 min-w-0">
+                  <div className="w-10 h-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shadow-sm shrink-0">
                     {activeLead.name?.substring(0, 2).toUpperCase() || 'LD'}
                   </div>
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2.5 flex-wrap">
                       <h2 className="font-serif font-bold text-white text-base md:text-lg truncate">{activeLead.name}</h2>
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/10 shrink-0">
+                      <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-white/[0.06] text-gray-300 border border-white/10 shrink-0">
                         {activeLead.status}
                       </span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-400 truncate">
-                      <span>{activeLead.phone || activeLead.email}</span>
-                      <span>•</span>
-                      <span className="text-emerald-400 font-medium">{activeLead.source || 'Website Inbound'}</span>
+                    <div className="flex items-center gap-2 text-xs text-gray-400 truncate mt-0.5">
+                      <span className="font-mono">{activeLead.phone || activeLead.email}</span>
+                      <span>&bull;</span>
+                      <span className="text-emerald-400 font-medium">
+                        {formatInboxChannelLabel(resolveLeadInboxChannel(activeLead))}
+                        {activeLead.metaCampaignName ? ` (${activeLead.metaCampaignName})` : ''}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  {/* Team Member Closer Assignment Dropdown */}
-                  <div className="flex items-center gap-1.5 bg-[#161a1d] px-2.5 py-1.5 rounded-xl border border-white/10 text-xs">
-                    <UserCheck size={13} className="text-emerald-400 shrink-0" />
-                    <span className="text-gray-400 text-[11px] font-medium hidden sm:inline">Rep:</span>
-                    <select
-                      value={activeLead.assignedUserId || ''}
-                      onChange={(e) => handleAssignLead(e.target.value)}
-                      disabled={isAssigning}
-                      className="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer max-w-[130px] truncate"
-                    >
-                      <option value="" className="bg-[#111827] text-gray-400">Unassigned</option>
-                      {teamMembers.map((m) => (
-                        <option key={m.id} value={m.id} className="bg-[#111827] text-white">
-                          {m.name} ({m.role})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   {/* AI Auto-Pilot Toggle Button */}
                   <button
                     type="button"
                     onClick={toggleAiHandoff}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all border ${
+                    className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all border whitespace-nowrap ${
                       isAiPaused
-                        ? 'bg-amber-500/10 text-amber-400 border-amber-500/30'
-                        : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                        ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                        : 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
                     }`}
                     title={isAiPaused ? 'Resume AI Auto-Pilot' : 'Pause AI and Take Over'}
                   >
@@ -554,31 +600,47 @@ export default function InboxClient({
                     <span className="hidden sm:inline">{isAiPaused ? 'Human Active' : 'AI Copilot'}</span>
                   </button>
 
-                  {/* Direct WhatsApp Web Button */}
-                  {activeLead.phone && (
-                    <button
-                      type="button"
-                      onClick={handleDirectWhatsAppOutreach}
-                      className="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-all shadow-md shadow-emerald-950/40"
-                    >
-                      <Phone size={13} />
-                      <span className="hidden sm:inline">WhatsApp</span>
-                    </button>
-                  )}
+                  {/* Toggle Lead Intelligence Inspector Drawer */}
+                  <button
+                    type="button"
+                    onClick={() => setShowInspector((prev) => !prev)}
+                    className={`hidden lg:inline-flex px-3 py-2 rounded-xl text-xs font-semibold items-center gap-1.5 transition-all border whitespace-nowrap ${
+                      showInspector
+                        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                        : 'bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 border-white/10'
+                    }`}
+                    title="Toggle Lead Intelligence panel"
+                  >
+                    <PanelRight size={14} />
+                    <span>Lead Intel</span>
+                  </button>
+
+                  {/* Manual Refresh */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.refresh();
+                      showToast('Inbox synced');
+                    }}
+                    className="p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 hover:text-white border border-white/10 transition-colors"
+                    title="Refresh messages"
+                  >
+                    <RefreshCw size={14} />
+                  </button>
                 </div>
               </header>
 
               {/* AI Auto-Pilot Warning Banner */}
               {isAiPaused && (
-                <div className="px-4 py-2 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-300 flex items-center justify-between shrink-0">
+                <div className="px-5 py-2.5 bg-amber-500/10 border-b border-amber-500/20 text-xs text-amber-200 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-2">
                     <UserCheck size={14} />
-                    <span>AI auto-responder paused. Rep is responding directly to this prospect.</span>
+                    <span>AI auto-responder paused. You are replying directly to this prospect.</span>
                   </div>
-                  <button 
-                    type="button" 
-                    onClick={toggleAiHandoff} 
-                    className="underline text-[11px] font-bold hover:text-white"
+                  <button
+                    type="button"
+                    onClick={toggleAiHandoff}
+                    className="underline text-xs font-bold hover:text-white"
                   >
                     Resume AI
                   </button>
@@ -586,15 +648,31 @@ export default function InboxClient({
               )}
 
               {/* Message Thread Scroll Area */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 flex flex-col">
+              <div className="flex-1 min-h-[220px] overflow-y-auto px-5 sm:px-8 py-6 space-y-5 flex flex-col">
                 {messages.length === 0 ? (
-                  <div className="flex-1 flex flex-col items-center justify-center text-gray-500 text-xs text-center space-y-2 p-6">
-                    <MessageSquare size={36} className="text-emerald-500/30" />
-                    <p className="font-semibold text-gray-300 text-sm">No messages exchanged yet.</p>
-                    <p className="text-gray-500 max-w-sm">
-                      Use the smart composer below to send a verified introductory template, or click WhatsApp to initiate direct outreach.
-                    </p>
-                  </div>
+                  activeLead.message ? (
+                    <div className="flex flex-col max-w-[82%] sm:max-w-[75%] items-start self-start">
+                      <div className="flex items-center gap-2 mb-1.5 px-1">
+                        <span className="text-[11px] text-gray-500 font-mono">
+                          {new Date(activeLead.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <span className="text-[10px] uppercase font-bold tracking-wider text-teal-300">
+                          {formatInboxChannelLabel(resolveLeadInboxChannel(activeLead))} Submission
+                        </span>
+                      </div>
+                      <div className="px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm bg-[#161b22] border border-white/[0.07] text-gray-100 rounded-tl-sm">
+                        <p className="whitespace-pre-wrap">{activeLead.message}</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex flex-col items-center justify-center text-gray-500 text-xs text-center space-y-3 p-8">
+                      <MessageSquare size={36} className="text-emerald-500/30" />
+                      <p className="font-semibold text-gray-200 text-sm">No messages exchanged yet.</p>
+                      <p className="text-gray-400 max-w-sm leading-relaxed">
+                        Send a reply below or pick a quick template to start the conversation.
+                      </p>
+                    </div>
+                  )
                 ) : (
                   messages.map((msg: any) => {
                     const isProspect = msg.senderType === 'PROSPECT';
@@ -603,27 +681,27 @@ export default function InboxClient({
                     return (
                       <div
                         key={msg.id}
-                        className={`flex flex-col max-w-[85%] ${
+                        className={`flex flex-col max-w-[82%] sm:max-w-[75%] ${
                           isProspect ? 'items-start self-start' : 'items-end self-end'
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1 px-1">
-                          <span className="text-[10px] text-gray-500 font-mono">
+                        <div className="flex items-center gap-2 mb-1.5 px-1">
+                          <span className="text-[11px] text-gray-500 font-mono">
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           <span className={`text-[10px] uppercase font-bold tracking-wider ${
                             isProspect ? 'text-gray-400' : isAi ? 'text-emerald-400' : 'text-emerald-300'
                           }`}>
-                            {isProspect ? 'Buyer' : isAi ? 'AI Support' : 'Rep (Human Closer)'}
+                            {isProspect ? 'Buyer' : isAi ? 'AI Support' : 'Rep'}
                           </span>
                         </div>
 
                         <div
-                          className={`p-3.5 rounded-2xl text-xs md:text-sm leading-relaxed shadow-md ${
+                          className={`px-4 py-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
                             isProspect
-                              ? 'bg-[#161a1d] border border-white/5 text-gray-200 rounded-tl-sm'
+                              ? 'bg-[#161b22] border border-white/[0.07] text-gray-100 rounded-tl-sm'
                               : isAi
-                              ? 'bg-emerald-950/20 border border-emerald-500/30 text-white rounded-tr-sm'
+                              ? 'bg-emerald-950/30 border border-emerald-500/25 text-white rounded-tr-sm'
                               : 'bg-emerald-600 text-white rounded-tr-sm shadow-emerald-950/20'
                           }`}
                         >
@@ -644,15 +722,19 @@ export default function InboxClient({
                                 <span className="inline-flex items-center gap-1 text-emerald-200 font-mono">
                                   <Check size={11} className="text-emerald-200" /> Sent
                                 </span>
+                              ) : msg.status === 'FAILED' ? (
+                                <span className="inline-flex items-center gap-1 text-rose-200 font-mono" title={msg.errorMessage || 'Delivery failed'}>
+                                  <AlertCircle size={11} className="text-rose-300" /> Failed
+                                </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 text-emerald-200/90 font-mono">
-                                  <CheckCheck size={12} /> Logged
+                                  <CheckCheck size={12} /> {msg.status === 'DRY_RUN_LOGGED' ? 'Dry-Run' : 'Logged'}
                                 </span>
                               )}
 
                               {msg.providerMessageId && (
                                 <span
-                                  className="text-[9px] font-mono text-white/50 bg-black/20 px-1 py-0.5 rounded truncate max-w-[110px]"
+                                  className="text-[9px] font-mono text-white/50 bg-black/20 px-1.5 py-0.5 rounded truncate max-w-[110px]"
                                   title={`Meta Provider Message ID: ${msg.providerMessageId}`}
                                 >
                                   {msg.providerMessageId.replace('wamid.', '')}
@@ -667,62 +749,74 @@ export default function InboxClient({
                 )}
               </div>
 
-              {/* Smart Composer & Presets */}
-              <div className="p-3.5 bg-[#0a0d12] border-t border-white/5 shrink-0 space-y-2.5">
-                {/* AI Preset Chips - Clean horizontal scroll with no truncation */}
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/10 shrink-0">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mr-0.5 flex items-center gap-1 shrink-0">
-                    <Sparkles size={12} /> Templates:
-                  </span>
-                  {quickTemplates.map((t, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setComposerText(t.text)}
-                      className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-medium transition-colors border border-white/5 shrink-0 whitespace-nowrap"
-                    >
-                      {t.label}
-                    </button>
-                  ))}
-                </div>
+              {/* Clean, Roomy Composer */}
+              <div className="px-5 py-4 bg-[#0a0d12] border-t border-white/[0.07] shrink-0 space-y-3">
+                {showTemplates && (
+                  <div className="flex items-center gap-2 flex-wrap pb-1">
+                    {quickTemplates.map((t, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setComposerText(t.text);
+                          setShowTemplates(false);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] text-gray-200 text-xs font-medium transition-colors border border-white/[0.08]"
+                      >
+                        {t.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
 
-                {/* Composer Form */}
-                <form onSubmit={handleSendMessage} className="space-y-2">
+                <form onSubmit={handleSendMessage} className="space-y-2.5">
                   <textarea
-                    rows={3}
-                    placeholder="Type an omnichannel reply, or choose a verified template above..."
+                    rows={2}
+                    placeholder="Write your reply..."
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value)}
-                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl p-3 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                    className="w-full bg-[#141920] border border-white/10 rounded-2xl px-4 py-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none leading-relaxed"
                   />
 
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-[11px] text-gray-500">
-                      Channel: <strong className="text-gray-300">{activeLead.phone ? 'WhatsApp Cloud API' : 'Email'}</strong>
-                      {assignedRep && (
-                        <span className="ml-2 text-emerald-400">· Rep: {assignedRep.name}</span>
-                      )}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 text-xs text-gray-400">
+                      <button
+                        type="button"
+                        onClick={() => setShowTemplates((prev) => !prev)}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium inline-flex items-center gap-1.5 border transition-colors whitespace-nowrap ${
+                          showTemplates
+                            ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                            : 'bg-white/[0.04] hover:bg-white/[0.08] text-gray-300 border-white/10'
+                        }`}
+                      >
+                        <Sparkles size={12} className="text-emerald-400" />
+                        <span>Templates</span>
+                      </button>
+                      <span className="hidden sm:inline text-[11px] text-gray-500">
+                        {activeLead.phone ? 'WhatsApp Cloud API' : formatInboxChannelLabel(resolveLeadInboxChannel(activeLead))}
+                        {assignedRep ? ` · ${assignedRep.name}` : ''}
+                      </span>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2.5 shrink-0">
                       {activeLead.phone && (
                         <button
                           type="button"
                           onClick={handleDirectWhatsAppOutreach}
-                          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md"
+                          className="px-3.5 py-2 rounded-xl bg-white/[0.05] hover:bg-emerald-500/15 text-emerald-300 font-semibold text-xs flex items-center gap-1.5 transition-colors border border-white/10 whitespace-nowrap"
                         >
                           <ExternalLink size={13} />
-                          <span>Dispatch via WhatsApp</span>
+                          <span>Open wa.me</span>
                         </button>
                       )}
 
                       <button
                         type="submit"
                         disabled={isSending || !composerText.trim()}
-                        className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md disabled:opacity-40"
+                        className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md disabled:opacity-40 whitespace-nowrap"
                       >
                         <Send size={13} />
-                        <span>{isSending ? 'Sending...' : 'Log & Send'}</span>
+                        <span>{isSending ? 'Sending...' : 'Send Reply'}</span>
                       </button>
                     </div>
                   </div>
@@ -737,21 +831,35 @@ export default function InboxClient({
         </section>
 
         {/* =========================================================================
-            PANE 3: Omnichannel Lead Context Inspector
+            PANE 3: Omnichannel Lead Context Inspector (Toggleable Drawer / 2XL Dock)
             ========================================================================= */}
-        <section 
-          className={`w-full xl:w-80 2xl:w-88 shrink-0 border-l border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-y-auto p-4 space-y-4 ${
-            mobileTab !== 'CONTEXT' ? 'hidden xl:flex' : 'flex'
+        <section
+          className={`w-full lg:w-[320px] xl:w-[340px] shrink-0 border-l border-white/[0.07] flex flex-col bg-[#0a0d12] h-full overflow-y-auto p-5 space-y-4 ${
+            mobileTab === 'CONTEXT'
+              ? 'flex'
+              : showInspector
+                ? 'hidden lg:flex'
+                : 'hidden'
           }`}
         >
           {activeLead ? (
             <>
               {/* Header */}
-              <div className="border-b border-white/5 pb-3">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 block mb-1">
-                  Lead Intelligence
-                </span>
-                <h3 className="font-serif font-bold text-white text-base truncate">{activeLead.name}</h3>
+              <div className="border-b border-white/[0.07] pb-3.5 flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 block mb-1">
+                    Lead Intelligence
+                  </span>
+                  <h3 className="font-serif font-bold text-white text-base truncate">{activeLead.name}</h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowInspector(false)}
+                  className="hidden lg:inline-flex p-1.5 rounded-lg text-gray-500 hover:text-white hover:bg-white/5"
+                  title="Close Lead Intel panel"
+                >
+                  <X size={14} />
+                </button>
               </div>
 
               {/* Commercial Snapshot Card */}

@@ -1,5 +1,6 @@
 import { db } from '@/lib/db';
 import { extractLeadQualificationData } from '../ai/extractor';
+import { resolveLeadInboxChannel } from '../inbox/channel';
 
 export const RevenueEngine = {
   
@@ -203,13 +204,14 @@ export const RevenueEngine = {
       });
     }
 
-    // 8. Ensure Triage Conversation exists for the Inbox
+    // 8. Ensure Triage Conversation exists for the Inbox with truthful acquisition channel
     if (!lead.conversations || lead.conversations.length === 0) {
+      const channel = resolveLeadInboxChannel(lead);
       const conv = await db.conversation.create({
         data: {
           organizationId: lead.organizationId,
           leadId: lead.id,
-          channel: 'WHATSAPP',
+          channel,
           status: 'ACTIVE',
         }
       });
