@@ -92,7 +92,7 @@ describe('CloseCraft HQ Phase 11: End-to-End Platform Redesign & Production Read
 
     const content = fs.readFileSync(inboxPath, 'utf8');
     assert.match(content, /toggleAiHandoff/, 'Deterministic toggle for pausing/resuming AI auto-pilot');
-    assert.match(content, /Dispatch via WhatsApp/, 'WhatsApp web composer launch');
+    assert.match(content, /Open in WhatsApp/, 'WhatsApp web composer launch');
     assert.match(content, /Opportunity Snapshot/, 'Context inspector deal snapshot');
     assert.match(content, /Next Best Action/, 'Presents recommended next best action');
   });
