@@ -59,11 +59,11 @@ const BASE_QUICK: QuickAction[] = [
 ];
 
 const ME_QUICK: Record<MeKind, QuickAction[]> = {
-  trainee: [{ label: "Go to my dashboard", href: "/trainee/dashboard" }, { label: "Ask my Learning Buddy", href: "/trainee/buddy" }],
-  employer: [{ label: "Go to my dashboard", href: "/employer/dashboard" }],
-  investor: [{ label: "Go to my dashboard", href: "/investor/dashboard" }],
-  organization: [{ label: "Go to my organization", href: "/admin/organization" }],
-  staff: [{ label: "Go to my dashboard", href: "/admin/dashboard" }],
+  trainee: [{ label: "Go to my dashboard", href: "/dss/dashboard" }, { label: "Ask my Learning Buddy", href: "/dss/ask" }],
+  employer: [{ label: "Go to my dashboard", href: "/dashboard" }],
+  investor: [{ label: "Contact the team", href: "/contact" }],
+  organization: [{ label: "Go to my organization", href: "/dashboard" }],
+  staff: [{ label: "Go to my dashboard", href: "/admin" }],
 };
 
 function available(on: GuideSwitches, a: QuickAction): boolean {
@@ -170,7 +170,7 @@ export function contextFor(pathname: string, on: GuideSwitches, me: MeKind | nul
       greeting: "Need help finding something? I can point you to the right page.",
       bubbles: ["Need help finding your way around?"],
       quick: [
-        { label: "Find training", href: "/courses" },
+        { label: "Find training", href: "/dss" },
         { label: "Find opportunities", ask: "Where can I find jobs and opportunities?" },
         { label: "Who can see my profile?", ask: "Who can see my profile?" },
       ],
