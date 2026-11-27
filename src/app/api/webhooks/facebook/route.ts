@@ -8,6 +8,7 @@ import { rateLimit, clientIp } from '@/lib/rateLimit';
 import crypto from 'crypto';
 import { decryptCredential } from '@/lib/integrations/meta/crypto';
 import { fetchLeadDetails, fetchAdAttribution } from '@/lib/integrations/meta/client';
+import { ensureEnquiryThread } from '@/lib/inbox/enquiryThread';
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
@@ -246,6 +247,21 @@ export async function POST(req: Request) {
               metaRawSubmission: JSON.stringify(rawResponses),
             },
           });
+
+          // 8b. Surface the enquiry in the Unified Inbox as a thread, so a
+          // Meta Ads enquiry is triaged and answered exactly like a
+          // WhatsApp one (the lead's phone makes WhatsApp the reply channel).
+          try {
+            await ensureEnquiryThread({
+              organizationId: org.id,
+              leadId: lead.id,
+              phone: leadPhone,
+              enquiryText: notes,
+              fallbackText: `New enquiry from Meta Lead Ads${matchedForm?.formName ? ` (form: ${matchedForm.formName})` : ''}.`,
+            });
+          } catch (threadErr: any) {
+            console.error(`[Facebook Webhook] Failed to create inbox thread for lead ${lead.id}:`, threadErr.message);
+          }
 
           // 9. Record sync log — honestly: if the Graph fetch failed, this is a
           // FAILED sync even though the lead shell was stored. Reporting SUCCESS
