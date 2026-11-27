@@ -90,7 +90,7 @@ export function RecoveryCampaignActions({
             type="button"
             disabled={busy !== null}
             onClick={handlePayViaBachs}
-            className="px-2.5 py-1 rounded-lg bg-[#C7F36B] text-[#111827] text-[10px] font-extrabold hover:bg-[#d9f99d] transition-colors inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
+            className="px-2.5 py-1 rounded-lg bg-accent-lime text-[#111827] text-[10px] font-extrabold hover:bg-accent-lime-soft transition-colors inline-flex items-center gap-1 cursor-pointer disabled:opacity-50"
           >
             {busy === 'PAY' ? <Loader2 size={11} className="animate-spin" /> : <CreditCard size={11} />}
             <span>Pay {currency === 'USD' ? '$' : '₦'}{setupFeeAmount.toLocaleString()}</span>

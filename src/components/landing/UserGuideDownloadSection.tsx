@@ -55,7 +55,7 @@ export default function UserGuideDownloadSection() {
     <section id="user-guide" className="py-20 md:py-28 bg-[#040807] border-t border-[#1f2937] relative overflow-hidden">
       {/* Ambient Glows */}
       <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-[#248277]/10 rounded-full blur-[150px] pointer-events-none" />
-      <div className="absolute bottom-10 right-1/4 w-[400px] h-[400px] bg-[#C7F36B]/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 right-1/4 w-[400px] h-[400px] bg-accent-lime/5 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
         {/* Header */}
@@ -81,7 +81,7 @@ export default function UserGuideDownloadSection() {
             <div className="relative group rounded-3xl bg-gradient-to-b from-[#0c1816] to-[#060c0b] border border-[#248277]/50 p-6 sm:p-8 shadow-2xl shadow-[#248277]/15 overflow-hidden">
               {/* Corner badge */}
               <div className="absolute top-5 right-5">
-                <span className="px-3 py-1 rounded-full bg-[#C7F36B] text-[#111827] font-black text-xs uppercase tracking-wider shadow-lg">
+                <span className="px-3 py-1 rounded-full bg-accent-lime text-[#111827] font-black text-xs uppercase tracking-wider shadow-lg">
                   FREE DOWNLOAD
                 </span>
               </div>
@@ -107,7 +107,7 @@ export default function UserGuideDownloadSection() {
                 {/* Specs */}
                 <div className="grid grid-cols-3 gap-2 py-3 border-y border-[#1f2937] text-center">
                   <div className="p-2 rounded-xl bg-[#111827]/70 border border-zinc-800">
-                    <div className="text-lg font-black text-[#C7F36B]">22</div>
+                    <div className="text-lg font-black text-accent-lime">22</div>
                     <div className="text-[10px] uppercase font-bold text-zinc-400">Pages</div>
                   </div>
                   <div className="p-2 rounded-xl bg-[#111827]/70 border border-zinc-800">
@@ -125,7 +125,7 @@ export default function UserGuideDownloadSection() {
                   <a
                     href={guidePdfUrl}
                     download={fileName}
-                    className="w-full py-4 px-6 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2.5 shadow-xl shadow-[#C7F36B]/25 transition-all active:scale-98 text-center cursor-pointer group"
+                    className="w-full py-4 px-6 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] font-extrabold text-sm sm:text-base inline-flex items-center justify-center gap-2.5 shadow-xl shadow-accent-lime/25 transition-all active:scale-98 text-center cursor-pointer group"
                   >
                     <Download size={18} className="group-hover:translate-y-0.5 transition-transform" />
                     <span>DOWNLOAD FREE GUIDE (PDF)</span>
@@ -147,7 +147,7 @@ export default function UserGuideDownloadSection() {
           {/* Right Column: Chapters & Content Breakdown */}
           <div className="lg:col-span-7 space-y-6">
             <div className="space-y-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#C7F36B]">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-accent-lime">
                 WHAT YOU WILL LEARN INSIDE
               </span>
               <h3 className="text-xl sm:text-2xl font-bold text-white">
@@ -166,7 +166,7 @@ export default function UserGuideDownloadSection() {
                   className="p-4 rounded-2xl bg-[#0a1110] border border-[#1b2b28] hover:border-[#248277]/60 transition-colors space-y-1.5"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] font-mono font-extrabold text-[#C7F36B] px-1.5 py-0.5 rounded bg-[#111827] border border-[#248277]/40">
+                    <span className="text-[11px] font-mono font-extrabold text-accent-lime px-1.5 py-0.5 rounded bg-[#111827] border border-[#248277]/40">
                       PART {ch.number}
                     </span>
                     <h4 className="text-xs font-bold text-white line-clamp-1">{ch.title}</h4>

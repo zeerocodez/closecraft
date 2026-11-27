@@ -388,13 +388,13 @@ export default function BillingClient({
         {usageSummary?.upgradeRecommendation?.needed && (
           <div className="p-4 rounded-xl bg-[#248277]/15 border border-[#45bfae]/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div className="flex items-start gap-2.5">
-              <Zap size={16} className="text-[#C7F36B] shrink-0 mt-0.5" />
+              <Zap size={16} className="text-accent-lime shrink-0 mt-0.5" />
               <div>
                 <span className="font-bold text-white">Capacity Notice: </span>
                 <span className="text-gray-300">{usageSummary.upgradeRecommendation.reason}</span>
               </div>
             </div>
-            <a href="#available-plans" className="px-3.5 py-1.5 rounded-lg bg-[#C7F36B] text-[#111827] font-bold shrink-0">
+            <a href="#available-plans" className="px-3.5 py-1.5 rounded-lg bg-accent-lime text-[#111827] font-bold shrink-0">
               View {usageSummary.upgradeRecommendation.recommendedPlanName} Plan
             </a>
           </div>
@@ -419,7 +419,7 @@ export default function BillingClient({
             `AI Operations (${usageSummary?.periodKey || 'Current Period'})`,
             usage.aiQualifications || 0,
             ent.maxAiQualificationsPerMonth || 200,
-            <Cpu size={14} className="text-[#C7F36B]" />,
+            <Cpu size={14} className="text-accent-lime" />,
             usageSummary?.credits?.aiOps || 0
           )}
           {renderProgressMeter(
@@ -479,7 +479,7 @@ export default function BillingClient({
                 }`}
               >
                 <span>Annual</span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#C7F36B] text-[#111827] font-black">2 Months Free</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-accent-lime text-[#111827] font-black">2 Months Free</span>
               </button>
             </div>
           </div>
@@ -541,7 +541,7 @@ export default function BillingClient({
                 }`}
               >
                 {plan.isRecommended && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#C7F36B] text-[#111827] text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider shadow">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-accent-lime text-[#111827] text-[10px] font-black px-3 py-0.5 rounded-full uppercase tracking-wider shadow">
                     Recommended Plan
                   </div>
                 )}
@@ -612,7 +612,7 @@ export default function BillingClient({
                       }
                       className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         plan.isRecommended
-                          ? 'bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827]'
+                          ? 'bg-accent-lime hover:bg-accent-lime-soft text-[#111827]'
                           : 'bg-[#45bfae] hover:bg-[#5cd4c3] text-[#0f1214]'
                       }`}
                     >

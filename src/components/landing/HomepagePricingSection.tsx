@@ -166,7 +166,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
       <div className="max-w-7xl mx-auto space-y-12">
         {/* Heading + Trial Notice */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C7F36B]/10 border border-[#C7F36B]/30 text-[#C7F36B] text-[11px] font-mono font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-accent-lime/10 border border-accent-lime/30 text-accent-lime text-[11px] font-mono font-bold uppercase tracking-wider">
             <Sparkles size={13} />
             <span>Workspace Pricing &amp; Commercial Infrastructure</span>
           </div>
@@ -179,7 +179,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
             Pricing is based primarily on business workspace and usage capacity — not per-user licence penalties.
           </p>
 
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#101917] border border-[#248277]/40 text-xs font-semibold text-[#C7F36B]">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#101917] border border-[#248277]/40 text-xs font-semibold text-accent-lime">
             <ShieldCheck size={15} className="text-[#45bfae]" />
             <span>Experience CloseCraft HQ free for 7 days. No credit card required.</span>
           </div>
@@ -199,7 +199,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                 onClick={() => setMarket(code)}
                 className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                   market === code
-                    ? 'bg-[#C7F36B] text-[#111827]'
+                    ? 'bg-accent-lime text-[#111827]'
                     : 'bg-[#1a1a1f] text-zinc-300 hover:bg-[#23232a]'
                 }`}
               >
@@ -222,7 +222,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
               type="button"
               onClick={() => setInterval('ANNUAL')}
               className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1.5 ${
-                interval === 'ANNUAL' ? 'bg-[#C7F36B] text-[#111827]' : 'text-zinc-400 hover:text-white'
+                interval === 'ANNUAL' ? 'bg-accent-lime text-[#111827]' : 'text-zinc-400 hover:text-white'
               }`}
             >
               <span>Annual Billing</span>
@@ -249,7 +249,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                 key={plan.code}
                 className={`p-6 rounded-3xl flex flex-col justify-between gap-6 border transition-all ${
                   isRecommended
-                    ? 'bg-gradient-to-b from-[#131e1c] to-[#0d1112] border-[#C7F36B] shadow-2xl shadow-[#C7F36B]/10'
+                    ? 'bg-gradient-to-b from-[#131e1c] to-[#0d1112] border-accent-lime shadow-2xl shadow-accent-lime/10'
                     : 'bg-[#101013] border-[#222227]'
                 }`}
               >
@@ -257,7 +257,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                   <div className="flex items-center justify-between gap-2">
                     <h3 className="text-xl font-heading font-extrabold text-white">{plan.name}</h3>
                     {isRecommended && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-[#C7F36B] text-[#111827] text-[10px] font-extrabold uppercase tracking-wider">
+                      <span className="px-2.5 py-0.5 rounded-full bg-accent-lime text-[#111827] text-[10px] font-extrabold uppercase tracking-wider">
                         RECOMMENDED PLAN
                       </span>
                     )}
@@ -277,7 +277,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                       )}
                     </div>
                     {monthly !== null && interval === 'ANNUAL' && annualSavings !== null && (
-                      <p className="text-[11px] font-mono font-bold text-[#C7F36B] mt-1">
+                      <p className="text-[11px] font-mono font-bold text-accent-lime mt-1">
                         Save {meta.symbol}{annualSavings.toLocaleString()} / year (2 months free)
                       </p>
                     )}
@@ -298,7 +298,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                   <ul className="space-y-2 text-xs text-zinc-300 pt-1">
                     {plan.features.map((feat) => (
                       <li key={feat} className="flex items-start gap-2">
-                        <CheckCircle2 size={14} className="text-[#C7F36B] shrink-0 mt-0.5" />
+                        <CheckCircle2 size={14} className="text-accent-lime shrink-0 mt-0.5" />
                         <span>{feat}</span>
                       </li>
                     ))}
@@ -319,7 +319,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                     href={signupHref}
                     className={`w-full py-3 rounded-xl font-extrabold text-xs inline-flex items-center justify-center gap-2 transition-colors ${
                       isRecommended
-                        ? 'bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827]'
+                        ? 'bg-accent-lime hover:bg-accent-lime-soft text-[#111827]'
                         : 'bg-[#1c1c22] hover:bg-[#272730] text-white border border-white/10'
                     }`}
                   >
@@ -355,7 +355,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                   <tr className="bg-[#16161a] text-zinc-300 border-b border-[#222227]">
                     <th className="p-4 font-bold">Capability</th>
                     <th className="p-4 font-bold">Starter</th>
-                    <th className="p-4 font-bold text-[#C7F36B]">Growth</th>
+                    <th className="p-4 font-bold text-accent-lime">Growth</th>
                     <th className="p-4 font-bold">Scale</th>
                     <th className="p-4 font-bold">Enterprise</th>
                   </tr>
@@ -371,7 +371,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                   <tr>
                     <td className="p-4 font-semibold text-white">Active Leads Cap</td>
                     <td className="p-4 font-mono">500</td>
-                    <td className="p-4 font-mono text-[#C7F36B] font-bold">2,000</td>
+                    <td className="p-4 font-mono text-accent-lime font-bold">2,000</td>
                     <td className="p-4 font-mono">10,000</td>
                     <td className="p-4 font-mono">Configurable</td>
                   </tr>
@@ -411,13 +411,13 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                   Independent Commercial Streams
                 </span>
                 <h3 className="text-lg font-heading font-extrabold text-white mt-1 flex items-center gap-2">
-                  <Database size={18} className="text-[#C7F36B]" />
+                  <Database size={18} className="text-accent-lime" />
                   <span>Lead Recovery &amp; Introductory Services</span>
                 </h3>
               </div>
               <Link
                 href="/services"
-                className="px-4 py-2 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-xs shrink-0"
+                className="px-4 py-2 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] font-extrabold text-xs shrink-0"
               >
                 GET STARTED
               </Link>
@@ -433,7 +433,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                   <div className="flex items-center justify-between gap-2">
                     <span className="text-xs font-bold text-white">{tier.name}</span>
                   </div>
-                  <div className="text-xs font-mono font-extrabold text-[#C7F36B]">
+                  <div className="text-xs font-mono font-extrabold text-accent-lime">
                     {market === 'NG' ? tier.ngn : tier.usd}
                   </div>
                   <p className="text-[11px] text-zinc-400">{tier.detail}</p>
@@ -450,7 +450,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                   Digital Sales School &amp; Closers
                 </span>
                 <h3 className="text-lg font-heading font-extrabold text-white mt-1 flex items-center gap-2">
-                  <Users size={18} className="text-[#C7F36B]" />
+                  <Users size={18} className="text-accent-lime" />
                   <span>Sales Enablement &amp; Commission Structure</span>
                 </h3>
               </div>
@@ -483,7 +483,7 @@ export function HomepagePricingSection({ onOpenEnterpriseModal }: { onOpenEnterp
                     <Briefcase size={12} className="text-[#45bfae]" />
                     <span>{item.tier}</span>
                   </div>
-                  <div className="text-xs font-mono font-extrabold text-[#C7F36B]">{item.range}</div>
+                  <div className="text-xs font-mono font-extrabold text-accent-lime">{item.range}</div>
                   <p className="text-[11px] text-zinc-400">{item.desc}</p>
                 </div>
               ))}

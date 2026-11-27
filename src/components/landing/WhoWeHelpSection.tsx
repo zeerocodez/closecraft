@@ -85,10 +85,10 @@ export function WhoWeHelpSection() {
                 className="p-7 rounded-3xl bg-gradient-to-b from-[#121918] to-[#0c0d10] border border-[#248277]/45 space-y-5 shadow-xl"
               >
                 <div className="flex items-start justify-between gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-[#C7F36B]/15 border border-[#C7F36B]/30 flex items-center justify-center text-[#C7F36B]">
+                  <div className="w-12 h-12 rounded-2xl bg-accent-lime/15 border border-accent-lime/30 flex items-center justify-center text-accent-lime">
                     <Icon size={24} />
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-[#C7F36B]/15 border border-[#C7F36B]/30 text-[#C7F36B] text-[10px] font-mono font-extrabold uppercase tracking-wider">
+                  <span className="px-2.5 py-1 rounded-full bg-accent-lime/15 border border-accent-lime/30 text-accent-lime text-[10px] font-mono font-extrabold uppercase tracking-wider">
                     {market.badge}
                   </span>
                 </div>
@@ -104,7 +104,7 @@ export function WhoWeHelpSection() {
                 <ul className="space-y-2 pt-2 border-t border-white/10 text-xs text-zinc-200">
                   {market.highlights.map((item) => (
                     <li key={item} className="flex items-start gap-2">
-                      <CheckCircle2 size={15} className="text-[#C7F36B] shrink-0 mt-0.5" />
+                      <CheckCircle2 size={15} className="text-accent-lime shrink-0 mt-0.5" />
                       <span>{item}</span>
                     </li>
                   ))}

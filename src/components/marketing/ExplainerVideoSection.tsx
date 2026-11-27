@@ -49,7 +49,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
     {
       stage: "1. LEAD INGESTION & ATTRIBUTION",
       badge: "WhatsApp & Meta Ads",
-      badgeColor: "bg-[#C7F36B]/15 text-[#C7F36B] border-[#C7F36B]/40",
+      badgeColor: "bg-accent-lime/15 text-accent-lime border-accent-lime/40",
       title: "Inbound Buyer · Adeola Adebayo",
       details: "Clicked Meta Sponsored Lead Form · Requested Enterprise 15-Seat Deployment",
       dealSize: "₦2,500,000 NGN",
@@ -89,7 +89,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
     {
       stage: "5. DEAL CLOSED & PROMISE TRACKED",
       badge: "Closed Won & Delivery",
-      badgeColor: "bg-[#C7F36B]/20 text-[#C7F36B] border-[#C7F36B]/50",
+      badgeColor: "bg-accent-lime/20 text-accent-lime border-accent-lime/50",
       title: "Closed Won · ₦2,500,000 NGN",
       details: "Payment verified, 10% closer commission attributed, customer onboarding commitment logged.",
       dealSize: "₦2.5M Added to Cash",
@@ -178,14 +178,14 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
       className="relative py-16 sm:py-24 border-t border-[#263342]/60 bg-[#070B0E] scroll-mt-24 overflow-hidden"
     >
       {/* Ambient background glow */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[650px] h-[350px] sm:h-[650px] bg-[#C7F36B]/5 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[350px] sm:w-[650px] h-[350px] sm:h-[650px] bg-accent-lime/5 rounded-full blur-[160px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[250px] sm:w-[450px] h-[250px] sm:h-[450px] bg-[#248277]/10 rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8 sm:space-y-10">
         {/* Section Header */}
         <div className="text-center space-y-3.5 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111827] border border-[#C7F36B]/40 text-[#C7F36B] text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-[#C7F36B] animate-pulse" />
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#111827] border border-accent-lime/40 text-accent-lime text-[11px] sm:text-xs font-bold uppercase tracking-wider shadow-inner">
+            <span className="w-2 h-2 rounded-full bg-accent-lime animate-pulse" />
             <span>PLATFORM DEMO &amp; REVENUE VSL</span>
           </div>
 
@@ -204,7 +204,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
               onClick={() => setActiveTab('video')}
               className={`px-3.5 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'video'
-                  ? 'bg-[#C7F36B] text-[#111827] shadow-md shadow-[#C7F36B]/15'
+                  ? 'bg-accent-lime text-[#111827] shadow-md shadow-accent-lime/15'
                   : 'text-[#94A3B8] hover:text-white'
               }`}
             >
@@ -216,7 +216,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
               onClick={() => setActiveTab('interactive')}
               className={`px-3.5 sm:px-5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
                 activeTab === 'interactive'
-                  ? 'bg-[#C7F36B] text-[#111827] shadow-md shadow-[#C7F36B]/15'
+                  ? 'bg-accent-lime text-[#111827] shadow-md shadow-accent-lime/15'
                   : 'text-[#94A3B8] hover:text-white'
               }`}
             >
@@ -237,7 +237,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
               {/* Clean External Header Bar (NO overlay covering the speaker) */}
               <div className="px-3.5 sm:px-5 py-2.5 sm:py-3 bg-[#0A0E13] border-b border-[#263342]/70 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-[#C7F36B] animate-pulse" />
+                  <span className="w-2 h-2 rounded-full bg-accent-lime animate-pulse" />
                   <span className="text-[11px] sm:text-xs font-mono font-bold tracking-wider text-white uppercase">
                     CloseCraft Revenue Engine Walkthrough
                   </span>
@@ -256,8 +256,8 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                       </>
                     ) : (
                       <>
-                        <Volume2 size={13} className="text-[#C7F36B]" />
-                        <span className="text-[#C7F36B] font-semibold">Sound On</span>
+                        <Volume2 size={13} className="text-accent-lime" />
+                        <span className="text-accent-lime font-semibold">Sound On</span>
                       </>
                     )}
                   </button>
@@ -288,8 +288,8 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                     className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-black/30 z-10 px-4 text-center"
                   >
                     <div className="relative flex items-center justify-center mb-3">
-                      <span className="absolute w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-[#C7F36B]/30 animate-ping" />
-                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] flex items-center justify-center shadow-2xl transition-transform hover:scale-105 active:scale-95">
+                      <span className="absolute w-20 h-20 sm:w-28 sm:h-28 rounded-full bg-accent-lime/30 animate-ping" />
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-accent-lime hover:bg-accent-lime-soft text-[#111827] flex items-center justify-center shadow-2xl transition-transform hover:scale-105 active:scale-95">
                         <Play size={28} className="ml-1 fill-[#111827] sm:w-8 sm:h-8" />
                       </div>
                     </div>
@@ -312,7 +312,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                   title="Click or drag to seek"
                 >
                   <div
-                    className="absolute top-0 bottom-0 left-0 bg-[#C7F36B] transition-all rounded-full"
+                    className="absolute top-0 bottom-0 left-0 bg-accent-lime transition-all rounded-full"
                     style={{ width: `${progressPct}%` }}
                   />
                   {/* Chapter tick marks */}
@@ -344,7 +344,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                       className="p-1.5 sm:p-2 rounded-lg bg-[#16202C] hover:bg-[#1E2C3D] text-white transition-colors cursor-pointer"
                       aria-label={isMuted ? "Unmute sound" : "Mute sound"}
                     >
-                      {isMuted ? <VolumeX size={16} className="text-amber-400" /> : <Volume2 size={16} className="text-[#C7F36B]" />}
+                      {isMuted ? <VolumeX size={16} className="text-amber-400" /> : <Volume2 size={16} className="text-accent-lime" />}
                     </button>
 
                     <span className="text-[11px] sm:text-xs text-[#94A3B8] font-mono">
@@ -357,7 +357,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                     <button
                       type="button"
                       onClick={cycleSpeed}
-                      className="px-2 py-1 rounded-md bg-[#16202C] hover:bg-[#1E2C3D] text-[#C7F36B] text-[11px] font-mono font-bold transition-colors cursor-pointer"
+                      className="px-2 py-1 rounded-md bg-[#16202C] hover:bg-[#1E2C3D] text-accent-lime text-[11px] font-mono font-bold transition-colors cursor-pointer"
                       title="Toggle playback speed"
                     >
                       {playbackSpeed}x
@@ -374,7 +374,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
 
                     <Link
                       href="/demo"
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs font-extrabold shadow-sm transition-all"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-accent-lime hover:bg-accent-lime-soft text-[#111827] text-xs font-extrabold shadow-sm transition-all"
                     >
                       <span>Interactive Demo</span>
                       <ArrowRight size={12} />
@@ -388,7 +388,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
             <div className="space-y-2 pt-1">
               <div className="flex items-center justify-between text-xs text-[#94A3B8] px-1">
                 <span className="font-semibold text-white">Video Chapters:</span>
-                <span className="text-[11px] font-mono text-[#C7F36B]">Tap to jump directly to section</span>
+                <span className="text-[11px] font-mono text-accent-lime">Tap to jump directly to section</span>
               </div>
 
               {/* Responsive Chapter Grid: 2-col on small mobile, 5-col on tablet/desktop */}
@@ -402,18 +402,18 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                       onClick={() => jumpTo(ch.time, idx)}
                       className={`p-2.5 sm:p-3 rounded-xl border text-left transition-all cursor-pointer group flex flex-col justify-between ${
                         isActive
-                          ? 'bg-[#16202C] border-[#C7F36B] shadow-md shadow-[#C7F36B]/10'
-                          : 'bg-[#0D1117] border-[#263342]/70 hover:border-[#C7F36B]/50 hover:bg-[#131B24]'
+                          ? 'bg-[#16202C] border-accent-lime shadow-md shadow-accent-lime/10'
+                          : 'bg-[#0D1117] border-[#263342]/70 hover:border-accent-lime/50 hover:bg-[#131B24]'
                       }`}
                     >
                       <div className="flex items-center justify-between text-[10px] font-mono mb-1">
-                        <span className={isActive ? 'text-[#C7F36B] font-bold' : 'text-[#64748B]'}>
+                        <span className={isActive ? 'text-accent-lime font-bold' : 'text-[#64748B]'}>
                           {ch.label}
                         </span>
                         <span
                           className={`px-1.5 py-0.5 rounded text-[9px] uppercase font-bold ${
                             isActive
-                              ? 'bg-[#C7F36B]/20 text-[#C7F36B]'
+                              ? 'bg-accent-lime/20 text-accent-lime'
                               : 'bg-white/5 text-[#94A3B8]'
                           }`}
                         >
@@ -449,11 +449,11 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                     onClick={() => setSimStep(idx)}
                     className={`p-2.5 rounded-xl text-left transition-all cursor-pointer ${
                       isCurrent
-                        ? 'bg-[#16202C] border border-[#C7F36B]/70 shadow-sm'
+                        ? 'bg-[#16202C] border border-accent-lime/70 shadow-sm'
                         : 'bg-[#111827]/60 border border-transparent hover:bg-[#16202C]'
                     }`}
                   >
-                    <span className={`text-[10px] font-mono block ${isCurrent ? 'text-[#C7F36B] font-bold' : 'text-[#64748B]'}`}>
+                    <span className={`text-[10px] font-mono block ${isCurrent ? 'text-accent-lime font-bold' : 'text-[#64748B]'}`}>
                       STAGE 0{idx + 1}
                     </span>
                     <span className={`text-xs font-bold truncate block mt-0.5 ${isCurrent ? 'text-white' : 'text-[#94A3B8]'}`}>
@@ -472,7 +472,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                 <div className="p-4 sm:p-6 rounded-2xl bg-[#111827] border border-[#263342] space-y-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#C7F36B]/15 border border-[#C7F36B]/30 flex items-center justify-center text-[#C7F36B] shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-accent-lime/15 border border-accent-lime/30 flex items-center justify-center text-accent-lime shrink-0">
                         <Icon size={20} />
                       </div>
                       <div>
@@ -484,14 +484,14 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                     </div>
 
                     <div className="text-left sm:text-right">
-                      <span className="text-xs sm:text-sm font-extrabold text-[#C7F36B]">{current.dealSize}</span>
+                      <span className="text-xs sm:text-sm font-extrabold text-accent-lime">{current.dealSize}</span>
                     </div>
                   </div>
 
                   <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">{current.details}</p>
 
                   <div className="p-3 sm:p-3.5 rounded-xl bg-[#090D12] border border-[#263342] flex items-start gap-2.5 text-xs text-emerald-300">
-                    <CheckCircle2 size={16} className="text-[#C7F36B] shrink-0 mt-0.5" />
+                    <CheckCircle2 size={16} className="text-accent-lime shrink-0 mt-0.5" />
                     <span className="leading-relaxed">{current.stateDesc}</span>
                   </div>
 
@@ -500,7 +500,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
                     <button
                       type="button"
                       onClick={() => setSimStep((prev) => (prev + 1) % simulationSteps.length)}
-                      className="px-4 py-2 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] text-xs font-extrabold inline-flex items-center gap-2 shadow-md shadow-[#C7F36B]/20 transition-all active:scale-95 cursor-pointer"
+                      className="px-4 py-2 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] text-xs font-extrabold inline-flex items-center gap-2 shadow-md shadow-accent-lime/20 transition-all active:scale-95 cursor-pointer"
                     >
                       <span>Next Step ({simStep < 4 ? `0${simStep + 2}` : 'Replay Demo'})</span>
                       <ArrowRight size={14} />
@@ -524,7 +524,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
         {/* 3 Outcome Pillars: RECOVER, CONVERT, DELIVER */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 sm:gap-4 pt-1">
           <div className="p-4 sm:p-5 rounded-2xl bg-[#0D1117] border border-[#263342] space-y-2">
-            <div className="flex items-center gap-2 text-[#C7F36B]">
+            <div className="flex items-center gap-2 text-accent-lime">
               <Target size={18} />
               <span className="font-bold text-sm text-white">RECOVER: Inactive Enquiries</span>
             </div>
@@ -534,7 +534,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
           </div>
 
           <div className="p-4 sm:p-5 rounded-2xl bg-[#0D1117] border border-[#263342] space-y-2">
-            <div className="flex items-center gap-2 text-[#C7F36B]">
+            <div className="flex items-center gap-2 text-accent-lime">
               <Clock size={18} />
               <span className="font-bold text-sm text-white">CONVERT: Strict 15-Min SLAs</span>
             </div>
@@ -544,7 +544,7 @@ export default function ExplainerVideoSection({ onOpenAudit }: ExplainerVideoSec
           </div>
 
           <div className="p-4 sm:p-5 rounded-2xl bg-[#0D1117] border border-[#263342] space-y-2">
-            <div className="flex items-center gap-2 text-[#C7F36B]">
+            <div className="flex items-center gap-2 text-accent-lime">
               <ShieldCheck size={18} />
               <span className="font-bold text-sm text-white">DELIVER: Promise Ledger</span>
             </div>

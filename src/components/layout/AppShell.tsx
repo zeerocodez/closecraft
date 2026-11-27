@@ -63,6 +63,11 @@ export default function AppShell({ children, user }: AppShellProps) {
 
   return (
     <div className="flex h-screen bg-canvas font-sans text-on-surface antialiased overflow-hidden relative">
+      {/* Ambient brand glow behind the app chrome */}
+      <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-0">
+        <div className="absolute -top-40 left-1/3 h-96 w-[42rem] rounded-full bg-emerald-500/[0.07] blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-80 w-[30rem] rounded-full bg-teal-500/[0.05] blur-3xl" />
+      </div>
       <Sidebar
         user={user}
         isOpen={isSidebarOpen}

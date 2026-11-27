@@ -21,8 +21,8 @@
   --color-primary-container: #064E3B;
   
   /* Secondary Brand Accents */
-  --color-lime: #10B981;
-  --color-on-lime: #022C22;
+  --color-lime: #C7F36B;
+  --color-on-lime: #111827;
   --color-teal: #45BFAE;
   --color-on-teal: #08231F;
   --color-deep-ink: #111827;
@@ -42,6 +42,54 @@
   
   --font-sans: 'Inter', sans-serif;
   --font-heading: 'Plus Jakarta Sans', sans-serif;
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+
+  /* Brand palette for the guide, DSS and landing component families.
+     These tokens were referenced by hundreds of classes but never
+     defined, so the utilities silently generated nothing. Values follow
+     the shipped dark theme (see landing.css custom properties). */
+  --color-brand-ink: #F3F7FA;
+  --color-brand-teal: #45BFAE;
+  --color-brand-surface: #111C26;
+  --color-brand-gray: rgba(255, 255, 255, 0.12);
+  --color-brand-mint: rgba(69, 191, 174, 0.15);
+  --color-brand-sand: rgba(245, 191, 101, 0.14);
+  --color-brand-on: #08231F;
+  --color-brand-rose: #FB7185;
+
+  /* Signature accent: the electric lime used for CTAs and highlights
+     across the product (previously hardcoded as #C7F36B in ~180 places).
+     Emerald remains the semantic primary (active/success states) and
+     teal the guide/secondary accent. */
+  --color-accent-lime: #C7F36B;
+  --color-accent-lime-soft: #D9F99D;
+
+  /* Elevation: layered shadows tuned for the dark surfaces. */
+  --shadow-card: 0 1px 2px rgba(2, 6, 17, 0.4), 0 12px 32px -12px rgba(2, 6, 17, 0.55);
+  --shadow-pop: 0 2px 6px rgba(2, 6, 17, 0.45), 0 24px 48px -12px rgba(2, 6, 17, 0.65);
+  --shadow-glow-primary: 0 8px 24px -8px rgba(16, 185, 129, 0.55);
+}
+
+@layer components {
+  /* Frosted panel over the app backdrop. */
+  .glass-panel {
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* Emerald-to-teal gradient text for display headings and highlights. */
+  .text-gradient {
+    background: linear-gradient(92deg, #34D399 0%, #45BFAE 55%, #6AD6A7 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* A lit top edge plus the standard card shadow: the premium card feel. */
+  .card-sheen {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(2, 6, 17, 0.4), 0 12px 32px -12px rgba(2, 6, 17, 0.55);
+  }
 }
 
 @layer base {

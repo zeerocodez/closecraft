@@ -139,7 +139,7 @@ export function DemoCaseStudiesSection() {
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="w-10 h-10 rounded-xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-[#C7F36B]">
+                    <div className="w-10 h-10 rounded-xl bg-[#248277]/15 border border-[#248277]/30 flex items-center justify-center text-accent-lime">
                       <Icon size={20} />
                     </div>
                     <span className="px-2.5 py-0.5 rounded-full bg-[#248277]/15 border border-[#248277]/30 text-[#45bfae] text-[10px] font-mono font-extrabold uppercase tracking-wider">
@@ -156,7 +156,7 @@ export function DemoCaseStudiesSection() {
 
                   <div className="p-3 rounded-xl bg-[#0b0b0d] border border-[#1f1f24]">
                     <p className="text-[10px] font-mono uppercase text-zinc-500">{cs.headlineMetricLabel}</p>
-                    <p className="text-xs font-bold text-[#C7F36B] mt-0.5">{cs.headlineMetricValue}</p>
+                    <p className="text-xs font-bold text-accent-lime mt-0.5">{cs.headlineMetricValue}</p>
                   </div>
 
                   <div className="space-y-2 text-xs text-zinc-400 leading-relaxed">
@@ -176,7 +176,7 @@ export function DemoCaseStudiesSection() {
                   onClick={() => setActiveCaseStudy(cs)}
                   className="w-full py-2.5 px-4 rounded-xl bg-[#19191d] hover:bg-[#222228] border border-[#2d2d34] text-white font-bold text-xs inline-flex items-center justify-center gap-2 transition-colors cursor-pointer"
                 >
-                  <Eye size={14} className="text-[#C7F36B]" />
+                  <Eye size={14} className="text-accent-lime" />
                   <span>View Demo Workflow</span>
                 </button>
               </div>
@@ -210,7 +210,7 @@ export function DemoCaseStudiesSection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
           <Link
             href="/signup"
-            className="px-8 py-4 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-sm inline-flex items-center justify-center gap-2 shadow-xl shadow-[#C7F36B]/15 transition-all"
+            className="px-8 py-4 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] font-extrabold text-sm inline-flex items-center justify-center gap-2 shadow-xl shadow-accent-lime/15 transition-all"
           >
             <span>START YOUR 7-DAY FREE TRIAL</span>
             <ArrowRight size={16} />
@@ -255,7 +255,7 @@ export function DemoCaseStudiesSection() {
                     key={idx}
                     className="p-3 rounded-xl bg-[#18181c] border border-white/5 flex items-start gap-2.5 text-xs text-zinc-200"
                   >
-                    <CheckCircle2 size={15} className="text-[#C7F36B] shrink-0 mt-0.5" />
+                    <CheckCircle2 size={15} className="text-accent-lime shrink-0 mt-0.5" />
                     <span>{stepText}</span>
                   </div>
                 ))}
@@ -271,7 +271,7 @@ export function DemoCaseStudiesSection() {
               <Link
                 href="/signup"
                 onClick={() => setActiveCaseStudy(null)}
-                className="px-6 py-3 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-xs inline-flex items-center gap-2"
+                className="px-6 py-3 rounded-xl bg-accent-lime hover:bg-accent-lime-soft text-[#111827] font-extrabold text-xs inline-flex items-center gap-2"
               >
                 <span>START YOUR 7-DAY FREE TRIAL</span>
                 <ArrowRight size={14} />
