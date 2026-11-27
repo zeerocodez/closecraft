@@ -15,7 +15,7 @@ export interface MetaConfig {
 export function getMetaConfig(): MetaConfig {
   const appId = (process.env.META_APP_ID || process.env.FACEBOOK_APP_ID || '').trim();
   const appSecret = (process.env.META_APP_SECRET || process.env.FACEBOOK_APP_SECRET || '').trim();
-  const verifyToken = (process.env.FACEBOOK_VERIFY_TOKEN || process.env.META_LEAD_ADS_VERIFY_TOKEN || 'closecraft_meta_webhook_verify_token_2026').trim();
+  const verifyToken = (process.env.FACEBOOK_VERIFY_TOKEN || process.env.META_LEAD_ADS_VERIFY_TOKEN || '').trim();
 
   return { appId, appSecret, verifyToken };
 }

@@ -42,7 +42,7 @@
 >
 > We built Closecraft to replace guesswork with complete follow-up visibility. The platform does not make magical promises or invent inflated valuation projections. It answers one essential question clearly: **"Know who is following up."**
 >
-> Start with our 14-day free trial, invite your team, and discover how many deals you can close simply by following up with the enquiries you already have.
+> Start with our 7-day free trial, invite your team, and discover how many deals you can close simply by following up with the enquiries you already have.
 
 ---
 
@@ -64,17 +64,17 @@
 
 ## 4. Frequently Asked Questions (Launch-Ready)
 
-**Q: How does the 14-day free trial work?**  
-A: You receive full access to all Starter features for up to 3 team members. No credit card or payment commitment is required. At the end of 14 days, you can choose to renew manually for ₦20,000/month or upgrade to Pro.
+**Q: How does the 7-day free trial work?**  
+A: You receive full access to all Starter features for up to 2 team members. No credit card or payment commitment is required. At the end of 7 days, you can choose to renew manually for ₦15,000/month or upgrade to Growth.
 
-**Q: What is the difference between Starter (₦20,000) and Pro (₦45,000)?**  
-A: Starter includes 3 internal team seats—ideal for lean agencies establishing structured follow-up routines. Pro expands capacity to 10 internal team seats and unlocks automated round-robin lead routing, manager call coaching queues, and priority notification dispatch.
+**Q: What is the difference between Starter (₦15,000) and Growth (₦35,000)?**  
+A: Starter includes 2 internal team seats—ideal for lean agencies establishing structured follow-up routines. Growth expands capacity to 5 internal team seats and unlocks automated round-robin lead routing, manager call coaching queues, and priority notification dispatch.
 
 **Q: How are payments handled?**  
 A: Payments are processed via Bachs.io, the official payment gateway for Nigerian businesses. You can renew manually using dynamic bank transfers, debit cards (Mastercard, Visa, Verve), or mobile money. Renewals are manual; we do not auto-debit your accounts.
 
 **Q: Do remote sales closers consume my internal seats?**  
-A: No. Remote professionals attached to your workspace through 30-day Managed Sales Pilots have dedicated external access and never count against your 3-seat or 10-seat internal quota.
+A: No. Remote professionals attached to your workspace through 30-day Managed Sales Pilots have dedicated external access and never count against your 2-seat or 5-seat internal quota.
 
 ---
 
@@ -97,7 +97,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 >
 > No more forgotten leads. No more unassigned threads.
 >
-> Start your 14-day free trial in under 3 minutes (no credit card required):  
+> Start your 7-day free trial in under 3 minutes (no credit card required):  
 > 👉 https://www.closecrafthq.com/signup
 >
 > To better follow-up,  
@@ -112,7 +112,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 >
 > We built Closecraft around one operating principle: 'Know who is following up.' It gives every lead a visible owner, tracks response SLAs, and allows teams to attach vetted remote sales professionals when capacity is stretched.
 >
-> We're live with a 14-day free trial (no card needed), and we’d love your feedback on the Today radar and enquiry triage workflows!"
+> We're live with a 7-day free trial (no card needed), and we’d love your feedback on the Today radar and enquiry triage workflows!"
 
 ---
 
@@ -129,7 +129,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 > 🔹 1-click WhatsApp outreach with country-code validation  
 > 🔹 On-demand remote closers from the Digital Sales School  
 >
-> Start your 14-day free trial today (no credit card required):  
+> Start your 7-day free trial today (no credit card required):  
 > https://www.closecrafthq.com/signup
 >
 > #SalesOperations #RevenueEngine #B2BSales #CustomerSuccess #Closecraft
@@ -141,7 +141,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 >
 > We just launched **Closecraft** to make sure no deal falls through the cracks again. It organizes your incoming leads, assigns them to your team members, and shows you who needs attention today.
 >
-> Try it free for 14 days: https://www.closecrafthq.com/signup
+> Try it free for 7 days: https://www.closecrafthq.com/signup
 
 ---
 
@@ -151,7 +151,7 @@ A: No. Remote professionals attached to your workspace through 30-day Managed Sa
 * **[0:25 - 0:50] The Today Radar:** Transition into Closecraft `/today` screen. *“This is the Closecraft Today Radar. In one view, you see every enquiry that needs action right now. Overdue follow-ups are highlighted in red, tasks due today are in amber, and scheduled discovery calls are ready.”*
 * **[0:50 - 1:15] Assignment & 1-Click Outreach:** Click on an unassigned lead. Assign to Closer Somtochukwu. Click "Start WhatsApp Outreach". *“With one click, Closecraft opens a pre-formatted, personalized conversation link directly to the prospect’s WhatsApp with the correct international dialing prefix.”*
 * **[1:15 - 1:40] Managed Sales Pilot:** Show `/sales-support`. *“Stretched for closer capacity? You can attach vetted, trained remote sales professionals directly from the Digital Sales School on a 30-day managed pilot.”*
-* **[1:40 - 2:00] Call to Action:** Show `/signup`. *“Stop losing sales to forgotten follow-up. Start your 14-day free trial today at closecrafthq.com.”*
+* **[1:40 - 2:00] Call to Action:** Show `/signup`. *“Stop losing sales to forgotten follow-up. Start your 7-day free trial today at closecrafthq.com.”*
 
 ---
 

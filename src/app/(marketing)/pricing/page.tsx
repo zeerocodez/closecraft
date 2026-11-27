@@ -57,7 +57,7 @@ export default function PricingPage() {
 
       <footer className="border-t border-[#1f1f1f] py-8 px-4 text-center text-xs text-zinc-500 space-y-1.5">
         <p>CloseCraft HQ is a revenue operations platform for businesses. It is not affiliated with CloseCraft App.</p>
-        <p>&copy; {new Date().getFullYear()} Zeerocodes Automation Limited (RC 8421094). Payments processed securely via Bachs.io.</p>
+        <p>&copy; {new Date().getFullYear()} Zeerocodes Automation Limited (RC 8181339). Payments processed securely via Bachs.io.</p>
       </footer>
     </div>
   );

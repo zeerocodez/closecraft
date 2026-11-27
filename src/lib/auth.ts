@@ -43,10 +43,9 @@ authProviders.push(
         email = 'demo.owner@apexconsulting.ng';
       }
 
-      const isDemoAccount = email.endsWith('@apexconsulting.ng') || email.endsWith('@apexdemo.closecraft.com');
-
-      // Application brute-force safeguard: limit failed attempts per account and IP (bypass for demo accounts)
-      if (!isDemoAccount) {
+      // Application brute-force safeguard: limit failed attempts per account and IP.
+      // Applies to ALL accounts, including demo accounts — no exceptions.
+      {
         const accountLimit = await rateLimit(`auth-login-account:${email}`, 10, 15 * 60 * 1000);
         if (!accountLimit.allowed) {
           console.warn(`[auth] Account brute-force limit exceeded for: ${email}`);
@@ -74,22 +73,13 @@ authProviders.push(
 
       if (!user || !user.passwordHash) return null;
 
-      let isPasswordValid = await bcrypt.compare(
+      // Passwords are verified ONLY against the stored bcrypt hash.
+      // Demo accounts are no exception: the seeded demo password works because
+      // it is the password hashed in the database, not because of any bypass.
+      const isPasswordValid = await bcrypt.compare(
         credentials.password as string,
         user.passwordHash
       );
-
-      // Support demonstration credentials flexibly for evaluators
-      if (
-        !isPasswordValid &&
-        isDemoAccount &&
-        (credentials.password === 'DemoAccess2026!' ||
-         credentials.password === 'ApexDemo2026!' ||
-         credentials.password === 'password' ||
-         credentials.password === 'demo')
-      ) {
-        isPasswordValid = true;
-      }
 
       if (!isPasswordValid) return null;
 
@@ -110,7 +100,11 @@ authProviders.push(
 
 const authSecret = cleanEnv(process.env.AUTH_SECRET) ||
   cleanEnv(process.env.NEXTAUTH_SECRET) ||
-  "closecraft_super_secret_revenue_os_key_2026_production_vault_99";
+  // Development-only fallback. In production the app fails closed: a missing
+  // secret must stop startup, never silently fall back to a public value.
+  (process.env.NODE_ENV !== "production"
+    ? "dev-only-insecure-secret-set-AUTH_SECRET-in-production"
+    : (() => { throw new Error("[auth] AUTH_SECRET or NEXTAUTH_SECRET must be set in production"); })());
 
 export const {
   handlers: { GET, POST },
@@ -184,11 +178,11 @@ export const {
                     organizationId: org.id,
                     status: "TRIALING",
                     plan: "STARTER",
-                    pricePerMonth: 20000.0,
+                    pricePerMonth: 15000.0,
                     currency: "NGN",
                     trialStartedAt,
                     trialEndsAt,
-                    maxInternalSeats: 3,
+                    maxInternalSeats: 2,
                   }
                 });
               }

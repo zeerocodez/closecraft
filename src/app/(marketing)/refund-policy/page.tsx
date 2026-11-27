@@ -78,7 +78,7 @@ export default function RefundPolicyPage() {
                 <strong className="text-on-surface">Billing Errors & Technical Failures:</strong> In the event of a duplicated Bachs payment, erroneous charge, or significant prolonged service disruption attributable directly to Closecraft infrastructure, we will issue a full 100% refund of the affected billing transaction.
               </li>
               <li>
-                <strong className="text-on-surface">Ordinary Monthly Usage:</strong> Monthly subscription fees (Starter ₦20,000, Pro ₦45,000) compensate for active multi-tenant server compute, database storage, and AI qualification routing during the paid 30-day window and are non-refundable once the billing month has commenced.
+                <strong className="text-on-surface">Ordinary Monthly Usage:</strong> Monthly subscription fees (Starter ₦15,000, Growth ₦35,000, Scale ₦75,000) compensate for active multi-tenant server compute, database storage, and AI qualification routing during the paid 30-day window and are non-refundable once the billing month has commenced.
               </li>
             </ul>
           </section>

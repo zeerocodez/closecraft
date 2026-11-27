@@ -538,7 +538,7 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
                   CloseCraft HQ is a revenue operations platform for businesses. It is not affiliated with CloseCraft App.
                 </p>
                 <p className="text-[11px] text-[#71717a]">
-                  Zeerocodes Automation Limited. RC 8421094.
+                  Zeerocodes Automation Limited. RC 8181339.
                 </p>
                 <div className="pt-1">
                   <a 
@@ -1079,8 +1079,8 @@ export default function LandingClientWrapper({ eco, flags }: LandingClientWrappe
         <p>From ₦150,000</p>
         <p>Request a Managed Sales Proposal</p>
         <p>Try Closecraft free for 7 days.</p>
-        <p>₦20,000</p>
-        <p>₦45,000</p>
+        <p>₦15,000</p>
+        <p>₦35,000</p>
         <p>₦75,000</p>
         <p>Show us where follow-up gets difficult.</p>
         <p>Fewer than 20</p>

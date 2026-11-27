@@ -8,7 +8,7 @@
 [![Payments](https://img.shields.io/badge/Billing-Bachs.io-indigo)](https://bachs.io)
 [![Multi-Tenant](https://img.shields.io/badge/Multi--Tenancy-Strict_Server_Isolation-purple)](#multi-tenant-architecture)
 
-> **Disclaimer:** CloseCraft HQ is a revenue operations platform for businesses by Zeerocodes Automation Limited (RC 8421094). It is not affiliated with CloseCraft App.
+> **Disclaimer:** CloseCraft HQ is a revenue operations platform for businesses by Zeerocodes Automation Limited (RC 8181339). It is not affiliated with CloseCraft App.
 
 ---
 
@@ -191,6 +191,14 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 A dedicated evaluation portal is available at `/demo` for evaluators and judges.
 
 ### Demonstration Workspace Credentials
+
+> **Security note:** The Apex demo workspace contains synthetic data only and is
+> isolated from customer workspaces. These accounts authenticate with their
+> seeded bcrypt password hash like any other account — there is no password
+> bypass — and login rate limits apply to them. Rotate the demo password and
+> disable the demo workspace outside evaluation periods. Never store real
+> client data in the demo workspace.
+
 | Role | Email | Password | Responsibilities |
 | :--- | :--- | :--- | :--- |
 | **Managing Director (Owner)** | `demo.owner@apexconsulting.ng` | `DemoAccess2026!` | Overall revenue analytics, pipeline health, settings |
@@ -233,4 +241,4 @@ A dedicated evaluation portal is available at `/demo` for evaluators and judges.
 
 ## 8. License & Commercial Information
 
-CloseCraft is proprietary software engineered by **Zeerocodes Automation Limited** (RC 7291048), Lagos, Nigeria. Built for the AI Startup Challenge. All rights reserved.
+CloseCraft is proprietary software engineered by **Zeerocodes Automation Limited** (RC 8181339), Lagos, Nigeria. Built for the AI Startup Challenge. All rights reserved.

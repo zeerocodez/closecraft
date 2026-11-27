@@ -40,7 +40,8 @@ export async function GET(req: Request) {
     const redirectUri = `${url.origin}/api/integrations/meta/callback`;
 
     // Sign state payload containing organizationId, userId, and timestamp
-    const secret = process.env.AUTH_SECRET || 'closecraft_default_meta_vault_secret_2026';
+    const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET;
+    if (!secret) throw new Error("[Meta] AUTH_SECRET must be set to sign/verify OAuth state");
     const payload = JSON.stringify({
       organizationId,
       userId: session.user.id,

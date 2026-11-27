@@ -197,7 +197,7 @@ test('CloseCraft HQ Phase 4: Complete Landing Page Redesign Acceptance Tests', a
     );
     assert.ok(landingContent.includes("LET'S FIX YOUR FOLLOW-UP"));
     assert.ok(landingContent.includes('EXPLORE OUR SOLUTIONS'));
-    assert.ok(landingContent.includes('Zeerocodes Automation Limited. RC 8421094.'));
+    assert.ok(landingContent.includes('Zeerocodes Automation Limited. RC 8181339.'));
     assert.ok(landingContent.includes('+234 902 636 5853'));
   });
 });

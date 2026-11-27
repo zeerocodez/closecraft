@@ -18,9 +18,12 @@ import {
 
 interface MetaAdsConfigCardProps {
   workspaceSlug: string;
+  // Supplied by the server from FACEBOOK_VERIFY_TOKEN / META_VERIFY_TOKEN.
+  // Never hardcode the webhook verify token in client code.
+  verifyToken?: string;
 }
 
-export function MetaAdsConfigCard({ workspaceSlug }: MetaAdsConfigCardProps) {
+export function MetaAdsConfigCard({ workspaceSlug, verifyToken = '' }: MetaAdsConfigCardProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
@@ -29,7 +32,6 @@ export function MetaAdsConfigCard({ workspaceSlug }: MetaAdsConfigCardProps) {
     ? `${window.location.origin}/api/webhooks/facebook`
     : 'https://www.closecrafthq.com/api/webhooks/facebook';
   
-  const verifyToken = 'closecraft_meta_webhook_verify_token_2026';
 
   const handleCopy = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -138,7 +140,7 @@ export function MetaAdsConfigCard({ workspaceSlug }: MetaAdsConfigCardProps) {
             </button>
           </div>
           <div className="p-2.5 rounded-xl bg-[#13171a] border border-white/5 font-mono text-xs text-slate-300 select-all overflow-x-auto">
-            {verifyToken}
+            {verifyToken || 'Not configured — set FACEBOOK_VERIFY_TOKEN in the server environment'}
           </div>
           <p className="text-[11px] text-gray-500">
             Paste into Verify Token field in Meta App Dashboard.

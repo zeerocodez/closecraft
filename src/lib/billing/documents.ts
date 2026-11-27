@@ -109,7 +109,7 @@ export function buildFinancialDocumentDto(invoice: any, orgName?: string) {
     brand: {
       name: 'CloseCraft HQ',
       legalEntity: 'Zeerocodes Automation Limited',
-      registration: 'RC 8421094',
+      registration: 'RC 8181339',
       supportEmail: 'billing@closecrafthq.com',
       website: 'https://www.closecrafthq.com',
     },

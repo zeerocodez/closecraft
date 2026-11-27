@@ -1,5 +1,13 @@
 # Closecraft Production Launch-Readiness Assessment & Audit Report
 
+> **Historical record — October 2026.** This audit describes the product as it
+> stood at that date, including the since-superseded ₦20,000/₦45,000 pricing
+> and 14-day trial. Current pricing, trial length and launch status are in
+> `src/lib/billing/catalog.ts` and `docs/PRODUCTION_LAUNCH_DECISION.md`.
+> Figures below have not been rewritten, so the document stays an honest
+> record of what was assessed at the time.
+
+
 **Product Name:** Closecraft  
 **Operator / Legal Entity:** Zeerocodes Automation Limited  
 **Tagline:** “Know who is following up.”  

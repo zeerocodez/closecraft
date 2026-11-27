@@ -29,8 +29,11 @@ async function main() {
 
   console.log(`Created organization: ${org.name}`);
 
-  // 3. Create a Demo User
-  const passwordHash = await bcrypt.hash('password123', 10);
+  // 3. Create a Demo User (local development seed only)
+  // Password comes from SEED_USER_PASSWORD; if unset, a random one is
+  // generated and printed once. Never hardcode a known password here.
+  const seedPassword = process.env.SEED_USER_PASSWORD || require('crypto').randomBytes(12).toString('hex');
+  const passwordHash = await bcrypt.hash(seedPassword, 10);
   const user = await prisma.user.create({
     data: {
       email: 'sarah@acme.com',
@@ -45,7 +48,7 @@ async function main() {
     },
   });
 
-  console.log(`Created user: ${user.email} (password: password123)`);
+  console.log(`Created user: ${user.email} (seed password: ${seedPassword})`);
 
   // 4. Create some Leads
   const leads = await Promise.all([

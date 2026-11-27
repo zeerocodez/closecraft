@@ -7,6 +7,11 @@ import { getOrCreateWorkspaceSubscription } from '@/lib/payments/subscription';
 import { SettingsForm } from './SettingsForm';
 import { WorkspaceIdentityForm } from './WorkspaceIdentityForm';
 import { MetaAdsConfigCard } from './MetaAdsConfigCard';
+// Webhook verify token is read server-side only and passed to the settings
+// card as a prop — it must never be hardcoded in client components.
+// (MetaAdsConfigCard is available for the Meta setup section:
+//  <MetaAdsConfigCard workspaceSlug={org.slug} verifyToken={metaVerifyToken} />)
+const metaVerifyToken = process.env.FACEBOOK_VERIFY_TOKEN || process.env.META_VERIFY_TOKEN || '';
 import { MetaLeadAdsDashboard } from '@/components/integrations/MetaLeadAdsDashboard';
 import { 
   Building2, 

@@ -184,7 +184,7 @@ export function getSoftwareApplicationJsonLd(custom?: {
     applicationCategory: custom?.applicationCategory || 'BusinessApplication',
     offers: {
       '@type': 'Offer',
-      price: '20000.00',
+      price: '15000.00',
       priceCurrency: 'NGN',
       priceValidUntil: '2027-12-31',
       availability: 'https://schema.org/InStock',
@@ -192,13 +192,10 @@ export function getSoftwareApplicationJsonLd(custom?: {
     description:
       custom?.description ||
       'Customer conversation intake, real-time response SLAs, contextual AI support, and deterministic Next Best Action allocation to stop losing sales to unfollowed leads.',
-    aggregateRating: {
-      '@type': 'AggregateRating',
-      ratingValue: '4.9',
-      ratingCount: '128',
-      bestRating: '5',
-      worstRating: '1',
-    },
+    // No aggregateRating: CloseCraft does not yet have 128 verified public
+    // reviews. Structured-data ratings must reflect real, verifiable review
+    // data — adding a rating here without it violates search-engine policy
+    // and misleads customers. Re-add only with genuine review counts.
     provider: {
       '@id': `${BASE_URL}/#organization`,
     },
