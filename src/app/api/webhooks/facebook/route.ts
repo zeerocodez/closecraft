@@ -100,7 +100,13 @@ export async function POST(req: Request) {
           where: { facebookPageId: pageId },
         });
         if (org && (org as any).metaAccessToken) {
-          pageAccessToken = (org as any).metaAccessToken;
+          // Stored encrypted by the Meta OAuth callback — decrypt before use.
+          // decryptCredential passes legacy plaintext values through unchanged.
+          try {
+            pageAccessToken = decryptCredential((org as any).metaAccessToken);
+          } catch {
+            pageAccessToken = (org as any).metaAccessToken;
+          }
         }
       }
 
@@ -178,6 +184,7 @@ export async function POST(req: Request) {
             : null;
 
           const notes = [
+            !graphDetails ? '⚠ Lead details could not be fetched from Meta (no usable page token — it may be expired). Contact data below is a placeholder; reconnect the Meta integration in Settings.' : null,
             `Meta Lead Form: ${matchedForm?.formName || formId || 'Instant Form'}`,
             campaignName ? `Campaign: ${campaignName}` : null,
             adSetName ? `Ad Set: ${adSetName}` : null,
@@ -240,7 +247,9 @@ export async function POST(req: Request) {
             },
           });
 
-          // 9. Record sync log
+          // 9. Record sync log — honestly: if the Graph fetch failed, this is a
+          // FAILED sync even though the lead shell was stored. Reporting SUCCESS
+          // here previously hid expired-token breakage from tenants entirely.
           if (connectedPage) {
             await db.metaLeadSyncLog.create({
               data: {
@@ -250,10 +259,19 @@ export async function POST(req: Request) {
                 formId,
                 pageId,
                 leadId: lead.id,
-                status: 'SUCCESS',
-                errorMessage: `Real-time capture: "${leadName}" (${leadEmail}) from form "${matchedForm?.formName || formId || 'Default'}"`,
+                status: graphDetails ? 'SUCCESS' : 'FAILED',
+                errorMessage: graphDetails
+                  ? `Real-time capture: "${leadName}" (${leadEmail}) from form "${matchedForm?.formName || formId || 'Default'}"`
+                  : 'Lead notification received but details could not be fetched from Meta (page token missing or expired). Lead stored with placeholder contact data — reconnect the Meta integration.',
               },
             }).catch(() => null);
+
+            if (!graphDetails) {
+              await db.metaIntegration.update({
+                where: { id: connectedPage.metaIntegrationId },
+                data: { lastError: 'Lead detail fetch failed — page token may be expired. Reconnect Meta in Settings.' },
+              }).catch(() => null);
+            }
           }
 
           // 10. Trigger Revenue Engine qualification & prescriptive Next Best Action

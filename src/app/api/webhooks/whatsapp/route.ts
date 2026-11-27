@@ -11,9 +11,13 @@ export async function GET(request: Request) {
   const token = url.searchParams.get('hub.verify_token');
   const challenge = url.searchParams.get('hub.challenge');
 
-  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
+  // Both product webhooks (Pages/Lead Ads and WhatsApp) belong to the same
+  // Meta app, and operators commonly configure a single verify token in the
+  // dashboard. Accept the shared app verify token as a fallback so a missing
+  // WhatsApp-specific variable cannot silently block webhook verification.
+  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN || process.env.FACEBOOK_VERIFY_TOKEN || process.env.META_VERIFY_TOKEN;
   if (!verifyToken) {
-    console.error('[WhatsApp Webhook] WHATSAPP_VERIFY_TOKEN is unconfigured.');
+    console.error('[WhatsApp Webhook] No webhook verify token configured (WHATSAPP_VERIFY_TOKEN / FACEBOOK_VERIFY_TOKEN).');
     return new NextResponse('Configuration error', { status: 500 });
   }
 
