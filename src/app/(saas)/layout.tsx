@@ -18,26 +18,24 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
     redirect("/login");
   }
 
-  // Server-authoritative approval check: only approved organizations can access the SaaS
-  const org = await db.organization.findUnique({
-    where: { id: organizationId },
-    select: { id: true, name: true, status: true, slug: true }
-  });
+  // Server-authoritative approval check + membership + cached subscription lookup in parallel
+  const [org, member, subscription] = await Promise.all([
+    db.organization.findUnique({
+      where: { id: organizationId },
+      select: { id: true, name: true, status: true, slug: true }
+    }),
+    db.organizationMember.findFirst({
+      where: { userId: session.user.id, organizationId },
+      select: { role: true }
+    }),
+    getOrCreateWorkspaceSubscription(organizationId).catch((subErr) => {
+      console.error('[SaasLayout] Subscription lookup fallback:', subErr);
+      return null;
+    }),
+  ]);
 
   if (!org || org.status !== 'APPROVED') {
     redirect('/pending-approval');
-  }
-
-  const member = await db.organizationMember.findFirst({
-    where: { userId: session.user.id, organizationId },
-    select: { role: true }
-  });
-
-  let subscription: Awaited<ReturnType<typeof getOrCreateWorkspaceSubscription>> | null = null;
-  try {
-    subscription = await getOrCreateWorkspaceSubscription(organizationId);
-  } catch (subErr) {
-    console.error('[SaasLayout] Subscription lookup fallback:', subErr);
   }
 
   const userWithRole = {
