@@ -16,6 +16,7 @@ import {
   updateServiceRequestStageAction
 } from './actions';
 import CommercialControlPanel from '@/components/admin/CommercialControlPanel';
+import GuideSwitchCard from '@/components/admin/GuideSwitchCard';
 
 export type OrgWithDetails = {
   id: string;
@@ -478,6 +479,13 @@ export default function AdminDashboardClient({
       {/* TAB 0: SUPERADMIN COMMERCIAL CONTROL CENTRE */}
       {activeTab === 'commercial' && commercialAnalytics && (
         <CommercialControlPanel analytics={commercialAnalytics} />
+      )}
+
+      {/* Loop guide switch, with the way into its answers */}
+      {activeTab === 'commercial' && (
+        <div className="mt-6">
+          <GuideSwitchCard />
+        </div>
       )}
 
       {/* TAB 1: REVENUE & FINANCIAL INTELLIGENCE */}
