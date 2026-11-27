@@ -43,3 +43,8 @@ next-env.d.ts
 # local databases
 *.db
 *.sqlite
+
+# local backup bundles, token notes & archived source directory
+*.bundle
+meta.txt
+/DSS_Complete_Website_Source/
