@@ -5,6 +5,8 @@ import {
   requireIntegrationManager,
   fetchWhatsAppPhoneNumberInfo,
   phoneNumberBelongsToWaba,
+  subscribeWabaToApp,
+  isWabaSubscribedToApp,
   summarizeWhatsAppConnection,
 } from '@/lib/integrations/whatsapp/config';
 
@@ -72,6 +74,47 @@ export async function POST(req: Request) {
       ).catch(() => null);
     }
 
+    // Subscribe the WABA to the CloseCraft app so Meta actually delivers
+    // inbound messages to our webhook. Without this link the webhook can
+    // verify green while every real message is silently withheld — so a
+    // definitive refusal from Meta blocks the connection instead of
+    // storing a number that can send but never receive. An unverifiable
+    // listing (null) does not block: the POST success above is the
+    // authoritative confirmation. Without a WABA ID there is nothing to
+    // subscribe — the number still connects, but the tenant is warned
+    // plainly that inbound will not arrive until they reconnect with it.
+    let subscription: {
+      attempted: boolean;
+      subscribed: boolean;
+      verified: boolean | null;
+      warning?: string;
+    };
+    if (businessAccountId) {
+      const sub = await subscribeWabaToApp(businessAccountId, accessToken);
+      if (!sub.subscribed) {
+        return NextResponse.json(
+          { error: `WhatsApp number validated, but CloseCraft could not subscribe your WhatsApp Business Account to receive inbound messages: ${sub.error}` },
+          { status: 400 },
+        );
+      }
+      const verified = await isWabaSubscribedToApp(businessAccountId, accessToken);
+      if (verified === false) {
+        return NextResponse.json(
+          { error: 'Meta accepted the subscription but the CloseCraft app is not listed on your WhatsApp Business Account yet. Try connecting again — if it persists, subscribe the account from the Meta App Dashboard.' },
+          { status: 400 },
+        );
+      }
+      subscription = { attempted: true, subscribed: true, verified };
+    } else {
+      subscription = {
+        attempted: false,
+        subscribed: false,
+        verified: null,
+        warning:
+          'Connected without a WhatsApp Business Account ID, so CloseCraft could not subscribe the account to receive inbound messages. Add the WABA ID and reconnect — until then new WhatsApp messages will not reach the inbox.',
+      };
+    }
+
     const org = await db.organization.update({
       where: { id: organizationId },
       data: {
@@ -86,6 +129,7 @@ export async function POST(req: Request) {
       success: true,
       message: `WhatsApp connected: ${info.verifiedName || 'Business'} ${info.displayPhoneNumber || ''}`.trim(),
       connection: summarizeWhatsAppConnection(org),
+      subscription,
       verifiedName: info.verifiedName,
       qualityRating: info.qualityRating,
     });
