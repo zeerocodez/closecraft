@@ -5,6 +5,7 @@ import {
   summarizeWhatsAppConnection,
   getStoredWhatsAppToken,
   fetchWhatsAppPhoneNumberInfo,
+  isWabaSubscribedToApp,
 } from '@/lib/integrations/whatsapp/config';
 
 /**
@@ -38,13 +39,19 @@ export async function GET(req: Request) {
 
     const connection = summarizeWhatsAppConnection(org);
     const { searchParams } = new URL(req.url);
-    let live: { ok: boolean; verifiedName?: string; qualityRating?: string; error?: string } | undefined;
+    let live: { ok: boolean; verifiedName?: string; qualityRating?: string; error?: string; subscribed?: boolean | null } | undefined;
 
     if (connection.connected && searchParams.get('live') === '1') {
       const token = getStoredWhatsAppToken(org);
       try {
         const info = await fetchWhatsAppPhoneNumberInfo(connection.phoneNumberId!, token!);
         live = { ok: true, verifiedName: info.verifiedName, qualityRating: info.qualityRating };
+        // A reachable number is only half the inbound chain: the WABA must
+        // also be subscribed to the app. Report it when the account ID is
+        // known; null means the check could not be performed, not "no".
+        if (connection.businessAccountId) {
+          live.subscribed = await isWabaSubscribedToApp(connection.businessAccountId, token!);
+        }
       } catch (err: any) {
         live = { ok: false, error: err.message || 'Stored credentials were rejected by Meta' };
       }

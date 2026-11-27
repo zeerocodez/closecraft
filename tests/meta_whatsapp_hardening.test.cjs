@@ -89,6 +89,44 @@ describe('Meta token lifecycle', () => {
   });
 });
 
+describe('WABA auto-subscription on connect (subscribed_apps)', () => {
+  it('subscription helpers use the subscribed_apps edge with a bearer token and verify via the app listing', () => {
+    const src = read('src/lib/integrations/whatsapp/config.ts');
+    assert.ok(src.includes('export async function subscribeWabaToApp'), 'connect flow needs a subscribe helper');
+    assert.ok(src.includes('/subscribed_apps'), 'must hit the subscribed_apps edge');
+    assert.ok(src.includes('Authorization: `Bearer ${accessToken}`'), 'must authenticate with the tenant token');
+    assert.ok(src.includes("data?.success !== true"), 'only a success:true reply counts as subscribed');
+    assert.ok(src.includes('whatsapp_business_management'), 'error must name the permission the token needs');
+    assert.ok(src.includes('export async function isWabaSubscribedToApp'), 'connect flow needs a verify helper');
+    assert.ok(src.includes('whatsapp_business_api_data'), 'GET listing nests the app under whatsapp_business_api_data');
+    assert.ok(src.includes("if (!configuredAppId) return null"), 'an unverifiable listing is null, never a false negative');
+  });
+
+  it('connect route subscribes the WABA when a Business Account ID is given and blocks on a definitive refusal', () => {
+    const src = read('src/app/api/integrations/whatsapp/connect/route.ts');
+    assert.ok(src.includes('subscribeWabaToApp(businessAccountId, accessToken)'), 'must subscribe during connect');
+    assert.ok(src.includes('isWabaSubscribedToApp(businessAccountId, accessToken)'), 'must verify the app is listed');
+    assert.ok(src.includes('could not subscribe your WhatsApp Business Account'), 'a Meta refusal must block with a plain error');
+    assert.ok(src.includes('subscription'), 'the response must report the subscription outcome');
+  });
+
+  it('connect route warns instead of failing when no Business Account ID is supplied', () => {
+    const src = read('src/app/api/integrations/whatsapp/connect/route.ts');
+    assert.ok(src.includes('Connected without a WhatsApp Business Account ID'), 'the no-WABA path must warn in plain language');
+    assert.ok(src.includes('attempted: false'), 'the response must say no subscription was attempted');
+  });
+
+  it('status route reports the live subscription state and the card shows it', () => {
+    const status = read('src/app/api/integrations/whatsapp/status/route.ts');
+    assert.ok(status.includes('isWabaSubscribedToApp'), 'live status must check the subscription');
+    assert.ok(status.includes('live.subscribed'), 'live payload must carry the subscription state');
+    const card = read('src/app/(saas)/settings/WhatsAppConfigCard.tsx');
+    assert.ok(card.includes('WABA subscribed to receive inbound messages'), 'a subscribed account must be confirmed in the UI');
+    assert.ok(card.includes('is not subscribed to CloseCraft'), 'an unsubscribed account must be flagged in the UI');
+    assert.ok(card.includes('needed for inbound'), 'the WABA field must say why it matters');
+  });
+});
+
 describe('Settings health monitor honesty', () => {
   it('derives channel health from real connection state', () => {
     const src = read('src/app/(saas)/settings/page.tsx');

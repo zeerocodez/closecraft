@@ -20,6 +20,7 @@ export function WhatsAppConfigCard() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [liveState, setLiveState] = useState<{ ok: boolean; text: string } | null>(null);
   const [checking, setChecking] = useState(false);
   const [webhookCheck, setWebhookCheck] = useState<{
@@ -54,6 +55,7 @@ export function WhatsAppConfigCard() {
     setSubmitting(true);
     setError(null);
     setNotice(null);
+    setWarning(null);
     try {
       const res = await fetch('/api/integrations/whatsapp/connect', {
         method: 'POST',
@@ -64,6 +66,7 @@ export function WhatsAppConfigCard() {
       if (!res.ok) throw new Error(data.error || 'Connection failed');
       setConnection(data.connection);
       setNotice(data.message || 'WhatsApp connected.');
+      setWarning(data.subscription?.warning || null);
       setAccessToken('');
       setLiveState(null);
     } catch (err: any) {
@@ -80,7 +83,11 @@ export function WhatsAppConfigCard() {
       const res = await fetch('/api/integrations/whatsapp/status?live=1');
       const data = await res.json();
       if (data.live?.ok) {
-        setLiveState({ ok: true, text: `Meta confirms this number is reachable${data.live.verifiedName ? ` (${data.live.verifiedName})` : ''}${data.live.qualityRating ? ` · Quality: ${data.live.qualityRating}` : ''}.` });
+        if (data.live.subscribed === false) {
+          setLiveState({ ok: false, text: 'Meta confirms this number is reachable, but its WhatsApp Business Account is not subscribed to CloseCraft — inbound messages will not arrive. Reconnect with the WABA ID and a token that has whatsapp_business_management permission.' });
+        } else {
+          setLiveState({ ok: true, text: `Meta confirms this number is reachable${data.live.verifiedName ? ` (${data.live.verifiedName})` : ''}${data.live.qualityRating ? ` · Quality: ${data.live.qualityRating}` : ''}${data.live.subscribed === true ? ' · WABA subscribed to receive inbound messages' : ''}.` });
+        }
       } else {
         setLiveState({ ok: false, text: data.live?.error || 'Meta rejected the stored credentials. Reconnect with a fresh system-user token.' });
       }
@@ -114,6 +121,7 @@ export function WhatsAppConfigCard() {
     if (!window.confirm('Disconnect this WhatsApp number? Inbound enquiries to it will stop routing to this workspace.')) return;
     setSubmitting(true);
     setError(null);
+    setWarning(null);
     try {
       const res = await fetch('/api/integrations/whatsapp/disconnect', { method: 'POST' });
       const data = await res.json();
@@ -148,6 +156,11 @@ export function WhatsAppConfigCard() {
           <AlertCircle size={14} className="mt-0.5 shrink-0" /> <span>{error}</span>
         </div>
       )}
+      {warning && (
+        <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs">
+          <AlertCircle size={14} className="mt-0.5 shrink-0" /> <span>{warning}</span>
+        </div>
+      )}
 
       {connection?.connected ? (
         <div className="space-y-4">
@@ -163,6 +176,11 @@ export function WhatsAppConfigCard() {
             <p className="text-[11px] text-gray-400">
               Inbound enquiries to this number route to this workspace only, and outbound replies send from it.
             </p>
+            {!connection.businessAccountId && (
+              <p className="text-[11px] text-amber-300/90">
+                No WhatsApp Business Account ID is stored, so CloseCraft could not subscribe this account to receive inbound messages. Disconnect and reconnect with the WABA ID (and a token with whatsapp_business_management permission) to switch inbound on.
+              </p>
+            )}
           </div>
 
           {liveState && (
@@ -224,9 +242,12 @@ export function WhatsAppConfigCard() {
           <p className="text-[11px] text-gray-400 leading-relaxed">
             Connect the WhatsApp Business number this workspace sends and receives on. You will need, from
             <strong className="text-gray-200"> Meta Business Settings → WhatsApp Accounts → API Setup</strong>: the
-            <strong className="text-gray-200"> Phone Number ID</strong> for your number, and a
+            <strong className="text-gray-200"> Phone Number ID</strong> for your number, the
+            <strong className="text-gray-200"> WhatsApp Business Account ID</strong> that owns it, and a
             <strong className="text-gray-200"> system-user access token</strong> with the
-            <em> whatsapp_business_messaging</em> permission for the same business. A temporary 24-hour token works
+            <em> whatsapp_business_messaging</em> and <em>whatsapp_business_management</em> permissions for the same business.
+            CloseCraft subscribes your account to the app on connect — that subscription is what lets inbound
+            messages reach the inbox. A temporary 24-hour token works
             for testing but expires — use a system-user token for production.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -241,7 +262,7 @@ export function WhatsAppConfigCard() {
               />
             </label>
             <label className="space-y-1.5 block">
-              <span className="text-[11px] font-bold text-gray-300 uppercase tracking-wider">WhatsApp Business Account ID (optional)</span>
+              <span className="text-[11px] font-bold text-gray-300 uppercase tracking-wider">WhatsApp Business Account ID (needed for inbound)</span>
               <input
                 value={businessAccountId}
                 onChange={(e) => setBusinessAccountId(e.target.value)}

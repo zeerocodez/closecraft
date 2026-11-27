@@ -9,7 +9,7 @@
 import { db } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { decryptCredential } from '@/lib/integrations/meta/crypto';
-import { META_GRAPH_VERSION } from '@/lib/integrations/meta/client';
+import { META_GRAPH_VERSION, getMetaConfig } from '@/lib/integrations/meta/client';
 
 const GRAPH_BASE = `https://graph.facebook.com/${META_GRAPH_VERSION}`;
 
@@ -62,6 +62,79 @@ export async function phoneNumberBelongsToWaba(
   const data = await res.json().catch(() => ({}));
   if (!Array.isArray(data.data)) return null;
   return data.data.some((n: any) => String(n.id) === String(phoneNumberId));
+}
+
+export interface WabaSubscriptionResult {
+  subscribed: boolean;
+  error?: string;
+}
+
+/**
+ * Subscribes a tenant's WhatsApp Business Account to the CloseCraft app so
+ * Meta delivers that account's inbound message events to our webhook.
+ *
+ * This is the step the dashboard setup flow does NOT do for you: the app-level
+ * webhook can be verified and green while Meta still withholds every real
+ * message, because the WABA itself was never linked via `subscribed_apps`.
+ * The call is idempotent — re-subscribing an already-subscribed account
+ * returns `{ success: true }` again — and needs a token with the
+ * `whatsapp_business_management` permission for that account (a system-user
+ * token scoped to the business, or a dashboard temporary token).
+ */
+export async function subscribeWabaToApp(
+  wabaId: string,
+  accessToken: string,
+): Promise<WabaSubscriptionResult> {
+  const url = `${GRAPH_BASE}/${encodeURIComponent(wabaId)}/subscribed_apps`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${accessToken}`, Accept: 'application/json' },
+    });
+  } catch {
+    return { subscribed: false, error: 'Could not reach Meta to subscribe the WhatsApp Business Account.' };
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data?.success !== true) {
+    return {
+      subscribed: false,
+      error:
+        data?.error?.message ||
+        `Meta refused the subscription (HTTP ${res.status}). The token needs the whatsapp_business_management permission for this WhatsApp Business Account.`,
+    };
+  }
+  return { subscribed: true };
+}
+
+/**
+ * Checks whether the CloseCraft app is listed on a WABA's subscribed apps.
+ * Returns true/false when the listing could be read. Returns null when the
+ * check itself could not be performed (no META_APP_ID configured, Meta
+ * rejected the read, or an unparseable response) — callers must treat null
+ * as "unverified", never as "not subscribed", because the POST above is the
+ * authoritative confirmation and a failed read proves nothing.
+ */
+export async function isWabaSubscribedToApp(
+  wabaId: string,
+  accessToken: string,
+  appId?: string,
+): Promise<boolean | null> {
+  const configuredAppId = (appId || getMetaConfig().appId || '').trim();
+  if (!configuredAppId) return null;
+  let res: Response;
+  try {
+    const url = `${GRAPH_BASE}/${encodeURIComponent(wabaId)}/subscribed_apps?access_token=${encodeURIComponent(accessToken)}`;
+    res = await fetch(url, { headers: { Accept: 'application/json' } });
+  } catch {
+    return null;
+  }
+  if (!res.ok) return null;
+  const data = await res.json().catch(() => ({}));
+  if (!Array.isArray(data.data)) return null;
+  return data.data.some(
+    (entry: any) => String(entry?.whatsapp_business_api_data?.id || entry?.id || '') === configuredAppId,
+  );
 }
 
 export interface WhatsAppConnectionSummary {
