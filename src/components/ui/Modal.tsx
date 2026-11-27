@@ -4,7 +4,9 @@ import React, { useEffect } from 'react';
 import { X } from 'lucide-react';
 
 export interface ModalProps {
-  isOpen: boolean;
+  isOpen?: boolean;
+  /** Alias for `isOpen`; some call sites pass `open` instead. Either one opens the dialog. */
+  open?: boolean;
   onClose: () => void;
   title?: React.ReactNode;
   description?: React.ReactNode;
@@ -15,7 +17,8 @@ export interface ModalProps {
 }
 
 export const Modal = ({
-  isOpen,
+  isOpen: isOpenProp,
+  open: openProp,
   onClose,
   title,
   description,
@@ -24,6 +27,7 @@ export const Modal = ({
   className = '',
   hideCloseButton = false,
 }: ModalProps) => {
+  const isOpen = Boolean(isOpenProp ?? openProp);
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape' && isOpen) {
