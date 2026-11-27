@@ -36,7 +36,11 @@ function FacebookIcon({ size = 20, className = "" }: { size?: number; className?
 
 interface MetaStatusData {
   isConnected: boolean;
+  isExpired?: boolean;
+  tokenDaysRemaining?: number | null;
   oauthConfigured?: boolean;
+  webhookVerifyConfigured?: boolean;
+  appSecretConfigured?: boolean;
   integration: {
     id: string;
     status: string;
@@ -44,6 +48,7 @@ interface MetaStatusData {
     businessName?: string;
     autoSyncLeads: boolean;
     tokenExpiresAt?: string;
+    lastError?: string | null;
     updatedAt: string;
   } | null;
   pages: Array<{
@@ -122,6 +127,16 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
   const [importDays, setImportDays] = useState<number>(30);
   const [importLoading, setImportLoading] = useState(false);
   const [importResult, setImportResult] = useState<string | null>(null);
+  const [selfTestLoading, setSelfTestLoading] = useState(false);
+  const [selfTestResult, setSelfTestResult] = useState<{
+    webhookVerified: boolean;
+    webhookMessage: string;
+    appSecretConfigured: boolean;
+    tokenValid: boolean;
+    tokenExpired: boolean;
+    tokenMessage: string;
+    pageChecks: Array<{ pageId: string; pageName: string; subscribed: boolean; error?: string }>;
+  } | null>(null);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -257,7 +272,26 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
     }
   };
 
+  const handleSelfTest = async () => {
+    setSelfTestLoading(true);
+    try {
+      const res = await fetch('/api/integrations/meta/test', { method: 'POST' });
+      const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json?.error || 'Meta self-test failed');
+      }
+      setSelfTestResult(json);
+      await loadStatus();
+    } catch (err: any) {
+      showToast(err?.message || 'Meta self-test failed');
+    } finally {
+      setSelfTestLoading(false);
+    }
+  };
+
   const isConnected = data?.isConnected;
+  const isExpired = Boolean(data?.isExpired);
+  const tokenDaysRemaining = data?.tokenDaysRemaining;
   const oauthConfigured = data?.oauthConfigured !== false;
 
   return (
@@ -292,6 +326,56 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
         </div>
       )}
 
+      {isExpired && (
+        <div className="p-4 rounded-2xl bg-rose-950/40 border border-rose-500/50 text-rose-100 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <AlertTriangle size={18} className="text-rose-400 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-bold">Meta OAuth Token Expired — Lead Sync Paused</p>
+              <p className="text-rose-200/90">
+                {data?.integration?.lastError || 'Your ~60-day Meta Business access token expired or could not be refreshed. Reconnect now to resume live Meta Lead Ads ingestion.'}
+              </p>
+            </div>
+          </div>
+          {oauthConfigured && (
+            <a
+              href="/api/integrations/meta/auth"
+              className="px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs shrink-0 inline-flex items-center gap-1.5"
+            >
+              <RefreshCw size={13} />
+              <span>Reconnect Meta</span>
+            </a>
+          )}
+        </div>
+      )}
+
+      {!isExpired && isConnected && typeof tokenDaysRemaining === 'number' && tokenDaysRemaining <= 14 && (
+        <div className="p-4 rounded-2xl bg-amber-950/35 border border-amber-500/40 text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <AlertTriangle size={16} className="text-amber-400 shrink-0" />
+            <span>
+              Meta OAuth token expires in <strong>{Math.max(0, tokenDaysRemaining)} day(s)</strong>. Automatic refresh runs in the background, or you can re-authorize now.
+            </span>
+          </div>
+          <a
+            href="/api/integrations/meta/auth"
+            className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shrink-0"
+          >
+            Refresh Connection
+          </a>
+        </div>
+      )}
+
+      {!isExpired && data?.integration?.lastError && (
+        <div className="p-4 rounded-2xl bg-amber-950/30 border border-amber-500/40 text-amber-200 text-xs flex items-start gap-2.5">
+          <AlertCircle size={16} className="text-amber-400 shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-amber-100">Last Meta Sync Warning</p>
+            <p className="text-amber-200/90 mt-0.5">{data.integration.lastError}</p>
+          </div>
+        </div>
+      )}
+
       {/* Toast Alert */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 px-4 py-2.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-2xl flex items-center gap-2 animate-in fade-in slide-in-from-bottom-2">
@@ -315,7 +399,11 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
                   <h3 className="font-serif text-lg font-bold text-white tracking-tight">
                     Meta Lead Ads (Facebook & Instagram)
                   </h3>
-                  {isConnected ? (
+                  {isExpired ? (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 uppercase tracking-wider">
+                      Reconnect Required
+                    </span>
+                  ) : isConnected ? (
                     <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase tracking-wider">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                       Live & Synchronising
@@ -356,6 +444,15 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
                 >
                   <RefreshCw size={15} className={isLoading ? 'animate-spin' : ''} />
                 </button>
+                <button
+                  type="button"
+                  onClick={handleSelfTest}
+                  disabled={selfTestLoading}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-emerald-300 font-bold text-xs border border-emerald-500/20 transition-colors flex items-center gap-1.5"
+                >
+                  <Radio size={14} className={selfTestLoading ? 'animate-pulse' : ''} />
+                  <span>{selfTestLoading ? 'Testing...' : 'Verify Webhook'}</span>
+                </button>
                 <a
                   href="/api/integrations/meta/auth"
                   className="px-4 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs border border-white/10 transition-colors flex items-center gap-2"
@@ -393,6 +490,54 @@ export function MetaLeadAdsDashboard({ teamMembers = [] }: { teamMembers?: Array
           </div>
         </div>
       </div>
+
+      {selfTestResult && (
+        <div className="p-4 rounded-2xl bg-[#0a0d12] border border-white/10 space-y-2 text-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-white flex items-center gap-2">
+              <ShieldCheck size={15} className="text-emerald-400" />
+              Meta Lead Ads &amp; Webhook Self-Test
+            </span>
+            <button
+              type="button"
+              onClick={() => setSelfTestResult(null)}
+              className="text-gray-500 hover:text-white"
+            >
+              <X size={14} />
+            </button>
+          </div>
+          <div className="space-y-1 text-[11px] text-gray-300">
+            <p className="flex items-center gap-2">
+              {selfTestResult.webhookVerified ? (
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+              ) : (
+                <AlertCircle size={13} className="text-rose-400 shrink-0" />
+              )}
+              <span>{selfTestResult.webhookMessage}</span>
+            </p>
+            <p className="flex items-center gap-2">
+              {selfTestResult.tokenValid ? (
+                <CheckCircle2 size={13} className="text-emerald-400 shrink-0" />
+              ) : (
+                <AlertCircle size={13} className="text-rose-400 shrink-0" />
+              )}
+              <span>{selfTestResult.tokenMessage}</span>
+            </p>
+            {selfTestResult.pageChecks.map((pc) => (
+              <p key={pc.pageId} className="flex items-center gap-2 pl-4 text-gray-400">
+                {pc.subscribed ? (
+                  <CheckCircle2 size={12} className="text-emerald-400 shrink-0" />
+                ) : (
+                  <AlertTriangle size={12} className="text-amber-400 shrink-0" />
+                )}
+                <span>
+                  Page <strong>{pc.pageName}</strong>: {pc.subscribed ? 'subscribed to leadgen ✓' : pc.error || 'not subscribed'}
+                </span>
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Campaign-to-Revenue Attribution Funnel KPI Strip */}
       {isConnected && data?.metrics && (
