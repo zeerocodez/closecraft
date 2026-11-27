@@ -60,7 +60,7 @@ describe('CloseCraft HQ Phase 7: Unified Revenue Inbox & Multichannel Communicat
 
     // WhatsApp Dispatch
     assert.match(clientContent, /formatWhatsAppUrl/, 'Uses official WhatsApp URL formatter');
-    assert.match(clientContent, /Dispatch via WhatsApp/, 'Action button to launch WhatsApp web');
+    assert.match(clientContent, /Open in WhatsApp/, 'Action button to launch WhatsApp web');
 
     // In-app Logging & Rate Limiting
     assert.match(clientContent, /\/api\/messages/, 'Posts message payload to API endpoint');

@@ -106,6 +106,10 @@ export interface SendWhatsAppMessageParams {
   templateComponents?: any[];
   conversationId?: string;
   allowOutsideServiceWindow?: boolean;
+  /** Who authored the message. Defaults to 'AI' for automated dispatch
+   *  (follow-up cron, recovery campaigns); the inbox passes 'HUMAN' so
+   *  replies typed by a person are attributed truthfully. */
+  senderType?: 'AI' | 'HUMAN';
 }
 
 export interface SendWhatsAppMessageResult {
@@ -140,6 +144,7 @@ export async function sendWhatsAppMessage(
     templateLanguage = 'en_US',
     templateComponents = [],
     conversationId: providedConvId,
+    senderType = 'AI',
   } = params;
 
   const cleanPhone = normalizeWhatsAppNumber(recipientPhone);
@@ -219,7 +224,7 @@ export async function sendWhatsAppMessage(
         data: {
           conversationId: convId,
           content: text || '[Failed Dispatch: Window Closed]',
-          senderType: 'AI',
+          senderType,
           status: 'FAILED',
           errorMessage: errorMsg,
         },
@@ -246,7 +251,7 @@ export async function sendWhatsAppMessage(
       data: {
         conversationId: convId,
         content: loggedContent,
-        senderType: 'AI',
+        senderType,
         status: 'DRY_RUN_LOGGED',
         providerMessageId: dryRunId,
       },
@@ -288,7 +293,7 @@ export async function sendWhatsAppMessage(
       data: {
         conversationId: convId,
         content: text || `[Template: ${templateName}]`,
-        senderType: 'AI',
+        senderType,
         status: 'FAILED',
         errorMessage: credErr,
       },
@@ -346,7 +351,7 @@ export async function sendWhatsAppMessage(
           data: {
             conversationId: convId,
             content: text || `[Template: ${templateName}]`,
-            senderType: 'AI',
+            senderType,
             status: 'SENT',
             providerMessageId: wamid,
           },
@@ -374,7 +379,7 @@ export async function sendWhatsAppMessage(
     data: {
       conversationId: convId,
       content: text || `[Template: ${templateName}]`,
-      senderType: 'AI',
+      senderType,
       status: 'FAILED',
       errorMessage: lastError || 'Unknown provider error',
     },
