@@ -104,9 +104,29 @@ export async function GET() {
 
     const campaignAttribution = Object.values(campaignAttributionMap).sort((a, b) => b.leadsCount - a.leadsCount);
 
+    const expiresAtMs = integration?.tokenExpiresAt
+      ? new Date(integration.tokenExpiresAt).getTime()
+      : null;
+    const tokenDaysRemaining =
+      expiresAtMs !== null
+        ? Math.ceil((expiresAtMs - Date.now()) / (24 * 60 * 60 * 1000))
+        : null;
+    const isExpired = Boolean(
+      integration &&
+        (['ERROR', 'EXPIRED'].includes(integration.status) || (expiresAtMs !== null && expiresAtMs <= Date.now()))
+    );
+
     return NextResponse.json({
-      isConnected: Boolean(integration && integration.status === 'CONNECTED'),
+      isConnected: Boolean(integration && integration.status === 'CONNECTED' && !isExpired),
+      isExpired,
+      tokenDaysRemaining,
       oauthConfigured: isMetaAppConfigured(),
+      webhookVerifyConfigured: Boolean(
+        (process.env.FACEBOOK_VERIFY_TOKEN || process.env.META_VERIFY_TOKEN || '').trim()
+      ),
+      appSecretConfigured: Boolean(
+        (process.env.FACEBOOK_APP_SECRET || process.env.META_APP_SECRET || '').trim()
+      ),
       integration: integration
         ? {
             id: integration.id,
