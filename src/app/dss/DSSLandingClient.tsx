@@ -243,26 +243,26 @@ export default function DSSLandingClient() {
   };
 
   return (
-    <div className="min-h-screen bg-[#071126] text-[#F3F7FA] font-sans selection:bg-[#0066FF]/30 selection:text-white">
+    <div className="min-h-screen bg-dss-navy text-brand-ink font-sans selection:bg-dss-blue/30 selection:text-white">
       {/* DSS ANNOUNCEMENT BANNER */}
       <aside
         aria-label="Announcement"
-        className="bg-gradient-to-r from-[#0C1A38] via-[#0066FF]/25 to-[#0C1A38] border-b border-[#0066FF]/30 py-2.5 px-4 text-center sticky top-0 z-50 shadow-md"
+        className="bg-gradient-to-r from-[#0C1A38] via-dss-blue/25 to-[#0C1A38] border-b border-dss-blue/30 py-2.5 px-4 text-center sticky top-0 z-50 shadow-md"
       >
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-xs">
           <span className="font-bold text-white tracking-wide">
             Your next step in sales starts at half the fee.
           </span>
-          <span className="text-[#CBD5E1]">
+          <span className="text-slate-300">
             Get 50% off eligible DSS enrolment fees with code{' '}
-            <span className="font-mono font-bold text-[#38BDF8] bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
+            <span className="font-mono font-bold text-dss-sky bg-black/40 px-1.5 py-0.5 rounded border border-white/10">
               cohort001
             </span>
             . A ₦100,000 fee becomes ₦50,000.
           </span>
           <a
             href="#early-bird-offer"
-            className="font-bold text-[#38BDF8] hover:text-white underline underline-offset-4 transition-colors flex items-center gap-1 shrink-0"
+            className="font-bold text-dss-sky hover:text-white underline underline-offset-4 transition-colors flex items-center gap-1 shrink-0"
           >
             <span>View Eligible Programmes</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -271,13 +271,13 @@ export default function DSSLandingClient() {
       </aside>
 
       {/* 4.A NAVIGATION */}
-      <header className="sticky top-[41px] z-40 bg-[#071126]/95 backdrop-blur-md border-b border-white/10">
+      <header className="sticky top-[41px] z-40 bg-dss-navy/95 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
           {/* Logo & Brand Identity */}
           <div className="flex items-center gap-4">
             <Link
               href="/"
-              className="flex items-center gap-2 text-xs font-semibold text-[#94A3B8] hover:text-white transition-colors px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10"
+              className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors px-2.5 py-1.5 rounded-lg bg-white/5 border border-white/10"
               title="Return to Closecraft Platform"
             >
               <Logo variant="icon" size="xs" />
@@ -290,7 +290,7 @@ export default function DSSLandingClient() {
           </div>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-[#94A3B8]">
+          <nav className="hidden lg:flex items-center gap-7 text-xs font-semibold text-slate-400">
             <a href="#curriculum" className="hover:text-white transition-colors">
               Curriculum
             </a>
@@ -312,14 +312,14 @@ export default function DSSLandingClient() {
           <div className="flex items-center gap-3">
             <Link
               href="/login"
-              className="px-3.5 py-2 text-xs font-semibold text-[#94A3B8] hover:text-white transition-colors"
+              className="px-3.5 py-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
             >
               Student Login
             </Link>
 
             <a
               href="#apply"
-              className="px-4 py-2 text-xs font-bold rounded-lg bg-[#0066FF] hover:bg-[#0052CC] text-white transition-colors shadow-sm shadow-[#0066FF]/20 flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-bold rounded-lg bg-dss-blue hover:bg-dss-royal text-white transition-colors shadow-sm shadow-dss-blue/20 flex items-center gap-1.5"
             >
               <span>Apply for the Sprint</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -328,30 +328,30 @@ export default function DSSLandingClient() {
         </div>
 
         {/* Small ecosystem link */}
-        <div className="bg-[#0B1733] border-t border-white/5 py-1.5 px-4 text-center text-[11px] text-[#94A3B8]">
+        <div className="bg-dss-deep border-t border-white/5 py-1.5 px-4 text-center text-[11px] text-slate-400">
           Looking for sales software for your business?{' '}
-          <Link href="/" className="text-[#38BDF8] font-medium hover:underline inline-flex items-center gap-1">
+          <Link href="/" className="text-dss-sky font-medium hover:underline inline-flex items-center gap-1">
             Explore Closecraft →
           </Link>
         </div>
       </header>
 
       {/* 4.B HERO */}
-      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden bg-gradient-to-b from-[#071126] via-[#0B1A3A] to-[#071126] border-b border-white/5">
+      <section className="relative pt-16 pb-20 md:pt-24 md:pb-28 overflow-hidden bg-gradient-to-b from-dss-navy via-[#0B1A3A] to-dss-navy border-b border-white/5">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Eyebrow */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] text-xs font-bold uppercase tracking-wider mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-dss-blue/15 border border-dss-blue/30 text-blue-400 text-xs font-bold uppercase tracking-wider mb-6">
             <Sparkles className="w-3.5 h-3.5" />
             <span>FOUR-WEEK REMOTE SALES SPRINT</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white mb-6 leading-[1.15]">
-            Learn remote sales. <span className="text-[#38BDF8]">Build work you can show.</span>
+            Learn remote sales. <span className="text-dss-sky">Build work you can show.</span>
           </h1>
 
           {/* Body */}
-          <p className="max-w-3xl mx-auto text-base sm:text-lg text-[#CBD5E1] mb-8 leading-relaxed">
+          <p className="max-w-3xl mx-auto text-base sm:text-lg text-slate-300 mb-8 leading-relaxed">
             Develop practical appointment-setting and closing skills through live workshops and guided practice. Finish
             with corrected work samples you can explain to a prospective employer or apply in your business.
           </p>
@@ -360,7 +360,7 @@ export default function DSSLandingClient() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
             <a
               href="#apply"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-sm font-bold transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-dss-blue hover:bg-dss-royal text-white text-sm font-bold transition-all shadow-lg shadow-dss-blue/25 flex items-center justify-center gap-2"
             >
               <span>Apply for the Sprint</span>
               <ArrowRight className="w-4 h-4" />
@@ -378,32 +378,32 @@ export default function DSSLandingClient() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 max-w-4xl mx-auto mb-6">
             <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
               <div className="text-2xl sm:text-3xl font-extrabold text-white mb-1">4 weeks</div>
-              <div className="text-xs text-[#94A3B8]">Structured teaching</div>
+              <div className="text-xs text-slate-400">Structured teaching</div>
             </div>
             <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
-              <div className="text-2xl sm:text-3xl font-extrabold text-[#38BDF8] mb-1">12</div>
-              <div className="text-xs text-[#94A3B8]">Live practical workshops</div>
+              <div className="text-2xl sm:text-3xl font-extrabold text-dss-sky mb-1">12</div>
+              <div className="text-xs text-slate-400">Live practical workshops</div>
             </div>
             <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
               <div className="text-2xl sm:text-3xl font-extrabold text-white mb-1">24</div>
-              <div className="text-xs text-[#94A3B8]">Lesson topics</div>
+              <div className="text-xs text-slate-400">Lesson topics</div>
             </div>
             <div className="bg-[#0D1C3D]/80 backdrop-blur border border-white/10 rounded-xl p-4 text-center">
-              <div className="text-xl sm:text-2xl font-extrabold text-[#60A5FA] mb-1">~21 hrs</div>
-              <div className="text-xs text-[#94A3B8]">Commitment per week</div>
+              <div className="text-xl sm:text-2xl font-extrabold text-blue-400 mb-1">~21 hrs</div>
+              <div className="text-xs text-slate-400">Commitment per week</div>
             </div>
           </div>
 
           {/* Supporting line */}
-          <p className="text-xs sm:text-sm text-[#94A3B8] italic">
+          <p className="text-xs sm:text-sm text-slate-400 italic">
             No previous sales experience is required. You do need time to practise.
           </p>
 
           {/* Cohort Notice (Honest fee/schedule state - no fake countdowns) */}
-          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-[#CBD5E1]">
-            <Calendar className="w-4 h-4 text-[#38BDF8]" />
+          <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-xs text-slate-300">
+            <Calendar className="w-4 h-4 text-dss-sky" />
             <span>Next Cohort: Accepting initial applications • </span>
-            <span className="text-[#38BDF8] font-medium">
+            <span className="text-dss-sky font-medium">
               {DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN
                 ? `₦${DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN.toLocaleString()}`
                 : 'Request the current cohort fee and schedule.'}
@@ -413,13 +413,13 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.C THE LEARNING GAP */}
-      <section className="py-20 bg-[#071126] border-b border-white/5">
+      <section className="py-20 bg-dss-navy border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-r from-[#0C1A38] to-[#0F234D] border border-white/10 rounded-2xl p-8 sm:p-12 shadow-xl">
             <h2 className="text-2xl sm:text-3xl font-bold text-white mb-6 leading-snug">
               Watching sales lessons is useful. Being able to handle the conversation takes practice.
             </h2>
-            <div className="space-y-4 text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+            <div className="space-y-4 text-sm sm:text-base text-slate-300 leading-relaxed">
               <p>
                 You may know what an appointment setter or closer does, yet still feel unsure about the next message to send
                 or the question to ask.
@@ -438,65 +438,65 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.D THE PRACTICAL OUTCOMES */}
-      <section className="py-20 bg-[#0B1733] border-b border-white/5">
+      <section className="py-20 bg-dss-deep border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">
               Build the skills behind a useful sales conversation.
             </h2>
-            <p className="text-sm sm:text-base text-[#94A3B8]">
+            <p className="text-sm sm:text-base text-slate-400">
               Observable capabilities developed through authentic commercial exercises, reviewed against verified rubrics.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
             {/* Outcome 1 */}
-            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+            <div className="bg-dss-navy border border-white/10 rounded-2xl p-7 hover:border-dss-blue/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/15 border border-dss-blue/30 text-blue-400 flex items-center justify-center font-bold text-base mb-5">
                 01
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Research before reaching out.</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Identify a suitable buyer and use real observations to write relevant opening messages.
               </p>
             </div>
 
             {/* Outcome 2 */}
-            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+            <div className="bg-dss-navy border border-white/10 rounded-2xl p-7 hover:border-dss-blue/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/15 border border-dss-blue/30 text-blue-400 flex items-center justify-center font-bold text-base mb-5">
                 02
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Qualify and book with purpose.</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Understand whether an enquiry fits, then arrange a meeting with a clear purpose and a useful handoff.
               </p>
             </div>
 
             {/* Outcome 3 */}
-            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+            <div className="bg-dss-navy border border-white/10 rounded-2xl p-7 hover:border-dss-blue/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/15 border border-dss-blue/30 text-blue-400 flex items-center justify-center font-bold text-base mb-5">
                 03
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Lead discovery and explain value.</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Investigate the buyer's situation and connect your recommendation to what they have actually told you.
               </p>
             </div>
 
             {/* Outcome 4 */}
-            <div className="bg-[#071126] border border-white/10 rounded-2xl p-7 hover:border-[#0066FF]/40 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/15 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-base mb-5">
+            <div className="bg-dss-navy border border-white/10 rounded-2xl p-7 hover:border-dss-blue/40 transition-colors">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/15 border border-dss-blue/30 text-blue-400 flex items-center justify-center font-bold text-base mb-5">
                 04
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Handle concerns and document the decision.</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Clarify objections, stay within approved terms and keep accurate records of the next action.
               </p>
             </div>
           </div>
 
           {/* Supporting copy */}
-          <div className="bg-[#071126]/60 border border-white/10 rounded-xl p-5 text-center max-w-3xl mx-auto text-sm text-[#CBD5E1]">
+          <div className="bg-dss-navy/60 border border-white/10 rounded-xl p-5 text-center max-w-3xl mx-auto text-sm text-slate-300">
             You will also work on a sales pipeline and prepare an onboarding handover, so your portfolio shows how the
             process connects.
           </div>
@@ -504,11 +504,11 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.E TWO WAYS TO APPLY THE LEARNING */}
-      <section className="py-20 bg-[#071126] border-b border-white/5">
+      <section className="py-20 bg-dss-navy border-b border-white/5">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Choose the goal you want your work to support.</h2>
-            <p className="text-sm sm:text-base text-[#94A3B8]">
+            <p className="text-sm sm:text-base text-slate-400">
               Both application routes learn the same foundational skills through the four-week sprint. Your final project
               records reflect your objective.
             </p>
@@ -520,25 +520,25 @@ export default function DSSLandingClient() {
               onClick={() => setSelectedRoute('Remote Sales Starter')}
               className={`cursor-pointer rounded-2xl p-8 border transition-all ${
                 selectedRoute === 'Remote Sales Starter'
-                  ? 'bg-[#0E2046] border-[#0066FF] shadow-lg shadow-[#0066FF]/15'
+                  ? 'bg-[#0E2046] border-dss-blue shadow-lg shadow-dss-blue/15'
                   : 'bg-[#091633] border-white/10 hover:border-white/20'
               }`}
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#38BDF8] bg-[#0066FF]/20 px-3 py-1 rounded-full border border-[#0066FF]/30">
+                <span className="text-xs font-bold uppercase tracking-wider text-dss-sky bg-dss-blue/20 px-3 py-1 rounded-full border border-dss-blue/30">
                   Career Track
                 </span>
                 {selectedRoute === 'Remote Sales Starter' && (
-                  <CheckCircle2 className="w-5 h-5 text-[#38BDF8]" />
+                  <CheckCircle2 className="w-5 h-5 text-dss-sky" />
                 )}
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Remote Sales Starter</h3>
-              <p className="text-sm text-[#CBD5E1] leading-relaxed mb-6">
+              <p className="text-sm text-slate-300 leading-relaxed mb-6">
                 Build practical samples for suitable appointment-setting or sales roles. Prepare a tailored application and
                 learn to review the compensation terms before accepting an opportunity.
               </p>
-              <div className="text-xs text-[#94A3B8] pt-4 border-t border-white/10 flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-[#38BDF8]" />
+              <div className="text-xs text-slate-400 pt-4 border-t border-white/10 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-dss-sky" />
                 <span>Focus: Demonstrable evidence for sales hiring teams & SDR/BDR managers</span>
               </div>
             </div>
@@ -548,32 +548,32 @@ export default function DSSLandingClient() {
               onClick={() => setSelectedRoute('Business Builder')}
               className={`cursor-pointer rounded-2xl p-8 border transition-all ${
                 selectedRoute === 'Business Builder'
-                  ? 'bg-[#0E2046] border-[#0066FF] shadow-lg shadow-[#0066FF]/15'
+                  ? 'bg-[#0E2046] border-dss-blue shadow-lg shadow-dss-blue/15'
                   : 'bg-[#091633] border-white/10 hover:border-white/20'
               }`}
             >
               <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#38BDF8] bg-[#0066FF]/20 px-3 py-1 rounded-full border border-[#0066FF]/30">
+                <span className="text-xs font-bold uppercase tracking-wider text-dss-sky bg-dss-blue/20 px-3 py-1 rounded-full border border-dss-blue/30">
                   Founder & Team Track
                 </span>
                 {selectedRoute === 'Business Builder' && (
-                  <CheckCircle2 className="w-5 h-5 text-[#38BDF8]" />
+                  <CheckCircle2 className="w-5 h-5 text-dss-sky" />
                 )}
               </div>
               <h3 className="text-xl font-bold text-white mb-3">Business Builder</h3>
-              <p className="text-sm text-[#CBD5E1] leading-relaxed mb-6">
+              <p className="text-sm text-slate-300 leading-relaxed mb-6">
                 Use an authorised offer from your business, or begin with the DSS fictional training offer. Develop a scoped
                 plan for improving how enquiries and sales conversations are handled.
               </p>
-              <div className="text-xs text-[#94A3B8] pt-4 border-t border-white/10 flex items-center gap-2">
-                <Briefcase className="w-4 h-4 text-[#38BDF8]" />
+              <div className="text-xs text-slate-400 pt-4 border-t border-white/10 flex items-center gap-2">
+                <Briefcase className="w-4 h-4 text-dss-sky" />
                 <span>Focus: Immediate conversion and pipeline improvement for real business offers</span>
               </div>
             </div>
           </div>
 
           {/* Shared line */}
-          <p className="text-center text-xs sm:text-sm text-[#94A3B8] italic max-w-2xl mx-auto">
+          <p className="text-center text-xs sm:text-sm text-slate-400 italic max-w-2xl mx-auto">
             Both routes use the same core curriculum. Your final application task reflects your goal. Choosing a route
             describes your learning focus and does not purchase an unverified placement.
           </p>
@@ -581,17 +581,17 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.F CURRICULUM */}
-      <section id="curriculum" className="py-20 bg-[#0B1733] border-b border-white/5 scroll-mt-24">
+      <section id="curriculum" className="py-20 bg-dss-deep border-b border-white/5 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#94A3B8] mb-3">
-              <BookOpen className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-400 mb-3">
+              <BookOpen className="w-3.5 h-3.5 text-dss-sky" />
               <span>Comprehensive 24-Topic Syllabus</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">
               Four focused weeks. A connected sales process.
             </h2>
-            <p className="text-sm sm:text-base text-[#CBD5E1]">
+            <p className="text-sm sm:text-base text-slate-300">
               All 24 original topics are taught through 12 practical workshops. You will use the same approved offer across
               the programme, then improve the connected work after feedback.
             </p>
@@ -599,14 +599,14 @@ export default function DSSLandingClient() {
 
           {/* Tab Selector: Weeks Overview vs 8-Criterion Rubric */}
           <div className="flex justify-center mb-10">
-            <div className="inline-flex p-1 rounded-xl bg-[#071126] border border-white/10">
+            <div className="inline-flex p-1 rounded-xl bg-dss-navy border border-white/10">
               <button
                 type="button"
                 onClick={() => setActiveTab('curriculum')}
                 className={`px-5 py-2 text-xs font-bold rounded-lg transition-colors ${
                   activeTab === 'curriculum'
-                    ? 'bg-[#0066FF] text-white shadow-sm'
-                    : 'text-[#94A3B8] hover:text-white'
+                    ? 'bg-dss-blue text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 12 Workshops by Week
@@ -616,8 +616,8 @@ export default function DSSLandingClient() {
                 onClick={() => setActiveTab('rubric')}
                 className={`px-5 py-2 text-xs font-bold rounded-lg transition-colors ${
                   activeTab === 'rubric'
-                    ? 'bg-[#0066FF] text-white shadow-sm'
-                    : 'text-[#94A3B8] hover:text-white'
+                    ? 'bg-dss-blue text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
                 }`}
               >
                 Assessment Rubric (8 Criteria)
@@ -634,7 +634,7 @@ export default function DSSLandingClient() {
                 return (
                   <div
                     key={wk.weekNumber}
-                    className="bg-[#071126] border border-white/10 rounded-2xl overflow-hidden transition-all shadow-sm"
+                    className="bg-dss-navy border border-white/10 rounded-2xl overflow-hidden transition-all shadow-sm"
                   >
                     {/* Week Header / Accordion trigger */}
                     <button
@@ -645,21 +645,21 @@ export default function DSSLandingClient() {
                     >
                       <div className="space-y-2">
                         <div className="flex items-center gap-3">
-                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#0066FF]/20 text-[#60A5FA] border border-[#0066FF]/30">
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-dss-blue/20 text-blue-400 border border-dss-blue/30">
                             Week {wk.weekNumber}
                           </span>
-                          <span className="text-xs text-[#94A3B8]">
+                          <span className="text-xs text-slate-400">
                             3 Workshops • 9 Scheduled Live Hours • 12 Guided Study Hours
                           </span>
                         </div>
                         <h3 className="text-lg sm:text-xl font-bold text-white">{wk.title}</h3>
-                        <p className="text-sm text-[#94A3B8] max-w-3xl">{wk.copy}</p>
-                        <div className="text-xs text-[#38BDF8] font-medium pt-1">
+                        <p className="text-sm text-slate-400 max-w-3xl">{wk.copy}</p>
+                        <div className="text-xs text-dss-sky font-medium pt-1">
                           Evidence: {wk.evidence}
                         </div>
                       </div>
                       <ChevronDown
-                        className={`w-5 h-5 text-[#94A3B8] shrink-0 mt-1 transition-transform duration-200 ${
+                        className={`w-5 h-5 text-slate-400 shrink-0 mt-1 transition-transform duration-200 ${
                           isOpen ? 'rotate-180 text-white' : ''
                         }`}
                       />
@@ -668,7 +668,7 @@ export default function DSSLandingClient() {
                     {/* Expandable Workshops for this week */}
                     {isOpen && (
                       <div className="px-6 pb-6 pt-2 border-t border-white/10 space-y-4 bg-[#091530]/50">
-                        <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">
+                        <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
                           Workshops in Week {wk.weekNumber}:
                         </div>
                         {weekWorkshops.map((ws) => {
@@ -676,7 +676,7 @@ export default function DSSLandingClient() {
                           return (
                             <div
                               key={ws.workshopNumber}
-                              className="rounded-xl border border-white/10 bg-[#071126] overflow-hidden"
+                              className="rounded-xl border border-white/10 bg-dss-navy overflow-hidden"
                             >
                               <button
                                 type="button"
@@ -684,26 +684,26 @@ export default function DSSLandingClient() {
                                 className="w-full p-4 text-left flex items-center justify-between gap-4 hover:bg-white/5 transition-colors"
                               >
                                 <div className="flex flex-wrap items-center gap-3">
-                                  <span className="font-mono text-xs font-bold text-[#38BDF8] bg-white/5 px-2 py-1 rounded">
+                                  <span className="font-mono text-xs font-bold text-dss-sky bg-white/5 px-2 py-1 rounded">
                                     WS {ws.workshopNumber.toString().padStart(2, '0')}
                                   </span>
-                                  <span className="text-xs text-[#94A3B8]">Lessons {ws.lessons}</span>
+                                  <span className="text-xs text-slate-400">Lessons {ws.lessons}</span>
                                   <span className="text-sm font-semibold text-white">{ws.focus}</span>
                                 </div>
                                 <ChevronDown
-                                  className={`w-4 h-4 text-[#94A3B8] shrink-0 transition-transform ${
+                                  className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${
                                     isWsOpen ? 'rotate-180 text-white' : ''
                                   }`}
                                 />
                               </button>
 
                               {isWsOpen && (
-                                <div className="p-4 pt-1 border-t border-white/5 text-xs text-[#CBD5E1] space-y-3 bg-[#0B1A3A]/40">
-                                  <p className="leading-relaxed text-[#94A3B8]">{ws.overview}</p>
+                                <div className="p-4 pt-1 border-t border-white/5 text-xs text-slate-300 space-y-3 bg-[#0B1A3A]/40">
+                                  <p className="leading-relaxed text-slate-400">{ws.overview}</p>
 
                                   <div>
                                     <div className="font-semibold text-white mb-1.5">Learning Outcomes:</div>
-                                    <ul className="list-disc pl-4 space-y-1 text-[#CBD5E1]">
+                                    <ul className="list-disc pl-4 space-y-1 text-slate-300">
                                       {ws.publicOutcomes.map((out, idx) => (
                                         <li key={idx}>{out}</li>
                                       ))}
@@ -712,12 +712,12 @@ export default function DSSLandingClient() {
 
                                   <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-white/5 text-[11px]">
                                     <div>
-                                      <span className="text-[#94A3B8]">Deliverable: </span>
+                                      <span className="text-slate-400">Deliverable: </span>
                                       <span className="text-white font-medium">{ws.deliverableEvidence}</span>
                                     </div>
                                     <div>
-                                      <span className="text-[#94A3B8]">Assessed Rubric: </span>
-                                      <span className="text-[#38BDF8] font-medium">
+                                      <span className="text-slate-400">Assessed Rubric: </span>
+                                      <span className="text-dss-sky font-medium">
                                         {ws.assessedCriteria.join(', ')}
                                       </span>
                                     </div>
@@ -735,10 +735,10 @@ export default function DSSLandingClient() {
             </div>
           ) : (
             /* Rubric Criteria View */
-            <div className="max-w-5xl mx-auto bg-[#071126] border border-white/10 rounded-2xl p-6 sm:p-8">
+            <div className="max-w-5xl mx-auto bg-dss-navy border border-white/10 rounded-2xl p-6 sm:p-8">
               <div className="mb-6">
                 <h3 className="text-xl font-bold text-white mb-2">The 8-Criterion Assessment Rubric</h3>
-                <p className="text-sm text-[#94A3B8]">
+                <p className="text-sm text-slate-400">
                   Every live role-play and final capstone demonstration is scored against these eight criteria (0–2 points
                   each, 16 maximum). Passing threshold is 12/16 with no critical failure.
                 </p>
@@ -751,11 +751,11 @@ export default function DSSLandingClient() {
                       <span className="font-semibold text-white text-sm">
                         {idx + 1}. {criterion.name}
                       </span>
-                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-[#0066FF]/20 text-[#60A5FA]">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded bg-dss-blue/20 text-blue-400">
                         0 – 2 pts
                       </span>
                     </div>
-                    <div className="space-y-1 text-xs text-[#94A3B8]">
+                    <div className="space-y-1 text-xs text-slate-400">
                       <div>
                         <strong className="text-white">Score 2 (Proficient):</strong> {criterion.scoringGuide.two}
                       </div>
@@ -772,52 +772,52 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.G HOW YOU LEARN */}
-      <section id="how-you-learn" className="py-20 bg-[#071126] border-b border-white/5 scroll-mt-24">
+      <section id="how-you-learn" className="py-20 bg-dss-navy border-b border-white/5 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Learn the skill, then put it to work.</h2>
-            <p className="text-sm sm:text-base text-[#94A3B8]">
+            <p className="text-sm sm:text-base text-slate-400">
               A continuous loop of live demonstration, structured deliberate practice, and objective instructor feedback.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+            <div className="bg-dss-deep border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/20 text-blue-400 flex items-center justify-center mb-4">
                 <BookOpen className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-white mb-2">Live demonstrations</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Watch how a task is handled and inspect the decisions behind it.
               </p>
             </div>
 
-            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+            <div className="bg-dss-deep border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/20 text-blue-400 flex items-center justify-center mb-4">
                 <Compass className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-white mb-2">Guided practice</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Work through role-plays and practical assignments using approved offer facts.
               </p>
             </div>
 
-            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+            <div className="bg-dss-deep border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/20 text-blue-400 flex items-center justify-center mb-4">
                 <Award className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-white mb-2">Focused feedback</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Identify the part that needs correction, then save an improved attempt.
               </p>
             </div>
 
-            <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
-              <div className="w-10 h-10 rounded-xl bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center mb-4">
+            <div className="bg-dss-deep border border-white/10 rounded-2xl p-6">
+              <div className="w-10 h-10 rounded-xl bg-dss-blue/20 text-blue-400 flex items-center justify-center mb-4">
                 <Layers className="w-5 h-5" />
               </div>
               <h3 className="text-base font-bold text-white mb-2">Connected project work</h3>
-              <p className="text-sm text-[#94A3B8] leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed">
                 Keep the offer and buyer information consistent across your messages and operating records.
               </p>
             </div>
@@ -826,16 +826,16 @@ export default function DSSLandingClient() {
           {/* Workload panel & Access line */}
           <div className="bg-gradient-to-r from-[#0C1B3B] to-[#0E224C] border border-white/10 rounded-2xl p-8 max-w-4xl mx-auto space-y-4">
             <div className="flex items-start gap-4">
-              <Clock className="w-6 h-6 text-[#38BDF8] shrink-0 mt-0.5" />
+              <Clock className="w-6 h-6 text-dss-sky shrink-0 mt-0.5" />
               <div>
                 <h4 className="text-base font-bold text-white mb-1">Time Commitment</h4>
-                <p className="text-sm text-[#CBD5E1] leading-relaxed">
+                <p className="text-sm text-slate-300 leading-relaxed">
                   Plan approximately 21 hours each week: 9 scheduled live hours and 12 hours of guided preparation and
                   practice. Each live workshop includes breaks.
                 </p>
               </div>
             </div>
-            <div className="pt-3 border-t border-white/10 text-xs text-[#94A3B8]">
+            <div className="pt-3 border-t border-white/10 text-xs text-slate-400">
               A computer supports the final project records. Written practice alternatives are available where recording is
               unsuitable.
             </div>
@@ -844,13 +844,13 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.H AI PRACTICE */}
-      <section id="ai-practice" className="py-20 bg-[#0B1733] border-b border-white/5 scroll-mt-24">
+      <section id="ai-practice" className="py-20 bg-dss-deep border-b border-white/5 scroll-mt-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#071126] border border-white/10 rounded-3xl p-8 sm:p-12 overflow-hidden relative shadow-2xl">
+          <div className="bg-dss-navy border border-white/10 rounded-3xl p-8 sm:p-12 overflow-hidden relative shadow-2xl">
             <div className="max-w-3xl space-y-6">
               {/* Eyebrow */}
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#0066FF]/20 border border-[#0066FF]/40 text-[#60A5FA] text-xs font-bold uppercase tracking-wider">
-                <Bot className="w-4 h-4 text-[#38BDF8]" />
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-dss-blue/20 border border-dss-blue/40 text-blue-400 text-xs font-bold uppercase tracking-wider">
+                <Bot className="w-4 h-4 text-dss-sky" />
                 <span>SALES PRACTICE POWERED BY CLOSECRAFT</span>
               </div>
 
@@ -860,17 +860,17 @@ export default function DSSLandingClient() {
               </h2>
 
               {/* Main Copy */}
-              <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                 Use an AI buyer to rehearse a sales situation with approved offer facts. After the attempt, review feedback
                 connected to the saved conversation.
               </p>
-              <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+              <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                 See which assessed behaviours met the standard and what needs correction. Use the next exercise to practise
                 that correction under a different buyer condition.
               </p>
 
               {/* Feature Explanation */}
-              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10 text-xs sm:text-sm text-[#94A3B8] space-y-1">
+              <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10 text-xs sm:text-sm text-slate-400 space-y-1">
                 <p>
                   <strong className="text-white">Performance Intelligence</strong> helps you revisit the evidence behind your
                   results.
@@ -881,7 +881,7 @@ export default function DSSLandingClient() {
               </div>
 
               {/* Supporting Line */}
-              <p className="text-xs text-[#94A3B8] italic">
+              <p className="text-xs text-slate-400 italic">
                 AI practice feedback supports learning. Formal DSS readiness decisions include an authorised trainer's review.
               </p>
 
@@ -890,7 +890,7 @@ export default function DSSLandingClient() {
                 <button
                   type="button"
                   onClick={() => setShowPracticeModal(true)}
-                  className="px-5 py-2.5 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
+                  className="px-5 py-2.5 rounded-xl bg-dss-blue hover:bg-dss-royal text-white text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>See a Practice Example</span>
@@ -906,7 +906,7 @@ export default function DSSLandingClient() {
 
                 <a
                   href="#apply"
-                  className="px-4 py-2.5 text-xs font-semibold text-[#94A3B8] hover:text-white transition-colors"
+                  className="px-4 py-2.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
                 >
                   Ask About Practice Access &rarr;
                 </a>
@@ -917,11 +917,11 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.I PORTFOLIO */}
-      <section className="py-20 bg-[#071126] border-b border-white/5">
+      <section className="py-20 bg-dss-navy border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Finish with work you can explain.</h2>
-            <p className="text-sm sm:text-base text-[#CBD5E1]">
+            <p className="text-sm sm:text-base text-slate-300">
               Your portfolio should show how you think and how you respond to feedback. You will build connected work
               samples, rather than a folder of copied templates.
             </p>
@@ -929,19 +929,19 @@ export default function DSSLandingClient() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-5xl mx-auto mb-8">
             {SPRINT_PORTFOLIO_GROUPS.map((grp) => (
-              <div key={grp.groupNumber} className="bg-[#0B1733] border border-white/10 rounded-2xl p-6">
+              <div key={grp.groupNumber} className="bg-dss-deep border border-white/10 rounded-2xl p-6">
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="w-7 h-7 rounded-lg bg-[#0066FF]/20 text-[#60A5FA] flex items-center justify-center font-bold text-xs">
+                  <span className="w-7 h-7 rounded-lg bg-dss-blue/20 text-blue-400 flex items-center justify-center font-bold text-xs">
                     {grp.groupNumber}
                   </span>
                   <h3 className="text-base font-bold text-white">{grp.title}</h3>
                 </div>
-                <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">{grp.description}</p>
+                <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{grp.description}</p>
               </div>
             ))}
           </div>
 
-          <p className="text-center text-xs sm:text-sm text-[#94A3B8] italic max-w-2xl mx-auto">
+          <p className="text-center text-xs sm:text-sm text-slate-400 italic max-w-2xl mx-auto">
             Simulation work stays labelled as simulation work. You can explain the task and your actual contribution
             without claiming a client result you did not produce.
           </p>
@@ -949,50 +949,50 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.J ASSESSMENT */}
-      <section className="py-20 bg-[#0B1733] border-b border-white/5">
+      <section className="py-20 bg-dss-deep border-b border-white/5">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">
               Completion should mean you demonstrated the work.
             </h2>
-            <p className="text-sm sm:text-base text-[#CBD5E1]">
+            <p className="text-sm sm:text-base text-slate-300">
               You will submit the required project evidence and complete a final demonstration. Reviewers assess observable
               work, using a published rubric.
             </p>
           </div>
 
           {/* Standards Panel */}
-          <div className="bg-[#071126] border border-white/10 rounded-2xl p-8 mb-6 shadow-lg">
-            <h3 className="text-base font-bold uppercase tracking-wider text-[#38BDF8] mb-6">
+          <div className="bg-dss-navy border border-white/10 rounded-2xl p-8 mb-6 shadow-lg">
+            <h3 className="text-base font-bold uppercase tracking-wider text-dss-sky mb-6">
               Published Passing Standards
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <Check className="w-5 h-5 text-dss-sky shrink-0 mt-0.5" />
                 <span className="text-sm text-white font-medium">Performance assessment: at least 12 out of 16.</span>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <Check className="w-5 h-5 text-dss-sky shrink-0 mt-0.5" />
                 <span className="text-sm text-white font-medium">Knowledge check: at least 8 out of 10.</span>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <Check className="w-5 h-5 text-dss-sky shrink-0 mt-0.5" />
                 <span className="text-sm text-white font-medium">All required evidence submitted.</span>
               </div>
               <div className="flex items-start gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-                <Check className="w-5 h-5 text-[#38BDF8] shrink-0 mt-0.5" />
+                <Check className="w-5 h-5 text-dss-sky shrink-0 mt-0.5" />
                 <span className="text-sm text-white font-medium">No unresolved critical failure.</span>
               </div>
             </div>
           </div>
 
           {/* Supporting copy */}
-          <div className="space-y-3 text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
+          <div className="space-y-3 text-xs sm:text-sm text-slate-400 leading-relaxed">
             <p>
               If a task needs correction, you receive a focused repeat. Attendance and completed lessons are recorded
               separately from assessed competence.
             </p>
-            <p className="text-[#CBD5E1] font-medium">
+            <p className="text-slate-300 font-medium">
               A Certificate of Completion is subject to the programme's completion requirements.
             </p>
           </div>
@@ -1000,20 +1000,20 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.K FOUNDER */}
-      <section className="py-20 bg-[#071126] border-b border-white/5">
+      <section className="py-20 bg-dss-navy border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#0B1733] border border-white/10 rounded-2xl p-8 sm:p-12">
+          <div className="bg-dss-deep border border-white/10 rounded-2xl p-8 sm:p-12">
             <div className="flex flex-col sm:flex-row items-start gap-6">
-              <div className="w-16 h-16 rounded-2xl bg-[#0066FF]/20 border border-[#0066FF]/30 text-[#60A5FA] flex items-center justify-center font-bold text-xl shrink-0">
+              <div className="w-16 h-16 rounded-2xl bg-dss-blue/20 border border-dss-blue/30 text-blue-400 flex items-center justify-center font-bold text-xl shrink-0">
                 EE
               </div>
               <div className="space-y-4">
                 <h2 className="text-2xl font-bold text-white">Meet Emmanuel Effiong.</h2>
-                <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                   Emmanuel Effiong is the founder of Digital Sales School and Closecraft under Zeerocodes Automation Limited.
                   He is an educator focused on helping learners connect technology with practical business work.
                 </p>
-                <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-300 leading-relaxed">
                   DSS uses structured exercises and evidence-based review to make progress visible.
                 </p>
               </div>
@@ -1023,39 +1023,39 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.L THE CLOSECRAFT CONNECTION */}
-      <section className="py-16 bg-[#0B1733] border-b border-white/5">
+      <section className="py-16 bg-dss-deep border-b border-white/5">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-white">A training pathway connected to real sales work.</h2>
-          <p className="text-sm text-[#CBD5E1] leading-relaxed max-w-3xl mx-auto">
+          <p className="text-sm text-slate-300 leading-relaxed max-w-3xl mx-auto">
             Closecraft provides sales software and separately scoped sales support for businesses. DSS develops practical
             skills through its training programme. Relevant assessed work can support an application for an available
             opportunity. Any internship or client assignment requires a separately confirmed arrangement.
           </p>
-          <p className="text-xs text-[#94A3B8] italic">Training does not guarantee employment, placement or income.</p>
+          <p className="text-xs text-slate-400 italic">Training does not guarantee employment, placement or income.</p>
         </div>
       </section>
 
       {/* DSS EARLY BIRD OFFER SECTION */}
-      <section id="early-bird-offer" className="py-20 bg-gradient-to-b from-[#0B1733] to-[#071126] border-b border-white/5 scroll-mt-24">
+      <section id="early-bird-offer" className="py-20 bg-gradient-to-b from-dss-deep to-dss-navy border-b border-white/5 scroll-mt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl mx-auto text-center mb-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#0066FF]/15 border border-[#0066FF]/30 text-xs font-bold text-[#60A5FA] uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-dss-blue/15 border border-dss-blue/30 text-xs font-bold text-blue-400 uppercase tracking-wider mb-4">
               <Tag className="w-3.5 h-3.5" />
               <span>DSS EARLY BIRD OFFER</span>
             </div>
             <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-4 tracking-tight leading-tight">
-              Build practical sales skills. <span className="text-[#38BDF8]">Pay 50% less.</span>
+              Build practical sales skills. <span className="text-dss-sky">Pay 50% less.</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#CBD5E1] leading-relaxed mb-4">
-              Practise prospecting, discovery, follow-up and closing through the DSS programme. Use <code className="font-mono font-bold text-[#38BDF8] bg-black/40 px-2 py-0.5 rounded border border-white/10">cohort001</code> at checkout to take 50% off an eligible enrolment fee.
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-4">
+              Practise prospecting, discovery, follow-up and closing through the DSS programme. Use <code className="font-mono font-bold text-dss-sky bg-black/40 px-2 py-0.5 rounded border border-white/10">cohort001</code> at checkout to take 50% off an eligible enrolment fee.
             </p>
-            <p className="text-xs sm:text-sm text-[#94A3B8] mb-8">
+            <p className="text-xs sm:text-sm text-slate-400 mb-8">
               Choose your eligible programme, apply the code and review your final fee before you pay.
             </p>
 
             {/* Code Redemption Box */}
-            <div className="bg-[#0D1C3D] border border-[#0066FF]/30 rounded-2xl p-6 sm:p-8 max-w-xl mx-auto shadow-xl">
-              <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">
+            <div className="bg-[#0D1C3D] border border-dss-blue/30 rounded-2xl p-6 sm:p-8 max-w-xl mx-auto shadow-xl">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
                 Your early bird code
               </div>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-6">
@@ -1065,11 +1065,11 @@ export default function DSSLandingClient() {
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full sm:w-auto px-5 py-3 rounded-xl bg-dss-blue hover:bg-dss-royal text-white text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   {codeCopied ? (
                     <>
-                      <CheckCheck className="w-4 h-4 text-[#38BDF8]" />
+                      <CheckCheck className="w-4 h-4 text-dss-sky" />
                       <span>Code copied</span>
                     </>
                   ) : (
@@ -1085,7 +1085,7 @@ export default function DSSLandingClient() {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
                 <a
                   href="#eligible-programmes"
-                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-[#071126] hover:bg-[#F3F7FA] text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
+                  className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white text-dss-navy hover:bg-brand-ink text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-sm"
                 >
                   <span>Choose My Programme</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -1098,7 +1098,7 @@ export default function DSSLandingClient() {
                 </a>
               </div>
 
-              <div className="text-[11px] text-[#94A3B8] leading-normal pt-2 border-t border-white/5">
+              <div className="text-[11px] text-slate-400 leading-normal pt-2 border-t border-white/5">
                 Valid on selected DSS offers for the designated cohort while the campaign is active. One successful use per learner. Cannot be combined with another discount. Closecraft software plans and managed services are excluded.
               </div>
             </div>
@@ -1108,8 +1108,8 @@ export default function DSSLandingClient() {
           <div id="eligible-programmes" className="pt-6 scroll-mt-28">
             <div className="text-center mb-8">
               <h3 className="text-xl sm:text-2xl font-bold text-white mb-2">Eligible DSS Programmes</h3>
-              <p className="text-xs sm:text-sm text-[#94A3B8]">
-                Prices reflect authoritative 50% discount when using code <code className="text-[#38BDF8]">cohort001</code> at checkout.
+              <p className="text-xs sm:text-sm text-slate-400">
+                Prices reflect authoritative 50% discount when using code <code className="text-dss-sky">cohort001</code> at checkout.
               </p>
             </div>
 
@@ -1122,39 +1122,39 @@ export default function DSSLandingClient() {
                 return (
                   <div
                     key={prod.id}
-                    className="bg-[#071126] border border-white/10 hover:border-[#0066FF]/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 relative group shadow-lg"
+                    className="bg-dss-navy border border-white/10 hover:border-dss-blue/50 rounded-2xl p-6 flex flex-col justify-between transition-all duration-200 relative group shadow-lg"
                   >
                     <div>
                       {/* 50% OFF Badge */}
-                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-[#0066FF] text-white text-[11px] font-extrabold uppercase tracking-wider mb-4 shadow-sm">
+                      <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-dss-blue text-white text-[11px] font-extrabold uppercase tracking-wider mb-4 shadow-sm">
                         <Tag className="w-3 h-3" />
                         <span>50% OFF WITH cohort001</span>
                       </div>
 
                       <h4 className="text-lg font-bold text-white mb-1.5">{prod.title}</h4>
-                      <p className="text-xs text-[#94A3B8] mb-4 leading-relaxed line-clamp-2">
+                      <p className="text-xs text-slate-400 mb-4 leading-relaxed line-clamp-2">
                         {prod.tagline}
                       </p>
 
                       {/* Pricing Comparison */}
-                      <div className="p-4 rounded-xl bg-[#0B1733] border border-white/5 mb-5 space-y-1.5">
-                        <div className="flex items-center justify-between text-xs text-[#94A3B8]">
+                      <div className="p-4 rounded-xl bg-dss-deep border border-white/5 mb-5 space-y-1.5">
+                        <div className="flex items-center justify-between text-xs text-slate-400">
                           <span>Regular fee:</span>
                           <span className="line-through">₦{regularFee.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between text-sm font-bold text-white">
-                          <span className="text-[#38BDF8]">Early bird fee:</span>
+                          <span className="text-dss-sky">Early bird fee:</span>
                           <span className="text-lg text-white font-extrabold">₦{earlyBirdFee.toLocaleString()}</span>
                         </div>
-                        <div className="text-[11px] font-semibold text-[#10B981] text-right">
+                        <div className="text-[11px] font-semibold text-emerald-500 text-right">
                           Save ₦{savings.toLocaleString()}
                         </div>
                       </div>
 
                       <ul className="space-y-2 mb-6">
                         {prod.features.slice(0, 3).map((feat, i) => (
-                          <li key={i} className="text-xs text-[#CBD5E1] flex items-start gap-2">
-                            <Check className="w-3.5 h-3.5 text-[#38BDF8] shrink-0 mt-0.5" />
+                          <li key={i} className="text-xs text-slate-300 flex items-start gap-2">
+                            <Check className="w-3.5 h-3.5 text-dss-sky shrink-0 mt-0.5" />
                             <span>{feat}</span>
                           </li>
                         ))}
@@ -1164,7 +1164,7 @@ export default function DSSLandingClient() {
                     <button
                       type="button"
                       onClick={() => handleOpenCheckout(prod)}
-                      className="w-full py-3 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 group-hover:shadow-md"
+                      className="w-full py-3 rounded-xl bg-dss-blue hover:bg-dss-royal text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-2 group-hover:shadow-md"
                     >
                       <span>Enrol with Early Bird Offer</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1180,7 +1180,7 @@ export default function DSSLandingClient() {
       {/* CHECKOUT MODAL */}
       {checkoutProduct && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-[#071126] border border-white/15 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-dss-navy border border-white/15 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl relative my-8 animate-in fade-in zoom-in-95 duration-150">
             {/* Close Button */}
             <button
               type="button"
@@ -1190,7 +1190,7 @@ export default function DSSLandingClient() {
               <X className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-2 text-xs font-bold text-[#38BDF8] uppercase tracking-wider mb-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-dss-sky uppercase tracking-wider mb-2">
               <Lock className="w-3.5 h-3.5" />
               <span>DSS Secure Enrolment</span>
             </div>
@@ -1198,8 +1198,8 @@ export default function DSSLandingClient() {
             <h3 className="text-xl sm:text-2xl font-bold text-white mb-1">
               Enrol in {checkoutProduct.title}
             </h3>
-            <p className="text-xs text-[#94A3B8] mb-6">
-              Complete your enrolment details and apply code <code className="text-[#38BDF8]">cohort001</code> to claim 50% discount.
+            <p className="text-xs text-slate-400 mb-6">
+              Complete your enrolment details and apply code <code className="text-dss-sky">cohort001</code> to claim 50% discount.
             </p>
 
             {checkoutError && (
@@ -1218,13 +1218,13 @@ export default function DSSLandingClient() {
                   value={learnerName}
                   onChange={(e) => setLearnerName(e.target.value)}
                   placeholder="e.g. Adeola Johnson"
-                  className="w-full h-10 px-3.5 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-xs focus:outline-none focus:border-[#0066FF]"
+                  className="w-full h-10 px-3.5 rounded-xl bg-dss-deep border border-white/10 text-white placeholder-white/30 text-xs focus:outline-none focus:border-dss-blue"
                 />
               </div>
 
               <div>
                 <label className="block text-xs font-semibold text-white mb-1">
-                  Email Address <span className="text-[#38BDF8]">*</span>
+                  Email Address <span className="text-dss-sky">*</span>
                 </label>
                 <input
                   type="email"
@@ -1232,13 +1232,13 @@ export default function DSSLandingClient() {
                   value={learnerEmail}
                   onChange={(e) => setLearnerEmail(e.target.value)}
                   placeholder="you@domain.com"
-                  className="w-full h-10 px-3.5 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-xs focus:outline-none focus:border-[#0066FF]"
+                  className="w-full h-10 px-3.5 rounded-xl bg-dss-deep border border-white/10 text-white placeholder-white/30 text-xs focus:outline-none focus:border-dss-blue"
                 />
               </div>
             </div>
 
             {/* Coupon Field */}
-            <div className="p-4 rounded-2xl bg-[#0B1733] border border-white/10 mb-6">
+            <div className="p-4 rounded-2xl bg-dss-deep border border-white/10 mb-6">
               <label className="block text-xs font-bold text-white mb-2">Have an early bird code?</label>
               <div className="flex gap-2 mb-2">
                 <input
@@ -1249,20 +1249,20 @@ export default function DSSLandingClient() {
                     setCouponError(null);
                   }}
                   placeholder="Enter code"
-                  className="flex-1 h-10 px-3 rounded-xl bg-[#071126] border border-white/10 text-white placeholder-white/30 text-xs font-mono focus:outline-none focus:border-[#0066FF]"
+                  className="flex-1 h-10 px-3 rounded-xl bg-dss-navy border border-white/10 text-white placeholder-white/30 text-xs font-mono focus:outline-none focus:border-dss-blue"
                 />
                 <button
                   type="button"
                   disabled={couponChecking}
                   onClick={() => handleApplyCoupon(checkoutProduct.slug, couponInput)}
-                  className="px-4 h-10 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-xs font-bold transition-colors disabled:opacity-50 shrink-0"
+                  className="px-4 h-10 rounded-xl bg-dss-blue hover:bg-dss-royal text-white text-xs font-bold transition-colors disabled:opacity-50 shrink-0"
                 >
                   {couponChecking ? 'Checking...' : 'Apply Code'}
                 </button>
               </div>
 
               {couponSuccessMessage && couponApplied && (
-                <div className="text-xs font-semibold text-[#10B981] flex items-center gap-1.5 mt-2">
+                <div className="text-xs font-semibold text-emerald-500 flex items-center gap-1.5 mt-2">
                   <CheckCircle2 className="w-3.5 h-3.5" />
                   <span>{couponSuccessMessage}</span>
                 </div>
@@ -1278,22 +1278,22 @@ export default function DSSLandingClient() {
 
             {/* Order Summary */}
             <div className="p-4 rounded-2xl bg-[#0D1C3D] border border-white/10 mb-6 space-y-2">
-              <div className="text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-3">
+              <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
                 Order Summary
               </div>
-              <div className="flex justify-between text-xs text-[#CBD5E1]">
+              <div className="flex justify-between text-xs text-slate-300">
                 <span>Programme fee</span>
                 <span>₦{checkoutProduct.priceNGN.toLocaleString()}</span>
               </div>
               {couponApplied && discountAmount > 0 && (
-                <div className="flex justify-between text-xs text-[#10B981] font-semibold">
+                <div className="flex justify-between text-xs text-emerald-500 font-semibold">
                   <span>Early bird discount — {couponInput.trim()}</span>
                   <span>−₦{discountAmount.toLocaleString()}</span>
                 </div>
               )}
               <div className="border-t border-white/10 pt-2 flex justify-between text-sm font-bold text-white">
                 <span>Total payable</span>
-                <span className="text-lg font-extrabold text-[#38BDF8]">
+                <span className="text-lg font-extrabold text-dss-sky">
                   ₦{(checkoutProduct.priceNGN - (couponApplied ? discountAmount : 0)).toLocaleString()}
                 </span>
               </div>
@@ -1304,7 +1304,7 @@ export default function DSSLandingClient() {
               type="button"
               disabled={checkoutLoading}
               onClick={handlePayAndEnrol}
-              className="w-full py-3.5 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold text-sm transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full py-3.5 rounded-xl bg-dss-blue hover:bg-dss-royal text-white font-bold text-sm transition-all shadow-lg shadow-dss-blue/25 flex items-center justify-center gap-2 disabled:opacity-60"
             >
               <CreditCard className="w-4 h-4" />
               <span>
@@ -1314,7 +1314,7 @@ export default function DSSLandingClient() {
               </span>
             </button>
 
-            <p className="text-[11px] text-[#94A3B8] text-center mt-3">
+            <p className="text-[11px] text-slate-400 text-center mt-3">
               Payments are verified server-side. Access to learning materials is provisioned upon confirmed settlement.
             </p>
           </div>
@@ -1322,23 +1322,23 @@ export default function DSSLandingClient() {
       )}
 
       {/* 4.M FEES AND DATES */}
-      <section id="fees-and-dates" className="py-20 bg-[#071126] border-b border-white/5 scroll-mt-24">
+      <section id="fees-and-dates" className="py-20 bg-dss-navy border-b border-white/5 scroll-mt-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Check the commitment. Choose your next step.</h2>
-            <p className="text-sm sm:text-base text-[#94A3B8]">
+            <p className="text-sm sm:text-base text-slate-400">
               Review the structured programme deliverables, calendar requirements, and transparent terms before applying.
             </p>
           </div>
 
           {/* Dominant Enrolment Card */}
-          <div className="bg-gradient-to-b from-[#0D1C3D] to-[#071126] border-2 border-[#0066FF]/40 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
+          <div className="bg-gradient-to-b from-[#0D1C3D] to-dss-navy border-2 border-dss-blue/40 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
             {/* Top Badge */}
             <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
-              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-[#0066FF] text-white uppercase tracking-wider">
+              <span className="px-3.5 py-1 rounded-full text-xs font-bold bg-dss-blue text-white uppercase tracking-wider">
                 Flagship Offering
               </span>
-              <span className="text-xs text-[#94A3B8]">{DSS_FLAGSHIP_SPRINT_CONFIG.timeZone}</span>
+              <span className="text-xs text-slate-400">{DSS_FLAGSHIP_SPRINT_CONFIG.timeZone}</span>
             </div>
 
             <h3 className="text-2xl sm:text-3xl font-extrabold text-white mb-4">
@@ -1349,32 +1349,32 @@ export default function DSSLandingClient() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-6 border-y border-white/10 mb-6 text-center">
               <div>
                 <div className="text-lg font-bold text-white">4 weeks</div>
-                <div className="text-xs text-[#94A3B8]">Teaching span</div>
+                <div className="text-xs text-slate-400">Teaching span</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-[#38BDF8]">12</div>
-                <div className="text-xs text-[#94A3B8]">Practical workshops</div>
+                <div className="text-lg font-bold text-dss-sky">12</div>
+                <div className="text-xs text-slate-400">Practical workshops</div>
               </div>
               <div>
                 <div className="text-lg font-bold text-white">Virtual</div>
-                <div className="text-xs text-[#94A3B8]">Live delivery</div>
+                <div className="text-xs text-slate-400">Live delivery</div>
               </div>
               <div>
-                <div className="text-lg font-bold text-[#60A5FA]">~21 hrs</div>
-                <div className="text-xs text-[#94A3B8]">Weekly workload</div>
+                <div className="text-lg font-bold text-blue-400">~21 hrs</div>
+                <div className="text-xs text-slate-400">Weekly workload</div>
               </div>
             </div>
 
             {/* Core Value Copy */}
-            <p className="text-sm text-[#CBD5E1] leading-relaxed mb-6">
+            <p className="text-sm text-slate-300 leading-relaxed mb-6">
               Your programme includes the student manual and practical workbook, with guided project work and assessment
               feedback.
             </p>
 
             {/* Fee & Calendar Status */}
-            <div className="p-5 rounded-2xl bg-[#071126]/80 border border-white/10 mb-8 space-y-3">
+            <div className="p-5 rounded-2xl bg-dss-navy/80 border border-white/10 mb-8 space-y-3">
               <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-[#94A3B8]">Tuition Fee:</span>
+                <span className="text-slate-400">Tuition Fee:</span>
                 <span className="font-semibold text-white">
                   {DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN
                     ? `₦${DSS_FLAGSHIP_SPRINT_CONFIG.priceNGN.toLocaleString()}`
@@ -1382,12 +1382,12 @@ export default function DSSLandingClient() {
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-[#94A3B8]">Intake Schedule:</span>
-                <span className="font-semibold text-[#38BDF8]">{DSS_FLAGSHIP_SPRINT_CONFIG.unconfiguredDateNotice}</span>
+                <span className="text-slate-400">Intake Schedule:</span>
+                <span className="font-semibold text-dss-sky">{DSS_FLAGSHIP_SPRINT_CONFIG.unconfiguredDateNotice}</span>
               </div>
               <div className="flex items-center justify-between text-xs sm:text-sm">
-                <span className="text-[#94A3B8]">Live Calendar:</span>
-                <span className="text-right text-[#CBD5E1]">
+                <span className="text-slate-400">Live Calendar:</span>
+                <span className="text-right text-slate-300">
                   3 workshops/week (3 hours each with two 10-minute breaks)
                 </span>
               </div>
@@ -1397,13 +1397,13 @@ export default function DSSLandingClient() {
             <div className="space-y-4 text-center">
               <a
                 href="#apply"
-                className="w-full py-4 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white font-bold text-base transition-all shadow-lg shadow-[#0066FF]/30 flex items-center justify-center gap-2"
+                className="w-full py-4 rounded-xl bg-dss-blue hover:bg-dss-royal text-white font-bold text-base transition-all shadow-lg shadow-dss-blue/30 flex items-center justify-center gap-2"
               >
                 <span>Apply for the Sprint</span>
                 <ArrowRight className="w-4 h-4" />
               </a>
 
-              <p className="text-xs text-[#94A3B8]">
+              <p className="text-xs text-slate-400">
                 Payment initiation is currently paused pending cohort schedule confirmation. Submit an application to
                 receive confirmed cohort dates and invoice terms.
               </p>
@@ -1412,8 +1412,8 @@ export default function DSSLandingClient() {
 
           {/* Legacy Catalog link preserved for previous customer commitments */}
           <div className="mt-8 text-center">
-            <span className="text-xs text-[#94A3B8]">Looking for historical 8-week course records or legacy tracks? </span>
-            <Link href="/dss/admin" className="text-xs text-[#38BDF8] hover:underline font-medium">
+            <span className="text-xs text-slate-400">Looking for historical 8-week course records or legacy tracks? </span>
+            <Link href="/dss/admin" className="text-xs text-dss-sky hover:underline font-medium">
               Student Records & Support &rarr;
             </Link>
           </div>
@@ -1421,29 +1421,29 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.N APPLICATION */}
-      <section id="apply" className="py-20 bg-[#0B1733] border-b border-white/5 scroll-mt-24">
+      <section id="apply" className="py-20 bg-dss-deep border-b border-white/5 scroll-mt-24">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#94A3B8] mb-3">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-400 mb-3">
+              <ShieldCheck className="w-3.5 h-3.5 text-dss-sky" />
               <span>Direct Admissions Review</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-3">
               Tell us what you want to use the skill for.
             </h2>
-            <p className="text-sm text-[#CBD5E1]">
+            <p className="text-sm text-slate-300">
               Share your goal and the time you can commit. We will help you check whether this sprint fits before you proceed with enrolment.
             </p>
           </div>
 
-          <div className="bg-[#071126] border border-white/10 rounded-3xl p-6 sm:p-10 shadow-2xl">
+          <div className="bg-dss-navy border border-white/10 rounded-3xl p-6 sm:p-10 shadow-2xl">
             {submitSuccess ? (
               <div className="text-center py-12 space-y-4">
-                <div className="w-16 h-16 rounded-full bg-[#0066FF]/20 text-[#38BDF8] flex items-center justify-center mx-auto mb-2 border border-[#0066FF]/30">
+                <div className="w-16 h-16 rounded-full bg-dss-blue/20 text-dss-sky flex items-center justify-center mx-auto mb-2 border border-dss-blue/30">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
                 <h3 className="text-xl font-bold text-white">Application Received</h3>
-                <p className="text-sm sm:text-base text-[#CBD5E1] max-w-md mx-auto leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-300 max-w-md mx-auto leading-relaxed">
                   Your application has been received. We will contact you using the details provided with programme information and the next step.
                 </p>
                 <div className="pt-4">
@@ -1462,7 +1462,7 @@ export default function DSSLandingClient() {
                         companySponsorship: '',
                       });
                     }}
-                    className="text-xs text-[#38BDF8] hover:underline"
+                    className="text-xs text-dss-sky hover:underline"
                   >
                     Submit another enquiry or update details
                   </button>
@@ -1490,7 +1490,7 @@ export default function DSSLandingClient() {
                 {/* Full name */}
                 <div>
                   <label htmlFor={nameId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
-                    Full name <span className="text-[#38BDF8]">*</span>
+                    Full name <span className="text-dss-sky">*</span>
                   </label>
                   <input
                     id={nameId}
@@ -1499,7 +1499,7 @@ export default function DSSLandingClient() {
                     value={formData.fullName}
                     onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                     placeholder="e.g. Adeola Johnson"
-                    className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    className="w-full h-12 px-4 rounded-xl bg-dss-deep border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-dss-blue transition-colors"
                   />
                 </div>
 
@@ -1507,7 +1507,7 @@ export default function DSSLandingClient() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor={emailId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
-                      Email address <span className="text-[#38BDF8]">*</span>
+                      Email address <span className="text-dss-sky">*</span>
                     </label>
                     <input
                       id={emailId}
@@ -1516,13 +1516,13 @@ export default function DSSLandingClient() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       placeholder="you@domain.com"
-                      className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                      className="w-full h-12 px-4 rounded-xl bg-dss-deep border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-dss-blue transition-colors"
                     />
                   </div>
 
                   <div>
                     <label htmlFor={phoneId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
-                      Phone or WhatsApp number <span className="text-[#38BDF8]">*</span>
+                      Phone or WhatsApp number <span className="text-dss-sky">*</span>
                     </label>
                     <input
                       id={phoneId}
@@ -1531,7 +1531,7 @@ export default function DSSLandingClient() {
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       placeholder="+234..."
-                      className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                      className="w-full h-12 px-4 rounded-xl bg-dss-deep border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-dss-blue transition-colors"
                     />
                   </div>
                 </div>
@@ -1540,14 +1540,14 @@ export default function DSSLandingClient() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor={timezoneId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
-                      Time zone <span className="text-[#38BDF8]">*</span>
+                      Time zone <span className="text-dss-sky">*</span>
                     </label>
                     <select
                       id={timezoneId}
                       required
                       value={formData.timezone}
                       onChange={(e) => setFormData({ ...formData, timezone: e.target.value })}
-                      className="w-full h-12 px-3 rounded-xl bg-[#0B1733] border border-white/10 text-white text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                      className="w-full h-12 px-3 rounded-xl bg-dss-deep border border-white/10 text-white text-sm focus:outline-none focus:border-dss-blue transition-colors"
                     >
                       <option value="WAT (GMT+1)">West Africa Time (WAT / GMT+1)</option>
                       <option value="GMT (GMT+0)">Greenwich Mean Time (GMT+0)</option>
@@ -1560,7 +1560,7 @@ export default function DSSLandingClient() {
 
                   <div>
                     <label htmlFor={routeId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
-                      Application route <span className="text-[#38BDF8]">*</span>
+                      Application route <span className="text-dss-sky">*</span>
                     </label>
                     <select
                       id={routeId}
@@ -1569,7 +1569,7 @@ export default function DSSLandingClient() {
                       onChange={(e) =>
                         setSelectedRoute(e.target.value as 'Remote Sales Starter' | 'Business Builder')
                       }
-                      className="w-full h-12 px-3 rounded-xl bg-[#0B1733] border border-white/10 text-white text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                      className="w-full h-12 px-3 rounded-xl bg-dss-deep border border-white/10 text-white text-sm focus:outline-none focus:border-dss-blue transition-colors"
                     >
                       <option value="Remote Sales Starter">Remote Sales Starter (Career Track)</option>
                       <option value="Business Builder">Business Builder (Founder & Team Track)</option>
@@ -1580,14 +1580,14 @@ export default function DSSLandingClient() {
                 {/* Current sales experience */}
                 <div>
                   <label htmlFor={experienceId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
-                    Current sales experience, including beginner <span className="text-[#38BDF8]">*</span>
+                    Current sales experience, including beginner <span className="text-dss-sky">*</span>
                   </label>
                   <select
                     id={experienceId}
                     required
                     value={formData.salesExperience}
                     onChange={(e) => setFormData({ ...formData, salesExperience: e.target.value })}
-                    className="w-full h-12 px-3 rounded-xl bg-[#0B1733] border border-white/10 text-white text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    className="w-full h-12 px-3 rounded-xl bg-dss-deep border border-white/10 text-white text-sm focus:outline-none focus:border-dss-blue transition-colors"
                   >
                     <option value="Beginner / No previous sales experience">
                       Beginner / No previous sales experience
@@ -1610,7 +1610,7 @@ export default function DSSLandingClient() {
                 {/* Main learning goal */}
                 <div>
                   <label htmlFor={goalId} className="block text-xs font-bold uppercase tracking-wider text-white mb-2">
-                    Your main learning goal <span className="text-[#38BDF8]">*</span>
+                    Your main learning goal <span className="text-dss-sky">*</span>
                   </label>
                   <textarea
                     id={goalId}
@@ -1619,7 +1619,7 @@ export default function DSSLandingClient() {
                     value={formData.learningGoal}
                     onChange={(e) => setFormData({ ...formData, learningGoal: e.target.value })}
                     placeholder="Describe what you want to be able to handle better after the sprint..."
-                    className="w-full p-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    className="w-full p-4 rounded-xl bg-dss-deep border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-dss-blue transition-colors"
                   />
                 </div>
 
@@ -1632,18 +1632,18 @@ export default function DSSLandingClient() {
                       required
                       checked={formData.canProtectHours}
                       onChange={(e) => setFormData({ ...formData, canProtectHours: e.target.checked })}
-                      className="mt-1 w-4 h-4 rounded text-[#0066FF] bg-[#0B1733] border-white/20 focus:ring-[#0066FF]"
+                      className="mt-1 w-4 h-4 rounded text-dss-blue bg-dss-deep border-white/20 focus:ring-dss-blue"
                     />
-                    <span className="text-xs sm:text-sm text-[#CBD5E1]">
+                    <span className="text-xs sm:text-sm text-slate-300">
                       I confirm that I can protect approximately 21 hours each week (9 scheduled live workshop hours and
-                      12 guided study hours) for the sprint duration. <span className="text-[#38BDF8]">*</span>
+                      12 guided study hours) for the sprint duration. <span className="text-dss-sky">*</span>
                     </span>
                   </label>
                 </div>
 
                 {/* Company sponsorship (optional) */}
                 <div>
-                  <label htmlFor={sponsorshipId} className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">
+                  <label htmlFor={sponsorshipId} className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
                     Existing company sponsorship details (only when relevant)
                   </label>
                   <input
@@ -1652,7 +1652,7 @@ export default function DSSLandingClient() {
                     value={formData.companySponsorship}
                     onChange={(e) => setFormData({ ...formData, companySponsorship: e.target.value })}
                     placeholder="Company name or corporate invoice contact (optional)"
-                    className="w-full h-12 px-4 rounded-xl bg-[#0B1733] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#0066FF] transition-colors"
+                    className="w-full h-12 px-4 rounded-xl bg-dss-deep border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-dss-blue transition-colors"
                   />
                 </div>
 
@@ -1661,15 +1661,15 @@ export default function DSSLandingClient() {
                   type="submit"
                   disabled={submitting}
                   className={`w-full py-4 rounded-xl ${
-                    submitting ? 'bg-gray-600 opacity-60 cursor-not-allowed' : 'bg-[#0066FF] hover:bg-[#0052CC]'
-                  } text-white font-bold text-sm transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2`}
+                    submitting ? 'bg-gray-600 opacity-60 cursor-not-allowed' : 'bg-dss-blue hover:bg-dss-royal'
+                  } text-white font-bold text-sm transition-all shadow-lg shadow-dss-blue/25 flex items-center justify-center gap-2`}
                 >
                   <span>{submitting ? 'Submitting Application...' : 'Submit My Application'}</span>
                   {!submitting && <ArrowRight className="w-4 h-4" />}
                 </button>
 
                 {/* Microcopy */}
-                <p className="text-center text-xs text-[#94A3B8]">
+                <p className="text-center text-xs text-slate-400">
                   Submitting an application does not confirm admission or payment. You will receive the current programme details and the next step.
                 </p>
               </form>
@@ -1679,15 +1679,15 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.O FAQs */}
-      <section id="faqs" className="py-20 bg-[#071126] border-b border-white/5 scroll-mt-24">
+      <section id="faqs" className="py-20 bg-dss-navy border-b border-white/5 scroll-mt-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-12">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-[#94A3B8] mb-3">
-              <HelpCircle className="w-3.5 h-3.5 text-[#38BDF8]" />
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-400 mb-3">
+              <HelpCircle className="w-3.5 h-3.5 text-dss-sky" />
               <span>Programme Clarity</span>
             </div>
             <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4">Frequently Asked Questions</h2>
-            <p className="text-sm sm:text-base text-[#94A3B8]">
+            <p className="text-sm sm:text-base text-slate-400">
               Straightforward answers about our expectations, curriculum, tools, and certification terms.
             </p>
           </div>
@@ -1767,7 +1767,7 @@ export default function DSSLandingClient() {
               return (
                 <div
                   key={idx}
-                  className="bg-[#0B1733] border border-white/10 rounded-2xl overflow-hidden transition-colors"
+                  className="bg-dss-deep border border-white/10 rounded-2xl overflow-hidden transition-colors"
                 >
                   <button
                     type="button"
@@ -1777,13 +1777,13 @@ export default function DSSLandingClient() {
                   >
                     <span className="text-sm sm:text-base font-semibold text-white">{faq.q}</span>
                     <ChevronDown
-                      className={`w-4 h-4 text-[#94A3B8] shrink-0 transition-transform ${
+                      className={`w-4 h-4 text-slate-400 shrink-0 transition-transform ${
                         isOpen ? 'rotate-180 text-white' : ''
                       }`}
                     />
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-5 pt-1 border-t border-white/5 text-xs sm:text-sm text-[#CBD5E1] leading-relaxed">
+                    <div className="px-5 pb-5 pt-1 border-t border-white/5 text-xs sm:text-sm text-slate-300 leading-relaxed">
                       {faq.a}
                     </div>
                   )}
@@ -1795,12 +1795,12 @@ export default function DSSLandingClient() {
       </section>
 
       {/* 4.P FINAL CTA */}
-      <section className="py-20 bg-gradient-to-b from-[#071126] via-[#0D1C3D] to-[#071126] border-b border-white/5 text-center">
+      <section className="py-20 bg-gradient-to-b from-dss-navy via-[#0D1C3D] to-dss-navy border-b border-white/5 text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
           <h2 className="text-3xl sm:text-5xl font-bold text-white tracking-tight">
             Give yourself practical work to show.
           </h2>
-          <p className="text-sm sm:text-base text-[#CBD5E1] max-w-2xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-base text-slate-300 max-w-2xl mx-auto leading-relaxed">
             Choose structured learning and make time to practise. Build a portfolio you can explain, with feedback that
             shows what to improve.
           </p>
@@ -1808,7 +1808,7 @@ export default function DSSLandingClient() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
             <a
               href="#apply"
-              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-[#0066FF] hover:bg-[#0052CC] text-white text-sm font-bold transition-all shadow-lg shadow-[#0066FF]/25 flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-8 py-4 rounded-xl bg-dss-blue hover:bg-dss-royal text-white text-sm font-bold transition-all shadow-lg shadow-dss-blue/25 flex items-center justify-center gap-2"
             >
               <span>Apply for the Sprint</span>
               <ArrowRight className="w-4 h-4" />
@@ -1822,7 +1822,7 @@ export default function DSSLandingClient() {
             </a>
           </div>
 
-          <p className="text-xs text-[#94A3B8] italic pt-4">
+          <p className="text-xs text-slate-400 italic pt-4">
             Four teaching weeks. A clear commitment to practical work.
           </p>
         </div>
@@ -1839,14 +1839,14 @@ export default function DSSLandingClient() {
       />
 
       {/* 4.Q FOOTER */}
-      <footer className="bg-[#050B1A] py-14 border-t border-white/10 text-xs text-[#94A3B8]">
+      <footer className="bg-[#050B1A] py-14 border-t border-white/10 text-xs text-slate-400">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-white/10">
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <DSSLogo variant="full" size="sm" alt="Digital Sales School" />
               </div>
-              <p className="text-[#CBD5E1] text-xs">Practical sales training powered by Closecraft.</p>
+              <p className="text-slate-300 text-xs">Practical sales training powered by Closecraft.</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-6">
@@ -1856,7 +1856,7 @@ export default function DSSLandingClient() {
               <Link href="/login" className="hover:text-white transition-colors">
                 Student Login
               </Link>
-              <Link href="/dss/affiliate" className="hover:text-white transition-colors font-medium text-[#38BDF8]">
+              <Link href="/dss/affiliate" className="hover:text-white transition-colors font-medium text-dss-sky">
                 Affiliate Programme
               </Link>
               <a href="mailto:dss@closecrafthq.com" className="hover:text-white transition-colors">
@@ -1891,7 +1891,7 @@ export default function DSSLandingClient() {
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
         >
-          <div className="bg-[#071126] border border-white/15 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+          <div className="bg-dss-navy border border-white/15 rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
             <button
               type="button"
               onClick={() => setShowPracticeModal(false)}
@@ -1902,21 +1902,21 @@ export default function DSSLandingClient() {
             </button>
 
             <div className="space-y-1">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#38BDF8] bg-[#0066FF]/20 px-2.5 py-0.5 rounded border border-[#0066FF]/30">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-dss-sky bg-dss-blue/20 px-2.5 py-0.5 rounded border border-dss-blue/30">
                 Practice Studio Walkthrough
               </span>
               <h3 className="text-xl font-bold text-white">AI Buyer Conversation & Feedback Example</h3>
             </div>
 
-            <div className="space-y-3 bg-[#0B1733] border border-white/10 rounded-2xl p-5 text-xs">
+            <div className="space-y-3 bg-dss-deep border border-white/10 rounded-2xl p-5 text-xs">
               <div className="flex items-start gap-3">
                 <span className="font-bold text-[#F87171] shrink-0">Simulated Buyer:</span>
-                <span className="text-[#CBD5E1] italic">
+                <span className="text-slate-300 italic">
                   "₦1,250,000 is way above what we budgeted for this quarter. Can you do ₦600k or break it into four instalments?"
                 </span>
               </div>
               <div className="flex items-start gap-3 pt-3 border-t border-white/5">
-                <span className="font-bold text-[#38BDF8] shrink-0">Learner Rep:</span>
+                <span className="font-bold text-dss-sky shrink-0">Learner Rep:</span>
                 <span className="text-white">
                   "I understand budget constraints are real. If we pause on the price for a moment—does this recommendation
                   fully resolve the pipeline leakage you shared earlier, or do you still have questions about implementation fit?"
@@ -1928,13 +1928,13 @@ export default function DSSLandingClient() {
             <div className="p-4 rounded-xl bg-white/[0.02] border border-white/10 space-y-2 text-xs">
               <div className="font-bold text-white flex items-center justify-between">
                 <span>Rubric Evidence Analysis:</span>
-                <span className="text-[#38BDF8] font-mono">Score: 2 / 2</span>
+                <span className="text-dss-sky font-mono">Score: 2 / 2</span>
               </div>
-              <p className="text-[#94A3B8]">
+              <p className="text-slate-400">
                 <strong>Criterion - Objection Diagnosis:</strong> The learner isolated price resistance from solution fit without
                 reacting defensively or offering an unapproved discount.
               </p>
-              <div className="pt-2 border-t border-white/5 text-[11px] text-[#38BDF8]">
+              <div className="pt-2 border-t border-white/5 text-[11px] text-dss-sky">
                 <strong>Next Recommended Drill:</strong> Practise authority diagnosis when the buyer states they need board sign-off.
               </div>
             </div>
@@ -1950,7 +1950,7 @@ export default function DSSLandingClient() {
               <a
                 href="#apply"
                 onClick={() => setShowPracticeModal(false)}
-                className="px-4 py-2 rounded-lg bg-[#0066FF] text-white text-xs font-bold hover:bg-[#0052CC] transition-colors"
+                className="px-4 py-2 rounded-lg bg-dss-blue text-white text-xs font-bold hover:bg-dss-royal transition-colors"
               >
                 Apply for Practice Access
               </a>

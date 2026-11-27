@@ -13,12 +13,12 @@ export default function DSSClinicPage() {
     return (
       <div className="min-h-screen bg-[#0d1117] text-gray-300 flex flex-col items-center justify-center p-6">
         <div className="bg-[#161b22] p-12 rounded-2xl border border-white/5 max-w-lg text-center">
-          <Download className="w-16 h-16 text-[#2ea043] mx-auto mb-6" />
+          <Download className="w-16 h-16 text-emerald-500 mx-auto mb-6" />
           <h2 className="text-2xl font-bold text-white mb-4">Registration Confirmed</h2>
           <p className="text-gray-400 mb-8">
             Thank you! You are registered for the DSS free sales clinic. We've emailed you the Ten Enquiry Sales Audit worksheet and the joining link.
           </p>
-          <a href="/downloads/Ten_Enquiry_Sales_Audit.pdf" className="text-[#2ea043] font-bold hover:underline">
+          <a href="/downloads/Ten_Enquiry_Sales_Audit.pdf" className="text-emerald-500 font-bold hover:underline">
             Download the Free Worksheet Now
           </a>
         </div>
@@ -40,7 +40,7 @@ export default function DSSClinicPage() {
             </Link>
           </div>
           <div className="text-center mb-12">
-          <div className="text-[#2ea043] font-bold text-xs uppercase tracking-widest mb-6">
+          <div className="text-emerald-500 font-bold text-xs uppercase tracking-widest mb-6">
             Free Live Clinic
           </div>
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight text-white mb-6 font-serif">
@@ -62,17 +62,17 @@ export default function DSSClinicPage() {
             
             <div>
               <label className="block text-sm font-bold text-white mb-2">Name <span className="text-red-500">*</span></label>
-              <input type="text" name="name" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none" />
+              <input type="text" name="name" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-emerald-500 focus:outline-none" />
             </div>
 
             <div>
               <label className="block text-sm font-bold text-white mb-2">Email Address <span className="text-red-500">*</span></label>
-              <input type="email" name="email" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none" />
+              <input type="email" name="email" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-emerald-500 focus:outline-none" />
             </div>
 
             <div>
               <label className="block text-sm font-bold text-white mb-2">Chosen Session <span className="text-red-500">*</span></label>
-              <select name="session" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none">
+              <select name="session" required className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-emerald-500 focus:outline-none">
                 <option value="">Select a session...</option>
                 <option value="Wednesday 14 October, 7 pm WAT">Wednesday 14 October, 7 pm WAT</option>
                 <option value="Saturday 24 October, 11 am WAT">Saturday 24 October, 11 am WAT</option>
@@ -82,22 +82,22 @@ export default function DSSClinicPage() {
             <div>
               <label className="block text-sm font-bold text-white mb-2">One anonymised sales question <span className="text-red-500">*</span></label>
               <p className="text-xs text-gray-500 mb-2">Please remove customer names and private details.</p>
-              <textarea name="question" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none"></textarea>
+              <textarea name="question" required rows={3} className="w-full p-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-emerald-500 focus:outline-none"></textarea>
             </div>
 
             <div className="space-y-4 pt-4 border-t border-white/10">
               <label className="flex items-start gap-3 cursor-pointer">
-                <input type="checkbox" name="wantReminders" className="mt-1 w-4 h-4 text-[#2ea043] bg-[#0d1117] border-white/20 rounded focus:ring-[#2ea043]" />
+                <input type="checkbox" name="wantReminders" className="mt-1 w-4 h-4 text-emerald-500 bg-[#0d1117] border-white/20 rounded focus:ring-emerald-500" />
                 <span className="text-sm text-gray-300">
                   I would like optional WhatsApp reminders for this clinic.
                 </span>
               </label>
               <div className="pl-7">
-                 <input type="tel" name="phone" placeholder="Phone number (optional)" className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-[#2ea043] focus:outline-none" />
+                 <input type="tel" name="phone" placeholder="Phone number (optional)" className="w-full h-11 px-3 rounded-lg bg-[#0d1117] text-white border border-white/10 focus:border-emerald-500 focus:outline-none" />
               </div>
             </div>
 
-            <button type="submit" className="w-full h-14 bg-[#2ea043] hover:bg-[#3fb950] text-white font-bold rounded-lg mt-8 flex items-center justify-center gap-2 transition-colors shadow-lg shadow-[#2ea043]/20">
+            <button type="submit" className="w-full h-14 bg-emerald-500 hover:bg-[#3fb950] text-white font-bold rounded-lg mt-8 flex items-center justify-center gap-2 transition-colors shadow-lg shadow-emerald-500/20">
               Register & Get Worksheet <ArrowRight size={18} />
             </button>
           </form>
