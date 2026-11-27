@@ -35,7 +35,7 @@ export default function SignupPromptButton({
       <Modal open={open} onClose={() => setOpen(false)} title={title} size="sm">
         <p className="mt-2 text-sm leading-relaxed text-gray-600">{reason}</p>
         <div className="mt-5 flex flex-col gap-2">
-          <Button href="/trainee/register" size="md">
+          <Button href="/dss/register" size="md">
             Create a free account
           </Button>
           <Button href={`/trainee/login?next=${encodeURIComponent(safeNext)}`} variant="secondary" size="md">
@@ -47,7 +47,7 @@ export default function SignupPromptButton({
         </div>
         <p className="mt-3 text-xs text-gray-600">
           Employer or organization?{" "}
-          <Link href="/employer/login" className="font-semibold text-brand-teal underline underline-offset-2">
+          <Link href="/login" className="font-semibold text-brand-teal underline underline-offset-2">
             Sign in here
           </Link>
           .
