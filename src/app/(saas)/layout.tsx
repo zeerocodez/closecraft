@@ -33,7 +33,12 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
     select: { role: true }
   });
 
-  const subscription = await getOrCreateWorkspaceSubscription(organizationId);
+  let subscription: Awaited<ReturnType<typeof getOrCreateWorkspaceSubscription>> | null = null;
+  try {
+    subscription = await getOrCreateWorkspaceSubscription(organizationId);
+  } catch (subErr) {
+    console.error('[SaasLayout] Subscription lookup fallback:', subErr);
+  }
 
   const userWithRole = {
     ...session.user,
@@ -51,7 +56,7 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
         />
       )}
 
-      {subscription.status === 'TRIALING' && subscription.trialHoursLeft <= 72 && (
+      {subscription?.status === 'TRIALING' && subscription.trialHoursLeft <= 72 && (
         <div className="mb-6 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2.5">
             <span className="material-symbols-outlined text-amber-400 text-[20px] shrink-0">timer</span>
@@ -74,7 +79,7 @@ export default async function SaasLayout({ children }: { children: React.ReactNo
         </div>
       )}
 
-      {subscription.status === 'EXPIRED' && (
+      {subscription?.status === 'EXPIRED' && (
         <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-200 text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-sm">
           <div className="flex items-center gap-2.5">
             <span className="material-symbols-outlined text-red-400 text-[20px] shrink-0">warning</span>

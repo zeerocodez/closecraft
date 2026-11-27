@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { db } from '@/lib/db';
 import {
   DEFAULT_SUBSCRIPTION_PLANS,
@@ -149,7 +150,7 @@ export interface SubscriptionStatusInfo {
  * Gets or initializes the configurable 7-day Starter trial workspace subscription.
  * Idempotent: never resets trial dates or erases customer data on expiry.
  */
-export async function getOrCreateWorkspaceSubscription(organizationId: string): Promise<SubscriptionStatusInfo> {
+async function _getOrCreateWorkspaceSubscription(organizationId: string): Promise<SubscriptionStatusInfo> {
   const now = new Date();
   const [policy, activePilot, existingSub] = await Promise.all([
     getPlatformBillingPolicy(),
@@ -319,6 +320,13 @@ export async function getOrCreateWorkspaceSubscription(organizationId: string): 
     activeLeadsCount: usageSummary.usage.activeLeads,
     usageSummary,
   };
+}
+
+const cachedGetOrCreateWorkspaceSubscription =
+  typeof cache === 'function' ? cache(_getOrCreateWorkspaceSubscription) : _getOrCreateWorkspaceSubscription;
+
+export async function getOrCreateWorkspaceSubscription(organizationId: string): Promise<SubscriptionStatusInfo> {
+  return cachedGetOrCreateWorkspaceSubscription(organizationId);
 }
 
 /**
