@@ -55,7 +55,11 @@ export async function POST(req: Request) {
 
     if (businessAccountId) {
       const belongs = await phoneNumberBelongsToWaba(businessAccountId, phoneNumberId, accessToken);
-      if (!belongs) {
+      // Only a definitive "not listed" blocks the connection. A null result
+      // means the listing could not be read with this token (e.g. dashboard
+      // temporary tokens) — the phone-number read above already proved the
+      // token's access to this number, so proceed.
+      if (belongs === false) {
         return NextResponse.json({ error: 'That phone number is not listed under the WhatsApp Business Account ID provided. Check both IDs belong to the same business.' }, { status: 400 });
       }
     }

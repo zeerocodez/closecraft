@@ -45,18 +45,23 @@ export async function fetchWhatsAppPhoneNumberInfo(
 
 /**
  * Confirms a Phone Number ID belongs to the given WhatsApp Business Account.
- * Returns true when the number is listed under the WABA.
+ * Returns true/false when the listing could be read. Returns null when the
+ * check itself could not be performed (e.g. the token lacks permission to
+ * list the WABA's numbers — common for dashboard temporary tokens); callers
+ * must treat null as "unverified", never as "does not belong", because the
+ * token already proved access by reading the phone number object itself.
  */
 export async function phoneNumberBelongsToWaba(
   wabaId: string,
   phoneNumberId: string,
   accessToken: string,
-): Promise<boolean> {
+): Promise<boolean | null> {
   const url = `${GRAPH_BASE}/${encodeURIComponent(wabaId)}/phone_numbers?fields=id&limit=100&access_token=${encodeURIComponent(accessToken)}`;
   const res = await fetch(url, { headers: { Accept: 'application/json' } });
-  if (!res.ok) return false;
+  if (!res.ok) return null;
   const data = await res.json().catch(() => ({}));
-  return Array.isArray(data.data) && data.data.some((n: any) => String(n.id) === String(phoneNumberId));
+  if (!Array.isArray(data.data)) return null;
+  return data.data.some((n: any) => String(n.id) === String(phoneNumberId));
 }
 
 export interface WhatsAppConnectionSummary {
