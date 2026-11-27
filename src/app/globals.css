@@ -64,6 +64,15 @@
   --color-accent-lime: #C7F36B;
   --color-accent-lime-soft: #D9F99D;
 
+  /* Digital Sales School palette: deep ink navy with an electric blue
+     accent and cyan highlight (previously hardcoded across the DSS
+     landing client in ~200 places). */
+  --color-dss-blue: #0066FF;
+  --color-dss-royal: #0052CC;
+  --color-dss-sky: #38BDF8;
+  --color-dss-navy: #071126;
+  --color-dss-deep: #0B1733;
+
   /* Elevation: layered shadows tuned for the dark surfaces. */
   --shadow-card: 0 1px 2px rgba(2, 6, 17, 0.4), 0 12px 32px -12px rgba(2, 6, 17, 0.55);
   --shadow-pop: 0 2px 6px rgba(2, 6, 17, 0.45), 0 24px 48px -12px rgba(2, 6, 17, 0.65);

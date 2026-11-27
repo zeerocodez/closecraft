@@ -6,7 +6,7 @@ import { Logo, DSSLogo } from '@/components/ui/Logo';
 export default function DSSRegisterPage() {
   return (
     <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6">
-      <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-lg border border-surface-container p-8">
+      <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl shadow-pop card-sheen border border-surface-container p-8">
         <div className="flex items-center justify-between mb-6">
           <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-on-surface-variant hover:text-on-surface">
             <Logo variant="icon" size="xs" />

@@ -315,7 +315,7 @@ export default function InboxClient({
   const assignedRep = activeLead?.assignedUser || teamMembers.find((m) => m.id === activeLead?.assignedUserId);
 
   return (
-    <div className="flex flex-col flex-1 bg-[#0f1214] border border-white/5 rounded-2xl overflow-hidden shadow-2xl min-h-0 relative">
+    <div className="flex flex-col flex-1 bg-[#0f1214] border border-white/10 rounded-2xl overflow-hidden shadow-2xl card-sheen min-h-0 relative">
       {/* Toast Notification */}
       {toastMessage && (
         <div className="absolute top-3 right-4 z-50 px-4 py-2 bg-emerald-500 text-slate-950 font-bold text-xs rounded-xl shadow-lg shadow-emerald-950/40 animate-in fade-in slide-in-from-top-2">
@@ -478,8 +478,8 @@ export default function InboxClient({
                     onClick={() => handleSelectLead(lead.id)}
                     className={`p-4 rounded-2xl cursor-pointer transition-all ${
                       isSelected
-                        ? 'bg-emerald-500/10 border border-emerald-500/40 shadow-lg shadow-emerald-500/5'
-                        : 'bg-white/[0.02] hover:bg-white/5 border border-white/5'
+                        ? 'bg-emerald-500/10 border border-emerald-500/40 shadow-lg shadow-emerald-500/10 ring-1 ring-emerald-400/20'
+                        : 'bg-white/[0.02] hover:bg-white/5 border border-white/5 hover:border-white/10'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2 mb-2">
@@ -567,7 +567,7 @@ export default function InboxClient({
           {activeLead ? (
             <>
               {/* Conversation Header */}
-              <header className="px-5 py-4 bg-[#0a0d12] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <header className="px-5 py-4 bg-[#0a0d12]/85 backdrop-blur-md border-b border-white/10 flex flex-wrap items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shadow-md shrink-0">
                     {activeLead.name?.substring(0, 2).toUpperCase() || 'LD'}
@@ -698,10 +698,10 @@ export default function InboxClient({
                         <div
                           className={`p-4 rounded-2xl text-sm leading-relaxed shadow-md ${
                             isProspect
-                              ? 'bg-[#161a1d] border border-white/5 text-gray-200 rounded-tl-sm'
+                              ? 'bg-[#161a1d] border border-white/10 text-gray-200 rounded-tl-sm'
                               : isAi
                               ? 'bg-emerald-950/20 border border-emerald-500/30 text-white rounded-tr-sm'
-                              : 'bg-emerald-600 text-white rounded-tr-sm shadow-emerald-950/20'
+                              : 'bg-gradient-to-b from-emerald-500 to-emerald-600 text-white rounded-tr-sm shadow-emerald-950/30'
                           }`}
                         >
                           <p className="whitespace-pre-wrap">{msg.content}</p>
@@ -770,7 +770,7 @@ export default function InboxClient({
                     placeholder="Type an omnichannel reply, or choose a verified template above..."
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value)}
-                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500/60 focus:shadow-[0_0_0_4px_rgba(16,185,129,0.12)] transition-all resize-none"
                   />
 
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -796,7 +796,7 @@ export default function InboxClient({
                       <button
                         type="submit"
                         disabled={isSending || !composerText.trim()}
-                        className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-colors shadow-md disabled:opacity-40 whitespace-nowrap"
+                        className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-emerald-500/25 hover:shadow-emerald-400/40 disabled:opacity-40 whitespace-nowrap"
                       >
                         <Send size={13} />
                         <span>{isSending ? 'Sending...' : 'Log & Send'}</span>

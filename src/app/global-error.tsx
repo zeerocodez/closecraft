@@ -39,7 +39,7 @@ export default function GlobalError({
             <button
               type="button"
               onClick={() => reset()}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[#C7F36B] hover:bg-[#d9f99d] text-[#111827] font-extrabold text-xs inline-flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-accent-lime hover:bg-lime-200 text-[#111827] font-extrabold text-xs inline-flex items-center justify-center gap-2 cursor-pointer"
             >
               <RefreshCw size={14} />
               <span>Reload Page</span>
