@@ -25,7 +25,8 @@ import {
   Check,
   CheckCheck,
   ShieldCheck,
-  ChevronDown
+  ChevronDown,
+  Megaphone
 } from 'lucide-react';
 
 export interface TeamMember {
@@ -41,6 +42,30 @@ interface InboxClientProps {
   currentUserId?: string;
 }
 
+// Enquiry sources unified in this inbox. An enquiry's origin is recorded
+// on Lead.source (e.g. WHATSAPP, FACEBOOK_LEAD_AD, WEBSITE_WIDGET); the
+// conversation channel only records how replies go out, so it is used
+// here purely as a fallback signal.
+export type EnquirySource = 'WHATSAPP' | 'META_ADS' | 'WEB' | 'OTHER';
+
+export function getEnquirySource(lead: any): EnquirySource {
+  const s = String(lead?.source || '').toUpperCase();
+  if (s.includes('FACEBOOK') || s.includes('META') || s.includes('INSTAGRAM')) return 'META_ADS';
+  if (s.includes('WEBSITE') || s.includes('WEB') || s.includes('PUBLIC')) return 'WEB';
+  if (s.includes('WHATSAPP')) return 'WHATSAPP';
+  const channel = lead?.conversations?.[0]?.channel;
+  if (channel === 'WHATSAPP') return 'WHATSAPP';
+  if (channel === 'WEB') return 'WEB';
+  return lead?.phone ? 'WHATSAPP' : 'OTHER';
+}
+
+export const ENQUIRY_SOURCE_LABEL: Record<EnquirySource, string> = {
+  WHATSAPP: 'WhatsApp',
+  META_ADS: 'Meta Ads',
+  WEB: 'Web Capture',
+  OTHER: 'Other',
+};
+
 export default function InboxClient({ 
   initialLeads, 
   teamMembers = [], 
@@ -52,7 +77,7 @@ export default function InboxClient({
   const [leads, setLeads] = useState<any[]>(initialLeads);
 
   // Filters & Navigation State
-  const [activeChannelFilter, setActiveChannelFilter] = useState<'ALL' | 'WHATSAPP' | 'EMAIL' | 'WEB' | 'HANDOFF' | 'HOT'>('ALL');
+  const [activeChannelFilter, setActiveChannelFilter] = useState<'ALL' | 'WHATSAPP' | 'META_ADS' | 'WEB' | 'HANDOFF' | 'HOT'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeLeadId, setActiveLeadId] = useState<string | null>(initialLeads[0]?.id || null);
   const [composerText, setComposerText] = useState('');
@@ -77,12 +102,16 @@ export default function InboxClient({
     { label: 'Request WhatsApp Call 📞', text: 'Are you available for a quick 5-minute WhatsApp audio call right now to align on next steps?' }
   ];
 
+  // Enquiry counts per source, for the filter chips
+  const sourceCounts: Record<EnquirySource, number> = { WHATSAPP: 0, META_ADS: 0, WEB: 0, OTHER: 0 };
+  leads.forEach((l) => { sourceCounts[getEnquirySource(l)] += 1; });
+
   // 1. Filter Leads
   const filteredLeads = leads.filter((lead) => {
-    const primaryChannel = lead.conversations?.[0]?.channel || (lead.phone ? 'WHATSAPP' : 'EMAIL');
-    if (activeChannelFilter === 'WHATSAPP' && primaryChannel !== 'WHATSAPP') return false;
-    if (activeChannelFilter === 'EMAIL' && primaryChannel !== 'EMAIL') return false;
-    if (activeChannelFilter === 'WEB' && primaryChannel !== 'WEB') return false;
+    const enquirySource = getEnquirySource(lead);
+    if (activeChannelFilter === 'WHATSAPP' && enquirySource !== 'WHATSAPP') return false;
+    if (activeChannelFilter === 'META_ADS' && enquirySource !== 'META_ADS') return false;
+    if (activeChannelFilter === 'WEB' && enquirySource !== 'WEB') return false;
     if (activeChannelFilter === 'HOT') {
       const intent = lead.buyingIntent || 0;
       if (intent < 70) return false;
@@ -315,12 +344,12 @@ export default function InboxClient({
             PANE 1: Conversation List (Triage Stream)
             ========================================================================= */}
         <section 
-          className={`w-full lg:w-80 xl:w-84 shrink-0 border-r border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-hidden ${
+          className={`w-full lg:w-[340px] xl:w-[370px] shrink-0 border-r border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-hidden ${
             mobileTab !== 'LIST' ? 'hidden lg:flex' : 'flex'
           }`}
         >
           {/* Search & Channel Filters */}
-          <div className="p-3 border-b border-white/5 space-y-2.5 shrink-0">
+          <div className="p-4 border-b border-white/5 space-y-3 shrink-0">
             {/* Search Box */}
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
@@ -329,16 +358,16 @@ export default function InboxClient({
                 placeholder="Search conversations..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#161a1d] border border-white/10 rounded-xl py-2 pl-9 pr-3 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors"
+                className="w-full bg-[#161a1d] border border-white/10 rounded-xl py-2.5 pl-9 pr-3 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
 
-            {/* Channel Filters */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-nowrap">
+            {/* Source Filters */}
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none text-nowrap">
               <button
                 type="button"
                 onClick={() => setActiveChannelFilter('ALL')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
                   activeChannelFilter === 'ALL'
                     ? 'bg-emerald-500 text-slate-950 font-extrabold'
                     : 'bg-white/5 hover:bg-white/10 text-gray-400'
@@ -348,19 +377,41 @@ export default function InboxClient({
               </button>
               <button
                 type="button"
-                onClick={() => setActiveChannelFilter('HANDOFF')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                  activeChannelFilter === 'HANDOFF'
-                    ? 'bg-emerald-500 text-slate-950 font-extrabold'
+                onClick={() => setActiveChannelFilter('WHATSAPP')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  activeChannelFilter === 'WHATSAPP'
+                    ? 'bg-emerald-600 text-white'
                     : 'bg-white/5 hover:bg-white/10 text-gray-400'
                 }`}
               >
-                Handoff
+                <MessageSquare size={12} /> WhatsApp ({sourceCounts.WHATSAPP})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('META_ADS')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  activeChannelFilter === 'META_ADS'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                }`}
+              >
+                <Megaphone size={12} /> Meta Ads ({sourceCounts.META_ADS})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveChannelFilter('WEB')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                  activeChannelFilter === 'WEB'
+                    ? 'bg-violet-600 text-white'
+                    : 'bg-white/5 hover:bg-white/10 text-gray-400'
+                }`}
+              >
+                <Globe size={12} /> Web Capture ({sourceCounts.WEB})
               </button>
               <button
                 type="button"
                 onClick={() => setActiveChannelFilter('HOT')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
                   activeChannelFilter === 'HOT'
                     ? 'bg-amber-500 text-black'
                     : 'bg-white/5 hover:bg-white/10 text-amber-400'
@@ -370,22 +421,22 @@ export default function InboxClient({
               </button>
               <button
                 type="button"
-                onClick={() => setActiveChannelFilter('WHATSAPP')}
-                className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
-                  activeChannelFilter === 'WHATSAPP'
-                    ? 'bg-emerald-600 text-white'
+                onClick={() => setActiveChannelFilter('HANDOFF')}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  activeChannelFilter === 'HANDOFF'
+                    ? 'bg-emerald-500 text-slate-950 font-extrabold'
                     : 'bg-white/5 hover:bg-white/10 text-gray-400'
                 }`}
               >
-                WhatsApp
+                Handoff
               </button>
             </div>
           </div>
 
           {/* Conversation Cards Stream */}
-          <div className="flex-1 overflow-y-auto divide-y divide-white/5 p-2 space-y-1">
+          <div className="flex-1 overflow-y-auto p-3 space-y-2.5">
             {filteredLeads.length === 0 ? (
-              <div className="p-8 text-center text-xs text-gray-500">
+              <div className="p-10 text-center text-sm text-gray-500">
                 No active conversations matching criteria.
               </div>
             ) : (
@@ -393,7 +444,7 @@ export default function InboxClient({
                 const latestMsg = lead.conversations?.[0]?.messages?.[0];
                 const isSelected = lead.id === currentActiveId;
                 const isHot = lead.buyingIntent && lead.buyingIntent >= 70;
-                const channel = lead.conversations?.[0]?.channel || (lead.phone ? 'WHATSAPP' : 'EMAIL');
+                const source = getEnquirySource(lead);
                 const deal = lead.deals?.[0];
                 const dealVal = deal ? `₦${(deal.amount / 1000).toFixed(0)}k` : null;
                 const assigned = lead.assignedUser || teamMembers.find((m) => m.id === lead.assignedUserId);
@@ -402,34 +453,34 @@ export default function InboxClient({
                   <article
                     key={lead.id}
                     onClick={() => handleSelectLead(lead.id)}
-                    className={`p-3 rounded-xl cursor-pointer transition-all ${
+                    className={`p-4 rounded-2xl cursor-pointer transition-all ${
                       isSelected
                         ? 'bg-emerald-500/10 border border-emerald-500/40 shadow-lg shadow-emerald-500/5'
-                        : 'bg-white/[0.02] hover:bg-white/5 border border-transparent'
+                        : 'bg-white/[0.02] hover:bg-white/5 border border-white/5'
                     }`}
                   >
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-xs shrink-0">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shrink-0">
                           {lead.name?.substring(0, 2).toUpperCase() || 'LD'}
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-1.5">
-                            <span className="font-bold text-white text-xs truncate">{lead.name}</span>
+                            <span className="font-bold text-white text-sm truncate">{lead.name}</span>
                             {isHot && (
                               <span title="High Intent Lead">
                                 <Flame size={12} className="text-amber-400 fill-amber-400 shrink-0" />
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-gray-500 truncate">
+                          <div className="text-xs text-gray-500 truncate">
                             {lead.phone || lead.email}
                           </div>
                         </div>
                       </div>
 
                       {latestMsg && (
-                        <span className="text-[10px] text-gray-500 shrink-0 font-mono">
+                        <span className="text-[11px] text-gray-500 shrink-0 font-mono">
                           {new Date(latestMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       )}
@@ -437,7 +488,7 @@ export default function InboxClient({
 
                     {/* Latest Message Preview */}
                     {latestMsg && (
-                      <p className="text-[11px] text-gray-400 line-clamp-1 mb-2 leading-relaxed">
+                      <p className="text-xs text-gray-400 line-clamp-2 mb-2.5 leading-relaxed">
                         <strong className="text-gray-300 font-medium">
                           {latestMsg.senderType === 'PROSPECT' ? 'Buyer: ' : latestMsg.senderType === 'AI' ? 'AI: ' : 'You: '}
                         </strong>
@@ -446,14 +497,19 @@ export default function InboxClient({
                     )}
 
                     {/* Badges Strip */}
-                    <div className="flex items-center justify-between text-[10px] pt-1 border-t border-white/5">
+                    <div className="flex items-center justify-between text-[10px] pt-2.5 border-t border-white/5">
                       <div className="flex items-center gap-1.5 truncate">
-                        <span className={`px-1.5 py-0.5 rounded font-bold uppercase tracking-wider text-[9px] ${
-                          channel === 'WHATSAPP' 
-                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                            : 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                        <span className={`px-2 py-0.5 rounded-md font-bold uppercase tracking-wider text-[9px] inline-flex items-center gap-1 ${
+                          source === 'WHATSAPP'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : source === 'META_ADS'
+                            ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                            : source === 'WEB'
+                            ? 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
+                            : 'bg-white/5 text-gray-400 border border-white/10'
                         }`}>
-                          {channel}
+                          {source === 'WHATSAPP' ? <MessageSquare size={10} /> : source === 'META_ADS' ? <Megaphone size={10} /> : source === 'WEB' ? <Globe size={10} /> : null}
+                          {ENQUIRY_SOURCE_LABEL[source]}
                         </span>
 
                         {assigned && (
@@ -488,7 +544,7 @@ export default function InboxClient({
           {activeLead ? (
             <>
               {/* Conversation Header */}
-              <header className="p-3.5 bg-[#0a0d12] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 shrink-0">
+              <header className="p-4 md:p-5 bg-[#0a0d12] border-b border-white/5 flex flex-wrap items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-3 min-w-0">
                   <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 font-bold text-sm shadow-md shrink-0">
                     {activeLead.name?.substring(0, 2).toUpperCase() || 'LD'}
@@ -503,7 +559,7 @@ export default function InboxClient({
                     <div className="flex items-center gap-2 text-xs text-gray-400 truncate">
                       <span>{activeLead.phone || activeLead.email}</span>
                       <span>•</span>
-                      <span className="text-emerald-400 font-medium">{activeLead.source || 'Website Inbound'}</span>
+                      <span className="text-emerald-400 font-medium">{ENQUIRY_SOURCE_LABEL[getEnquirySource(activeLead)]} enquiry</span>
                     </div>
                   </div>
                 </div>
@@ -575,7 +631,7 @@ export default function InboxClient({
               )}
 
               {/* Message Thread Scroll Area */}
-              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 flex flex-col">
+              <div className="flex-1 overflow-y-auto px-5 py-6 md:px-8 md:py-8 space-y-5 flex flex-col">
                 {messages.length === 0 ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-gray-500 text-xs text-center space-y-2 p-6">
                     <MessageSquare size={36} className="text-emerald-500/30" />
@@ -596,11 +652,11 @@ export default function InboxClient({
                           isProspect ? 'items-start self-start' : 'items-end self-end'
                         }`}
                       >
-                        <div className="flex items-center gap-2 mb-1 px-1">
-                          <span className="text-[10px] text-gray-500 font-mono">
+                        <div className="flex items-center gap-2 mb-1.5 px-1">
+                          <span className="text-[11px] text-gray-500 font-mono">
                             {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
-                          <span className={`text-[10px] uppercase font-bold tracking-wider ${
+                          <span className={`text-[11px] uppercase font-bold tracking-wider ${
                             isProspect ? 'text-gray-400' : isAi ? 'text-emerald-400' : 'text-emerald-300'
                           }`}>
                             {isProspect ? 'Buyer' : isAi ? 'AI Support' : 'Rep (Human Closer)'}
@@ -608,7 +664,7 @@ export default function InboxClient({
                         </div>
 
                         <div
-                          className={`p-3.5 rounded-2xl text-xs md:text-sm leading-relaxed shadow-md ${
+                          className={`p-4 rounded-2xl text-sm leading-relaxed shadow-md ${
                             isProspect
                               ? 'bg-[#161a1d] border border-white/5 text-gray-200 rounded-tl-sm'
                               : isAi
@@ -657,7 +713,7 @@ export default function InboxClient({
               </div>
 
               {/* Smart Composer & Presets */}
-              <div className="p-3.5 bg-[#0a0d12] border-t border-white/5 shrink-0 space-y-2.5">
+              <div className="p-4 md:p-5 bg-[#0a0d12] border-t border-white/5 shrink-0 space-y-3">
                 {/* AI Preset Chips - Clean horizontal scroll with no truncation */}
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-white/10 shrink-0">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 mr-0.5 flex items-center gap-1 shrink-0">
@@ -668,7 +724,7 @@ export default function InboxClient({
                       key={idx}
                       type="button"
                       onClick={() => setComposerText(t.text)}
-                      className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-medium transition-colors border border-white/5 shrink-0 whitespace-nowrap"
+                      className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white text-xs font-medium transition-colors border border-white/5 shrink-0 whitespace-nowrap"
                     >
                       {t.label}
                     </button>
@@ -682,7 +738,7 @@ export default function InboxClient({
                     placeholder="Type an omnichannel reply, or choose a verified template above..."
                     value={composerText}
                     onChange={(e) => setComposerText(e.target.value)}
-                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl p-3 text-xs md:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
+                    className="w-full bg-[#161a1d] border border-white/10 rounded-xl p-3.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 transition-colors resize-none"
                   />
 
                   <div className="flex flex-wrap items-center justify-between gap-2">
@@ -729,7 +785,7 @@ export default function InboxClient({
             PANE 3: Omnichannel Lead Context Inspector
             ========================================================================= */}
         <section 
-          className={`w-full xl:w-80 2xl:w-88 shrink-0 border-l border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-y-auto p-4 space-y-4 ${
+          className={`w-full xl:w-80 2xl:w-88 shrink-0 border-l border-white/5 flex flex-col bg-[#0a0d12] h-full overflow-y-auto p-5 space-y-5 ${
             mobileTab !== 'CONTEXT' ? 'hidden xl:flex' : 'flex'
           }`}
         >
@@ -744,7 +800,7 @@ export default function InboxClient({
               </div>
 
               {/* Commercial Snapshot Card */}
-              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/20 space-y-2.5">
+              <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20 space-y-2.5">
                 <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
                   Opportunity Snapshot
                 </div>
@@ -858,7 +914,7 @@ export default function InboxClient({
                   </div>
                   <div className="flex items-center gap-2 text-gray-300">
                     <Globe size={14} className="text-emerald-400 shrink-0" />
-                    <span className="truncate">Source: {activeLead.source || 'Website'}</span>
+                    <span className="truncate">Source: {ENQUIRY_SOURCE_LABEL[getEnquirySource(activeLead)]}</span>
                   </div>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { ensureEnquiryThread } from '@/lib/inbox/enquiryThread';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -149,6 +150,19 @@ export async function POST(req: NextRequest) {
         nextActionDueAt: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2-hour SLA
       }
     });
+
+    // Surface the enquiry in the Unified Inbox as a thread.
+    try {
+      await ensureEnquiryThread({
+        organizationId: org.id,
+        leadId: lead.id,
+        phone: cleanPhone,
+        enquiryText: cleanMessage,
+        fallbackText: 'Inbound enquiry via website embed widget.',
+      });
+    } catch (threadErr: any) {
+      console.error('[Lead Embed] Failed to create inbox thread:', threadErr.message);
+    }
 
     return NextResponse.json(
       {

@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { checkDuplicateLead } from '@/lib/dal/lead';
 import { normalizeWhatsAppNumber } from '@/lib/whatsapp';
 import { rateLimit, clientIp } from '@/lib/rateLimit';
+import { ensureEnquiryThread } from '@/lib/inbox/enquiryThread';
 
 /**
  * Public Lead Capture Endpoint
@@ -128,6 +129,19 @@ export async function POST(req: NextRequest) {
         nextActionDueAt: new Date(Date.now() + 86400000), // Default 24h SLA
       }
     });
+
+    // 5b. Surface the enquiry in the Unified Inbox as a thread.
+    try {
+      await ensureEnquiryThread({
+        organizationId: org.id,
+        leadId: lead.id,
+        phone: formattedPhone,
+        enquiryText: message ? String(message).slice(0, 2000) : null,
+        fallbackText: 'New enquiry from the website.',
+      });
+    } catch (threadErr: any) {
+      console.error('[Public Lead Capture] Failed to create inbox thread:', threadErr.message);
+    }
 
     const isLikelyDuplicate = Boolean(duplicateCheck);
     const duplicateWarning = duplicateCheck 

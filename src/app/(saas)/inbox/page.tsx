@@ -72,15 +72,15 @@ export default async function InboxPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-2 w-full h-[calc(100dvh-5rem)] max-h-[calc(100dvh-5rem)] p-2 sm:p-3 overflow-hidden">
+    <div className="flex flex-col gap-4 w-full h-[calc(100dvh-5rem)] max-h-[calc(100dvh-5rem)] p-4 sm:p-6 overflow-hidden">
       {/* Header */}
-      <div className="flex flex-row items-center justify-between gap-4 border-b border-outline-variant/30 pb-2.5 shrink-0">
+      <div className="flex flex-row items-center justify-between gap-4 border-b border-outline-variant/30 pb-4 shrink-0">
         <div>
-          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 mb-0.5 shadow-xs">
+          <div className="inline-flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20 mb-1.5 shadow-xs">
             <MessageSquare size={12} />
             <span>Omnichannel Communications Hub</span>
           </div>
-          <h1 className="text-lg md:text-xl font-heading font-extrabold text-on-surface tracking-tight">
+          <h1 className="text-xl md:text-2xl font-heading font-extrabold text-on-surface tracking-tight">
             Unified Revenue Inbox
           </h1>
         </div>
@@ -88,7 +88,7 @@ export default async function InboxPage() {
         {/* Security & Tenant Badge */}
         <div className="flex items-center gap-2 text-xs text-on-surface-variant font-mono">
           <ShieldCheck size={14} className="text-emerald-400" />
-          <span className="hidden sm:inline">Tenant Isolated &bull; WhatsApp Cloud API</span>
+          <span className="hidden sm:inline">Tenant Isolated &bull; WhatsApp &bull; Meta Ads &bull; Web Capture</span>
         </div>
       </div>
 
