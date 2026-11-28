@@ -140,7 +140,7 @@ export default async function PendingApprovalPage() {
               </div>
               <div className="text-xs">
                 <span className="font-semibold text-on-surface block">3. Revenue Engine & WhatsApp Activation</span>
-                <span className="text-on-surface-variant">Access is granted to the Sales Command Centre, lead queue, and WhatsApp Business API.</span>
+                <span className="text-on-surface-variant">Access is granted to your CloseCraft workspace, lead queue, and WhatsApp Business API.</span>
               </div>
             </div>
           </div>

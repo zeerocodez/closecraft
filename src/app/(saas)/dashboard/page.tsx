@@ -34,7 +34,7 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Revenue Command Centre | CloseCraft HQ',
+  title: 'Overview | CloseCraft HQ',
   description: 'Recover overlooked opportunities, convert active prospects, and deliver customer promises.',
 };
 
@@ -102,7 +102,7 @@ export default async function CommandCentrePage({
       orderBy: [{ buyingIntent: 'desc' }, { createdAt: 'desc' }],
       take: 4,
     }),
-    // Active or overdue commitments from Promise Ledger
+    // Active or overdue commitments from Customer Promises
     db.customerCommitment.findMany({
       where: {
         organizationId,
@@ -231,10 +231,10 @@ export default async function CommandCentrePage({
           <Link
             href="/commitments"
             className="h-9 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/60 text-xs font-semibold flex items-center gap-1.5 transition-all"
-            title="Open Customer Promise Ledger"
+            title="Open Customer Promises"
           >
             <CheckSquare size={14} className="text-accent-lime" />
-            <span>Promise Ledger</span>
+            <span>Customer Promises</span>
           </Link>
 
           <LiveLeadSimulatorModal />
@@ -329,7 +329,7 @@ export default async function CommandCentrePage({
           <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-1 border-t border-outline-variant/20">
             <span>{overdueCommitments.filter(c => c.isOverdue).length} overdue SLA</span>
             <Link href="/commitments" className="text-xs font-bold text-on-surface hover:text-accent-lime flex items-center gap-0.5">
-              <span>Promise Ledger</span>
+              <span>Customer Promises</span>
               <ArrowRight size={11} />
             </Link>
           </div>
@@ -423,7 +423,7 @@ export default async function CommandCentrePage({
               href="/commitments"
               className="w-full h-8 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/50 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
             >
-              <span>Review Promise Ledger</span>
+              <span>Review Customer Promises</span>
               <ArrowRight size={12} />
             </Link>
           </div>

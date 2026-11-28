@@ -179,7 +179,7 @@ export function ExtractCommitmentsModal({ isOpen, onClose, leads = [] }: Extract
           {savedCount !== null && (
             <div className="p-3.5 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-emerald-200 text-xs flex items-center gap-2">
               <Check size={15} className="text-emerald-300" />
-              <span>Successfully recorded {savedCount} customer commitments to the Promise Ledger!</span>
+              <span>Successfully recorded {savedCount} customer promises!</span>
             </div>
           )}
         </div>

@@ -972,7 +972,7 @@ export default function InboxClient({
                   onClick={() => router.push(`/pipeline`)}
                   className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white font-bold text-xs transition-colors border border-white/10 flex items-center justify-center gap-1.5"
                 >
-                  <span>Open in Deal Pipeline</span>
+                  <span>Open in Sales Pipeline</span>
                   <ArrowRight size={13} />
                 </button>
               </div>
