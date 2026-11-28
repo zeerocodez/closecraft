@@ -110,6 +110,9 @@ export default function TodayViewClient({
   const [activeTab, setActiveTab] = useState<'today' | 'overdue' | 'missing' | 'unassigned' | 'blockers'>('today');
   const [selectedLead, setSelectedLead] = useState<TodayLeadItem | null>(null);
   const [isFollowUpModalOpen, setIsFollowUpModalOpen] = useState(false);
+  const [quickSendLead, setQuickSendLead] = useState<TodayLeadItem | null>(null);
+  const [quickSendText, setQuickSendText] = useState('');
+  const [isQuickSending, setIsQuickSending] = useState(false);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
   const [isBlockerModalOpen, setIsBlockerModalOpen] = useState(false);
   const [blockerTargetLead, setBlockerTargetLead] = useState<TodayLeadItem | null>(null);
@@ -148,6 +151,54 @@ export default function TodayViewClient({
   // Resolve blocker
   const [resolvingBlockerId, setResolvingBlockerId] = useState<string | null>(null);
   const [resolutionText, setResolutionText] = useState('');
+
+  const openQuickSend = (lead: TodayLeadItem) => {
+    setQuickSendLead(lead);
+    setQuickSendText(buildFollowUpDraft(lead.name));
+  };
+
+  // One-tap WhatsApp follow-up, sent from inside CloseCraft via
+  // /api/messages (which dispatches through the tenant's own WhatsApp
+  // connection and records the message in the Inbox thread). The outcome
+  // wording mirrors the Inbox composer exactly: a follow-up is only
+  // "sent" when Meta accepted it. Sending does NOT complete the scheduled
+  // follow-up — that stays with the Action flow, as before.
+  const handleQuickSend = async () => {
+    if (!quickSendLead || !quickSendText.trim() || isQuickSending) return;
+    setIsQuickSending(true);
+    try {
+      const res = await fetch('/api/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          leadId: quickSendLead.id,
+          content: quickSendText.trim(),
+          senderType: 'HUMAN',
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.dispatch?.deliveryStatus === 'SENT') {
+          setFeedbackMsg(`Follow-up sent to ${quickSendLead.name} via WhatsApp — it is in the Inbox thread.`);
+        } else if (data.dispatch?.dryRun) {
+          setFeedbackMsg('Live WhatsApp dispatch is off — message logged only, not sent');
+        } else if (data.dispatch) {
+          setFeedbackMsg(data.dispatch.error || 'WhatsApp delivery failed — the message is marked failed in the thread');
+        } else {
+          setFeedbackMsg(`Follow-up logged for ${quickSendLead.name}.`);
+        }
+        setQuickSendLead(null);
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setFeedbackMsg(errData.error || 'Failed to send message');
+      }
+    } catch {
+      setFeedbackMsg('Network error sending message');
+    } finally {
+      setIsQuickSending(false);
+    }
+  };
 
   const openFollowUpModal = (lead: TodayLeadItem) => {
     setSelectedLead(lead);
@@ -262,11 +313,17 @@ export default function TodayViewClient({
     }
   };
 
+  // One follow-up draft, shared by the WhatsApp hand-off below and the
+  // in-app quick-send: the wording a lead receives must not depend on
+  // which button the rep happened to tap.
+  const buildFollowUpDraft = (contactName: string) =>
+    `Hello ${contactName}, following up regarding your enquiry with ${organizationName || 'CloseCraft'}. Are you available for a brief call today?`;
+
   // Safe WhatsApp draft generator (Section 13: does NOT mark follow up complete)
   const openWhatsAppDraft = (phone: string, contactName: string) => {
     const cleanLeadPhone = normalizeWhatsAppNumber(phone);
     const orgDisplayName = organizationName || 'CloseCraft';
-    const opener = `Hello ${contactName}, following up regarding your enquiry with ${orgDisplayName}. Are you available for a brief call today?`;
+    const opener = buildFollowUpDraft(contactName);
 
     if (cleanLeadPhone) {
       const url = formatWhatsAppUrl(cleanLeadPhone, opener);
@@ -604,6 +661,7 @@ export default function TodayViewClient({
             emptyMessage="No follow-up tasks due today. All active opportunities have actions scheduled for upcoming days."
             onOpenFollowUp={openFollowUpModal}
             onOpenWhatsApp={openWhatsAppDraft}
+            onQuickSend={openQuickSend}
             onAddBlocker={(lead) => {
               setBlockerTargetLead(lead);
               setIsBlockerModalOpen(true);
@@ -618,6 +676,7 @@ export default function TodayViewClient({
             isOverdue
             onOpenFollowUp={openFollowUpModal}
             onOpenWhatsApp={openWhatsAppDraft}
+            onQuickSend={openQuickSend}
             onAddBlocker={(lead) => {
               setBlockerTargetLead(lead);
               setIsBlockerModalOpen(true);
@@ -631,6 +690,7 @@ export default function TodayViewClient({
             emptyMessage="No opportunities without a next action. Keep it up!"
             onOpenFollowUp={openFollowUpModal}
             onOpenWhatsApp={openWhatsAppDraft}
+            onQuickSend={openQuickSend}
             onAddBlocker={(lead) => {
               setBlockerTargetLead(lead);
               setIsBlockerModalOpen(true);
@@ -644,6 +704,7 @@ export default function TodayViewClient({
             emptyMessage="No unassigned enquiries. All records have an accountable owner."
             onOpenFollowUp={openFollowUpModal}
             onOpenWhatsApp={openWhatsAppDraft}
+            onQuickSend={openQuickSend}
             onAddBlocker={(lead) => {
               setBlockerTargetLead(lead);
               setIsBlockerModalOpen(true);
@@ -729,6 +790,56 @@ export default function TodayViewClient({
       </div>
 
       {/* Completion & Rescheduling Modal */}
+      {quickSendLead && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-lg bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="px-6 py-4 border-b border-outline-variant/30 flex items-center justify-between">
+              <div>
+                <h3 className="font-heading font-semibold text-lg text-on-surface">Send WhatsApp follow-up</h3>
+                <p className="text-xs text-on-surface-variant">{quickSendLead.name} ({quickSendLead.phone})</p>
+              </div>
+              <button onClick={() => setQuickSendLead(null)} className="p-1 text-on-surface-variant hover:text-on-surface">
+                <Icon name="X" size={18} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-medium text-on-surface-variant mb-1">
+                  Message — sent from your business number and saved to the Inbox thread
+                </label>
+                <textarea
+                  rows={4}
+                  value={quickSendText}
+                  onChange={(e) => setQuickSendText(e.target.value)}
+                  className="w-full bg-surface-container-high px-3 py-2 rounded-xl text-sm border border-outline-variant/40 text-on-surface focus:outline-none focus:border-primary"
+                />
+                <p className="text-[11px] text-on-surface-variant mt-1">
+                  Sending a message does not complete the scheduled follow-up — record the outcome under Action when it happens.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-2">
+                <button
+                  onClick={() => setQuickSendLead(null)}
+                  className="px-3.5 py-2 rounded-lg border border-outline-variant/30 text-xs font-medium text-on-surface-variant hover:text-on-surface transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleQuickSend}
+                  disabled={isQuickSending || !quickSendText.trim()}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-500 text-slate-950 text-xs font-semibold hover:bg-emerald-400 transition-colors disabled:opacity-50"
+                >
+                  <Icon name="Send" size={14} />
+                  <span>{isQuickSending ? 'Sending...' : 'Send now'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {isFollowUpModalOpen && selectedLead && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-lg bg-surface-container-low border border-outline-variant/40 rounded-2xl shadow-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
@@ -1073,6 +1184,7 @@ function LeadListSection({
   isOverdue = false,
   onOpenFollowUp,
   onOpenWhatsApp,
+  onQuickSend,
   onAddBlocker,
 }: {
   leads: TodayLeadItem[];
@@ -1080,6 +1192,7 @@ function LeadListSection({
   isOverdue?: boolean;
   onOpenFollowUp: (lead: TodayLeadItem) => void;
   onOpenWhatsApp: (phone: string, name: string) => void;
+  onQuickSend: (lead: TodayLeadItem) => void;
   onAddBlocker: (lead: TodayLeadItem) => void;
 }) {
   if (leads.length === 0) {
@@ -1157,6 +1270,17 @@ function LeadListSection({
             </div>
 
             <div className="flex items-center gap-2 shrink-0">
+              {lead.phone && (
+                <button
+                  onClick={() => onQuickSend(lead)}
+                  title="Send a WhatsApp follow-up now, from inside CloseCraft"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500 text-slate-950 hover:bg-emerald-400 text-xs font-semibold transition-colors"
+                >
+                  <Icon name="Send" size={14} />
+                  <span>Send follow-up</span>
+                </button>
+              )}
+
               {lead.phone && (
                 <button
                   onClick={() => onOpenWhatsApp(lead.phone!, lead.name)}
