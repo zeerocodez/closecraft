@@ -143,7 +143,7 @@ export default function BillingReturnPage() {
                 href="/inbox"
                 className="flex-1 py-3 px-4 rounded-xl text-xs font-bold bg-[#45bfae] text-[#0f1214] hover:bg-[#5cd4c3] transition-all text-center shadow-lg"
               >
-                Go to Sales Command Centre
+                Go to Overview
               </Link>
               <Link
                 href="/billing"

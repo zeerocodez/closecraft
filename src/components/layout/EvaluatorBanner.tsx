@@ -37,7 +37,7 @@ export default function EvaluatorBanner({
       role: 'OWNER',
       title: 'Managing Partner (Owner)',
       destination: '/dashboard/revenue-engine',
-      badge: 'Full Command Centre & Settings',
+      badge: 'Full Workspace & Settings',
     },
     {
       email: 'demo.manager@apexconsulting.ng',

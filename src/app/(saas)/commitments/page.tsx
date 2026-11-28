@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const metadata = {
-  title: 'Promise Ledger & Fulfilment Hub | CloseCraft HQ',
+  title: 'Customer Promises | CloseCraft HQ',
   description: 'Track customer promises, post-sale deliverables, deadlines, and balance collections to prevent churn and SLA leakage.'
 };
 

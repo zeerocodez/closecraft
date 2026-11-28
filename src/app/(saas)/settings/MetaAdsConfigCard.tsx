@@ -191,7 +191,7 @@ export function MetaAdsConfigCard({ workspaceSlug, verifyToken = '' }: MetaAdsCo
             </div>
             <h4 className="font-bold text-white text-xs">Live Revenue Engine</h4>
             <p className="text-[11px] text-gray-400 leading-relaxed">
-              Every ad submission instantly enters your <strong>Unified Inbox</strong> and <strong>Deal Pipeline</strong> with AI qualification!
+              Every ad submission instantly enters your <strong>Inbox</strong> and <strong>Sales Pipeline</strong> with AI qualification!
             </p>
           </div>
         </div>

@@ -819,7 +819,7 @@ export default function TeamPageClient({
                   <span className="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-bold">SALES CLOSING</span>
                 </div>
                 <p className="text-gray-400 text-[11px]">
-                  Access to Sales Command Centre, Unified Inbox, Deal Pipeline, scheduled video appointments, proposal creation, and personal commission tracking.
+                  Access to the Overview, Inbox, Sales Pipeline, scheduled video appointments, proposal creation, and personal commission tracking.
                 </p>
               </div>
 
