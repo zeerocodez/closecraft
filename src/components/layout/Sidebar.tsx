@@ -49,10 +49,10 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     userRole === 'MANAGER' ||
     userRole === 'SUPER_ADMIN';
 
-  // Live sidebar counts (new enquiries waiting, follow-ups due), from the
+  // Live sidebar counts (unread inbox messages, follow-ups due), from the
   // session-scoped /api/nav-counts route. Failures stay silent — a missing
   // badge must never block navigation.
-  const [navCounts, setNavCounts] = useState<{ newEnquiries: number; followUpsDue: number } | null>(null);
+  const [navCounts, setNavCounts] = useState<{ newEnquiries: number; followUpsDue: number; unreadMessages: number } | null>(null);
 
   useEffect(() => {
     if (userRole === 'EXTERNAL_PROFESSIONAL') return;
@@ -62,8 +62,8 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
         const res = await fetch('/api/nav-counts');
         if (!res.ok) return;
         const data = await res.json();
-        if (!cancelled && typeof data?.newEnquiries === 'number' && typeof data?.followUpsDue === 'number') {
-          setNavCounts({ newEnquiries: data.newEnquiries, followUpsDue: data.followUpsDue });
+        if (!cancelled && typeof data?.newEnquiries === 'number' && typeof data?.followUpsDue === 'number' && typeof data?.unreadMessages === 'number') {
+          setNavCounts({ newEnquiries: data.newEnquiries, followUpsDue: data.followUpsDue, unreadMessages: data.unreadMessages });
         }
       } catch {
         // Badges are an aid, not a blocker.
@@ -187,7 +187,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     icon: string;
     label: string;
     badge?: string;
-    countKey?: 'newEnquiries' | 'followUpsDue';
+    countKey?: 'newEnquiries' | 'followUpsDue' | 'unreadMessages';
     exact?: boolean;
     visible?: boolean;
   }
@@ -224,7 +224,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
       {
         title: 'ENQUIRIES',
         items: [
-          { href: '/inbox', icon: 'Inbox', label: 'Inbox', countKey: 'newEnquiries' },
+          { href: '/inbox', icon: 'Inbox', label: 'Inbox', countKey: 'unreadMessages' },
           { href: '/leads', icon: 'Users', label: 'Enquiries' },
           { href: '/today', icon: 'Clock', label: 'Follow-ups', countKey: 'followUpsDue' },
           { href: '/pipeline', icon: 'Layers', label: 'Sales Pipeline' },

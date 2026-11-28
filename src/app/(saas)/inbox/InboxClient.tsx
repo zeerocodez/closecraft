@@ -69,6 +69,22 @@ export const ENQUIRY_SOURCE_LABEL: Record<EnquirySource, string> = {
   OTHER: 'Other',
 };
 
+/**
+ * Unread inbound messages for one lead: PROSPECT messages nobody on the
+ * team has opened yet. Inbound read-state lives on Message.readAt (for
+ * PROSPECT messages that column means "read by the team"; WhatsApp
+ * receipts only ever set it on outbound messages).
+ */
+function countUnreadMessages(lead: any): number {
+  let count = 0;
+  for (const conv of lead?.conversations || []) {
+    for (const msg of conv?.messages || []) {
+      if (msg.senderType === 'PROSPECT' && !msg.readAt) count += 1;
+    }
+  }
+  return count;
+}
+
 export default function InboxClient({ 
   initialLeads, 
   teamMembers = [], 
@@ -164,6 +180,42 @@ export default function InboxClient({
 
   const activeLead = filteredLeads.find((l) => l.id === currentActiveId);
   const activeConversation = activeLead?.conversations?.[0];
+
+  // True read-state: opening a conversation marks its inbound messages as
+  // read — optimistically here, persisted via /api/messages/read. If the
+  // persist call fails, the next page load shows the true unread state
+  // again rather than pretending the messages were read.
+  const activeConversationId = activeConversation?.id;
+  const activeUnreadCount = activeLead ? countUnreadMessages(activeLead) : 0;
+  useEffect(() => {
+    if (!activeConversationId || activeUnreadCount === 0) return;
+    const readAt = new Date().toISOString();
+    setLeads((prev) =>
+      prev.map((l) => {
+        if (l.id !== activeLeadId) return l;
+        return {
+          ...l,
+          conversations: (l.conversations || []).map((c: any) =>
+            c.id !== activeConversationId
+              ? c
+              : {
+                  ...c,
+                  messages: (c.messages || []).map((m: any) =>
+                    m.senderType === 'PROSPECT' && !m.readAt ? { ...m, readAt } : m
+                  ),
+                }
+          ),
+        };
+      })
+    );
+    fetch('/api/messages/read', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ conversationId: activeConversationId }),
+    }).catch(() => {
+      // Silent by design — see the comment above.
+    });
+  }, [activeConversationId, activeUnreadCount, activeLeadId]);
   const messages = activeConversation?.messages ? [...activeConversation.messages].reverse() : [];
   const activeDeal = activeLead?.deals?.[0];
   const activeDealAmount = activeDeal 
@@ -467,6 +519,7 @@ export default function InboxClient({
                 const latestMsg = lead.conversations?.[0]?.messages?.[0];
                 const isSelected = lead.id === currentActiveId;
                 const isHot = lead.buyingIntent && lead.buyingIntent >= 70;
+                const unreadCount = countUnreadMessages(lead);
                 const source = getEnquirySource(lead);
                 const deal = lead.deals?.[0];
                 const dealVal = deal ? `₦${(deal.amount / 1000).toFixed(0)}k` : null;
@@ -502,16 +555,26 @@ export default function InboxClient({
                         </div>
                       </div>
 
-                      {latestMsg && (
-                        <span className="text-[11px] text-gray-500 shrink-0 font-mono">
-                          {new Date(latestMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 shrink-0">
+                        {latestMsg && (
+                          <span className="text-[11px] text-gray-500 font-mono">
+                            {new Date(latestMsg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        )}
+                        {unreadCount > 0 && (
+                          <span
+                            title={`${unreadCount} unread message${unreadCount === 1 ? '' : 's'}`}
+                            className="min-w-5 h-5 px-1.5 rounded-full bg-emerald-500 text-slate-950 text-[10px] font-bold inline-flex items-center justify-center"
+                          >
+                            {unreadCount}
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     {/* Latest Message Preview */}
                     {latestMsg && (
-                      <p className="text-xs text-gray-400 line-clamp-2 mb-2.5 leading-relaxed">
+                      <p className={`text-xs line-clamp-2 mb-2.5 leading-relaxed ${unreadCount > 0 ? 'text-gray-200 font-medium' : 'text-gray-400'}`}>
                         <strong className="text-gray-300 font-medium">
                           {latestMsg.senderType === 'PROSPECT' ? 'Buyer: ' : latestMsg.senderType === 'AI' ? 'AI: ' : 'You: '}
                         </strong>
