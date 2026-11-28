@@ -9,6 +9,7 @@ import { RevenueLeakSection } from '@/components/revenue-engine/RevenueLeakSecti
 import { AddLeadModal } from '@/app/(saas)/leads/AddLeadModal';
 import { QualificationPolicyModal } from '@/components/revenue-engine/QualificationPolicyModal';
 import { LiveLeadSimulatorModal } from '@/components/revenue-engine/LiveLeadSimulatorModal';
+import OnboardingChecklistCard from '@/components/dashboard/OnboardingChecklistCard';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import {
@@ -178,6 +179,38 @@ export default async function CommandCentrePage({
     }),
   ]);
 
+  // Activation state for the getting-started card (owners/admins only, and
+  // only until every step is done). Channel definitions mirror the Settings
+  // page exactly, so this card can never claim a channel is live when
+  // Settings says it is not. Organisation always comes from the session.
+  const [activationMember, activationOrg, activationMeta, activationLeadCount, activationReplies, activationDemoSeed] = await Promise.all([
+    db.organizationMember.findFirst({
+      where: { userId: session.user.id, organizationId },
+      select: { role: true },
+    }),
+    db.organization.findUnique({
+      where: { id: organizationId },
+      select: { whatsappPhoneNumberId: true, whatsappAccessToken: true },
+    }),
+    db.metaIntegration.findUnique({
+      where: { organizationId },
+      select: { status: true },
+    }),
+    db.lead.count({ where: { organizationId } }),
+    db.message.count({
+      where: { senderType: 'HUMAN', conversation: { organizationId } },
+    }),
+    db.lead.findFirst({
+      where: { organizationId, message: { contains: '[DEMO_SEED]' } },
+      select: { id: true },
+    }),
+  ]);
+  const isOwnerOrAdmin = activationMember?.role === 'OWNER' || activationMember?.role === 'ADMIN';
+  const whatsappConnected = Boolean(activationOrg?.whatsappPhoneNumberId && activationOrg?.whatsappAccessToken);
+  const metaConnected = activationMeta?.status === 'CONNECTED';
+  const activationComplete = whatsappConnected && metaConnected && activationLeadCount > 0 && activationReplies > 0;
+  const showActivationCard = isOwnerOrAdmin && !activationComplete;
+
   const tabs = [
     { id: 'needs_attention', label: 'Needs Attention' },
     { id: 'my_actions', label: 'My Assigned Actions' },
@@ -198,7 +231,7 @@ export default async function CommandCentrePage({
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-accent-lime/15 text-accent-lime border border-accent-lime/30 flex items-center gap-1.5 shadow-xs">
               <span className="w-1.5 h-1.5 rounded-full bg-accent-lime animate-pulse" />
-              <span>REVENUE COMMAND CENTRE</span>
+              <span>OVERVIEW</span>
             </span>
             <span className="text-xs text-on-surface-variant font-medium">
               {org?.name || 'Workspace'}
@@ -241,6 +274,20 @@ export default async function CommandCentrePage({
           <AddLeadModal />
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* ACTIVATION CHECKLIST (owners/admins, until setup is complete)             */}
+      {/* ========================================================================= */}
+      {showActivationCard && (
+        <OnboardingChecklistCard
+          organizationName={org?.name || 'your workspace'}
+          whatsappConnected={whatsappConnected}
+          metaConnected={metaConnected}
+          leadCount={activationLeadCount}
+          hasReplied={activationReplies > 0}
+          hasDemoSeed={Boolean(activationDemoSeed)}
+        />
+      )}
 
       {/* ========================================================================= */}
       {/* 2. REVENUE SNAPSHOT (FOUR COMPACT TRUTHFUL METRICS)                        */}

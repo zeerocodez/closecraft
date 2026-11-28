@@ -3,10 +3,11 @@ import { auth } from '@/lib/auth';
 import { redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import OnboardingWizardClient from '@/components/onboarding/OnboardingWizardClient';
+import ActivationFirstSteps from '@/components/onboarding/ActivationFirstSteps';
 
 export const metadata = {
-  title: 'Workspace Onboarding & Qualification | Closecraft',
-  description: 'Personalise your Closecraft setup, assess enquiry volume, and explore remote sales support.',
+  title: 'Set Up Your Workspace | CloseCraft HQ',
+  description: 'Connect WhatsApp and Meta Lead Ads so every enquiry from your ads lands in one place, then tell us about your business.',
 };
 
 export default async function OnboardingPage() {
@@ -44,9 +45,21 @@ export default async function OnboardingPage() {
 
   const org = await db.organization.findUnique({
     where: { id: organizationId },
-    select: { id: true, name: true },
+    select: { id: true, name: true, whatsappPhoneNumberId: true, whatsappAccessToken: true },
   });
   if (!org) redirect('/login');
+
+  // Activation state, shown above the qualification questions: channel
+  // definitions mirror the Settings page exactly.
+  const [metaIntegration, leadCount] = await Promise.all([
+    db.metaIntegration.findUnique({
+      where: { organizationId },
+      select: { status: true },
+    }),
+    db.lead.count({ where: { organizationId } }),
+  ]);
+  const whatsappConnected = Boolean(org.whatsappPhoneNumberId && org.whatsappAccessToken);
+  const metaConnected = metaIntegration?.status === 'CONNECTED';
 
   // Fetch latest qualification if resuming
   const latestQualification = await db.workspaceQualification.findFirst({
@@ -56,6 +69,11 @@ export default async function OnboardingPage() {
 
   return (
     <div className="flex-1 w-full py-6">
+      <ActivationFirstSteps
+        whatsappConnected={whatsappConnected}
+        metaConnected={metaConnected}
+        leadCount={leadCount}
+      />
       <OnboardingWizardClient
         initialQualification={latestQualification ? JSON.parse(JSON.stringify(latestQualification)) : null}
         organizationName={org.name}
