@@ -49,6 +49,34 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     userRole === 'MANAGER' ||
     userRole === 'SUPER_ADMIN';
 
+  // Live sidebar counts (new enquiries waiting, follow-ups due), from the
+  // session-scoped /api/nav-counts route. Failures stay silent — a missing
+  // badge must never block navigation.
+  const [navCounts, setNavCounts] = useState<{ newEnquiries: number; followUpsDue: number } | null>(null);
+
+  useEffect(() => {
+    if (userRole === 'EXTERNAL_PROFESSIONAL') return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const res = await fetch('/api/nav-counts');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (!cancelled && typeof data?.newEnquiries === 'number' && typeof data?.followUpsDue === 'number') {
+          setNavCounts({ newEnquiries: data.newEnquiries, followUpsDue: data.followUpsDue });
+        }
+      } catch {
+        // Badges are an aid, not a blocker.
+      }
+    };
+    load();
+    const timer = setInterval(load, 60000);
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [pathname, userRole]);
+
   const sidebarClasses = `
     fixed left-0 top-0 h-full bg-gradient-to-b from-surface-container-lowest via-surface-container-lowest to-[#070B14] border-r border-outline-variant/30 z-50 flex flex-col justify-between select-none shadow-sm
     transition-[width,transform] duration-200 ease-[cubic-bezier(0.2,0,0,1)]
@@ -159,6 +187,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
     icon: string;
     label: string;
     badge?: string;
+    countKey?: 'newEnquiries' | 'followUpsDue';
     exact?: boolean;
     visible?: boolean;
   }
@@ -175,58 +204,56 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
             { href: '/dss/examinations', icon: 'Award', label: 'Examinations' },
             { href: '/dss/roleplay', icon: 'PlayCircle', label: 'AI Roleplay' },
             { href: '/dss/certificates', icon: 'ShieldCheck', label: 'Certificates' },
-            { href: '/dashboard', icon: 'ArrowLeft', label: 'Back to Revenue OS' },
+            { href: '/dashboard', icon: 'ArrowLeft', label: 'Back to CloseCraft' },
           ],
         },
       ];
     }
 
-    // Master CloseCraft Revenue Operating System
+    // Master CloseCraft navigation, organised around the daily job of a
+    // business that runs ads: enquiries come in, get followed up, and get
+    // closed. Labels use the customer's words, not internal product names,
+    // and every href is unchanged so no link, guide step or bookmark breaks.
     return [
       {
         title: 'OVERVIEW',
         items: [
-          { href: '/dashboard', icon: 'TrendingUp', label: 'Command Centre', exact: true },
+          { href: '/dashboard', icon: 'TrendingUp', label: 'Overview', exact: true },
         ],
       },
       {
-        title: 'REVENUE',
+        title: 'ENQUIRIES',
         items: [
-          { href: '/inbox', icon: 'Inbox', label: 'Unified Inbox' },
-          { href: '/leads', icon: 'Users', label: 'Enquiries & Leads' },
-          { href: '/recovery', icon: 'Sparkles', label: 'Lead Recovery', badge: 'RECOVER' },
-          { href: '/pipeline', icon: 'Layers', label: 'Deal Pipeline' },
-          { href: '/today', icon: 'Clock', label: 'Follow-ups' },
-          { href: '/commitments', icon: 'CheckSquare', label: 'Promise Ledger', badge: 'DELIVER' },
+          { href: '/inbox', icon: 'Inbox', label: 'Inbox', countKey: 'newEnquiries' },
+          { href: '/leads', icon: 'Users', label: 'Enquiries' },
+          { href: '/today', icon: 'Clock', label: 'Follow-ups', countKey: 'followUpsDue' },
+          { href: '/pipeline', icon: 'Layers', label: 'Sales Pipeline' },
+          { href: '/recovery', icon: 'Sparkles', label: 'Lead Recovery' },
         ],
       },
       {
-        title: 'INTELLIGENCE',
+        title: 'INSIGHTS',
         items: [
-          { href: '/practice', icon: 'Target', label: 'AI Practice Coach' },
           { href: '/dashboard/analytics', icon: 'Activity', label: 'Revenue Analytics' },
           { href: '/rep', icon: 'Award', label: 'Sales Performance' },
+          { href: '/practice', icon: 'Target', label: 'AI Practice Coach' },
         ],
       },
       {
         title: 'BUSINESS',
         items: [
+          { href: '/commitments', icon: 'CheckSquare', label: 'Customer Promises' },
           { href: '/services', icon: 'Briefcase', label: 'Growth Services' },
-          { href: '/team', icon: 'UserCheck', label: 'Team Roster', visible: isManagerOrOwner },
-        ],
-      },
-      {
-        title: 'LEARNING',
-        items: [
+          { href: '/team', icon: 'UserCheck', label: 'Team', visible: isManagerOrOwner },
           { href: '/dss/dashboard', icon: 'GraduationCap', label: 'Digital Sales School' },
         ],
       },
       {
         title: 'SETTINGS',
         items: [
-          { href: '/settings', icon: 'Settings', label: 'Workspace' },
+          { href: '/settings', icon: 'Settings', label: 'Settings' },
           { href: '/settings#meta-ads', icon: 'Share2', label: 'Meta Lead Ads' },
-          { href: '/billing', icon: 'CreditCard', label: 'Billing & Invoices', visible: isManagerOrOwner },
+          { href: '/billing', icon: 'CreditCard', label: 'Billing', visible: isManagerOrOwner },
         ],
       },
     ];
@@ -273,6 +300,7 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
 
                 {visibleItems.map((item) => {
                   const isActive = item.exact ? pathname === item.href : pathname.startsWith(item.href);
+                  const count = item.countKey && navCounts ? navCounts[item.countKey] : undefined;
                   return (
                     <Link
                       key={item.href}
@@ -306,6 +334,20 @@ export default function Sidebar({ user, isOpen, setIsOpen, isMobile }: SidebarPr
                         <span className="ml-auto text-[9px] font-mono font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                           {item.badge}
                         </span>
+                      )}
+                      {count !== undefined && count > 0 && (isExpanded || isMobile) && (
+                        <span
+                          className={`ml-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full border ${
+                            item.countKey === 'followUpsDue'
+                              ? 'bg-amber-400/15 text-amber-300 border-amber-400/30'
+                              : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
+                          }`}
+                        >
+                          {count > 99 ? '99+' : count}
+                        </span>
+                      )}
+                      {count !== undefined && count > 0 && !isExpanded && !isMobile && (
+                        <span className="absolute right-2 top-2 w-2 h-2 rounded-full bg-emerald-400" aria-hidden="true" />
                       )}
                     </Link>
                   );
