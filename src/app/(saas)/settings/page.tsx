@@ -136,7 +136,7 @@ export default async function SettingsPage() {
       </section>
 
       {/* Section 1.B: WhatsApp Business Connection (tenant's own number) */}
-      <section className="p-6 md:p-8 rounded-3xl bg-[#0f1214] border border-white/5 shadow-xl space-y-6">
+      <section id="whatsapp" className="p-6 md:p-8 rounded-3xl bg-[#0f1214] border border-white/5 shadow-xl space-y-6">
         <div>
           <h2 className="font-serif text-lg font-bold text-white flex items-center gap-2">
             <PlugZap size={18} className="text-[#45bfae]" />
