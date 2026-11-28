@@ -87,7 +87,9 @@ describe('Sidebar live counts', () => {
   it('sidebar fetches counts and binds them to Inbox and Follow-ups', () => {
     const src = read('src/components/layout/Sidebar.tsx');
     assert.ok(src.includes("fetch('/api/nav-counts')"), 'sidebar polls the nav-counts route');
-    assert.ok(src.includes("countKey: 'newEnquiries'"), 'Inbox carries the new-enquiries count');
+    // Phase 3: the Inbox badge counts unread messages now that read-state
+    // exists (Phase 1 badged new enquiries because it did not).
+    assert.ok(src.includes("countKey: 'unreadMessages'"), 'Inbox carries the unread-messages count');
     assert.ok(src.includes("countKey: 'followUpsDue'"), 'Follow-ups carries the due count');
   });
 
@@ -99,7 +101,7 @@ describe('Sidebar live counts', () => {
     assert.ok(src.includes("status: 'NEW'"), 'new enquiries = unresponded leads, as on the Today page');
     assert.ok(src.includes('nextActionDueAt'), 'follow-ups due counts leads by nextActionDueAt');
     assert.ok(src.includes("notIn: ['WON', 'LOST']"), 'closed leads are excluded from the due count');
-    assert.ok(src.includes('NextResponse.json({ newEnquiries, followUpsDue })'), 'route returns both counts');
+    assert.ok(src.includes('NextResponse.json({ newEnquiries, followUpsDue, unreadMessages })'), 'route returns all three counts');
   });
 });
 
