@@ -9,27 +9,35 @@ import {
   ArrowRight,
   Database,
   Trash2,
-  Sliders,
-  Users,
   MessageCircle,
-  HelpCircle,
+  Share2,
+  Inbox,
+  Reply,
 } from 'lucide-react';
 import { seedSampleWorkspaceAction, clearSampleWorkspaceAction } from '@/app/(saas)/actions';
 
 interface OnboardingChecklistCardProps {
   organizationName: string;
+  whatsappConnected: boolean;
+  metaConnected: boolean;
   leadCount: number;
+  hasReplied: boolean;
   hasDemoSeed: boolean;
-  isProfileComplete: boolean;
-  isPolicyConfigured: boolean;
 }
 
+/**
+ * Activation checklist: the shortest path from a new workspace to enquiries
+ * flowing in and being worked. Every step's done-state comes from real
+ * connection/lead data computed on the server — the card never guesses.
+ * Rendered on the Overview page for owners/admins until all steps are done.
+ */
 export default function OnboardingChecklistCard({
   organizationName,
+  whatsappConnected,
+  metaConnected,
   leadCount,
+  hasReplied,
   hasDemoSeed,
-  isProfileComplete,
-  isPolicyConfigured,
 }: OnboardingChecklistCardProps) {
   const [isPending, startTransition] = useTransition();
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -37,35 +45,39 @@ export default function OnboardingChecklistCard({
   const steps = [
     {
       id: 1,
-      title: 'Workspace Identity & WhatsApp Channel',
-      desc: 'Set your organization brand name and official WhatsApp number.',
-      isDone: isProfileComplete,
-      href: '/settings',
-      actionLabel: 'Configure in Settings',
+      icon: MessageCircle,
+      title: 'Connect WhatsApp',
+      desc: 'Enquiries sent to your WhatsApp Business number land in your Inbox automatically — no copying chats by hand.',
+      isDone: whatsappConnected,
+      href: '/settings#whatsapp',
+      actionLabel: whatsappConnected ? 'Manage connection' : 'Connect WhatsApp',
     },
     {
       id: 2,
-      title: 'Lead Qualification Policy',
-      desc: 'Tune automated ICP fit thresholds, budget benchmarks, and routing rules.',
-      isDone: isPolicyConfigured,
-      href: '/settings',
-      actionLabel: 'View Policy Presets',
+      icon: Share2,
+      title: 'Connect Meta Lead Ads',
+      desc: 'Every lead from your Facebook and Instagram ads flows straight into CloseCraft, with the campaign it came from.',
+      isDone: metaConnected,
+      href: '/settings#meta-ads',
+      actionLabel: metaConnected ? 'Manage connection' : 'Connect Meta Ads',
     },
     {
       id: 3,
-      title: 'Commercial Lead Pipeline',
-      desc: 'Capture active opportunities or seed sample workspace data to test operations.',
+      icon: Inbox,
+      title: 'See your first enquiry',
+      desc: 'Send a test message to your number or run a test lead — it appears in your Inbox, qualified and ready to work.',
       isDone: leadCount > 0,
-      href: '/leads',
-      actionLabel: 'Explore Leads Hub',
+      href: '/inbox',
+      actionLabel: 'Open Inbox',
     },
     {
       id: 4,
-      title: 'Unified Revenue Inbox & WhatsApp Outreach',
-      desc: 'Execute Next Best Actions and one-click WhatsApp outreach directly from the triage stage.',
-      isDone: leadCount > 0,
+      icon: Reply,
+      title: 'Reply & follow up',
+      desc: 'Answer from the Inbox and the reply goes out from your business number. CloseCraft keeps reminding you until the sale closes.',
+      isDone: hasReplied,
       href: '/inbox',
-      actionLabel: 'Launch Revenue Inbox',
+      actionLabel: 'Reply from Inbox',
     },
   ];
 
@@ -76,7 +88,7 @@ export default function OnboardingChecklistCard({
     setFeedback(null);
     startTransition(async () => {
       try {
-        const res = await seedSampleWorkspaceAction();
+        await seedSampleWorkspaceAction();
         setFeedback('Successfully seeded 3 sample leads and 1 demonstration appointment.');
         window.location.reload();
       } catch (err: any) {
@@ -98,30 +110,47 @@ export default function OnboardingChecklistCard({
     });
   };
 
+  const channelPill = (label: string, connected: boolean) => (
+    <span
+      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+        connected
+          ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/25'
+          : 'bg-amber-400/10 text-amber-300 border-amber-400/25'
+      }`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${connected ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+      {label}: {connected ? 'Connected' : 'Not connected'}
+    </span>
+  );
+
   return (
     <div className="bg-[#0f1214] border border-white/5 rounded-3xl p-6 md:p-8 space-y-6 shadow-xl">
       {/* Header Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-2 flex-wrap">
             <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#248277]/10 text-[#45bfae] border border-[#248277]/20 flex items-center gap-1">
               <Sparkles className="w-3 h-3 text-[#45bfae]" />
-              Trial Activation & Setup
+              Get Set Up
             </span>
             <span className="text-xs text-slate-400 font-medium">
               {completedCount} of {steps.length} Steps Completed ({progressPercent}%)
             </span>
           </div>
           <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
-            Getting Started with {organizationName}
+            Get {organizationName} catching every enquiry
           </h2>
           <p className="text-xs md:text-sm text-slate-400 mt-1">
-            Complete workspace initialization to activate automated WhatsApp follow-ups, lead qualification, and appointment scheduling.
+            Connect the places your enquiries come from. CloseCraft catches every one, reminds you to follow up, and helps you close the sale.
           </p>
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            {channelPill('WhatsApp', whatsappConnected)}
+            {channelPill('Meta Ads', metaConnected)}
+          </div>
         </div>
 
         {/* Quick Seed / Clear Trigger */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {hasDemoSeed ? (
             <button
               onClick={handleClear}
@@ -181,7 +210,8 @@ export default function OnboardingChecklistCard({
                 )}
               </div>
               <div className="flex-1 space-y-1">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <step.icon className="w-4 h-4 text-[#45bfae]" />
                   <h3 className={`text-sm font-semibold ${step.isDone ? 'text-slate-200 line-through' : 'text-white'}`}>
                     {step.title}
                   </h3>
